@@ -65,7 +65,8 @@ class ApiConstants {
   // ── Products ─────────────────────────────────────────────────────────────────
   // Public/client browsing (read-only).
   static const String products        = '/products';
-  static const String productSearch   = '/products/search';
+  // Note: product search is a query parameter on /products (?search=…),
+  // not a separate route. Use: ApiConstants.products + queryParameters: {'search': q}
   static String productById(String id) => '/products/$id';
 
   // Merchant product CRUD — separate namespace from public browsing.

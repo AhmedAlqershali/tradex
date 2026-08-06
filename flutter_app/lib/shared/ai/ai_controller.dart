@@ -144,6 +144,12 @@ class AiController {
     } on ApiException {
       statusNotifier.value = AiStatus.error;
       rethrow;
+    } catch (e) {
+      // Catch-all: ensures statusNotifier always reaches a terminal state even
+      // for non-API errors (network timeout, type cast failures, etc.).
+      // Without this, the AI tool sheet spinner hangs indefinitely.
+      statusNotifier.value = AiStatus.error;
+      rethrow;
     }
   }
 

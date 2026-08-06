@@ -7,8 +7,8 @@ import 'package:ai_saas/shared/models/mock_order.dart';
 /// Built from [CartItem] at checkout time so the order snapshot is immutable
 /// even after the cart is cleared.
 ///
-/// Migration path: replace with a JSON-serializable model when a backend is
-/// added. The [id] field maps directly to the server product ID.
+/// All fields are JSON-serializable. The [id] field maps directly to the
+/// server product ID.
 class AppOrderProduct {
   final String id;
   final String name;
@@ -88,8 +88,8 @@ class AppOrder {
   final String ref;
   final DateTime createdAt;
 
-  /// Reserved for future backend filtering. Null in the local-only phase.
-  /// When auth is added: set to the authenticated merchant's ID at checkout.
+  /// Reserved for per-merchant filtering. Null for client-placed orders
+  /// (the backend associates orders with merchants via store ownership).
   final String? merchantId;
 
   /// Mutable — only [OrderController.updateOrderStatus] should write to this.
@@ -326,9 +326,10 @@ class OrderController {
 
 // ─── Ref generator ────────────────────────────────────────────────────────────
 
-/// Generates a unique-enough order reference for the local-only phase.
+/// Generates a fallback order reference for cases where the server returns
+/// an order with an empty ref (e.g. partial response). The server-assigned
+/// ref is always preferred — see [OrderBloc._onOrderCreateRequested].
 /// Format: TRX-YYYYMMDD-XXXX
-/// Replace with a server-assigned ID when a backend is integrated.
 String generateOrderRef() {
   final now = DateTime.now();
   final date =
