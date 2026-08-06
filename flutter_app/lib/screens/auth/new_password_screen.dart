@@ -170,7 +170,19 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                       onToggle: () =>
                           setState(() => _obscureText1 = !_obscureText1),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 6.h),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل',
+                        textDirection: TextDirection.rtl,
+                        style: GoogleFonts.ibmPlexSans(
+                          fontSize: 12.sp,
+                          color: const Color(0xff707070),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
 
                     // حقل تأكيد كلمة المرور
                     _buildPasswordField(

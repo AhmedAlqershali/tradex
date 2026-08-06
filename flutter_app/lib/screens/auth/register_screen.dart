@@ -56,6 +56,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    if (password.length < 6) {
+      _showError('كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل');
+      return;
+    }
+
     if (!_agreeToTerms) {
       _showError('يرجى الموافقة على شروط الخدمة');
       return;
@@ -340,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             enableSuggestions: false,
                             style: _inputTextStyle(),
                             decoration: _inputDecoration(
-                              hint: 'Ahmed123',
+                              hint: 'abcdef',
                               hintDirection: TextDirection.ltr,
                               icon: Icons.lock_outline,
                               suffixIcon: IconButton(
@@ -362,7 +367,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 17),
+                          const SizedBox(height: 6),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل',
+                              textDirection: TextDirection.rtl,
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 12,
+                                color: textGrey,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 11),
 
 // TERMS
                           GestureDetector(
