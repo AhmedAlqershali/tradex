@@ -35,7 +35,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on ApiException catch (e) {
       if (!isClosed) emit(AuthFailure(message: e.message));
     } catch (e) {
-      if (!isClosed) emit(AuthFailure(message: e.toString()));
+      if (!isClosed) {
+        emit(const AuthFailure(message: 'حدث خطأ غير متوقع. حاول مجدداً.'));
+      }
     }
   }
 
@@ -58,7 +60,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on ApiException catch (e) {
       if (!isClosed) emit(AuthFailure(message: e.message));
     } catch (e) {
-      if (!isClosed) emit(AuthFailure(message: e.toString()));
+      if (!isClosed) {
+        emit(const AuthFailure(message: 'حدث خطأ غير متوقع. حاول مجدداً.'));
+      }
     }
   }
 
@@ -94,7 +98,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on ApiException catch (e) {
       if (!isClosed) emit(AuthFailure(message: e.message));
     } catch (e) {
-      if (!isClosed) emit(AuthFailure(message: e.toString()));
+      if (!isClosed) {
+        emit(const AuthFailure(message: 'حدث خطأ غير متوقع. حاول مجدداً.'));
+      }
     }
   }
 
@@ -114,7 +120,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on ApiException catch (e) {
       if (!isClosed) emit(AuthFailure(message: e.message));
     } catch (e) {
-      if (!isClosed) emit(AuthFailure(message: e.toString()));
+      if (!isClosed) {
+        emit(const AuthFailure(message: 'حدث خطأ غير متوقع. حاول مجدداً.'));
+      }
     }
   }
 

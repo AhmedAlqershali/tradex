@@ -18,11 +18,17 @@ class _BnScreenState extends State<BnScreen> {
   @override
   Widget build(BuildContext context) {
     final items = NavConfig.getItems(widget.type);
+    if (items.isEmpty) {
+      return const Scaffold(
+        body: Center(child: Text('لا توجد شاشات متاحة')),
+      );
+    }
+    final selectedIndex = _currentIndex.clamp(0, items.length - 1);
 
     return Scaffold(
-      body: items[_currentIndex].widget,
+      body: items[selectedIndex].widget,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 12.sp,
         unselectedFontSize: 12.sp,

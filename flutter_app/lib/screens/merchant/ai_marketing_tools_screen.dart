@@ -481,25 +481,22 @@ ValueListenableBuilder<List<AiResult>>(
 valueListenable: AiController.instance.historyNotifier,
 builder: (context, history, _) {
 if (history.isEmpty) {
-return Column(
-children: [
-_recentItem(
-icon: Icons.description_outlined,
-iconColor: AppColors.purple,
-title: 'وصف منتج: عطر "واحة النخيل"',
-time: 'مثال — لم يتم التوليد بعد',
-),
-
-SizedBox(height: 10.h),
-
-_recentItem(
-icon: Icons.share_outlined,
-iconColor: AppColors.orange,
-title: 'منشور انستغرام: تخفيضات الشتاء',
-time: 'مثال — لم يتم التوليد بعد',
-),
-],
-);
+ return Container(
+   width: double.infinity,
+   padding: EdgeInsets.all(16.r),
+   decoration: BoxDecoration(
+     color: AppColors.cardWhite,
+     borderRadius: BorderRadius.circular(16.r),
+   ),
+   child: Text(
+     'لا توجد عمليات بعد. استخدم إحدى أدوات الذكاء الاصطناعي لبدء التوليد.',
+     textAlign: TextAlign.right,
+     style: TextStyle(
+       fontSize: 13.sp,
+       color: AppColors.textGray,
+     ),
+   ),
+ );
 }
 
 return Column(

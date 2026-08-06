@@ -1,7 +1,6 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
-import 'package:ai_saas/core/storage/secure_storage_service.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 
 // ─── Value objects ────────────────────────────────────────────────────────────
@@ -152,11 +151,8 @@ class AuthService {
   // ── Logout ────────────────────────────────────────────────────────────────────
   /// POST /auth/logout
   Future<void> logout() async {
-    final refreshToken =
-        await SecureStorageService.instance.readRefreshToken();
     await ApiClient.instance.post<Map<String, dynamic>>(
       ApiConstants.logout,
-      data: refreshToken != null ? {'refresh_token': refreshToken} : null,
     );
   }
 

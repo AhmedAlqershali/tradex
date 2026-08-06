@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +55,7 @@ class UserController {
   void onTokenExpired() {
     currentUserNotifier.value = null;
     authErrorNotifier.value = 'انتهت جلستك. يرجى تسجيل الدخول مجدداً.';
+    unawaited(_clearLegacySession());
   }
 
   // ── Session restore ───────────────────────────────────────────────────────────

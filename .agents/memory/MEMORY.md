@@ -2,3 +2,4 @@
 - [BOM corruption in AI files](bom-corruption.md) — 8 PHP files under app/Contracts/Services/AI/ and app/Services/AI/ had UTF-8 BOM; stripped with sed.
 - [Flutter base URL mechanism](flutter-base-url.md) — dart-define was commented out in app_config.dart; always use String.fromEnvironment with Replit domain as default.
 - [verifyOtp no-op](verifyotp-noop.md) — backend has no OTP verify endpoint; verifyOtp in UserController is a deliberate no-op; token validated at resetPassword call.
+- [Imported app toolchains](imported-app-toolchains.md) — imported Laravel workflows may pin an older PHP module; Flutter native builds can require extra desktop libraries.

@@ -1,9 +1,7 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
-import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/splash_screen.dart';
-import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

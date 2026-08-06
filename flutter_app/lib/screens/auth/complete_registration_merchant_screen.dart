@@ -817,7 +817,7 @@ size: 20.sp,
 
 Widget _buildDropdownField() {
 return DropdownButtonFormField<String>(
-initialValue: _selectedRegion,
+      value: _selectedRegion,
 isExpanded: true,
 dropdownColor: Colors.white,
 

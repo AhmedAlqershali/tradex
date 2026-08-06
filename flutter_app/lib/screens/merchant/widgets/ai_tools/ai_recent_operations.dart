@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 // ─── AiRecentOperations ───────────────────────────────────────────────────────
 //
 // Section listing the last 5 generated results from AiController.historyNotifier.
-// Falls back to placeholder rows when history is empty.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AiRecentOperations extends StatelessWidget {
@@ -47,22 +46,21 @@ class AiRecentOperations extends StatelessWidget {
               valueListenable: AiController.instance.historyNotifier,
               builder: (context, history, _) {
                 if (history.isEmpty) {
-                  return Column(
-                    children: [
-                      _OperationRow(
-                        icon: Icons.description_outlined,
-                        iconColor: AppColors.purple,
-                        title: 'وصف منتج: عطر "واحة النخيل"',
-                        time: 'مثال — لم يتم التوليد بعد',
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.r),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardWhite,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Text(
+                      'لا توجد عمليات بعد. استخدم إحدى أدوات الذكاء الاصطناعي لبدء التوليد.',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: AppColors.textGray,
                       ),
-                      SizedBox(height: 10.h),
-                      _OperationRow(
-                        icon: Icons.share_outlined,
-                        iconColor: AppColors.orange,
-                        title: 'منشور انستغرام: تخفيضات الشتاء',
-                        time: 'مثال — لم يتم التوليد بعد',
-                      ),
-                    ],
+                    ),
                   );
                 }
                 return Column(
