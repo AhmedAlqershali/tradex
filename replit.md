@@ -44,6 +44,19 @@ cd tradex-backend && php artisan test
 # 522 tests, 1404 assertions — all passing
 ```
 
+### Replit audit status (2026-08-06)
+- Java/GraalVM 19.0.2 is available and the Gradle wrapper runs with Gradle 8.14.
+- `flutter clean`, `flutter pub get`, `flutter analyze`, and `flutter test` pass.
+- Laravel smoke tests pass for client and merchant registration, login, authenticated
+  profile/session endpoints, catalog reads, cart/favorites/orders reads, merchant
+  store/product/order/dashboard/analytics reads, and logout.
+- The Android SDK is not installed in this workspace. `adb` platform-tools are
+  available, but `sdkmanager`, Android platforms, build-tools, and an emulator are
+  not. Therefore `flutter build apk --debug` is blocked with `No Android SDK found`.
+- Android status: **ANDROID BUILD BLOCKED — Android SDK/toolchain unavailable.**
+  Runtime status: **ANDROID RUNTIME BLOCKED — no Android device/emulator available.**
+- AI live testing remains blocked unless the server-side `GEMINI_API_KEY` is configured.
+
 ### Architecture
 ```
 Controller → Service → Repository → Model

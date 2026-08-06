@@ -21,11 +21,11 @@ class AppConfig {
   // ── Base URL ──────────────────────────────────────────────────────────────────
   // Override at build time:
   //   --dart-define=TRADEX_BASE_URL=https://your-domain.com/api/v1
-  // The default points to the Replit development server so the app works
+  // The default points to this Replit development server so the app works
   // out of the box in this environment without extra build flags.
   static const String baseUrl = String.fromEnvironment(
     'TRADEX_BASE_URL',
-    defaultValue: 'https://029f1b68-742d-4031-99a8-6422b7abd418-00-24s4za3y3xt7w.pike.replit.dev/api/v1',
+    defaultValue: 'https://ff165008-2154-4c2f-8178-3dc0b1cfc493-00-2n43d3gdvzyud.sisko.replit.dev/api/v1',
   );
 
   // ── Environment helpers ───────────────────────────────────────────────────────
