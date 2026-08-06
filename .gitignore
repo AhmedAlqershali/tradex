@@ -1,0 +1,19 @@
+﻿# Secrets
+tradex-backend/.env
+
+# Laravel generated/runtime files
+tradex-backend/storage/logs/
+tradex-backend/storage/framework/cache/
+tradex-backend/storage/framework/sessions/
+tradex-backend/storage/framework/testing/
+tradex-backend/storage/framework/views/
+tradex-backend/public/storage
+
+# Flutter generated files
+flutter_app/.dart_tool/
+flutter_app/build/
+flutter_app/android/.gradle/
+
+# Replit local files
+.local/
+.config/
