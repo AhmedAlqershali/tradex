@@ -20,12 +20,13 @@ class AppConfig {
 
   // ── Base URL ──────────────────────────────────────────────────────────────────
   // Override at build time:
-  //   --dart-define=TRADEX_BASE_URL=https://staging.tradex.ps/v1
-  // static const String baseUrl = String.fromEnvironment(
-  //   'TRADEX_BASE_URL',
-  //   defaultValue: 'https://api.tradex.ps/v1',
-  // );
-  static const String baseUrl = 'http://192.168.0.108:8000/api/v1';
+  //   --dart-define=TRADEX_BASE_URL=https://your-domain.com/api/v1
+  // The default points to the Replit development server so the app works
+  // out of the box in this environment without extra build flags.
+  static const String baseUrl = String.fromEnvironment(
+    'TRADEX_BASE_URL',
+    defaultValue: 'https://029f1b68-742d-4031-99a8-6422b7abd418-00-24s4za3y3xt7w.pike.replit.dev/api/v1',
+  );
 
   // ── Environment helpers ───────────────────────────────────────────────────────
   // Compile-time flag — true only in release/profile builds.

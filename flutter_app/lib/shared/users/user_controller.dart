@@ -199,21 +199,17 @@ class UserController {
 
   // ── Email verification ────────────────────────────────────────────────────────
 
-  /// The backend verifies email ownership via a signed link sent by email —
-  /// there is no in-app OTP-code endpoint to call, so [otp] is intentionally
-  /// unused here. This resends that verification email; [email] is likewise
-  /// unused since the resend endpoint operates on the current session.
+  /// The backend uses a signed emailed link for email verification — there is
+  /// no in-app OTP-code endpoint. For the forgot-password flow the "OTP" the
+  /// user enters is the password-reset token from the email link; that token
+  /// is validated when POST /auth/password/reset is called (not before).
+  /// This method is therefore a deliberate no-op: it succeeds immediately so
+  /// [AuthBloc] emits [AuthOtpVerified] and navigates to the new-password
+  /// screen, where the real token validation happens.
   /// Kept as a same-signature method so [AuthBloc] doesn't need to change.
   Future<void> verifyOtp({required String email, required String otp}) async {
-    _begin();
-    try {
-      await AuthService.instance.resendVerificationEmail();
-    } on ApiException catch (e) {
-      authErrorNotifier.value = _localiseError(e);
-      rethrow;
-    } finally {
-      _end();
-    }
+    // No-op: no pre-validation endpoint exists. The reset token is validated
+    // by the backend when resetPassword() is called with it.
   }
 
   // ── Reset password ────────────────────────────────────────────────────────────

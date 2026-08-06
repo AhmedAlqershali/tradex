@@ -1,0 +1,701 @@
+You are the senior full-stack engineer responsible for completely stabilizing the existing Tradex project.
+
+The project contains:
+
+* Laravel Backend API
+* Flutter Mobile Application
+* Authentication
+* Sanctum
+* Products
+* Stores
+* Categories
+* Cart
+* Checkout
+* Orders
+* Favorites
+* Notifications
+* Merchant functionality
+* AI/Gemini functionality
+
+The project currently contains many errors and integration problems.
+
+Your mission is to make the EXISTING project work reliably from end to end.
+
+==================================================
+CRITICAL RULES
+==============
+
+1. DO NOT rebuild the project from scratch.
+2. DO NOT create a new Laravel project.
+3. DO NOT create a new Flutter project.
+4. DO NOT replace the architecture unnecessarily.
+5. Preserve the existing architecture.
+6. Preserve existing working features.
+7. Do not remove features just to make errors disappear.
+8. Do not replace real implementations with mocks.
+9. Do not hardcode API keys, passwords, tokens, URLs, or secrets.
+10. Do not modify unrelated files.
+11. Do not perform cosmetic refactoring.
+12. Do not add new features unless required to fix an existing feature.
+13. Do not modify working code unnecessarily.
+14. Fix ROOT CAUSES, not symptoms.
+15. Every meaningful fix must be tested.
+16. Do not claim something works unless you actually tested it.
+17. Do not touch production data destructively.
+18. Do not expose secrets in logs or reports.
+
+IMPORTANT:
+
+Work systematically.
+
+Do NOT attempt to rewrite the entire project in one pass.
+
+Use:
+
+AUDIT → FIX → TEST → VERIFY
+
+==================================================
+PHASE 1 — PROJECT INVENTORY
+===========================
+
+First inspect the project structure.
+
+Identify:
+
+Backend:
+
+* Laravel version
+* PHP requirements
+* Composer dependencies
+* Database
+* Sanctum
+* API version
+* routes
+* controllers
+* requests
+* resources
+* services
+* repositories
+* models
+* migrations
+* factories
+* seeders
+* tests
+* AI/Gemini implementation
+
+Flutter:
+
+* Flutter/Dart version
+* pubspec.yaml
+* state management
+* API client
+* Dio configuration
+* models
+* repositories/services
+* BLoC/events/states
+* screens
+* authentication flow
+* token storage
+* AI screens/services
+* error handling
+
+Do not modify anything during the initial inventory.
+
+==================================================
+PHASE 2 — BACKEND STABILITY
+===========================
+
+Make the Laravel backend run correctly.
+
+Check and fix:
+
+* PHP compatibility
+* Composer dependencies
+* Laravel configuration
+* .env requirements
+* APP_KEY
+* database connection
+* migrations
+* models
+* relationships
+* factories
+* seeders
+* routes
+* middleware
+* exception handling
+
+Run appropriate Laravel checks and tests.
+
+Do not install unnecessary dependencies.
+
+==================================================
+PHASE 3 — AUTHENTICATION
+========================
+
+Completely stabilize:
+
+Registration
+Login
+Logout
+/me
+Sanctum
+Forgot Password
+Reset Password
+Email verification if already implemented
+Role handling
+
+Support:
+
+CLIENT
+MERCHANT
+ADMIN
+
+Check:
+
+* validation
+* duplicate email
+* invalid credentials
+* token creation
+* token storage
+* token revocation
+* protected routes
+* role authorization
+
+Passwords MUST be securely hashed.
+
+Never store plaintext passwords.
+
+Do not weaken password requirements merely to hide validation errors.
+
+Make the API responses simple and predictable for Flutter.
+
+==================================================
+PHASE 4 — PASSWORD EXPERIENCE
+=============================
+
+Fix all password-related issues:
+
+* registration password
+* password confirmation
+* login verification
+* forgot password
+* reset password
+* reset token validation
+* expired reset token
+* invalid reset token
+* change password if already implemented
+
+Make errors understandable.
+
+Do not expose password reset tokens or secrets in logs.
+
+==================================================
+PHASE 5 — BACKEND API
+=====================
+
+Verify all existing API functionality:
+
+Authentication
+Categories
+Stores
+Products
+Favorites
+Cart
+Checkout
+Orders
+Notifications
+Merchant products
+Merchant orders
+Merchant store management
+Admin category management
+AI endpoints
+
+Check:
+
+* validation
+* authorization
+* database queries
+* relationships
+* serialization
+* JSON responses
+* HTTP status codes
+* error handling
+
+Do not redesign the API unless absolutely necessary.
+
+Preserve the API contract where possible.
+
+==================================================
+PHASE 6 — GEMINI / AI
+=====================
+
+This is a HIGH PRIORITY area.
+
+Deeply inspect the existing AI architecture.
+
+Check:
+
+* Gemini API configuration
+* GEMINI_API_KEY
+* Gemini provider
+* AiProviderInterface
+* ProductDescriptionService
+* MarketingContentService
+* CustomerReplyService
+* AiAnalyticsService
+* AI controllers
+* AI routes
+* AI requests
+* AI usage tracking
+* AI exceptions
+
+Determine whether each implementation is:
+
+REAL
+BROKEN
+STUB
+MOCK
+INCOMPLETE
+
+Replace broken/stub production implementations with real working implementations using the existing architecture.
+
+Do NOT create duplicate Gemini logic.
+
+The architecture should remain:
+
+Flutter
+↓
+Laravel API
+↓
+AI Service
+↓
+Gemini Provider
+↓
+Gemini API
+↓
+Laravel normalized response
+↓
+Flutter
+
+The Gemini API key MUST stay in the Laravel environment.
+
+Never place the Gemini key in Flutter.
+
+Never expose it in logs.
+
+Verify:
+
+* API endpoint
+* model
+* HTTP request
+* headers
+* request body
+* timeout
+* error handling
+* rate limits
+* quota errors
+* authentication errors
+* response parsing
+* malformed responses
+
+Support Arabic and English.
+
+Test at least one real AI endpoint if GEMINI_API_KEY is available.
+
+If the key is not available, do not fake a successful Gemini test.
+
+Report that live Gemini testing requires the environment variable.
+
+==================================================
+PHASE 7 — FLUTTER BUILD STABILITY
+=================================
+
+Now move to Flutter.
+
+Run:
+
+flutter pub get
+flutter analyze
+
+Fix all compilation/analyzer errors.
+
+Then run the application and identify runtime errors.
+
+Fix:
+
+* imports
+* null safety
+* type errors
+* broken constructors
+* missing methods
+* incorrect models
+* invalid JSON parsing
+* state management errors
+* RenderBox/layout errors
+* navigation errors
+* async errors
+* lifecycle errors
+
+Do not rewrite the Flutter architecture.
+
+Preserve the existing BLoC/state-management architecture.
+
+==================================================
+PHASE 8 — FLUTTER API INTEGRATION
+=================================
+
+Audit:
+
+api_constants.dart
+api_client.dart
+Dio configuration
+secure storage
+authentication service
+repositories
+models
+BLoCs
+events
+states
+
+Verify:
+
+Flutter
+↓
+Dio
+↓
+Laravel API
+↓
+JSON response
+↓
+Model
+↓
+Repository
+↓
+BLoC
+↓
+UI
+
+Fix:
+
+* wrong Base URL
+* incorrect endpoints
+* incorrect HTTP methods
+* incorrect headers
+* missing Authorization
+* token handling
+* JSON parsing
+* response envelope mismatches
+* error parsing
+* timeouts
+* network failures
+
+Do not hardcode production server addresses unnecessarily.
+
+Use environment/configuration where appropriate.
+
+==================================================
+PHASE 9 — FLUTTER AUTHENTICATION
+================================
+
+Make the complete flow work:
+
+Register
+→ Login
+→ Save token
+→ Load /me
+→ Authenticated requests
+→ Logout
+→ Delete token
+
+Test:
+
+Client registration
+Merchant registration
+Login
+Wrong password
+Duplicate email
+Logout
+Session persistence
+Unauthenticated request
+Expired/invalid token
+
+Password reset should correctly communicate with Laravel.
+
+==================================================
+PHASE 10 — FLUTTER AI
+=====================
+
+Connect Flutter AI functionality to the REAL Laravel AI endpoints.
+
+Do NOT call Gemini directly from Flutter.
+
+Verify:
+
+Flutter
+→ Laravel AI endpoint
+→ Gemini
+→ Laravel
+→ Flutter
+
+Fix:
+
+* request body
+* language field
+* context
+* response parsing
+* loading state
+* success state
+* error state
+* timeout
+* authentication
+* Arabic output
+
+Make AI failures user-friendly.
+
+Do not display raw server stack traces to users.
+
+==================================================
+PHASE 11 — BUSINESS FLOWS
+=========================
+
+Verify the main Tradex flows end to end.
+
+CLIENT:
+
+Register
+Login
+Browse categories
+Browse stores
+Browse products
+View product
+Favorite product
+Add product to cart
+Update cart
+Checkout
+Create order
+View orders
+View order details
+Notifications
+Profile
+Logout
+
+MERCHANT:
+
+Register
+Login
+Store profile
+Create product
+Edit product
+Delete product
+View orders
+Update order status
+Logout
+
+AI:
+
+Generate product description
+Generate marketing content
+Generate customer reply
+AI analytics if already implemented
+
+==================================================
+PHASE 12 — ERROR HANDLING
+=========================
+
+Backend must correctly handle:
+
+400
+401
+403
+404
+405
+409
+422
+429
+500
+502
+503
+
+Flutter must correctly interpret these responses.
+
+Use predictable JSON.
+
+Do not expose internal exceptions when APP_DEBUG=false.
+
+==================================================
+PHASE 13 — SECURITY
+===================
+
+Verify:
+
+* passwords hashed
+* Sanctum tokens protected
+* API keys protected
+* Gemini key protected
+* validation
+* authorization
+* rate limiting
+* CORS
+* file upload validation
+* mass assignment protection
+* production debug settings
+* sensitive logging
+
+Never expose:
+
+passwords
+tokens
+API keys
+private credentials
+reset tokens
+
+==================================================
+PHASE 14 — TESTING
+==================
+
+Backend:
+
+Run the existing Laravel/PHP test suite.
+
+Test authentication and AI specifically.
+
+Flutter:
+
+Run:
+
+flutter analyze
+
+Then build/run the application.
+
+Fix errors found during execution.
+
+Do not stop at the first error.
+
+After fixing an error, rerun the relevant test.
+
+Do not repeatedly run unrelated expensive operations.
+
+==================================================
+PHASE 15 — FINAL VERIFICATION
+=============================
+
+Before declaring the project stable, verify:
+
+BACKEND:
+
+* Laravel starts
+* database works
+* migrations work
+* authentication works
+* registration works
+* login works
+* Sanctum works
+* password reset works
+* API routes work
+* AI/Gemini works if configured
+* tests pass
+
+FLUTTER:
+
+* dependencies resolve
+* analyzer is clean or remaining warnings are documented
+* app builds
+* authentication works
+* API connection works
+* token works
+* products work
+* cart works
+* checkout works
+* orders work
+* merchant features work
+* AI works
+
+==================================================
+IMPORTANT FAILURE RULE
+======================
+
+If you encounter a problem you cannot solve:
+
+DO NOT hide it.
+
+DO NOT remove the feature.
+
+DO NOT replace it with fake data.
+
+DO NOT claim success.
+
+Record:
+
+PROBLEM
+ROOT CAUSE
+WHAT WAS ATTEMPTED
+CURRENT STATUS
+WHAT IS REQUIRED
+
+==================================================
+FINAL REPORT
+============
+
+At the end provide a concise report:
+
+1. BACKEND
+
+* Fixed
+* Remaining
+
+2. AUTHENTICATION
+
+* Registration
+* Login
+* Sanctum
+* Password reset
+
+3. AI/GEMINI
+
+* Configuration
+* Provider
+* AI services
+* Endpoints
+* Live test status
+
+4. FLUTTER
+
+* Build
+* Analyze
+* API integration
+* Authentication
+* AI integration
+
+5. TESTS
+
+* Tests run
+* Passed
+* Failed
+
+6. FILES CHANGED
+   List changed files.
+
+7. REMAINING BLOCKERS
+   List only real unresolved blockers.
+
+8. MANUAL ACTIONS REQUIRED
+   Tell me exactly what I must configure manually, such as:
+
+GEMINI_API_KEY
+database credentials
+API base URL
+mail configuration
+
+Do not ask me to manually fix code that you can safely fix yourself.
+
+START NOW.
+
+First perform the project inventory and identify the highest-priority problems.
+
+Then proceed through the phases systematically.
+
+Do not stop after finding the first error.
+
+Do not rewrite the project.
+
+Fix the existing project.

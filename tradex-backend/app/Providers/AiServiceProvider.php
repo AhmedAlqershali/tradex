@@ -1,30 +1,22 @@
-﻿<?php
+<?php
 
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\Services\AI\AiProviderInterface;
-use App\Contracts\Services\AI\AiServiceInterface;
-use App\Contracts\Services\AI\AiUsageServiceInterface;
-use App\Services\AI\Providers\GeminiAiProvider;
-use App\Services\AI\AiService;
-use App\Services\AI\AiUsageService;
 
+/**
+ * AiServiceProvider — intentionally empty.
+ *
+ * AI interface bindings are handled by RepositoryServiceProvider to keep all
+ * IoC registrations in one place. This provider is retained as a stub so
+ * existing config/app.php references do not break.
+ */
 class AiServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(AiUsageServiceInterface::class, AiUsageService::class);
-
-        $this->app->singleton(AiProviderInterface::class, function ($app) {
-            return new GeminiAiProvider();
-        });
-
-        $this->app->singleton(AiServiceInterface::class, AiService::class);
+        // Bindings live in RepositoryServiceProvider.
     }
 
-    public function boot(): void
-    {
-        //
-    }
+    public function boot(): void {}
 }

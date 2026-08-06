@@ -1,3 +1,39 @@
 modules = ["php-8.4"]
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+APP_URL = "https://029f1b68-742d-4031-99a8-6422b7abd418-00-24s4za3y3xt7w.pike.replit.dev"
+DB_DATABASE = "/home/runner/workspace/tradex-backend/database/database.sqlite"
+FILESYSTEM_DISK = "public"
+MAIL_MAILER = "log"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd tradex-backend && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
