@@ -3,8 +3,6 @@
 namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
-
 class ChangePasswordRequest extends FormRequest
 {
     public function authorize(): bool
@@ -16,15 +14,7 @@ class ChangePasswordRequest extends FormRequest
     {
         return [
             'current_password' => ['required', 'string'],
-            'new_password'     => [
-                'required',
-                'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->uncompromised(),
-            ],
+            'new_password'     => ['required', 'string', 'min:6', 'confirmed'],
         ];
     }
 

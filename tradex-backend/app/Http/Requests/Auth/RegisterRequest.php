@@ -17,7 +17,7 @@ class RegisterRequest extends FormRequest
             'name'     => ['required', 'string', 'max:100'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone'    => ['nullable', 'string', 'max:20'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
             'role'     => ['nullable', 'string', 'in:client,merchant'],
         ];
     }
@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
         return [
             'email.unique'          => 'This email address is already registered.',
             'password.confirmed'    => 'Password confirmation does not match.',
-            'password.min'          => 'Password must be at least 8 characters.',
+            'password.min'          => 'Password must be at least 6 characters.',
             'role.in'               => 'Role must be either client or merchant.',
         ];
     }

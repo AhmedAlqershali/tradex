@@ -147,6 +147,8 @@ class Inline
                 return 'false';
             case \is_int($value):
                 return $value;
+            case \is_float($value) && is_nan($value):
+                return '.NaN';
             case is_numeric($value) && false === strpbrk($value, "\f\n\r\t\v"):
                 $locale = setlocale(\LC_NUMERIC, 0);
                 if (false !== $locale) {
@@ -252,10 +254,6 @@ class Inline
             }
 
             $output[] = \sprintf('%s: %s', self::dump($key, $keyFlags), self::dump($val, $flags));
-        }
-
-        if (!$output) {
-            return '{}';
         }
 
         return \sprintf('{ %s }', implode(', ', $output));
@@ -704,13 +702,7 @@ class Inline
                                 throw new ParseException('Missing value for tag "!php/object".', self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
                             }
 
-                            $serialized = self::parseScalar(substr($scalar, 12));
-
-                            if (!\is_scalar($serialized ?? '') && !$serialized instanceof \Stringable) {
-                                throw new ParseException(\sprintf('The "!php/object" tag only supports a string value, got "%s".', get_debug_type($serialized)), self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
-                            }
-
-                            return unserialize((string) $serialized, ['allowed_classes' => true]);
+                            return unserialize(self::parseScalar(substr($scalar, 12)), ['allowed_classes' => true]);
                         }
 
                         if (self::$exceptionOnInvalidType) {
@@ -725,15 +717,7 @@ class Inline
                             }
 
                             $i = 0;
-                            $const = self::parseScalar(substr($scalar, 11), 0, null, $i, false);
-
-                            if (!\is_scalar($const ?? '') && !$const instanceof \Stringable) {
-                                throw new ParseException(\sprintf('The "!php/const" tag only supports a string value, got "%s".', get_debug_type($const)), self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
-                            }
-
-                            $const = (string) $const;
-
-                            if (\defined($const)) {
+                            if (\defined($const = self::parseScalar(substr($scalar, 11), 0, null, $i, false))) {
                                 return \constant($const);
                             }
 
@@ -752,12 +736,6 @@ class Inline
 
                             $i = 0;
                             $enumName = self::parseScalar(substr($scalar, 10), 0, null, $i, false);
-
-                            if (!\is_scalar($enumName ?? '') && !$enumName instanceof \Stringable) {
-                                throw new ParseException(\sprintf('The "!php/enum" tag only supports a string value, got "%s".', get_debug_type($enumName)), self::$parsedLineNumber + 1, $scalar, self::$parsedFilename);
-                            }
-
-                            $enumName = (string) $enumName;
                             $useName = str_contains($enumName, '::');
                             $enum = $useName ? strstr($enumName, '::', true) : $enumName;
 
@@ -809,6 +787,10 @@ class Inline
             case \in_array($scalar[0], ['+', '-', '.'], true) || is_numeric($scalar[0]):
                 if (Parser::preg_match('{^[+-]?[0-9][0-9_]*$}', $scalar)) {
                     $scalar = str_replace('_', '', $scalar);
+
+                    if ('+' === $scalar[0]) {
+                        $scalar = substr($scalar, 1);
+                    }
                 }
 
                 switch (true) {
@@ -827,8 +809,9 @@ class Inline
 
                         return '0x' === $scalar[0].$scalar[1] ? hexdec($scalar) : (float) $scalar;
                     case '.inf' === $scalarLower:
-                    case '.nan' === $scalarLower:
                         return -log(0);
+                    case '.nan' === $scalarLower:
+                        return \NAN;
                     case '-.inf' === $scalarLower:
                         return log(0);
                     case Parser::preg_match('/^(-|\+)?[0-9][0-9_]*(\.[0-9_]+)?$/', $scalar):

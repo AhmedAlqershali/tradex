@@ -51,8 +51,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
       _showError('يرجى إدخال كلمة المرور الجديدة وتأكيدها.');
       return;
     }
-    if (newPassword.length < 8) {
-      _showError('يجب أن تكون كلمة المرور 8 أحرف على الأقل.');
+    if (newPassword.length < 6) {
+      _showError('يجب أن تكون كلمة المرور 6 أحرف على الأقل.');
       return;
     }
     if (newPassword != confirmPassword) {
