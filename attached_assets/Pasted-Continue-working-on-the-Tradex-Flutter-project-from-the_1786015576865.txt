@@ -1,0 +1,78 @@
+Continue working on the Tradex Flutter project from the current state.
+
+IMPORTANT:
+
+* Do NOT stop after reading files or creating a checkpoint.
+* Do NOT just report what is wrong.
+* Actually implement the fixes in the Flutter project.
+* Do NOT modify GitHub or push anything to GitHub.
+* Work directly on the current project files.
+* Do NOT delete existing features, screens, assets, backend integration, or working code.
+* Preserve the existing architecture and BLoC approach.
+
+First, inspect the current Flutter project and determine exactly what has already been completed and what remains broken.
+
+Then execute this workflow:
+
+1. Run Flutter dependency setup and analyze the project.
+2. Fix ALL compilation errors.
+3. Fix ALL analyzer errors and warnings that materially affect the application.
+4. Run/build the Flutter application and identify runtime errors.
+5. Fix layout/rendering errors, including any RenderBox/layout issues.
+6. Inspect the complete navigation flow and make sure every route opens correctly.
+7. Inspect BLoC/events/states/repositories/services and make sure state management is actually connected to the UI.
+8. Inspect Dio/API client configuration and make sure requests match the Laravel backend API.
+9. Verify authentication:
+
+   * Register
+   * Login
+   * Logout
+   * Current user
+   * Token persistence
+   * Unauthorized handling
+10. Verify client functionality:
+
+* Home
+* Categories
+* Stores
+* Products
+* Product details
+* Favorites
+* Cart
+* Checkout
+* Orders
+* Notifications
+* Profile
+
+11. Verify merchant functionality:
+
+* Merchant dashboard
+* Store profile
+* Products CRUD
+* Product images
+* Stock
+* Orders
+* Order status updates
+
+12. Verify AI-related Flutter screens/services and their API integration.
+13. Verify Arabic RTL, localization, loading states, empty states, errors, and responsive layouts.
+14. Check all assets and asset paths in pubspec.yaml.
+15. Remove references to missing assets/files only when they are genuinely invalid; do not delete useful project assets.
+16. Check environment/configuration files and API base URL handling.
+17. Do not expose or hardcode secrets/API keys in Flutter source code.
+18. Run a final flutter analyze.
+19. Run a final build/test if the environment supports it.
+
+IMPORTANT EXECUTION RULE:
+Work in phases, but continue automatically from one phase to the next. Do not stop after Phase 1 or after creating a checkpoint.
+
+At the end, provide a clear report containing:
+
+* What was fixed
+* What was implemented
+* What remains incomplete
+* Exact Flutter analyze result
+* Exact build/test result
+* Any remaining blockers
+
+The goal is to leave the Tradex Flutter application in the most complete, stable, runnable state possible without removing existing functionality.
