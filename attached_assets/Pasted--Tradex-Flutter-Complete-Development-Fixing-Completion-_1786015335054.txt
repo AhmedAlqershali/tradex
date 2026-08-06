@@ -1,0 +1,677 @@
+# Tradex Flutter — Complete Development, Fixing & Completion
+
+You are working on the existing **Tradex Flutter mobile application**.
+
+The Flutter project is located at:
+
+```text
+flutter_app/
+```
+
+The Laravel backend exists in:
+
+```text
+tradex-backend/
+```
+
+For this task, your primary focus is the **Flutter application**.
+
+Do NOT work on GitHub.
+Do NOT push, commit, reset, force-push, or modify the GitHub repository.
+Work directly on the current Replit project files.
+
+---
+
+## MAIN OBJECTIVE
+
+Continue developing the Tradex Flutter application until it is a stable, functional, production-quality mobile application connected correctly to the existing Laravel backend.
+
+Do not rebuild the application from scratch.
+
+Do not replace existing functionality with mock data.
+
+Do not remove existing features.
+
+Preserve the existing UI/design and architecture unless a change is necessary to fix a real problem.
+
+---
+
+# PHASE 1 — UNDERSTAND THE CURRENT FLUTTER PROJECT
+
+Before changing anything, inspect the entire:
+
+```text
+flutter_app/
+```
+
+Pay special attention to:
+
+```text
+lib/
+lib/core/
+lib/models/
+lib/services/
+lib/repositories/
+lib/blocs/
+lib/screens/
+lib/widgets/
+```
+
+Also inspect:
+
+```text
+pubspec.yaml
+android/
+```
+
+Understand the current architecture and how state management, API communication, models, repositories, and screens work together.
+
+The project already has an existing architecture.
+
+Do NOT introduce a completely different architecture.
+
+Where BLoC is already used, continue using BLoC.
+
+---
+
+# PHASE 2 — RUN FLUTTER CHECKS
+
+Run:
+
+```bash
+cd flutter_app
+flutter pub get
+flutter analyze
+flutter test
+```
+
+If the project can be launched, run it and inspect the actual application.
+
+Record every:
+
+* compile error
+* analyzer error
+* runtime exception
+* UI error
+* navigation problem
+* API error
+* state-management problem
+
+Then fix them systematically.
+
+Do not stop after fixing the first issue.
+
+---
+
+# PHASE 3 — API INTEGRATION
+
+The Laravel backend already exists.
+
+Do NOT replace the API with fake data.
+
+Audit and synchronize:
+
+```text
+Flutter API calls
+        ↓
+Dio
+        ↓
+Laravel API
+        ↓
+JSON response
+        ↓
+Flutter models
+        ↓
+Repository/Service
+        ↓
+BLoC
+        ↓
+UI
+```
+
+Check:
+
+* API base URL
+* authentication headers
+* Sanctum token
+* secure storage
+* login
+* logout
+* current user
+* registration
+* products
+* categories
+* stores
+* favorites
+* cart
+* checkout
+* orders
+* profile
+* notifications
+* merchant features
+* AI features
+
+Every Flutter endpoint must match the actual Laravel route and response structure.
+
+Fix mismatches.
+
+---
+
+# PHASE 4 — AUTHENTICATION
+
+Make authentication fully functional.
+
+Verify:
+
+### Register
+
+* client registration
+* merchant registration
+* validation
+* API response
+* token storage
+* navigation after registration
+
+### Login
+
+* email/phone handling according to backend
+* password
+* validation
+* token storage
+* user information
+* role detection
+
+### Session
+
+When the application starts:
+
+* check stored token
+* restore user session
+* retrieve current user when necessary
+* navigate to the correct screen
+
+### Logout
+
+* call backend logout
+* clear secure token
+* clear user state
+* return to login screen
+
+Fix all authentication-related issues.
+
+---
+
+# PHASE 5 — CLIENT APPLICATION
+
+Fully inspect and complete the client experience.
+
+Check:
+
+## Home
+
+* categories
+* stores
+* products
+* banners
+* search
+* navigation
+* loading
+* empty states
+* errors
+
+## Categories
+
+* category listing
+* category filtering
+* product results
+
+## Stores
+
+* store listing
+* store details
+* store products
+
+## Products
+
+* product listing
+* product details
+* images
+* price
+* stock
+* favorite
+* add to cart
+
+## Search
+
+Make sure search actually communicates with the backend where supported.
+
+## Favorites
+
+Verify:
+
+* add favorite
+* remove favorite
+* list favorites
+* persistent state
+* correct UI state
+
+---
+
+# PHASE 6 — CART & CHECKOUT
+
+Completely test:
+
+```text
+Product
+ ↓
+Add to cart
+ ↓
+Cart
+ ↓
+Quantity
+ ↓
+Remove item
+ ↓
+Checkout
+ ↓
+Order
+ ↓
+Confirmation
+```
+
+Check:
+
+* cart state
+* quantities
+* stock
+* totals
+* multiple stores
+* checkout fields
+* validation
+* API request
+* successful order
+* failed order
+* navigation
+* order confirmation
+
+Do not use fake checkout behavior when the backend endpoint exists.
+
+---
+
+# PHASE 7 — ORDERS
+
+Verify:
+
+* order history
+* order details
+* order items
+* prices
+* quantities
+* store information
+* order status
+* status mapping
+* loading
+* empty state
+* errors
+
+Ensure the order status mapper matches the backend values exactly.
+
+---
+
+# PHASE 8 — MERCHANT APPLICATION
+
+Audit all merchant screens.
+
+Verify:
+
+* merchant dashboard
+* store information
+* product list
+* add product
+* edit product
+* delete product
+* product images
+* price
+* stock
+* product status
+* merchant orders
+* order details
+* update order status
+
+All merchant actions must communicate with the actual Laravel backend.
+
+Do not leave placeholder buttons or fake responses.
+
+---
+
+# PHASE 9 — PROFILE
+
+Verify:
+
+* profile information
+* editing profile
+* avatar if supported
+* role information
+* logout
+* authentication state
+
+Make sure changes persist through the backend.
+
+---
+
+# PHASE 10 — UI/UX FIXES
+
+Inspect the application visually and fix all real Flutter UI problems.
+
+Especially investigate:
+
+* RenderBox was not laid out
+* `WeekendPromoBanner`
+* Container constraint problems
+* Row overflow
+* Column overflow
+* ListView inside Column
+* nested scroll views
+* incorrect Expanded/Flexible usage
+* keyboard overflow
+* image constraints
+* loading layout
+* empty states
+* bottom navigation
+* dialogs
+* sheets
+
+Do not simply hide errors.
+
+Fix the underlying layout constraints correctly.
+
+---
+
+# PHASE 11 — RTL & ARABIC
+
+Tradex is an Arabic/RTL application.
+
+Verify:
+
+* RTL direction
+* text alignment
+* icons
+* arrows
+* padding
+* margins
+* Row ordering
+* navigation
+* forms
+* dialogs
+* bottom navigation
+* Arabic strings
+
+Do not break existing localization.
+
+---
+
+# PHASE 12 — BLoC / STATE MANAGEMENT
+
+Audit every BLoC.
+
+For each feature ensure:
+
+```text
+Event
+ ↓
+BLoC
+ ↓
+Repository/Service
+ ↓
+API
+ ↓
+Response
+ ↓
+State
+ ↓
+UI
+```
+
+Every async feature should correctly handle:
+
+```text
+Initial
+Loading
+Success
+Empty
+Failure
+```
+
+Avoid:
+
+* unnecessary setState
+* duplicated API requests
+* state updates after dispose
+* memory leaks
+* incorrect BlocProvider scope
+* stale data
+* race conditions
+
+Do not migrate to another state management solution.
+
+---
+
+# PHASE 13 — MODELS & JSON
+
+Audit all models against the Laravel JSON responses.
+
+Especially inspect:
+
+* Product
+* Store
+* Category
+* User
+* Order
+* OrderItem
+* Cart
+* Favorite
+* Notification
+* AI responses
+
+Make parsing robust against:
+
+* null values
+* missing optional fields
+* empty arrays
+* unexpected response data
+
+Do not silently discard important backend data.
+
+---
+
+# PHASE 14 — DIO & ERROR HANDLING
+
+Improve the API client where necessary.
+
+Handle:
+
+```text
+200
+201
+204
+400
+401
+403
+404
+409
+422
+429
+500
+```
+
+Provide useful user-facing error messages.
+
+Never show raw Dio exceptions to users.
+
+Ensure authentication errors correctly redirect to login when appropriate.
+
+---
+
+# PHASE 15 — AI FEATURES
+
+Inspect all existing Flutter AI screens and services.
+
+Check integration with the existing Laravel AI API.
+
+Verify:
+
+* request format
+* response parsing
+* loading state
+* error state
+* generated content
+* authentication
+* Arabic text
+* UI display
+
+Do not expose Gemini API keys inside Flutter.
+
+The Flutter app should communicate with the backend AI endpoints.
+
+---
+
+# PHASE 16 — PERFORMANCE
+
+Look for obvious performance problems.
+
+Improve where needed:
+
+* unnecessary rebuilds
+* huge widget trees
+* repeated API calls
+* image loading
+* list rendering
+* unnecessary setState
+* duplicated network requests
+
+Do not prematurely optimize working code.
+
+---
+
+# PHASE 17 — FINAL TEST
+
+After all modifications run:
+
+```bash
+cd flutter_app
+flutter pub get
+flutter analyze
+flutter test
+```
+
+If possible, run the application.
+
+Test manually:
+
+1. App launch
+2. Register
+3. Login
+4. Home
+5. Categories
+6. Stores
+7. Products
+8. Search
+9. Favorites
+10. Cart
+11. Checkout
+12. Order confirmation
+13. Order history
+14. Profile
+15. Logout
+16. Merchant login
+17. Merchant products
+18. Merchant orders
+19. AI features
+
+Fix all errors found.
+
+---
+
+# IMPORTANT DEVELOPMENT RULES
+
+DO NOT:
+
+* delete working features
+* replace API functionality with mock data
+* rewrite the project from scratch
+* change architecture unnecessarily
+* migrate from BLoC
+* hardcode secrets
+* put Gemini API keys in Flutter
+* remove screens just because they have errors
+* hide exceptions instead of fixing them
+* modify GitHub
+* push commits
+* reset the repository
+
+DO:
+
+* inspect first
+* understand existing code
+* fix root causes
+* preserve existing functionality
+* connect everything to the real backend
+* improve Flutter architecture where necessary
+* test every major feature
+* keep Arabic RTL working
+
+---
+
+# FINAL REPORT
+
+When finished, provide:
+
+### Flutter errors fixed
+
+List every important Flutter issue fixed.
+
+### Features completed
+
+List every feature that became functional.
+
+### API integration
+
+Explain which Flutter features are successfully connected to Laravel.
+
+### UI fixes
+
+List important UI/layout problems fixed.
+
+### BLoC
+
+List BLoCs reviewed or improved.
+
+### Tests
+
+Show:
+
+```text
+flutter analyze: PASS/FAIL
+flutter test: PASS/FAIL
+```
+
+### Remaining issues
+
+List only genuine remaining issues.
+
+### Current status
+
+Give:
+
+```text
+Flutter Status:
+READY
+or
+READY WITH MINOR FIXES
+or
+NOT READY
+```
+
+Do not claim READY unless it has actually been tested.
+
+Start now by auditing the existing `flutter_app` and then systematically fix and complete the application.
