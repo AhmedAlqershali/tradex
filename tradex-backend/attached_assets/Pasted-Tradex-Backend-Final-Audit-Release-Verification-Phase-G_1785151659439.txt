@@ -1,0 +1,246 @@
+Tradex Backend Final Audit — Release Verification Phase
+
+Goal:
+Perform a final professional audit of the Laravel backend before Flutter integration.
+
+Important:
+Do not add new features.
+Do not change existing business logic.
+Do not refactor unnecessarily.
+Only fix real production issues discovered during the audit.
+
+Perform a complete verification of:
+
+1. Application Health Check
+
+Verify:
+
+- Laravel application starts correctly.
+- Environment configuration is valid.
+- All migrations run successfully.
+- Storage configuration works.
+- Cache configuration works.
+- Queue configuration is documented.
+- No critical errors appear in logs.
+
+---
+
+2. Routes Audit
+
+Review all registered API routes:
+
+Check:
+
+- Route naming consistency.
+- Authentication middleware.
+- Role middleware.
+- Missing protection.
+- Duplicate routes.
+- Incorrect HTTP methods.
+
+Generate final route summary.
+
+---
+
+3. Database Audit
+
+Verify:
+
+- All migrations are applied.
+- All tables are consistent.
+- Relationships work correctly.
+- Foreign keys exist where required.
+- Indexes exist for important queries.
+- No broken relationships.
+- No unused critical tables.
+
+Confirm database is production safe.
+
+---
+
+4. Authentication & Authorization Audit
+
+Test:
+
+- Register.
+- Login.
+- Logout.
+- Current user.
+- Password reset.
+- Email verification.
+
+Verify roles:
+
+- Client.
+- Merchant.
+- Admin.
+
+Check:
+
+- Unauthorized access returns correct JSON envelope.
+- Forbidden access returns correct JSON envelope.
+
+---
+
+5. API Contract Audit
+
+Verify every API response follows:
+
+{
+ success,
+ message,
+ data,
+ errors
+}
+
+Check:
+
+- Success responses.
+- Validation errors.
+- Authentication errors.
+- Permission errors.
+- Not found errors.
+- Rate limit errors.
+- Server errors.
+
+No API should return HTML.
+
+---
+
+6. Marketplace Flow Test
+
+Test complete client journey:
+
+- Browse categories.
+- Browse stores.
+- View products.
+- Search.
+- Filter.
+- Add favorites.
+- Add cart items.
+- Checkout.
+- Create order.
+- View order history.
+
+Verify database changes.
+
+---
+
+7. Merchant Flow Test
+
+Verify:
+
+- Merchant authentication.
+- Store management.
+- Product CRUD.
+- Inventory updates.
+- Order management.
+- Sales statistics.
+
+---
+
+8. Admin Flow Test
+
+Verify:
+
+- Admin authentication.
+- User management.
+- Category management.
+- Analytics access.
+
+---
+
+9. AI SaaS Final Verification
+
+Verify:
+
+Gemini integration:
+
+- API key handling.
+- Provider binding.
+- AI endpoints.
+- Credit deduction.
+- Usage tracking.
+- Request history.
+- Rate limits.
+- Failure handling.
+
+Test:
+
+- Successful AI response.
+- Invalid API key.
+- Provider timeout.
+- Credit limit reached.
+
+---
+
+10. Security Review
+
+Check:
+
+- Mass assignment protection.
+- Input validation.
+- File upload security.
+- Rate limiting.
+- Sensitive information exposure.
+- Production error handling.
+
+---
+
+11. Performance Review
+
+Check:
+
+- N+1 queries.
+- Missing eager loading.
+- Slow database queries.
+- Unnecessary API calls.
+
+Only optimize if there is a real issue.
+
+---
+
+12. Full Automated Testing
+
+Run:
+
+php artisan test
+
+Expected:
+
+- All tests passing.
+- No warnings.
+- No failures.
+
+Report:
+
+- Total tests.
+- Assertions.
+- Duration.
+
+---
+
+13. Final Developer Handover Report
+
+Create:
+
+docs/final-readiness-report.md
+
+Include:
+
+- Backend status.
+- Architecture summary.
+- All completed modules.
+- Test results.
+- Production requirements.
+- Known limitations (if any).
+
+At the end provide:
+
+1. Backend readiness percentage.
+2. Production blockers (if any).
+3. Confirmation:
+"Backend is ready for Flutter integration."
+
+Do not start Flutter work.
+This task is only final backend verification.

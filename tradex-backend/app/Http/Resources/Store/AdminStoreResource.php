@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Resources\Store;
+
+use App\Http\Resources\Product\ProductResource;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+
+/**
+ * Detailed store resource for admin endpoints.
+ * Includes owner (merchant) info and product list.
+ */
+class AdminStoreResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'          => $this->id,
+            'store_name'  => $this->store_name,
+            'description' => $this->description,
+            'logo'        => $this->logo
+                ? Storage::disk('public')->url($this->logo)
+                : null,
+            'status'      => $this->status,
+
+            // Counts (available when loaded with withCount)
+            'products_count' => $this->products_count ?? null,
+            'orders_count'   => $this->orders_count   ?? null,
+
+            // Merchant / owner info
+            'owner' => $this->whenLoaded('owner', fn () => [
+                'id'     => $this->owner->id,
+                'name'   => $this->owner->name,
+                'email'  => $this->owner->email,
+                'phone'  => $this->owner->phone,
+                'role'   => $this->owner->role,
+                'status' => $this->owner->status,
+            ]),
+
+            // Products preview (first 10)
+            'products' => $this->whenLoaded(
+                'products',
+                fn () => ProductResource::collection($this->products),
+            ),
+
+            'created_at' => $this->created_at?->toIso8601String(),
+            'updated_at' => $this->updated_at?->toIso8601String(),
+        ];
+    }
+}

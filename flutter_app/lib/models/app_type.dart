@@ -1,0 +1,4 @@
+enum AppType {
+  client,
+  merchant
+}

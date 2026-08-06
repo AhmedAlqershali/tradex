@@ -1,0 +1,162 @@
+Continue Tradex Backend development from the current completed state.
+
+Important:
+- Do not create any dashboard frontend.
+- Do not use Filament or React/Vue.
+- We are preparing APIs only for future Merchant Dashboard and Admin Dashboard integration.
+- Keep existing Flutter mobile APIs unchanged.
+
+Phase: Dashboard Backend Preparation
+
+Before writing code:
+1. Audit the current backend structure.
+2. Check existing models, services, repositories, routes, and avoid duplicates.
+3. Follow the existing architecture:
+Controller → Service Interface → Service → Repository Interface → Repository → Model → Resource
+
+Implement the following:
+
+## 1. Merchant Dashboard API
+
+Create merchant dashboard endpoints:
+
+GET /api/v1/merchant/dashboard
+
+Return:
+- total products
+- active products
+- out of stock products
+- total orders
+- pending orders
+- completed orders
+- cancelled orders
+- total sales
+- recent orders
+- top selling products
+- low inventory products
+
+
+Create:
+
+GET /api/v1/merchant/analytics
+
+Return:
+- sales overview
+- orders statistics
+- monthly sales data
+- best products
+- store performance
+
+
+## 2. Admin Dashboard API
+
+Create admin dashboard endpoints:
+
+GET /api/v1/admin/dashboard
+
+Return:
+
+System overview:
+- total users
+- total clients
+- total merchants
+- total stores
+- total products
+- total orders
+- total sales
+
+Marketplace statistics:
+- newest users
+- newest stores
+- newest products
+- recent orders
+
+
+Create:
+
+GET /api/v1/admin/analytics
+
+Return:
+- sales statistics
+- order statistics
+- user growth
+- merchant growth
+- product statistics
+
+
+## 3. Admin User Management API
+
+Implement:
+
+GET    /admin/users
+GET    /admin/users/{id}
+PUT    /admin/users/{id}/status
+PUT    /admin/users/{id}/role
+
+
+Features:
+- search users
+- filter by role
+- activate/deactivate users
+
+
+## 4. Admin Store Management API
+
+Implement:
+
+GET    /admin/stores
+GET    /admin/stores/{id}
+PUT    /admin/stores/{id}/status
+
+
+Features:
+- approve store
+- suspend store
+- view merchant information
+- view store products
+
+
+## 5. Inventory Improvements
+
+Add:
+
+- low stock detection
+- inventory statistics
+- stock alerts preparation
+
+
+## 6. Security
+
+Ensure:
+- Merchant can only access his own dashboard data.
+- Admin can access all system statistics.
+- Add policies where required.
+- Add validation using Form Requests.
+- Keep responses using existing ApiResponseTrait/BaseApiController.
+
+
+## 7. Testing
+
+Create feature tests for:
+
+Merchant:
+- dashboard access
+- analytics access
+- ownership protection
+
+Admin:
+- dashboard access
+- user management
+- store management
+
+
+After finishing:
+
+Provide:
+1. Complete list of created files.
+2. Modified files.
+3. New API routes.
+4. Verification report.
+5. Export a ZIP backup of the updated backend project.
+
+Do not start the next phase until this phase is fully completed.

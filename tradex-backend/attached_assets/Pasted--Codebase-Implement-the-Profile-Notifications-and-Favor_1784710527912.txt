@@ -1,0 +1,145 @@
+@Codebase
+
+Implement the Profile, Notifications, and Favorites features for the Tradex Laravel Backend.
+
+Follow the existing project architecture:
+- Controllers
+- Services
+- Repositories
+- Contracts
+- API Resources
+- Form Requests
+
+Do not rewrite existing modules.
+Do not break authentication, products, cart, stores, or orders.
+
+========================
+1. Profile Management
+========================
+
+Create a complete user profile system.
+
+Features:
+
+- Get current user profile
+- Update profile information
+- Change password
+- Upload/update avatar image
+
+Requirements:
+
+Create:
+- ProfileController
+- ProfileService
+- ProfileServiceInterface
+- UpdateProfileRequest
+- ChangePasswordRequest
+- UserResource
+
+Update User model if needed.
+
+Add proper:
+- Validation
+- Error handling
+- Authorization
+- API responses
+
+
+========================
+2. Notifications System
+========================
+
+Create a complete notifications module.
+
+Create:
+
+Database:
+- notifications migration
+
+Models:
+- Notification model
+
+Services:
+- NotificationService
+- NotificationServiceInterface
+
+Controller:
+- NotificationController
+
+Resource:
+- NotificationResource
+
+Features:
+
+- Get user notifications
+- Mark notification as read
+- Mark all notifications as read
+- Delete notification
+
+Prepare it for future use:
+- New order notification
+- Order status update notification
+- Merchant notifications
+
+
+========================
+3. Favorites System
+========================
+
+Create favorites functionality.
+
+Features:
+
+Client can:
+- Add product to favorites
+- Remove product from favorites
+- View favorite products
+
+Create:
+
+- Favorite migration
+- Favorite model
+- Favorite repository
+- Favorite service
+- Favorite controller
+- Favorite resource
+
+Add User and Product relationships.
+
+
+========================
+4. API Routes
+========================
+
+Add protected API routes:
+
+Profile:
+- GET /profile
+- PUT /profile
+- PUT /profile/password
+
+Notifications:
+- GET /notifications
+- PUT /notifications/{id}/read
+- PUT /notifications/read-all
+- DELETE /notifications/{id}
+
+Favorites:
+- GET /favorites
+- POST /favorites/{product}
+- DELETE /favorites/{product}
+
+
+========================
+5. Verification
+========================
+
+After implementation:
+
+- Run migrations.
+- Check for errors.
+- Test API endpoints.
+- Confirm files created/modified.
+- Provide a summary of completed work.
+
+Keep the existing Laravel architecture and coding style.

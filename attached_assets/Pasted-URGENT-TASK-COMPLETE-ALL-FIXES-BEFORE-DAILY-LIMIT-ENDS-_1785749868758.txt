@@ -1,0 +1,173 @@
+URGENT TASK — COMPLETE ALL FIXES BEFORE DAILY LIMIT ENDS
+
+You are a senior Flutter engineer. 
+Your priority is to use the available session time efficiently and FIX ALL EXISTING PROBLEMS in this Tradex Flutter project before the daily usage limit ends.
+
+Do not spend time writing long explanations.
+Do not only analyze.
+Work directly on the code and solve problems.
+
+================================================
+
+PROJECT:
+
+Tradex Flutter Application
+
+Stack:
+- Flutter
+- Dart
+- Arabic RTL
+- Laravel API Backend
+- Sanctum Authentication
+- BLoC architecture
+
+================================================
+
+YOUR WORK RULE:
+
+Follow this cycle continuously:
+
+1. Scan errors
+2. Fix errors
+3. Run analyzer/build
+4. Fix next errors
+5. Repeat until the project works
+
+Do not stop after finding problems.
+
+================================================
+
+PHASE 1 — QUICK FULL AUDIT
+
+Immediately run:
+
+flutter doctor
+flutter pub get
+flutter analyze
+
+Check:
+
+- Dart errors
+- Missing dependencies
+- Broken imports
+- Build errors
+- Android configuration problems
+- Runtime issues
+
+Start fixing immediately.
+
+================================================
+
+PHASE 2 — REMOVE ALL BLOCKING ERRORS
+
+Fix every error preventing the application from running:
+
+- Compilation errors
+- Null safety problems
+- Type errors
+- Missing classes
+- Missing methods
+- Incorrect constructors
+- Broken widgets
+- Navigation crashes
+- State management errors
+- Package conflicts
+
+Priority:
+Make the app compile first.
+
+================================================
+
+PHASE 3 — REPAIR CORE FEATURES
+
+Verify and fix:
+
+Authentication:
+- Login
+- Register
+- Logout
+- User session
+- Token storage
+
+Products:
+- Categories
+- Stores
+- Product list
+- Product details
+
+Shopping:
+- Cart
+- Checkout
+- Orders
+
+Merchant:
+- Products management
+- Orders management
+- Store profile
+
+================================================
+
+PHASE 4 — API CONNECTION FIX
+
+Check:
+
+- API URL
+- Dio client
+- Headers
+- Sanctum token
+- JSON models
+- Repository methods
+
+Fix all:
+- Wrong endpoints
+- Parsing errors
+- Authentication failures
+- API exceptions
+
+================================================
+
+PHASE 5 — FLUTTER QUALITY FIXES
+
+Repair:
+
+- BLoC connections
+- Providers
+- State handling
+- Loading states
+- Error states
+- RTL layout
+- Overflow issues
+- Broken UI screens
+
+================================================
+
+PHASE 6 — BUILD SUCCESS
+
+Before finishing run:
+
+flutter clean
+flutter pub get
+flutter analyze
+flutter build apk --debug
+
+Fix remaining issues.
+
+================================================
+
+IMPORTANT:
+
+- Spend the session fixing code, not explaining.
+- Do not ask unnecessary questions.
+- Do not wait for approval.
+- Do not rewrite working features.
+- Preserve Tradex functionality.
+- Make as many fixes as possible before the daily limit expires.
+
+At the end only provide a short summary:
+
+1. Number of fixed errors
+2. Main files changed
+3. Current build status
+4. Remaining issues (only if impossible to finish)
+
+START NOW.

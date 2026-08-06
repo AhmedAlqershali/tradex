@@ -1,0 +1,159 @@
+import 'package:ai_saas/core/api/api_client.dart';
+import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/shared/orders/order_controller.dart';
+
+// ─── OrderService ─────────────────────────────────────────────────────────────
+//
+// Handles order submission and status management.
+//
+// Endpoints:
+//   POST /orders                        (client — create)
+//   GET  /orders                        (client — own orders)
+//   GET  /orders/:id                    (client — own order detail)
+//   GET  /merchant/orders               (merchant — store's orders)
+//   GET  /merchant/orders/:id           (merchant — order detail)
+//   PUT  /merchant/orders/:id/status    { status }  (merchant only)
+//
+// The backend's order-status enum (pending/confirmed/processing/completed/
+// cancelled) is coarser than the app's 6-value UI vocabulary
+// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
+// cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this
+// boundary so OrderController/OrderBloc/the screens don't need to change.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class OrderService {
+  OrderService._();
+  static final OrderService instance = OrderService._();
+
+  // ── Submit order ──────────────────────────────────────────────────────────────
+  /// POST /orders
+  /// [items] — list of { product_id, product_name, price, quantity }.
+  /// Items are a price snapshot captured at checkout time.
+  /// Returns the server-created [AppOrder] with a server-assigned ref.
+  Future<AppOrder> createOrder({
+    required String customerName,
+    required String customerPhone,
+    required String customerCity,
+    String? notes,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    final response = await ApiClient.instance.post<Map<String, dynamic>>(
+      ApiConstants.orders,
+      data: {
+        'customer_name': customerName,
+        'customer_phone': customerPhone,
+        'customer_city': customerCity,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+        'items': items,
+      },
+    );
+    final raw = response.data!;
+    final orderJson =
+        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+  }
+
+  // ── Fetch orders ──────────────────────────────────────────────────────────────
+  /// GET /orders — all orders belonging to the authenticated client.
+  Future<List<AppOrder>> getClientOrders() async {
+    final response =
+        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.orders);
+    final raw = response.data!;
+    return _extractOrderList(raw);
+  }
+
+  /// GET /merchant/orders — all orders for the authenticated merchant's store.
+  Future<List<AppOrder>> getMerchantOrders() async {
+    final response = await ApiClient.instance
+        .get<Map<String, dynamic>>(ApiConstants.merchantOrders);
+    final raw = response.data!;
+    return _extractOrderList(raw);
+  }
+
+  /// GET /orders/:id or GET /merchant/orders/:id depending on [asMerchant].
+  /// The two roles hit different route namespaces on this backend — there is
+  /// no single generic "order by ref" endpoint usable by both.
+  Future<AppOrder> getOrderByRef(String ref, {bool asMerchant = true}) async {
+    final path = asMerchant
+        ? ApiConstants.merchantOrderById(ref)
+        : ApiConstants.orderByRef(ref);
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(path);
+    final raw = response.data!;
+    final orderJson =
+        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+  }
+
+  // ── Status update (merchant only) ─────────────────────────────────────────────
+  /// PUT /merchant/orders/:ref/status
+  /// [status] is one of the app's UI-vocabulary strings (pending_review,
+  /// merchant_contacted, order_confirmed, preparing, completed, cancelled) —
+  /// translated to the backend's enum before sending.
+  Future<void> patchStatus({
+    required String ref,
+    required String status,
+  }) async {
+    await ApiClient.instance.put<Map<String, dynamic>>(
+      ApiConstants.merchantOrderStatus(ref),
+      data: {'status': _toBackendStatus(status)},
+    );
+  }
+
+  // ── Status vocabulary translation ─────────────────────────────────────────────
+
+  /// App UI status → backend enum. The backend only recognises pending,
+  /// confirmed, processing, completed, cancelled — the two "in-progress
+  /// before confirmation" UI states collapse onto 'confirmed'.
+  static String _toBackendStatus(String appStatus) {
+    switch (appStatus) {
+      case 'merchant_contacted':
+      case 'order_confirmed':
+        return 'confirmed';
+      case 'preparing':
+        return 'processing';
+      case 'completed':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      case 'pending_review':
+      default:
+        return 'pending';
+    }
+  }
+
+  /// Backend enum → app UI status, for order JSON coming back from the
+  /// server (list/detail responses).
+  static String _fromBackendStatus(String backendStatus) {
+    switch (backendStatus) {
+      case 'pending':    return 'pending_review';
+      case 'confirmed':  return 'order_confirmed';
+      case 'processing': return 'preparing';
+      case 'completed':  return 'completed';
+      case 'cancelled':  return 'cancelled';
+      default:           return 'pending_review';
+    }
+  }
+
+  Map<String, dynamic> _normaliseStatus(Map<String, dynamic> orderJson) {
+    final status = orderJson['status'];
+    if (status is String) {
+      return {...orderJson, 'status': _fromBackendStatus(status)};
+    }
+    return orderJson;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+
+  List<AppOrder> _extractOrderList(Map<String, dynamic> raw) {
+    final data = raw['data'] ?? raw;
+    final list = data is Map && data['data'] is List ? data['data'] : data;
+    if (list is List) {
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(_normaliseStatus)
+          .map(AppOrder.fromServerJson)
+          .toList();
+    }
+    return [];
+  }
+}

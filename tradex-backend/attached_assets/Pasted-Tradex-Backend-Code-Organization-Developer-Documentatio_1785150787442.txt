@@ -1,0 +1,244 @@
+Tradex Backend Code Organization & Developer Documentation Phase
+
+Goal:
+Organize and document the Laravel backend so a human developer can understand, maintain, and modify the project easily without AI assistance.
+
+Important:
+Do not change business logic.
+Do not change API behavior.
+Do not remove working features.
+Only improve structure, readability, and documentation.
+
+Tasks:
+
+1. Backend Structure Audit
+
+Review the complete Laravel project and organize:
+
+- Controllers
+- Services
+- Repositories
+- Models
+- Requests
+- Resources
+- Policies
+- Middleware
+- Jobs
+- Events
+- Notifications
+- AI services
+- Configuration files
+
+Ensure every file has a clear responsibility.
+
+If any file contains too much logic:
+- Refactor carefully.
+- Keep the same functionality.
+- Preserve all tests.
+
+---
+
+2. Create Developer Documentation
+
+Create a complete developer guide:
+
+Create:
+
+/docs/backend-guide.md
+
+Include:
+
+- Project overview.
+- Laravel architecture explanation.
+- Folder structure explanation.
+- Request lifecycle explanation.
+- Authentication flow.
+- User roles explanation.
+- Database relationships.
+- API structure.
+- Error handling system.
+- AI architecture explanation.
+- How to add a new feature.
+
+---
+
+3. Explain Every Main Module
+
+Document:
+
+Authentication:
+- Register.
+- Login.
+- Tokens.
+- Permissions.
+
+Marketplace:
+- Categories.
+- Stores.
+- Products.
+- Search.
+- Filters.
+
+Orders:
+- Cart.
+- Checkout.
+- Order lifecycle.
+
+Merchant:
+- Store management.
+- Product management.
+- Sales analytics.
+
+Admin:
+- Management features.
+
+AI SaaS:
+- Gemini provider.
+- AI services.
+- Credits.
+- Usage tracking.
+
+---
+
+4. Add Code Documentation
+
+Add clear comments only where needed.
+
+Document complex logic:
+
+- Order creation flow.
+- Stock updates.
+- AI credit deduction.
+- Permission checks.
+- Important database operations.
+
+Do not add unnecessary comments.
+
+---
+
+5. Improve Naming & Organization
+
+Review:
+
+- Class names.
+- Method names.
+- Variable names.
+- File locations.
+
+Make naming consistent with Laravel standards.
+
+Do not rename public API fields.
+
+---
+
+6. Create Architecture Diagram
+
+Create:
+
+/docs/architecture.md
+
+Explain:
+
+Client App
+    |
+    |
+API Routes
+    |
+Controllers
+    |
+Services
+    |
+Repositories
+    |
+Models
+    |
+Database
+
+
+Also explain AI flow:
+
+Flutter
+ |
+Laravel API
+ |
+AI Service Layer
+ |
+Gemini Provider
+ |
+Google Gemini API
+
+---
+
+7. Create Database Documentation
+
+Create:
+
+/docs/database.md
+
+Include:
+
+- All tables.
+- Purpose of each table.
+- Relationships.
+- Important columns.
+
+---
+
+8. Create API Reference
+
+Create:
+
+/docs/api-reference.md
+
+For every endpoint:
+
+Include:
+- Method.
+- URL.
+- Authentication requirement.
+- Parameters.
+- Response example.
+- Possible errors.
+
+---
+
+9. Create Developer Setup Guide
+
+Create:
+
+/docs/setup.md
+
+Include:
+
+- Requirements.
+- Installation steps.
+- Environment variables.
+- Database setup.
+- Migration commands.
+- Running tests.
+- Running development server.
+
+---
+
+10. Final Verification
+
+After organization:
+
+Run:
+
+- Full test suite.
+- Check routes.
+- Check migrations.
+- Check API responses.
+
+Ensure:
+
+514+ tests passing.
+
+At the end provide:
+
+1. New folder/documentation structure.
+2. Files changed.
+3. Architecture summary.
+4. Instructions for a developer to maintain the backend alone.
+5. Confirm that no functionality was changed.

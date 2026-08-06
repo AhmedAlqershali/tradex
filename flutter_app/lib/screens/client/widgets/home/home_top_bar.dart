@@ -1,0 +1,102 @@
+import 'package:ai_saas/screens/client/cart_screen.dart';
+import 'package:ai_saas/screens/search_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+// ─── HomeTopBar ───────────────────────────────────────────────────────────────
+//
+// Top bar of the shopper home: avatar, notifications, cart, location, menu.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class HomeTopBar extends StatelessWidget {
+  const HomeTopBar({super.key});
+
+  static const Color _primary = Color(0xff4D41DF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22.r,
+            backgroundColor: _primary.withValues(alpha: 0.1),
+            child: Icon(Icons.person_outline_rounded,
+                color: _primary, size: 22.sp),
+          ),
+          SizedBox(width: 10.w),
+          _IconCircleButton(
+            icon: Icons.shopping_cart_outlined,
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const CartScreen())),
+          ),
+          const Spacer(),
+          Flexible(
+            flex: 4,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.location_on_rounded,
+                        color: _primary, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Flexible(
+                      child: Text(
+                        'النصيرات',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.ibmPlexSans(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xff1A1A1A),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'المنطقة الوسطى',
+                  style: GoogleFonts.ibmPlexSans(
+                      fontSize: 10.sp, color: Colors.black38),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const SearchScreen())),
+            icon:
+                Icon(Icons.menu_rounded, size: 26.sp, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconCircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _IconCircleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFEFEFEF)),
+        ),
+        child: Icon(icon, size: 22.sp, color: Colors.black87),
+      ),
+    );
+  }
+}

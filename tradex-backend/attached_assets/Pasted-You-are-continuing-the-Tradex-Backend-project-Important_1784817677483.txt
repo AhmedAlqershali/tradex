@@ -1,0 +1,137 @@
+You are continuing the Tradex Backend project.
+
+Important:
+This is an existing Laravel 12 backend project.
+Do not rebuild from scratch.
+Do not remove existing features.
+Do not modify Flutter client API contracts unless absolutely necessary.
+
+First:
+Perform a complete audit of the current codebase.
+
+Check:
+- Existing migrations
+- Models and relationships
+- Controllers
+- Services
+- Repositories
+- API routes
+- Policies
+- Form Requests
+- Resources
+- Tests
+
+Confirm what is already completed and what is still missing.
+
+Current status:
+The backend already has:
+
+✅ Authentication system
+✅ Client marketplace
+✅ Merchant products management
+✅ Stores management
+✅ Cart and checkout
+✅ Orders system
+✅ Favorites
+✅ Notifications database system
+✅ Subscription plans
+✅ Merchant subscription requests
+✅ Admin subscription management
+✅ User management APIs
+✅ Store management APIs
+✅ Dashboard preparation APIs
+✅ Architecture:
+Controller → Service → Repository → Model → Resource
+
+Tests status:
+159 tests passed successfully with zero regressions.
+
+Now complete the final backend polishing phase only.
+
+Tasks:
+
+1. API Quality Review
+- Review all API endpoints.
+- Ensure consistent response format.
+- Fix missing validation.
+- Improve error handling.
+- Remove duplicated logic.
+
+2. Product Search & Filtering
+Complete product discovery:
+- keyword search
+- category filtering
+- store filtering
+- price range filtering
+- sorting:
+  - newest
+  - price ascending
+  - price descending
+
+Do not break existing product APIs.
+
+3. Order Improvements
+Add:
+- client order cancellation if business rules allow
+- order filtering:
+  - status
+  - date range
+- improve order status validation
+
+
+4. Notification Preparation
+Prepare the backend for push notifications:
+- create device_tokens table/model if missing
+- store user device tokens
+- create notification service structure
+- keep existing database notifications working
+
+Do not integrate Firebase yet.
+
+5. Security Audit
+Review:
+- authentication protection
+- role permissions
+- policies
+- file uploads validation
+- rate limiting
+
+Fix any security issues found.
+
+6. Documentation
+Create/update:
+- API documentation file
+- setup instructions
+- environment requirements
+- database migration instructions
+
+
+7. Testing
+Add missing feature tests for:
+- product search
+- filtering
+- order cancellation
+- notification tokens
+- permissions
+
+Run the full test suite.
+
+Requirements:
+- Follow existing architecture.
+- No dashboard frontend.
+- No Filament changes.
+- No AI integration yet.
+- No payment gateway integration.
+- Keep manual subscription payment flow:
+  QR Bank of Palestine / PayPal wallet / payment proof upload.
+
+At the end:
+Provide:
+1. Complete implementation report.
+2. List of created files.
+3. List of modified files.
+4. API routes added or changed.
+5. Test results.
+6. Export a ZIP backup of the completed backend project.
+
+Do not start dashboard development until this backend final phase is verified.

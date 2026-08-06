@@ -1,0 +1,33 @@
+[nix]
+channel = "stable-25_05"
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "nix-shell -p flutter --run 'flutter pub get && flutter run -d web-server --web-port=5000 --web-hostname=0.0.0.0 --profile'"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80

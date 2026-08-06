@@ -1,0 +1,169 @@
+@Codebase
+
+We are continuing development of the Tradex Laravel Backend only.
+
+Your role is a senior Laravel backend architect.
+
+The Flutter application is already prepared with its screens and user flows. Now we need to prepare the backend professionally for future API integration.
+
+Before making changes:
+1. Analyze the existing Laravel backend completely.
+2. Understand what is already implemented.
+3. Do not rebuild existing features.
+4. Keep the current architecture whenever possible.
+
+Start by preparing the backend foundation.
+
+Tasks:
+
+========================
+1. Backend Architecture Review
+========================
+
+Review:
+- Laravel structure
+- Models
+- Controllers
+- Services
+- Repositories
+- Routes
+- Middleware
+- Policies
+- Database design
+
+Identify:
+- Existing functionality
+- Missing functionality
+- Required improvements
+
+
+========================
+2. Database Preparation
+========================
+
+Review and prepare the database structure for a marketplace application.
+
+Check and improve if needed:
+
+Users:
+- Client
+- Merchant
+
+Stores:
+- Merchant store information
+
+Products:
+- Product details
+- Price
+- Images
+- Category
+- Stock
+
+Categories
+
+Cart:
+- Cart items
+
+Orders:
+- Orders
+- Order items
+- Order status
+
+Favorites
+
+Notifications
+
+
+Ensure:
+- Correct relationships
+- Proper foreign keys
+- Clean migrations
+
+
+========================
+3. Authentication Preparation
+========================
+
+Prepare a professional authentication system for Flutter:
+
+Required:
+- Register
+- Login
+- Logout
+- Current user profile
+- Role management
+
+Roles:
+- Client
+- Merchant
+
+
+========================
+4. API Structure Preparation
+========================
+
+Organize API routes professionally.
+
+Prepare structure for:
+
+Authentication:
+- /auth
+
+Products:
+- /products
+
+Categories:
+- /categories
+
+Stores:
+- /stores
+
+Cart:
+- /cart
+
+Orders:
+- /orders
+
+Favorites:
+- /favorites
+
+Profile:
+- /profile
+
+
+Use:
+- Controllers
+- API Resources
+- Form Requests
+- Proper validation
+- Consistent JSON responses
+
+
+========================
+5. Code Quality
+========================
+
+Improve:
+- Validation
+- Error handling
+- Security
+- Clean code
+- Maintainability
+
+Do not:
+- Delete existing features
+- Change unrelated code
+- Create unnecessary complexity
+
+
+========================
+Final Requirement
+
+After analysis, provide:
+
+1. Current backend status.
+2. What will be modified.
+3. List of files that will be created or changed.
+4. Implementation plan in phases.
+
+Do not start major implementation until the plan is clear.

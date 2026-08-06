@@ -1,0 +1,68 @@
+Continue working on the Tradex Laravel 12 Backend project.
+
+First, inspect the current implementation and verify the existing state. Do not rebuild anything that is already completed.
+
+Current status:
+- Laravel 12 API backend is implemented.
+- PHP 8.4 environment configured.
+- Sanctum authentication implemented.
+- Roles: client, merchant, admin.
+- Controllers, Services, Repositories architecture exists.
+- Database migrations and models are already created.
+- API response standardization exists.
+- Tests are passing.
+
+Your task is the next production-readiness phase:
+
+Phase 1 — Production Audit
+- Run full project inspection.
+- Check routes, controllers, services, repositories, models, migrations.
+- Identify missing production requirements.
+- Verify security configuration.
+- Verify environment configuration for deployment.
+
+Phase 2 — API Completion
+Check and improve:
+- Public store/category/product APIs.
+- Search and filtering capabilities.
+- Pagination consistency.
+- Validation rules.
+- Error handling consistency.
+- Authorization policies.
+- File upload validation.
+- Missing edge cases.
+
+Phase 3 — AI SaaS Preparation
+Review the existing AI services:
+- ProductDescriptionService
+- MarketingContentService
+- CustomerReplyService
+- AiAnalyticsService
+- Gemini provider integration
+
+Improve SaaS readiness:
+- Request history storage.
+- Usage tracking.
+- Token/cost tracking structure.
+- User limits and subscription readiness.
+- Clean provider abstraction.
+
+Phase 4 — Deployment Readiness
+Prepare backend for production hosting:
+- Verify .env.example.
+- Verify APP_ENV and APP_DEBUG settings.
+- Check CORS.
+- Check Sanctum configuration.
+- Check storage linking requirements.
+- Verify migrations run correctly on fresh database.
+- Add missing documentation if needed.
+
+Important:
+- Do not modify working features unnecessarily.
+- Keep the existing architecture:
+Controller → Service → Repository → Model.
+- Maintain API compatibility with the Flutter application.
+- After changes, run tests and provide a detailed report:
+1. What was already completed.
+2. What you changed.
+3. Remaining issues before production deployment.
