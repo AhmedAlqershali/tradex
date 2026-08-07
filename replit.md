@@ -19,7 +19,7 @@ flutter_app/      — Flutter mobile app (BLoC state management)
 
 The `Start application` workflow runs from the root:
 ```bash
-cd tradex-backend && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=5000
+cd tradex-backend && export DB_CONNECTION=sqlite DB_DATABASE=/home/runner/workspace/tradex-backend/database/database.sqlite CACHE_STORE=file SESSION_DRIVER=file MAIL_MAILER=log APP_ENV=local APP_DEBUG=true && php artisan config:clear && php -S 0.0.0.0:5000 -t public public/index.php
 ```
 
 Health check: `GET /api/v1/health`  

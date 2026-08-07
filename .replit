@@ -1,4 +1,4 @@
-modules = ["php-8.2"]
+modules = ["php-8.2", "python-base-3.13"]
 [nix]
 channel = "stable-25_05"
 
@@ -48,13 +48,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd tradex-backend && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=5000"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd tradex-backend && export DB_CONNECTION=sqlite DB_DATABASE=/home/runner/workspace/tradex-backend/database/database.sqlite CACHE_STORE=file SESSION_DRIVER=file MAIL_MAILER=log APP_ENV=local APP_DEBUG=true && php artisan config:clear && php -S 0.0.0.0:5000 -t public public/index.php"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000

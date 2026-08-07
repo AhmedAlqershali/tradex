@@ -25,7 +25,7 @@ class AppConfig {
   // out of the box in this environment without extra build flags.
   static const String baseUrl = String.fromEnvironment(
     'TRADEX_BASE_URL',
-    defaultValue: 'https://ff165008-2154-4c2f-8178-3dc0b1cfc493-00-2n43d3gdvzyud.sisko.replit.dev/api/v1',
+    defaultValue: 'https://bb267d06-4f58-4590-882d-6bea68e8f74a-00-214dt3olbnshh.sisko.replit.dev/api/v1',
   );
 
   // ── Environment helpers ───────────────────────────────────────────────────────

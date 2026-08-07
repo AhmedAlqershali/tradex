@@ -5,3 +5,4 @@
 - [verifyOtp no-op](verifyotp-noop.md) — backend has no OTP verify endpoint; verifyOtp in UserController is a deliberate no-op; token validated at resetPassword call.
 - [Imported app toolchains](imported-app-toolchains.md) — imported Laravel workflows may pin an older PHP module; Flutter native builds can require extra desktop libraries.
 - [Live secret process loading](live-secret-processes.md) — newly added Replit Secrets are injected into new processes, not already-running workflows.
+- [Laravel workflow runtime](laravel-workflow-runtime.md) — imported Laravel apps need explicit SQLite/file runtime exports and public-root serving in the Replit workflow.
