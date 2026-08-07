@@ -110,8 +110,9 @@ class GeminiProviderService implements AiProviderInterface
             // Gemini may return an empty candidates array when content is
             // filtered by safety policies — treat that as a provider failure.
             $text = $body['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $text = is_string($text) ? trim($text) : '';
 
-            if ($text === '' || $text === null) {
+            if ($text === '') {
                 // Check for a prompt-feedback block reason before generic message.
                 $blockReason = $body['promptFeedback']['blockReason'] ?? null;
                 $detail      = $blockReason
@@ -134,7 +135,7 @@ class GeminiProviderService implements AiProviderInterface
             $costUsd = ($promptTokens * 0.000000075) + ($candidateTokens * 0.000000300);
 
             return [
-                'result'      => trim($text),
+                'result'      => $text,
                 'tokens_used' => $tokensUsed,
                 'cost_usd'    => round($costUsd, 8),
             ];

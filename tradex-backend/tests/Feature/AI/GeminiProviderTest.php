@@ -173,6 +173,28 @@ class GeminiProviderTest extends TestCase
         (new GeminiProviderService())->complete('sys', 'user');
     }
 
+    public function test_gemini_provider_throws_on_whitespace_only_response(): void
+    {
+        config(['services.gemini.key' => 'fake-key']);
+
+        Http::fake([
+            '*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [['text' => " \n\t "]],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $this->expectException(AiProviderException::class);
+        $this->expectExceptionMessageMatches('/empty response/i');
+
+        (new GeminiProviderService())->complete('sys', 'user');
+    }
+
     public function test_gemini_provider_throws_on_safety_block(): void
     {
         config(['services.gemini.key' => 'fake-key']);

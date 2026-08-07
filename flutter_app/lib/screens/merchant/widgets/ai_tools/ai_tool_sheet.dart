@@ -1,6 +1,7 @@
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
 import 'package:ai_saas/shared/ai/ai_result_model.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -97,35 +98,51 @@ class _AiToolSheetState extends State<AiToolSheet> {
     final ai = AiController.instance;
     setState(() { _loading = true; _result = null; });
 
-    AiResult result;
-    switch (widget.tool) {
-      case AiToolType.productDescription:
-        result = await ai.generateProductDescription(
-          name: _field1.text.trim(),
-          category: _field2.text.trim(),
-          extra: _field3.text.trim(),
-        );
-        break;
-      case AiToolType.instagramPost:
-        result = await ai.generateInstagramPost(
-          productName: _field1.text.trim(),
-          category: _field2.text.trim(),
-        );
-        break;
-      case AiToolType.hashtags:
-        result = await ai.generateHashtags(
-          topic: _field1.text.trim(),
-          category: _field2.text.trim(),
-        );
-        break;
-      case AiToolType.customerReply:
-        result = await ai.generateCustomerReply(
-          customerMessage: _field1.text.trim(),
-        );
-        break;
-    }
+    try {
+      late final AiResult result;
+      switch (widget.tool) {
+        case AiToolType.productDescription:
+          result = await ai.generateProductDescription(
+            name: _field1.text.trim(),
+            category: _field2.text.trim(),
+            extra: _field3.text.trim(),
+          );
+          break;
+        case AiToolType.instagramPost:
+          result = await ai.generateInstagramPost(
+            productName: _field1.text.trim(),
+            category: _field2.text.trim(),
+          );
+          break;
+        case AiToolType.hashtags:
+          result = await ai.generateHashtags(
+            topic: _field1.text.trim(),
+            category: _field2.text.trim(),
+          );
+          break;
+        case AiToolType.customerReply:
+          result = await ai.generateCustomerReply(
+            customerMessage: _field1.text.trim(),
+          );
+          break;
+      }
 
-    if (mounted) setState(() { _loading = false; _result = result; });
+      if (mounted) setState(() { _result = result; });
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error is ApiException ? error.message : 'حدث خطأ غير متوقع. حاول مجدداً.',
+            textDirection: TextDirection.rtl,
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() { _loading = false; });
+    }
   }
 
   void _copyResult() {

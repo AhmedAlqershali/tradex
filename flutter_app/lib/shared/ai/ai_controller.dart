@@ -170,10 +170,21 @@ class AiController {
         'language': 'Arabic',
       },
     );
-    final raw = response.data!;
+    final raw = response.data;
+    if (raw == null) {
+      throw const UnknownException(
+        'خادم الذكاء الاصطناعي أعاد استجابة غير صالحة. حاول مجدداً.',
+      );
+    }
     final body =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return body['result'] as String? ?? '';
+    final result = body['result'];
+    if (result is! String || result.trim().isEmpty) {
+      throw const UnknownException(
+        'خادم الذكاء الاصطناعي أعاد نتيجة فارغة أو غير صالحة. حاول مجدداً.',
+      );
+    }
+    return result.trim();
   }
 
   // ── Marketing-content parsing ─────────────────────────────────────────────────
