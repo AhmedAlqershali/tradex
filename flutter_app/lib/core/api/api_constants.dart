@@ -99,6 +99,9 @@ class ApiConstants {
   static String adminUserById(String id) => '/admin/users/$id';
   static String adminUserStatus(String id) => '/admin/users/$id/status';
   static String adminUserRole(String id) => '/admin/users/$id/role';
+  static const String adminStores = '/admin/stores';
+  static String adminStoreById(String id) => '/admin/stores/$id';
+  static String adminStoreStatus(String id) => '/admin/stores/$id/status';
 
   // ── Favorites ────────────────────────────────────────────────────────────────
   static const String favorites = '/favorites';

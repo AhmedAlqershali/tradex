@@ -5,6 +5,7 @@ import 'package:ai_saas/screens/merchant/merchant_home.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
+import 'package:ai_saas/screens/admin/admin_merchants_screen.dart';
 import 'package:ai_saas/screens/admin/admin_users_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
@@ -92,6 +93,12 @@ class NavConfig {
             title: 'المستخدمون',
             icon: Icons.people_outline,
             activeIcon: Icons.people,
+          ),
+          const BnItem(
+            widget: AdminMerchantsScreen(),
+            title: 'التجار',
+            icon: Icons.storefront_outlined,
+            activeIcon: Icons.storefront,
           ),
           const BnItem(
             widget: ProfileScreen(),
