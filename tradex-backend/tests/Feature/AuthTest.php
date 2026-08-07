@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -19,6 +21,8 @@ class AuthTest extends TestCase
 
     public function test_client_can_register(): void
     {
+        Notification::fake();
+
         $this->postJson('/api/v1/auth/register/client', [
             'name'                  => 'Test Client',
             'email'                 => 'client@example.com',
@@ -31,10 +35,16 @@ class AuthTest extends TestCase
             ->assertJsonStructure(['data' => ['token', 'user']]);
 
         $this->assertDatabaseHas('users', ['email' => 'client@example.com', 'role' => 'client']);
+        Notification::assertSentTo(
+            User::where('email', 'client@example.com')->first(),
+            VerifyEmail::class
+        );
     }
 
     public function test_merchant_can_register(): void
     {
+        Notification::fake();
+
         $this->postJson('/api/v1/auth/register/merchant', [
             'name'                  => 'Test Merchant',
             'email'                 => 'merchant@example.com',
@@ -48,6 +58,10 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseHas('users', ['email' => 'merchant@example.com', 'role' => 'merchant']);
         $this->assertDatabaseHas('stores', ['store_name' => 'Test Store']);
+        Notification::assertSentTo(
+            User::where('email', 'merchant@example.com')->first(),
+            VerifyEmail::class
+        );
     }
 
     public function test_registration_requires_unique_email(): void

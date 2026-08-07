@@ -38,6 +38,7 @@ class AuthService implements AuthServiceInterface
         $user->save();
 
         $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
+        $user->sendEmailVerificationNotification();
 
         return [
             'user'  => $this->userPayload($user),
@@ -55,7 +56,7 @@ class AuthService implements AuthServiceInterface
      */
     public function registerMerchant(array $data): array
     {
-        return DB::transaction(function () use ($data) {
+        $registration = DB::transaction(function () use ($data) {
             $user = new User();
             $user->fill([
                 'name'     => $data['name'],
@@ -79,11 +80,19 @@ class AuthService implements AuthServiceInterface
             $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
 
             return [
-                'user'  => $this->userPayload($user),
-                'store' => $this->storePayload($store),
+                'user'  => $user,
+                'store' => $store,
                 'token' => $token,
             ];
         });
+
+        $registration['user']->sendEmailVerificationNotification();
+
+        return [
+            'user'  => $this->userPayload($registration['user']),
+            'store' => $this->storePayload($registration['store']),
+            'token' => $registration['token'],
+        ];
     }
 
     // -------------------------------------------------------------------------
