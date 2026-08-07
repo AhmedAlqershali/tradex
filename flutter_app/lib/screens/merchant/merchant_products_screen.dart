@@ -24,7 +24,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProductBloc>().add(const ProductsLoadRequested());
+    context.read<ProductBloc>().add(const MerchantProductsLoadRequested());
   }
 
   @override
@@ -47,9 +47,13 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                 margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               ));
               // Reload products after deletion.
-              context.read<ProductBloc>().add(const ProductsLoadRequested());
+              context.read<ProductBloc>().add(
+                    const MerchantProductsLoadRequested(),
+                  );
             } else if (state is ProductCreated || state is ProductUpdated) {
-              context.read<ProductBloc>().add(const ProductsLoadRequested());
+              context.read<ProductBloc>().add(
+                    const MerchantProductsLoadRequested(),
+                  );
             }
           },
           builder: (context, state) {
@@ -98,8 +102,9 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
 
   Widget _buildList(BuildContext context, List<Product> products) {
     return RefreshIndicator(
-      onRefresh: () async =>
-          context.read<ProductBloc>().add(const ProductsLoadRequested()),
+      onRefresh: () async => context
+          .read<ProductBloc>()
+          .add(const MerchantProductsLoadRequested()),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -267,7 +272,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
           ElevatedButton(
             onPressed: () => context
                 .read<ProductBloc>()
-                .add(const ProductsLoadRequested()),
+                .add(const MerchantProductsLoadRequested()),
             child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
           ),
         ],

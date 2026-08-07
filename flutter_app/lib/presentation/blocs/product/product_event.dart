@@ -24,6 +24,10 @@ class ProductsLoadRequested extends ProductEvent {
   List<Object?> get props => [category, storeId, featured, page];
 }
 
+class MerchantProductsLoadRequested extends ProductEvent {
+  const MerchantProductsLoadRequested();
+}
+
 class ProductByIdRequested extends ProductEvent {
   const ProductByIdRequested(this.id);
 

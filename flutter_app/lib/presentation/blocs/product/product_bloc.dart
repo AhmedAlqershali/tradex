@@ -11,6 +11,7 @@ part 'product_state.dart';
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ProductBloc() : super(const ProductInitial()) {
     on<ProductsLoadRequested>(_onProductsLoadRequested);
+    on<MerchantProductsLoadRequested>(_onMerchantProductsLoadRequested);
     on<ProductByIdRequested>(_onProductByIdRequested);
     on<ProductSearchRequested>(_onProductSearchRequested);
     on<ProductCreateRequested>(_onProductCreateRequested);
@@ -31,6 +32,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         featured: event.featured,
         page: event.page,
       );
+      emit(ProductsLoaded(products));
+    } on ApiException catch (e) {
+      emit(ProductFailure(e.message));
+    }
+  }
+
+  Future<void> _onMerchantProductsLoadRequested(
+    MerchantProductsLoadRequested event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(const ProductLoading());
+    try {
+      final products = await ProductService.instance.getMerchantProducts();
       emit(ProductsLoaded(products));
     } on ApiException catch (e) {
       emit(ProductFailure(e.message));

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 
@@ -59,6 +60,17 @@ class ProductService {
     return _extractProductList(raw);
   }
 
+  /// GET /merchant/products
+  ///
+  /// This is intentionally separate from [getProducts], which reads the
+  /// public catalog. Merchant screens must never use the public endpoint for
+  /// their inventory.
+  Future<List<Product>> getMerchantProducts() async {
+    final response = await ApiClient.instance
+        .get<Map<String, dynamic>>(ApiConstants.merchantProducts);
+    return _extractProductList(response.data!);
+  }
+
   /// GET /products/:id
   Future<Product> getProductById(String id) async {
     final response = await ApiClient.instance
@@ -101,10 +113,13 @@ class ProductService {
     List<String> imagePaths = const [],
   }) async {
     final storeId = UserController.instance.currentUser?.storeId;
+    if (storeId == null || storeId.isEmpty) {
+      throw const ValidationException('لا يوجد متجر مرتبط بهذا الحساب.');
+    }
     final categoryId = await _resolveCategoryId(category);
 
     final formData = FormData.fromMap({
-      if (storeId != null) 'store_id': storeId,
+      'store_id': storeId,
       if (categoryId != null) 'category_id': categoryId,
       'name': name,
       'price': price,

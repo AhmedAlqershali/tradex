@@ -25,7 +25,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
   void initState() {
     super.initState();
     context.read<OrderBloc>().add(const MerchantOrdersLoadRequested());
-    context.read<ProductBloc>().add(const ProductsLoadRequested());
+    context.read<ProductBloc>().add(const MerchantProductsLoadRequested());
     context.read<StoreBloc>().add(const MyStoreLoadRequested());
   }
 
