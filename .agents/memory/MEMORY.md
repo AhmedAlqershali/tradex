@@ -7,3 +7,4 @@
 - [Laravel test database restore](laravel-test-database-restore.md) — focused RefreshDatabase tests can replace the imported runtime SQLite state; restore and recheck seeded rows afterward.
 - [Live secret process loading](live-secret-processes.md) — newly added Replit Secrets are injected into new processes, not already-running workflows.
 - [Laravel workflow runtime](laravel-workflow-runtime.md) — imported Laravel apps need explicit SQLite/file runtime exports and public-root serving in the Replit workflow.
+- [Admin category multipart updates](admin-category-multipart.md) — send Laravel category image updates as POST with `_method=PUT`.

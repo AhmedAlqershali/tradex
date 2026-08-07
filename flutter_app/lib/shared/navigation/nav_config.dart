@@ -7,6 +7,7 @@ import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
 import 'package:ai_saas/screens/admin/admin_merchants_screen.dart';
 import 'package:ai_saas/screens/admin/admin_users_screen.dart';
+import 'package:ai_saas/screens/admin/admin_categories_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
@@ -99,6 +100,12 @@ class NavConfig {
             title: 'التجار',
             icon: Icons.storefront_outlined,
             activeIcon: Icons.storefront,
+          ),
+          const BnItem(
+            widget: AdminCategoriesScreen(),
+            title: 'التصنيفات',
+            icon: Icons.category_outlined,
+            activeIcon: Icons.category,
           ),
           const BnItem(
             widget: ProfileScreen(),
