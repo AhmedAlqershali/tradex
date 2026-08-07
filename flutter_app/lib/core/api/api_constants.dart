@@ -21,22 +21,22 @@ class ApiConstants {
   // ── Timeouts ─────────────────────────────────────────────────────────────────
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
-  static const Duration sendTimeout    = Duration(seconds: 30);
+  static const Duration sendTimeout = Duration(seconds: 30);
 
   // ── Auth ──────────────────────────────────────────────────────────────────────
   // Backend exposes separate client/merchant registration endpoints (merchant
   // registration additionally creates a store atomically) — there is no single
   // unified /auth/register route.
-  static const String registerClient   = '/auth/register/client';
+  static const String registerClient = '/auth/register/client';
   static const String registerMerchant = '/auth/register/merchant';
-  static const String login            = '/auth/login';
-  static const String logout           = '/auth/logout';
+  static const String login = '/auth/login';
+  static const String logout = '/auth/logout';
   // Backend does not implement a refresh-token endpoint — Sanctum issues a
   // single long-lived token per login. Kept unused by ApiClient's 401
   // handler (which already degrades gracefully when no refresh token is
   // stored) rather than pointed at a route that doesn't exist.
-  static const String forgotPassword   = '/auth/password/forgot';
-  static const String resetPassword    = '/auth/password/reset';
+  static const String forgotPassword = '/auth/password/forgot';
+  static const String resetPassword = '/auth/password/reset';
   // Backend verifies email via a signed emailed link (GET
   // /auth/email/verify/{id}/{hash}), not an in-app OTP code. Kept for the
   // resend-verification action only.
@@ -46,25 +46,25 @@ class ApiConstants {
   // Backend route is /profile (all authenticated roles), not /users/me — there
   // is no /users/* route outside the admin namespace. `me` is kept as the
   // constant name for readability at call sites (it means "the current user").
-  static const String me              = '/profile';
-  static const String meAvatar        = '/profile/avatar';
-  static const String mePassword      = '/profile/password';
+  static const String me = '/profile';
+  static const String meAvatar = '/profile/avatar';
+  static const String mePassword = '/profile/password';
 
   // ── Stores ───────────────────────────────────────────────────────────────────
   // Public/client browsing.
-  static const String stores          = '/stores';
-  static String storeById(String id)          => '/stores/$id';
+  static const String stores = '/stores';
+  static String storeById(String id) => '/stores/$id';
   static String storeProducts(String storeId) => '/stores/$storeId/products';
 
   // Merchant-owned store management — backend has no "/stores/me" shortcut;
   // every merchant store route is id-based.
-  static const String myStores        = '/merchant/stores';
-  static String myStoreById(String id)    => '/merchant/stores/$id';
-  static String myStoreLogo(String id)    => '/merchant/stores/$id/logo';
+  static const String myStores = '/merchant/stores';
+  static String myStoreById(String id) => '/merchant/stores/$id';
+  static String myStoreLogo(String id) => '/merchant/stores/$id/logo';
 
   // ── Products ─────────────────────────────────────────────────────────────────
   // Public/client browsing (read-only).
-  static const String products        = '/products';
+  static const String products = '/products';
   // Note: product search is a query parameter on /products (?search=…),
   // not a separate route. Use: ApiConstants.products + queryParameters: {'search': q}
   static String productById(String id) => '/products/$id';
@@ -74,34 +74,38 @@ class ApiConstants {
   static String merchantProductById(String id) => '/merchant/products/$id';
 
   // ── Config (categories) ───────────────────────────────────────────────────────
-  static const String categories      = '/categories';
+  static const String categories = '/categories';
 
   // ── Cart ──────────────────────────────────────────────────────────────────────
-  static const String cart            = '/cart';
-  static const String cartItems       = '/cart/items';
+  static const String cart = '/cart';
+  static const String cartItems = '/cart/items';
   static String cartItem(String itemId) => '/cart/items/$itemId';
 
   // ── Orders ───────────────────────────────────────────────────────────────────
   // Client (own orders only).
-  static const String orders          = '/orders';
-  static String orderByRef(String ref)              => '/orders/$ref';
+  static const String orders = '/orders';
+  static String orderByRef(String ref) => '/orders/$ref';
 
   // Merchant order management — separate namespace; status updates are PUT,
   // not PATCH.
-  static const String merchantOrders  = '/merchant/orders';
-  static String merchantOrderById(String id)        => '/merchant/orders/$id';
-  static String merchantOrderStatus(String id)      => '/merchant/orders/$id/status';
+  static const String merchantOrders = '/merchant/orders';
+  static String merchantOrderById(String id) => '/merchant/orders/$id';
+  static String merchantOrderStatus(String id) => '/merchant/orders/$id/status';
+
+  // ── Admin ────────────────────────────────────────────────────────────────────
+  // System-wide overview for authenticated admin users.
+  static const String adminDashboard = '/admin/dashboard';
 
   // ── Favorites ────────────────────────────────────────────────────────────────
-  static const String favorites       = '/favorites';
-  static String favoriteById(String productId)      => '/favorites/$productId';
+  static const String favorites = '/favorites';
+  static String favoriteById(String productId) => '/favorites/$productId';
 
   // ── AI ────────────────────────────────────────────────────────────────────────
   static const String aiProductDescription = '/ai/product-description';
   // Backend combines caption + hashtags + tagline into one endpoint — there
   // is no separate /ai/marketing-post or /ai/hashtags route.
-  static const String aiMarketingContent   = '/ai/marketing-content';
-  static const String aiCustomerReply      = '/ai/customer-reply';
+  static const String aiMarketingContent = '/ai/marketing-content';
+  static const String aiCustomerReply = '/ai/customer-reply';
   // No /ai/history endpoint exists; usage/limit info is at /ai/usage.
-  static const String aiUsage              = '/ai/usage';
+  static const String aiUsage = '/ai/usage';
 }

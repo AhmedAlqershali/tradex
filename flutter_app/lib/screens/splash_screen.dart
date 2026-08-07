@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
@@ -49,9 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (savedUser != null) {
       // Session exists — restore the correct home screen.
-      final type = savedUser.role == AppType.merchant
-          ? AppType.merchant
-          : AppType.client;
+      final type = savedUser.role;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => BnScreen(type: type)),
@@ -81,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             children: [
               const Spacer(flex: 3),
-
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
@@ -101,9 +97,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ],
                 ),
               ),
-
               SizedBox(height: 24.h),
-
               Directionality(
                 textDirection: TextDirection.rtl,
                 child: Column(
@@ -130,9 +124,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ],
                 ),
               ),
-
               const Spacer(flex: 4),
-
               _buildProgressBar(),
               SizedBox(height: 40.h),
             ],

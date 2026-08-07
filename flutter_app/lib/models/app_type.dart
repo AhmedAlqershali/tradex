@@ -1,4 +1,5 @@
 enum AppType {
   client,
-  merchant
+  merchant,
+  admin,
 }

@@ -1,4 +1,5 @@
 import 'package:ai_saas/screens/auth/register_screen.dart';
+import 'package:ai_saas/screens/auth/login_screen.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -60,7 +61,8 @@ class _UserSelectionState extends State<UserSelection> {
                       // كارت متسوق
                       _buildSelectionCard(
                         title: 'متسوق',
-                        description: 'ابحث عن المنتجات، قارن الأسعار، وتسوق بسهولة ذكية.',
+                        description:
+                            'ابحث عن المنتجات، قارن الأسعار، وتسوق بسهولة ذكية.',
                         imagePath: 'assets/images/client.png',
                         type: AppType.client,
                         isSelected: _selectedType == AppType.client,
@@ -70,7 +72,8 @@ class _UserSelectionState extends State<UserSelection> {
                       // كارت تاجر
                       _buildSelectionCard(
                         title: 'تاجر',
-                        description: 'قم ببيع منتجاتك، تتبع أرباحك، ووسع تجارتك باستخدام الذكاء الاصطناعي.',
+                        description:
+                            'قم ببيع منتجاتك، تتبع أرباحك، ووسع تجارتك باستخدام الذكاء الاصطناعي.',
                         imagePath: 'assets/images/merchant.png',
                         type: AppType.merchant,
                         isSelected: _selectedType == AppType.merchant,
@@ -82,7 +85,8 @@ class _UserSelectionState extends State<UserSelection> {
 
                       // الجزء السفلي: الزر ونصوص الشروط
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 24.w, vertical: 24.h),
                         child: Column(
                           children: [
                             ElevatedButton(
@@ -90,7 +94,8 @@ class _UserSelectionState extends State<UserSelection> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => RegisterScreen(type: _selectedType),
+                                    builder: (context) =>
+                                        RegisterScreen(type: _selectedType),
                                   ),
                                 );
                               },
@@ -118,6 +123,24 @@ class _UserSelectionState extends State<UserSelection> {
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: Colors.grey.shade500,
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+                            TextButton(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const LoginScreen(type: AppType.admin),
+                                ),
+                              ),
+                              child: Text(
+                                'دخول الإدارة',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -206,7 +229,7 @@ class _UserSelectionState extends State<UserSelection> {
                   fit: BoxFit.contain,
                   // التعامل مع حالة عدم وجود الصورة لتجنب كراش التطبيق
                   errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.image_not_supported, color: Colors.grey),
+                      const Icon(Icons.image_not_supported, color: Colors.grey),
                 ),
               ),
             ],

@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<FavoriteBloc>(create: (_) => FavoriteBloc()),
         BlocProvider<CategoryBloc>(create: (_) => CategoryBloc()),
         BlocProvider<MerchantBloc>(create: (_) => MerchantBloc()),
+        BlocProvider<AdminDashboardBloc>(create: (_) => AdminDashboardBloc()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),
@@ -127,8 +128,7 @@ class MyApp extends StatelessWidget {
           if (states.contains(WidgetState.selected)) return AppColors.primary;
           return null;
         }),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {

@@ -9,3 +9,4 @@ export 'store/store_bloc.dart';
 export 'favorite/favorite_bloc.dart';
 export 'category/category_bloc.dart';
 export 'merchant/merchant_bloc.dart';
+export 'admin_dashboard/admin_dashboard_bloc.dart';

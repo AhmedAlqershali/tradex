@@ -4,6 +4,7 @@ import 'package:ai_saas/screens/merchant/ai_marketing_tools_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_home.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
+import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
@@ -13,8 +14,7 @@ import 'package:ai_saas/shared/navigation/nav_item.dart';
 class NavConfig {
   static List<BnItem> getItems(AppType type) {
     switch (type) {
-
-    // 👇 العميل
+      // 👇 العميل
       case AppType.client:
         return [
           BnItem(
@@ -43,7 +43,7 @@ class NavConfig {
           ),
         ];
 
-    // 👇 التاجر
+      // 👇 التاجر
       case AppType.merchant:
         return [
           BnItem(
@@ -69,6 +69,22 @@ class NavConfig {
             title: 'منتجاتي',
             icon: Icons.inventory_2_outlined,
             activeIcon: Icons.inventory_2_rounded,
+          ),
+          const BnItem(
+            widget: ProfileScreen(),
+            title: 'حسابي',
+            icon: Icons.person_outline,
+            activeIcon: Icons.person,
+          ),
+        ];
+
+      case AppType.admin:
+        return [
+          const BnItem(
+            widget: AdminDashboardScreen(),
+            title: 'نظرة عامة',
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard_rounded,
           ),
           const BnItem(
             widget: ProfileScreen(),

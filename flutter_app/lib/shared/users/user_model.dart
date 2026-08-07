@@ -21,7 +21,8 @@ class AppUser {
   final String email;
   final String phone;
 
-  /// User role — client or merchant. Drives UI branching throughout the app.
+  /// User role — client, merchant, or admin. Drives UI branching throughout
+  /// the app.
   final AppType role;
 
   /// Merchant-only: the store this user owns.
@@ -61,6 +62,7 @@ class AppUser {
 
   bool get isMerchant => role == AppType.merchant;
   bool get isClient => role == AppType.client;
+  bool get isAdmin => role == AppType.admin;
 
   /// Display-safe name — falls back to a generic label when name is blank.
   String get displayName => name.isNotEmpty ? name : 'مستخدم Tradex';
@@ -130,18 +132,18 @@ class AppUser {
         orElse: () => AppType.client,
       ),
       storeId: json['store_id'] as String? ??
-               json['storeId'] as String? ??
-               firstStore?['id']?.toString(),
+          json['storeId'] as String? ??
+          firstStore?['id']?.toString(),
       storeName: json['store_name'] as String? ??
-                 json['storeName'] as String? ??
-                 firstStore?['store_name'] as String?,
-      storeCategory: json['store_category'] as String? ??
-                     json['storeCategory'] as String?,
+          json['storeName'] as String? ??
+          firstStore?['store_name'] as String?,
+      storeCategory:
+          json['store_category'] as String? ?? json['storeCategory'] as String?,
       region: json['region'] as String?,
       photoPath: json['avatar'] as String? ??
-                 json['photo_url'] as String? ??
-                 json['avatar_url'] as String? ??
-                 json['photoPath'] as String?,
+          json['photo_url'] as String? ??
+          json['avatar_url'] as String? ??
+          json['photoPath'] as String?,
       createdAt: _parseDate(
         json['created_at'] as String? ?? json['createdAt'] as String?,
       ),
@@ -179,7 +181,9 @@ class AppUser {
       role: role ?? this.role,
       storeId: storeId == _absent ? this.storeId : storeId as String?,
       storeName: storeName == _absent ? this.storeName : storeName as String?,
-      storeCategory: storeCategory == _absent ? this.storeCategory : storeCategory as String?,
+      storeCategory: storeCategory == _absent
+          ? this.storeCategory
+          : storeCategory as String?,
       region: region == _absent ? this.region : region as String?,
       photoPath: photoPath == _absent ? this.photoPath : photoPath as String?,
       createdAt: createdAt ?? this.createdAt,

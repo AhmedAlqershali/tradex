@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
   bool _rememberMe = false;
 
-  final _emailCtrl    = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
   @override
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin(BuildContext context) {
-    final email    = _emailCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
 
     if (email.isEmpty || password.isEmpty) {
@@ -63,9 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Load cart and favorites for the new session.
           context.read<CartBloc>().add(const CartLoadRequested());
           context.read<FavoriteBloc>().add(const FavoritesLoadRequested());
-          final type = state.user.role == AppType.merchant
-              ? AppType.merchant
-              : AppType.client;
+          final type = state.user.role;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => BnScreen(type: type)),
@@ -255,10 +253,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 24.h),
 
                       SizeButton(
-                        title: isLoading ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول',
-                        onTap: isLoading
-                            ? null
-                            : () => _handleLogin(context),
+                        title:
+                            isLoading ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول',
+                        onTap: isLoading ? null : () => _handleLogin(context),
                       ),
 
                       SizedBox(height: 20.h),
@@ -300,16 +297,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildDivider() {
     return Row(
       children: [
-        const Expanded(
-            child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
+        const Expanded(child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Text('أو المتابعة عبر',
               style: GoogleFonts.ibmPlexSans(
                   color: Colors.black38, fontSize: 12.sp)),
         ),
-        const Expanded(
-            child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
+        const Expanded(child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
       ],
     );
   }
