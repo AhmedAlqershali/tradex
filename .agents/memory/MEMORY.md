@@ -4,5 +4,6 @@
 - [Flutter base URL mechanism](flutter-base-url.md) — dart-define was commented out in app_config.dart; always use String.fromEnvironment with Replit domain as default.
 - [verifyOtp no-op](verifyotp-noop.md) — backend has no OTP verify endpoint; verifyOtp in UserController is a deliberate no-op; token validated at resetPassword call.
 - [Imported app toolchains](imported-app-toolchains.md) — imported Laravel workflows may pin an older PHP module; Flutter native builds can require extra desktop libraries.
+- [Laravel test database restore](laravel-test-database-restore.md) — focused RefreshDatabase tests can replace the imported runtime SQLite state; restore and recheck seeded rows afterward.
 - [Live secret process loading](live-secret-processes.md) — newly added Replit Secrets are injected into new processes, not already-running workflows.
 - [Laravel workflow runtime](laravel-workflow-runtime.md) — imported Laravel apps need explicit SQLite/file runtime exports and public-root serving in the Replit workflow.
