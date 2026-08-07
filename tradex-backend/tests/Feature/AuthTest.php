@@ -35,10 +35,15 @@ class AuthTest extends TestCase
             ->assertJsonStructure(['data' => ['token', 'user']]);
 
         $this->assertDatabaseHas('users', ['email' => 'client@example.com', 'role' => 'client']);
-        Notification::assertSentTo(
+        Notification::assertNotSentTo(
             User::where('email', 'client@example.com')->first(),
             VerifyEmail::class
         );
+
+        $this->postJson('/api/v1/auth/login', [
+            'email'    => 'client@example.com',
+            'password' => 'Password123!',
+        ])->assertOk();
     }
 
     public function test_merchant_can_register(): void
@@ -58,7 +63,7 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseHas('users', ['email' => 'merchant@example.com', 'role' => 'merchant']);
         $this->assertDatabaseHas('stores', ['store_name' => 'Test Store']);
-        Notification::assertSentTo(
+        Notification::assertNotSentTo(
             User::where('email', 'merchant@example.com')->first(),
             VerifyEmail::class
         );

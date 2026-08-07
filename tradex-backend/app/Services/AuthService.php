@@ -38,7 +38,6 @@ class AuthService implements AuthServiceInterface
         $user->save();
 
         $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
-        $user->sendEmailVerificationNotification();
 
         return [
             'user'  => $this->userPayload($user),
@@ -85,8 +84,6 @@ class AuthService implements AuthServiceInterface
                 'token' => $token,
             ];
         });
-
-        $registration['user']->sendEmailVerificationNotification();
 
         return [
             'user'  => $this->userPayload($registration['user']),
