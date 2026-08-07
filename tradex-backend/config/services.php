@@ -44,6 +44,17 @@ return [
         'base_url' => env('OPENAI_BASE_URL',  'https://api.openai.com/v1'),
     ],
 
+    // ── OpenRouter (OpenAI-compatible, live verification only) ─────────────────
+    'openrouter' => [
+        'key'      => env('OPENROUTER_API_KEY', ''),
+        'model'    => env('OPENROUTER_MODEL', 'openrouter/free'),
+        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+    ],
+
+    // Gemini remains the default provider. Set AI_PROVIDER=openrouter only for
+    // a temporary OpenRouter verification process.
+    'ai_provider' => env('AI_PROVIDER', 'gemini'),
+
     // ── Google Gemini ─────────────────────────────────────────────────────────
     // Active AI provider. GeminiProviderService is bound to AiProviderInterface
     // in RepositoryServiceProvider.

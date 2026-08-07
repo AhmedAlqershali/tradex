@@ -9,6 +9,7 @@ use App\Services\ReviewService;
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Contracts\Services\AI\AiUsageServiceInterface;
 use App\Services\AI\GeminiProviderService;
+use App\Services\AI\OpenRouterProviderService;
 use App\Services\AI\AiUsageService;
 use App\Contracts\Repositories\CartRepositoryInterface;
 use App\Contracts\Repositories\CategoryRepositoryInterface;
@@ -103,9 +104,14 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ReviewRepositoryInterface::class,               ReviewRepository::class);
 
         // ── AI SaaS ───────────────────────────────────────────────────────────
-        // Active provider: GeminiProviderService (Google Gemini).
-        // To swap back to OpenAI: change GeminiProviderService → AiProviderService.
-        $this->app->bind(AiProviderInterface::class,    GeminiProviderService::class);
+        $this->app->bind(AiProviderInterface::class, function ($app) {
+            $provider = match (config('services.ai_provider', 'gemini')) {
+                'openrouter' => OpenRouterProviderService::class,
+                default      => GeminiProviderService::class,
+            };
+
+            return $app->make($provider);
+        });
         $this->app->bind(AiUsageServiceInterface::class, AiUsageService::class);
     }
 
