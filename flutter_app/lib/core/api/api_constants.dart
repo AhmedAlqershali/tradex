@@ -95,6 +95,10 @@ class ApiConstants {
   // ── Admin ────────────────────────────────────────────────────────────────────
   // System-wide overview for authenticated admin users.
   static const String adminDashboard = '/admin/dashboard';
+  static const String adminUsers = '/admin/users';
+  static String adminUserById(String id) => '/admin/users/$id';
+  static String adminUserStatus(String id) => '/admin/users/$id/status';
+  static String adminUserRole(String id) => '/admin/users/$id/role';
 
   // ── Favorites ────────────────────────────────────────────────────────────────
   static const String favorites = '/favorites';

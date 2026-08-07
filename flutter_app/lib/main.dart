@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<CategoryBloc>(create: (_) => CategoryBloc()),
         BlocProvider<MerchantBloc>(create: (_) => MerchantBloc()),
         BlocProvider<AdminDashboardBloc>(create: (_) => AdminDashboardBloc()),
+        BlocProvider<AdminUsersBloc>(create: (_) => AdminUsersBloc()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),
