@@ -497,10 +497,19 @@ class _AdminUserDetailsScreenState extends State<AdminUserDetailsScreen> {
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('تغيير الدور'),
-        children: const [
-          SimpleDialogOption(value: 'client', child: Text('عميل')),
-          SimpleDialogOption(value: 'merchant', child: Text('تاجر')),
-          SimpleDialogOption(value: 'admin', child: Text('مدير')),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'client'),
+            child: const Text('عميل'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'merchant'),
+            child: const Text('تاجر'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'admin'),
+            child: const Text('مدير'),
+          ),
         ],
       ),
     );
@@ -516,10 +525,19 @@ class _AdminUserDetailsScreenState extends State<AdminUserDetailsScreen> {
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('تغيير الحالة'),
-        children: const [
-          SimpleDialogOption(value: 'active', child: Text('نشط')),
-          SimpleDialogOption(value: 'inactive', child: Text('غير نشط')),
-          SimpleDialogOption(value: 'banned', child: Text('محظور')),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'active'),
+            child: const Text('نشط'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'inactive'),
+            child: const Text('غير نشط'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'banned'),
+            child: const Text('محظور'),
+          ),
         ],
       ),
     );
