@@ -1,4 +1,4 @@
-modules = ["php-8.2"]
+modules = ["php-8.2", "nodejs-24"]
 [nix]
 channel = "stable-25_05"
 
@@ -27,7 +27,7 @@ LOG_LEVEL = "debug"
 LOG_STACK = "single"
 QUEUE_CONNECTION = "database"
 SANCTUM_EXPIRATION_MINUTES = "129600"
-SESSION_DRIVER = "database"
+SESSION_DRIVER = "file"
 SESSION_ENCRYPT = "false"
 SESSION_LIFETIME = "120"
 SESSION_PATH = "/"
