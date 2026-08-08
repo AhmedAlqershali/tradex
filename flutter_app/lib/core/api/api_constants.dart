@@ -109,6 +109,16 @@ class ApiConstants {
   static String adminProductReviews(String productId) =>
       '/admin/products/$productId/reviews';
   static String adminReviewById(String id) => '/admin/reviews/$id';
+  static const String adminSubscriptionRequests =
+      '/admin/subscription-requests';
+  static String adminSubscriptionRequestById(String id) =>
+      '/admin/subscription-requests/$id';
+  static String adminSubscriptionRequestApprove(String id) =>
+      '/admin/subscription-requests/$id/approve';
+  static String adminSubscriptionRequestReject(String id) =>
+      '/admin/subscription-requests/$id/reject';
+  static String adminSubscriptionRequestProof(String id) =>
+      '/admin/subscription-requests/$id/proof';
 
   // ── Favorites ────────────────────────────────────────────────────────────────
   static const String favorites = '/favorites';

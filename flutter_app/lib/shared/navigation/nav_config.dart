@@ -10,6 +10,7 @@ import 'package:ai_saas/screens/admin/admin_users_screen.dart';
 import 'package:ai_saas/screens/admin/admin_categories_screen.dart';
 import 'package:ai_saas/screens/admin/admin_plans_screen.dart';
 import 'package:ai_saas/screens/admin/admin_reviews_screen.dart';
+import 'package:ai_saas/screens/admin/admin_subscription_requests_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
@@ -120,6 +121,12 @@ class NavConfig {
             title: 'المراجعات',
             icon: Icons.rate_review_outlined,
             activeIcon: Icons.rate_review,
+          ),
+          const BnItem(
+            widget: AdminSubscriptionRequestsScreen(),
+            title: 'طلبات الاشتراك',
+            icon: Icons.receipt_long_outlined,
+            activeIcon: Icons.receipt_long,
           ),
           const BnItem(
             widget: ProfileScreen(),
