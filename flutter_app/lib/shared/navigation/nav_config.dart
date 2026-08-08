@@ -8,6 +8,7 @@ import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
 import 'package:ai_saas/screens/admin/admin_merchants_screen.dart';
 import 'package:ai_saas/screens/admin/admin_users_screen.dart';
 import 'package:ai_saas/screens/admin/admin_categories_screen.dart';
+import 'package:ai_saas/screens/admin/admin_plans_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
@@ -106,6 +107,12 @@ class NavConfig {
             title: 'التصنيفات',
             icon: Icons.category_outlined,
             activeIcon: Icons.category,
+          ),
+          const BnItem(
+            widget: AdminPlansScreen(),
+            title: 'الخطط',
+            icon: Icons.card_membership_outlined,
+            activeIcon: Icons.card_membership,
           ),
           const BnItem(
             widget: ProfileScreen(),
