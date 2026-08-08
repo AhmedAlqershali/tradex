@@ -2,6 +2,9 @@
 
 namespace Tests;
 
+use App\Models\Subscription;
+use App\Models\Plan;
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Http;
 
@@ -26,5 +29,21 @@ abstract class TestCase extends BaseTestCase
         Http::fake([
             'https://api.pwnedpasswords.com/*' => Http::response('', 200),
         ]);
+    }
+
+    /**
+     * Give a merchant the entitlement required by merchant business routes.
+     */
+    protected function entitleMerchant(User $merchant): Subscription
+    {
+        $plan = Plan::factory()->active()->create([
+            'ai_usage_limit' => null,
+        ]);
+
+        return Subscription::factory()
+            ->forUser($merchant)
+            ->active()
+            ->forPlan($plan)
+            ->create();
     }
 }

@@ -169,6 +169,7 @@ class MassAssignmentTest extends TestCase
     public function test_merchant_cannot_self_activate_suspended_store(): void
     {
         $merchant = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->create([
             'user_id' => $merchant->id,
             'status'  => 'suspended',
@@ -193,6 +194,7 @@ class MassAssignmentTest extends TestCase
     {
         $client   = User::factory()->create(['role' => 'client', 'status' => 'active']);
         $merchant = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->create(['user_id' => $merchant->id, 'status' => 'active']);
         $product  = Product::factory()->create([
             'store_id' => $store->id,
@@ -227,6 +229,7 @@ class MassAssignmentTest extends TestCase
     {
         $client   = User::factory()->create(['role' => 'client', 'status' => 'active']);
         $merchant = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->create(['user_id' => $merchant->id, 'status' => 'active']);
         $product  = Product::factory()->create([
             'store_id' => $store->id,
@@ -261,6 +264,7 @@ class MassAssignmentTest extends TestCase
         $attacker = User::factory()->create(['role' => 'client', 'status' => 'active']);
         $victim   = User::factory()->create(['role' => 'client', 'status' => 'active']);
         $merchant = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->create(['user_id' => $merchant->id, 'status' => 'active']);
         $product  = Product::factory()->create([
             'store_id' => $store->id,

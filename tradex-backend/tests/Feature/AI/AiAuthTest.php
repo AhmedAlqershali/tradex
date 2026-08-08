@@ -28,8 +28,10 @@ class AiAuthTest extends TestCase
 
     private function merchantToken(): string
     {
-        return User::factory()->merchant()->create()
-            ->createToken('test')->plainTextToken;
+        $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
+
+        return $merchant->createToken('test')->plainTextToken;
     }
 
     private function clientToken(): string

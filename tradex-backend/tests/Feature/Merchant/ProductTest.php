@@ -22,6 +22,7 @@ class ProductTest extends TestCase
     private function actingAsMerchant(): array
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->forUser($merchant)->active()->create();
         $token    = $merchant->createToken('test')->plainTextToken;
 

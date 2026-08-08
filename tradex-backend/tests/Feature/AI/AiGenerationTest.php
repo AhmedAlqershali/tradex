@@ -29,8 +29,10 @@ class AiGenerationTest extends TestCase
 
     private function merchantToken(): string
     {
-        return User::factory()->merchant()->create()
-            ->createToken('test')->plainTextToken;
+        $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
+
+        return $merchant->createToken('test')->plainTextToken;
     }
 
     private function adminToken(): string
@@ -72,6 +74,7 @@ class AiGenerationTest extends TestCase
     public function test_product_description_records_usage(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         $this->mock(AiProviderInterface::class)
@@ -240,6 +243,7 @@ class AiGenerationTest extends TestCase
     public function test_merchant_can_view_ai_usage(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         AiUsage::factory()->create([

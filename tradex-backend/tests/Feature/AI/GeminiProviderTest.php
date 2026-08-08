@@ -34,7 +34,9 @@ class GeminiProviderTest extends TestCase
 
     private function merchantHeaders(): array
     {
-        $token = User::factory()->merchant()->create()->createToken('test')->plainTextToken;
+        $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
+        $token = $merchant->createToken('test')->plainTextToken;
         return ['Authorization' => "Bearer {$token}", 'Accept' => 'application/json'];
     }
 
@@ -299,6 +301,7 @@ class GeminiProviderTest extends TestCase
     public function test_credits_are_recorded_after_gemini_generation(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         $this->mock(AiProviderInterface::class)
@@ -328,6 +331,7 @@ class GeminiProviderTest extends TestCase
     public function test_gemini_provider_failure_returns_503_and_does_not_record_usage(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         $this->mock(AiProviderInterface::class)
@@ -387,6 +391,7 @@ class GeminiProviderTest extends TestCase
     public function test_rate_limit_still_returns_429_with_gemini_provider(): void
     {
         $merchant  = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token     = $merchant->createToken('test')->plainTextToken;
         $headers   = ['Authorization' => "Bearer {$token}", 'Accept' => 'application/json'];
 

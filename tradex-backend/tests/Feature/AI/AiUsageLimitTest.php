@@ -33,6 +33,7 @@ class AiUsageLimitTest extends TestCase
     public function test_merchant_blocked_when_daily_limit_reached(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         // Set a daily limit of 2
@@ -64,6 +65,7 @@ class AiUsageLimitTest extends TestCase
     public function test_merchant_blocked_when_monthly_limit_reached(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         AiSetting::create([
@@ -92,6 +94,7 @@ class AiUsageLimitTest extends TestCase
     public function test_merchant_blocked_when_ai_disabled(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         AiSetting::create([
@@ -113,6 +116,7 @@ class AiUsageLimitTest extends TestCase
     public function test_merchant_without_settings_has_no_limit(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         // No AiSetting record = unlimited
@@ -136,6 +140,7 @@ class AiUsageLimitTest extends TestCase
     public function test_merchant_within_daily_limit_can_generate(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         AiSetting::create([
@@ -169,6 +174,7 @@ class AiUsageLimitTest extends TestCase
     public function test_usage_count_increments_after_generation(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $token    = $merchant->createToken('test')->plainTextToken;
 
         $this->mock(AiProviderInterface::class)

@@ -34,6 +34,7 @@ class OrderTest extends TestCase
     private function seedCheckoutFixture(): array
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->forUser($merchant)->active()->create();
         $product  = Product::factory()->active()->create([
             'store_id' => $store->id,
@@ -152,6 +153,7 @@ class OrderTest extends TestCase
     public function test_merchant_can_view_incoming_orders(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->forUser($merchant)->active()->create();
         $token    = $merchant->createToken('test')->plainTextToken;
 
@@ -166,6 +168,7 @@ class OrderTest extends TestCase
     public function test_merchant_can_update_order_status(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->forUser($merchant)->active()->create();
         $token    = $merchant->createToken('test')->plainTextToken;
         $order    = Order::factory()->forStore($store)->pending()->create();
@@ -180,6 +183,7 @@ class OrderTest extends TestCase
     public function test_merchant_cannot_set_invalid_order_status(): void
     {
         $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->forUser($merchant)->active()->create();
         $token    = $merchant->createToken('test')->plainTextToken;
         $order    = Order::factory()->forStore($store)->pending()->create();

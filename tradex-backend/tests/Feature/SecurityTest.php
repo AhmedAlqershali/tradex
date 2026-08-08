@@ -181,6 +181,7 @@ class SecurityTest extends TestCase
     {
         $merchant1  = User::factory()->merchant()->create();
         $merchant2  = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant1);
         $store2     = Store::factory()->forUser($merchant2)->active()->create();
         $product    = Product::factory()->forStore($store2)->create();
 

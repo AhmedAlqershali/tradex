@@ -144,6 +144,7 @@ class BannedUserTest extends TestCase
             'role'   => 'merchant',
             'status' => 'active',
         ]);
+        $this->entitleMerchant($merchant);
         $store = \App\Models\Store::factory()->create([
             'user_id' => $merchant->id,
             'status'  => 'active',

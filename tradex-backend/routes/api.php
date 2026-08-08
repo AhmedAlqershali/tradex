@@ -154,7 +154,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('usage', [AiController::class, 'usage'])->name('usage');
 
                 // Merchant tools
-                Route::middleware('role:merchant')->group(function () {
+                Route::middleware(['role:merchant', 'merchant.subscription'])->group(function () {
                     Route::post('product-description', [AiController::class, 'productDescription'])->name('product-description');
                     Route::post('marketing-content',   [AiController::class, 'marketingContent'])->name('marketing-content');
                     Route::post('customer-reply',      [AiController::class, 'customerReply'])->name('customer-reply');
@@ -167,27 +167,29 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             });
 
         // ── Merchant ─────────────────────────────────────────────────────────
-        Route::middleware('role:merchant')
+        Route::middleware(['role:merchant'])
             ->prefix('merchant')
             ->name('merchant.')
             ->group(function () {
-                // Product management
-                Route::apiResource('products', Merchant\ProductController::class);
+                Route::middleware('merchant.subscription')->group(function () {
+                    // Product management
+                    Route::apiResource('products', Merchant\ProductController::class);
 
-                // Order management
-                Route::get('orders',                    [MerchantOrderController::class, 'index'])->name('orders.index');
-                Route::get('orders/{id}',               [MerchantOrderController::class, 'show'])->name('orders.show');
-                Route::put('orders/{id}/status',        [MerchantOrderController::class, 'updateStatus'])->name('orders.status');
+                    // Order management
+                    Route::get('orders',                    [MerchantOrderController::class, 'index'])->name('orders.index');
+                    Route::get('orders/{id}',               [MerchantOrderController::class, 'show'])->name('orders.show');
+                    Route::put('orders/{id}/status',        [MerchantOrderController::class, 'updateStatus'])->name('orders.status');
 
-                // ── Store management ──────────────────────────────────────────
-                Route::get('stores',                    [MerchantStoreController::class, 'index'])->name('stores.index');
-                Route::get('stores/{id}',               [MerchantStoreController::class, 'show'])->name('stores.show');
-                Route::put('stores/{id}',               [MerchantStoreController::class, 'update'])->name('stores.update');
-                Route::post('stores/{id}/logo',         [MerchantStoreController::class, 'updateLogo'])->name('stores.logo');
+                    // ── Store management ──────────────────────────────────────
+                    Route::get('stores',                    [MerchantStoreController::class, 'index'])->name('stores.index');
+                    Route::get('stores/{id}',               [MerchantStoreController::class, 'show'])->name('stores.show');
+                    Route::put('stores/{id}',               [MerchantStoreController::class, 'update'])->name('stores.update');
+                    Route::post('stores/{id}/logo',         [MerchantStoreController::class, 'updateLogo'])->name('stores.logo');
 
-                // ── Dashboard & Analytics ─────────────────────────────────────
-                Route::get('dashboard', [MerchantDashboardController::class, 'dashboard'])->name('dashboard');
-                Route::get('analytics', [MerchantDashboardController::class, 'analytics'])->name('analytics');
+                    // ── Dashboard & Analytics ─────────────────────────────────
+                    Route::get('dashboard', [MerchantDashboardController::class, 'dashboard'])->name('dashboard');
+                    Route::get('analytics', [MerchantDashboardController::class, 'analytics'])->name('analytics');
+                });
 
                 // ── Subscription ──────────────────────────────────────────────
                 // GET  /merchant/subscription                    — current active subscription

@@ -79,6 +79,7 @@ class PrivilegeEscalationTest extends TestCase
         $store = Store::factory()->create(['user_id' => $owner->id, 'status' => 'active']);
 
         $attacker = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($attacker);
         $token    = $attacker->createToken('test')->plainTextToken;
 
         $this->putJson("/api/v1/merchant/stores/{$store->id}", [
@@ -93,6 +94,7 @@ class PrivilegeEscalationTest extends TestCase
         $product = Product::factory()->create(['store_id' => $store->id, 'status' => 'active', 'quantity' => 5]);
 
         $attacker = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($attacker);
         $token    = $attacker->createToken('test')->plainTextToken;
 
         $this->deleteJson("/api/v1/merchant/products/{$product->id}", [], $this->headers($token))
@@ -111,6 +113,7 @@ class PrivilegeEscalationTest extends TestCase
         ]);
 
         $attacker = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($attacker);
         $token    = $attacker->createToken('test')->plainTextToken;
 
         $this->getJson("/api/v1/merchant/orders/{$order->id}", $this->headers($token))
