@@ -6,6 +6,7 @@ use App\Models\Subscription;
 use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 abstract class TestCase extends BaseTestCase
@@ -25,6 +26,12 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Keep throttle counters isolated between PHPUnit tests. The testing
+        // environment uses Laravel's in-memory cache, which otherwise survives
+        // across requests and can leak auth/api/AI rate-limit state into the
+        // next test in the same process.
+        Cache::flush();
 
         Http::fake([
             'https://api.pwnedpasswords.com/*' => Http::response('', 200),

@@ -10,3 +10,4 @@
 - [Admin category multipart updates](admin-category-multipart.md) — send Laravel category image updates as POST with `_method=PUT`.
 - [Laravel JSON negotiation](laravel-json-negotiation.md) — API auth/error probes need an Accept: application/json header for JSON responses.
 - [Sanctum guard switching in tests](sanctum-guard-switching.md) — flush cached auth guards when one feature test switches bearer identities between simulated requests.
+- [PHPUnit throttle isolation](phpunit-throttle-isolation.md) — flush the in-memory test cache between feature tests so auth, API, and AI throttle counters cannot leak across cases.
