@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -79,6 +80,10 @@ class SubscriptionLifecycleTest extends TestCase
                 'status' => 'pending',
             ]);
 
+            // Sanctum's request guard is cached by the in-process test
+            // application. Flush it before switching from the merchant token
+            // to the admin token so the next request resolves the new user.
+            Auth::forgetGuards();
             $admin = User::factory()->admin()->create(['status' => 'active']);
             $adminToken = $admin->createToken('test')->plainTextToken;
 
@@ -88,8 +93,7 @@ class SubscriptionLifecycleTest extends TestCase
                 $this->headers($adminToken),
             );
 
-            $approval->dump()->assertOk()
-                ->assertOk()
+            $approval->assertOk()
                 ->assertJsonPath('data.status', 'approved');
 
             $paid = Subscription::where('user_id', $merchant->id)
@@ -106,6 +110,7 @@ class SubscriptionLifecycleTest extends TestCase
                 'status' => 'expired',
             ]);
 
+            Auth::forgetGuards();
             $this->getJson('/api/v1/merchant/subscription', $merchantHeaders)
                 ->assertOk()
                 ->assertJsonPath('data.type', 'paid')

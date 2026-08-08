@@ -9,3 +9,4 @@
 - [Laravel workflow runtime](laravel-workflow-runtime.md) — imported Laravel apps need explicit SQLite/file runtime exports and public-root serving in the Replit workflow.
 - [Admin category multipart updates](admin-category-multipart.md) — send Laravel category image updates as POST with `_method=PUT`.
 - [Laravel JSON negotiation](laravel-json-negotiation.md) — API auth/error probes need an Accept: application/json header for JSON responses.
+- [Sanctum guard switching in tests](sanctum-guard-switching.md) — flush cached auth guards when one feature test switches bearer identities between simulated requests.
