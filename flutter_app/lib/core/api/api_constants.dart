@@ -103,6 +103,8 @@ class ApiConstants {
   static const String adminStores = '/admin/stores';
   static String adminStoreById(String id) => '/admin/stores/$id';
   static String adminStoreStatus(String id) => '/admin/stores/$id/status';
+  static const String adminProducts = '/admin/products';
+  static String adminProductById(String id) => '/admin/products/$id';
   static const String adminCategories = '/admin/categories';
   static String adminCategoryById(String id) => '/admin/categories/$id';
   static const String adminPlans = '/admin/plans';
@@ -133,4 +135,5 @@ class ApiConstants {
   static const String aiCustomerReply = '/ai/customer-reply';
   // No /ai/history endpoint exists; usage/limit info is at /ai/usage.
   static const String aiUsage = '/ai/usage';
+  static const String aiAnalytics = '/ai/analytics';
 }

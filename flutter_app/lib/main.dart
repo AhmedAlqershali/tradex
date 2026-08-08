@@ -46,6 +46,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AdminSubscriptionRequestsBloc>(
           create: (_) => AdminSubscriptionRequestsBloc(),
         ),
+        BlocProvider<AdminProductsBloc>(
+          create: (_) => AdminProductsBloc(),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),

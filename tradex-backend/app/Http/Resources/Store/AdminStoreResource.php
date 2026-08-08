@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Store;
 
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Subscription\SubscriptionResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -29,14 +30,29 @@ class AdminStoreResource extends JsonResource
             'orders_count'   => $this->orders_count   ?? null,
 
             // Merchant / owner info
-            'owner' => $this->whenLoaded('owner', fn () => [
-                'id'     => $this->owner->id,
-                'name'   => $this->owner->name,
-                'email'  => $this->owner->email,
-                'phone'  => $this->owner->phone,
-                'role'   => $this->owner->role,
-                'status' => $this->owner->status,
-            ]),
+            'owner' => $this->whenLoaded('owner', function () {
+                $owner = [
+                    'id'     => $this->owner->id,
+                    'name'   => $this->owner->name,
+                    'email'  => $this->owner->email,
+                    'phone'  => $this->owner->phone,
+                    'role'   => $this->owner->role,
+                    'status' => $this->owner->status,
+                ];
+
+                if ($this->owner->relationLoaded('subscriptions')) {
+                    $subscriptions = $this->owner->subscriptions
+                        ->sortByDesc('starts_at')
+                        ->values();
+                    $owner['current_subscription'] = $subscriptions->first()
+                        ? new SubscriptionResource($subscriptions->first())
+                        : null;
+                    $owner['subscription_history'] =
+                        SubscriptionResource::collection($subscriptions);
+                }
+
+                return $owner;
+            }),
 
             // Products preview (first 10)
             'products' => $this->whenLoaded(

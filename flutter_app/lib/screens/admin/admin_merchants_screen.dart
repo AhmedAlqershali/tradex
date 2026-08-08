@@ -479,7 +479,9 @@ class _DetailsContent extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         Text(
-          merchant.description.isEmpty ? 'لا يوجد وصف للمتجر.' : merchant.description,
+          merchant.description.isEmpty
+              ? 'لا يوجد وصف للمتجر.'
+              : merchant.description,
           textAlign: TextAlign.center,
           style: GoogleFonts.ibmPlexSans(
             color: AppColors.textGray,
@@ -509,7 +511,8 @@ class _DetailsContent extends StatelessWidget {
               ? const Text('لا تتوفر بيانات مالك المتجر.')
               : Column(
                   children: [
-                    _InfoRow(label: 'الاسم', value: merchant.owner!.displayName),
+                    _InfoRow(
+                        label: 'الاسم', value: merchant.owner!.displayName),
                     _InfoRow(label: 'البريد', value: merchant.owner!.email),
                     _InfoRow(label: 'الهاتف', value: merchant.owner!.phone),
                     _InfoRow(
@@ -530,6 +533,10 @@ class _DetailsContent extends StatelessWidget {
             ],
           ),
         ),
+        if (merchant.owner != null) ...[
+          SizedBox(height: 12.h),
+          _SubscriptionCard(owner: merchant.owner!),
+        ],
         if (merchant.products.isNotEmpty) ...[
           SizedBox(height: 12.h),
           _SectionCard(
@@ -550,6 +557,68 @@ class _DetailsContent extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _SubscriptionCard extends StatelessWidget {
+  const _SubscriptionCard({required this.owner});
+
+  final AdminMerchantOwner owner;
+
+  @override
+  Widget build(BuildContext context) {
+    final current = owner.currentSubscription;
+    return _SectionCard(
+      title: 'الاشتراك الحالي والسجل',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (current == null)
+            const Text('لا يوجد اشتراك حالي أو تجربة مجانية.')
+          else ...[
+            _InfoRow(label: 'الخطة', value: current.planName),
+            _InfoRow(
+              label: 'النوع',
+              value: current.isTrial ? 'تجربة مجانية' : current.type,
+            ),
+            _InfoRow(label: 'الحالة', value: _statusLabel(current.status)),
+            _InfoRow(
+              label: 'الاستحقاق',
+              value: current.isEntitled ? 'مستحق' : 'منتهي',
+            ),
+            if (current.endsAt != null)
+              _InfoRow(
+                label: 'ينتهي في',
+                value: _formatDate(current.endsAt!),
+              ),
+          ],
+          if (owner.subscriptionHistory.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            Text(
+              'سجل الاشتراكات',
+              style: GoogleFonts.ibmPlexSans(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            ...owner.subscriptionHistory.map(
+              (subscription) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: Text(subscription.planName),
+                subtitle: Text(
+                  '${subscription.isTrial ? 'تجربة' : subscription.type} • '
+                  '${_statusLabel(subscription.status)}',
+                ),
+                trailing: subscription.endsAt == null
+                    ? null
+                    : Text(_formatDate(subscription.endsAt!)),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -686,6 +755,10 @@ String _statusLabel(String status) {
       return status.isEmpty ? 'غير معروف' : status;
   }
 }
+
+String _formatDate(DateTime date) =>
+    '${date.year}/${date.month.toString().padLeft(2, '0')}/'
+    '${date.day.toString().padLeft(2, '0')}';
 
 Color _statusColor(String status) {
   switch (status) {

@@ -43,6 +43,7 @@ class AdminStoreManagementService implements AdminStoreManagementServiceInterfac
     {
         return Store::with([
             'owner:id,name,email,phone,role,status',
+            'owner.subscriptions.plan',
             'products' => fn ($q) => $q->with(['images'])->limit(10),
         ])
         ->withCount(['products', 'orders'])

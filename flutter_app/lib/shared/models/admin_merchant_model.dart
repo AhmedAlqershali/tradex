@@ -1,3 +1,5 @@
+import 'package:ai_saas/shared/models/admin_subscription_model.dart';
+
 class AdminMerchant {
   const AdminMerchant({
     required this.id,
@@ -56,6 +58,8 @@ class AdminMerchantOwner {
     required this.phone,
     required this.role,
     required this.status,
+    this.currentSubscription,
+    this.subscriptionHistory = const [],
   });
 
   final String id;
@@ -64,6 +68,8 @@ class AdminMerchantOwner {
   final String phone;
   final String role;
   final String status;
+  final AdminSubscription? currentSubscription;
+  final List<AdminSubscription> subscriptionHistory;
 
   String get displayName => name.trim().isEmpty ? 'تاجر' : name.trim();
 
@@ -75,8 +81,22 @@ class AdminMerchantOwner {
       phone: _text(json['phone']),
       role: _text(json['role'], fallback: 'merchant'),
       status: _text(json['status'], fallback: 'active'),
+      currentSubscription: _nested(
+        json['current_subscription'],
+        AdminSubscription.fromJson,
+      ),
+      subscriptionHistory: _list(json['subscription_history'])
+          .map(AdminSubscription.fromJson)
+          .toList(),
     );
   }
+}
+
+T? _nested<T>(
+  Object? value,
+  T Function(Map<String, dynamic>) parse,
+) {
+  return value is Map ? parse(Map<String, dynamic>.from(value)) : null;
 }
 
 class AdminMerchantProduct {

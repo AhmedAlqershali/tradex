@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/theme/app_colors.dart';
+import 'package:ai_saas/core/services/admin_ai_analytics_service.dart';
 import 'package:ai_saas/presentation/blocs/admin_analytics/admin_analytics_bloc.dart';
 import 'package:ai_saas/shared/models/admin_analytics_model.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
@@ -105,6 +106,8 @@ class _AnalyticsContent extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 28.h),
         children: [
+          const _AiInsightsCard(),
+          SizedBox(height: 14.h),
           Text(
             'أداء المنصة',
             style: GoogleFonts.ibmPlexSans(
@@ -186,6 +189,82 @@ class _AnalyticsContent extends StatelessWidget {
               child: _CategoryBars(
                 categories: analytics.products.byCategory,
               ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AiInsightsCard extends StatefulWidget {
+  const _AiInsightsCard();
+
+  @override
+  State<_AiInsightsCard> createState() => _AiInsightsCardState();
+}
+
+class _AiInsightsCardState extends State<_AiInsightsCard> {
+  Future<AdminAiInsight>? _request;
+
+  void _generate() {
+    setState(() {
+      _request = AdminAiAnalyticsService.instance.generate();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome_outlined, color: AppColors.primary),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  'رؤى الذكاء الاصطناعي',
+                  style: GoogleFonts.ibmPlexSans(
+                    color: AppColors.textDark,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: _request == null ? _generate : null,
+                child: const Text('تحليل الآن'),
+              ),
+            ],
+          ),
+          if (_request != null) ...[
+            SizedBox(height: 12.h),
+            FutureBuilder<AdminAiInsight>(
+              future: _request,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const LinearProgressIndicator();
+                }
+                if (snapshot.hasError) {
+                  return Text(
+                    'تعذر إنشاء التحليل: ${snapshot.error}',
+                    style: GoogleFonts.ibmPlexSans(color: AppColors.red),
+                  );
+                }
+                final insight = snapshot.data;
+                if (insight == null || insight.result.isEmpty) {
+                  return const Text('لم يُرجع مزود الذكاء الاصطناعي نتيجة.');
+                }
+                return Text(
+                  insight.result,
+                  style: GoogleFonts.ibmPlexSans(
+                    color: AppColors.textDark,
+                    height: 1.6,
+                  ),
+                );
+              },
             ),
           ],
         ],
