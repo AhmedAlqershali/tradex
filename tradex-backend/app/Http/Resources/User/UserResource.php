@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\Subscription\SubscriptionResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +35,20 @@ class UserResource extends JsonResource
                 'logo'        => $store->logo,
                 'status'      => $store->status,
             ])->values();
+        }
+
+        // Admin merchant views include the current period and preserved
+        // subscription history when the relationship was explicitly loaded.
+        // Other user payloads do not pay the cost or expose these fields.
+        if ($this->isMerchant() && $this->relationLoaded('subscriptions')) {
+            $subscriptions = $this->subscriptions
+                ->sortByDesc('starts_at')
+                ->values();
+
+            $data['current_subscription'] = $subscriptions->first()
+                ? new SubscriptionResource($subscriptions->first())
+                : null;
+            $data['subscription_history'] = SubscriptionResource::collection($subscriptions);
         }
 
         return $data;

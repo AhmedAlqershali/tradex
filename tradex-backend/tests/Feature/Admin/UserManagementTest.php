@@ -3,6 +3,8 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Store;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -158,6 +160,46 @@ class UserManagementTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.id', $client->id)
             ->assertJsonPath('data.name', 'Test Client');
+    }
+
+    public function test_admin_merchant_details_include_current_subscription_and_history(): void
+    {
+        ['token' => $token] = $this->actingAsAdmin();
+
+        $merchant = User::factory()->merchant()->create();
+        $trialPlan = Plan::factory()->create(['name' => 'free-trial-admin-test']);
+        $paidPlan = Plan::factory()->create(['name' => 'paid-admin-test']);
+
+        Subscription::factory()->forUser($merchant)->forPlan($trialPlan)->create([
+            'type'       => 'trial',
+            'status'     => 'expired',
+            'starts_at'  => now()->subDays(30),
+            'ends_at'    => now()->subDays(16),
+        ]);
+        $current = Subscription::factory()->forUser($merchant)->forPlan($paidPlan)->create([
+            'type'       => 'paid',
+            'status'     => 'active',
+            'starts_at'  => now()->subDay(),
+            'ends_at'    => now()->addMonth(),
+        ]);
+
+        $response = $this->getJson("/api/v1/admin/users/{$merchant->id}", $this->headers($token));
+
+        $response->assertOk()
+            ->assertJsonPath('data.current_subscription.id', $current->id)
+            ->assertJsonPath('data.current_subscription.type', 'paid')
+            ->assertJsonPath('data.current_subscription.status', 'active')
+            ->assertJsonPath('data.current_subscription.plan.id', $paidPlan->id)
+            ->assertJsonStructure([
+                'data' => [
+                    'current_subscription' => ['id', 'plan', 'type', 'is_trial', 'status', 'is_entitled'],
+                    'subscription_history' => [
+                        '*' => ['id', 'plan', 'type', 'is_trial', 'status', 'starts_at', 'ends_at'],
+                    ],
+                ],
+            ]);
+
+        $this->assertCount(2, $response->json('data.subscription_history'));
     }
 
     public function test_show_returns_404_for_missing_user(): void

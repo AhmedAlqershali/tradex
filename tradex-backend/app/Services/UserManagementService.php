@@ -43,7 +43,10 @@ class UserManagementService implements UserManagementServiceInterface
         $perPage = min((int) ($filters['per_page'] ?? 15), 100);
 
         // Eager-load stores for merchants only to avoid N+1
-        return $query->with(['stores:id,user_id,store_name,status'])
+        return $query->with([
+                'stores:id,user_id,store_name,status',
+                'subscriptions.plan',
+            ])
             ->orderByDesc('created_at')
             ->paginate($perPage)
             ->withQueryString();
@@ -51,7 +54,7 @@ class UserManagementService implements UserManagementServiceInterface
 
     public function findById(int $id): ?User
     {
-        return User::with(['stores'])->find($id);
+        return User::with(['stores', 'subscriptions.plan'])->find($id);
     }
 
     // -------------------------------------------------------------------------
