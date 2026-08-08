@@ -5,6 +5,7 @@ import 'package:ai_saas/screens/merchant/merchant_home.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
+import 'package:ai_saas/screens/admin/admin_analytics_screen.dart';
 import 'package:ai_saas/screens/admin/admin_merchants_screen.dart';
 import 'package:ai_saas/screens/admin/admin_users_screen.dart';
 import 'package:ai_saas/screens/admin/admin_categories_screen.dart';
@@ -91,6 +92,12 @@ class NavConfig {
             title: 'نظرة عامة',
             icon: Icons.dashboard_outlined,
             activeIcon: Icons.dashboard_rounded,
+          ),
+          const BnItem(
+            widget: AdminAnalyticsScreen(),
+            title: 'التحليلات',
+            icon: Icons.insights_outlined,
+            activeIcon: Icons.insights,
           ),
           const BnItem(
             widget: AdminUsersScreen(),
