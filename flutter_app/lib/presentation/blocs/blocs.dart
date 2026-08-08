@@ -14,3 +14,4 @@ export 'admin_merchants/admin_merchants_bloc.dart';
 export 'admin_categories/admin_categories_bloc.dart';
 export 'admin_users/admin_users_bloc.dart';
 export 'admin_plans/admin_plans_bloc.dart';
+export 'admin_reviews/admin_reviews_bloc.dart';
