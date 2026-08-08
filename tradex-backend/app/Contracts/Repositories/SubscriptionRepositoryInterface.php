@@ -13,6 +13,16 @@ interface SubscriptionRepositoryInterface
     public function findActiveForUser(User $user): ?Subscription;
 
     /**
+     * Find the latest subscription period, regardless of status.
+     */
+    public function findLatestForUser(User $user): ?Subscription;
+
+    /**
+     * Mark a stale active period as expired while preserving its history.
+     */
+    public function markExpired(Subscription $subscription): Subscription;
+
+    /**
      * Mark all of the merchant's currently active subscriptions as
      * 'cancelled' (history is preserved — rows are not deleted).
      */

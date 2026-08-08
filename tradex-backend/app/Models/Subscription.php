@@ -24,6 +24,7 @@ class Subscription extends Model
         'user_id',
         'plan_id',
         'billing_cycle',
+        'type',
         'status',
         'starts_at',
         'ends_at',
@@ -37,6 +38,7 @@ class Subscription extends Model
             'ends_at'      => 'datetime',
             'cancelled_at' => 'datetime',
             'billing_cycle' => 'string',
+            'type'          => 'string',
             'status'        => 'string',
         ];
     }
@@ -62,5 +64,17 @@ class Subscription extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function isTrial(): bool
+    {
+        return $this->type === 'trial';
+    }
+
+    public function isEntitled(): bool
+    {
+        return $this->status === 'active'
+            && $this->ends_at !== null
+            && $this->ends_at->isFuture();
     }
 }

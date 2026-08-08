@@ -22,6 +22,7 @@ class SubscriptionFactory extends Factory
             'user_id'       => User::factory()->merchant(),
             'plan_id'       => Plan::factory(),
             'billing_cycle' => fake()->randomElement(['monthly', 'yearly']),
+            'type'          => 'paid',
             'status'        => 'active',
             'starts_at'     => $startsAt,
             'ends_at'       => $startsAt->copy()->addMonth(),

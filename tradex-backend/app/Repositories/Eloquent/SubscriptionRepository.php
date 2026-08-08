@@ -20,6 +20,21 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
             ->first();
     }
 
+    public function findLatestForUser(User $user): ?Subscription
+    {
+        return Subscription::where('user_id', $user->id)
+            ->with('plan')
+            ->latest('starts_at')
+            ->first();
+    }
+
+    public function markExpired(Subscription $subscription): Subscription
+    {
+        $subscription->forceFill(['status' => 'expired'])->save();
+
+        return $subscription->fresh('plan');
+    }
+
     /**
      * Mark all active subscription rows for the user as cancelled.
      * Rows are kept (not deleted) so subscription history is preserved.

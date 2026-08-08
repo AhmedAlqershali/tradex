@@ -14,6 +14,16 @@ interface SubscriptionServiceInterface
     public function getActiveForMerchant(User $merchant): ?Subscription;
 
     /**
+     * The latest trial or paid period, including an expired period.
+     */
+    public function getCurrentForMerchant(User $merchant): ?Subscription;
+
+    /**
+     * Create the merchant's initial 14-day trial.
+     */
+    public function startTrial(User $merchant): Subscription;
+
+    /**
      * Activate a plan for a merchant.
      *
      * Any currently active subscription is cancelled (history preserved,

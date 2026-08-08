@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Services\AuthServiceInterface;
 use App\Models\Store;
 use App\Models\User;
+use App\Contracts\Services\SubscriptionServiceInterface;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,10 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService,
+    ) {}
+
     // -------------------------------------------------------------------------
     // Registration
     // -------------------------------------------------------------------------
@@ -75,6 +80,8 @@ class AuthService implements AuthServiceInterface
             $store->user_id = $user->id;
             $store->status  = 'active';
             $store->save();
+
+            $this->subscriptionService->startTrial($user);
 
             $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
 

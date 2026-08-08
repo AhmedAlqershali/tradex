@@ -33,21 +33,21 @@ class SubscriptionController extends BaseApiController
     // ── GET /api/v1/merchant/subscription ─────────────────────────────────────
 
     /**
-     * Get the merchant's current active subscription, if any.
+     * Get the merchant's current trial or paid subscription period, if any.
      */
     public function show(Request $request): JsonResponse
     {
-        $subscription = $this->subscriptionService->getActiveForMerchant($request->user());
+        $subscription = $this->subscriptionService->getCurrentForMerchant($request->user());
 
         if (! $subscription) {
-            return $this->success(null, 'No active subscription found.');
+            return $this->success(null, 'No subscription period found.');
         }
 
         $subscription->loadMissing('plan');
 
         return $this->success(
             new SubscriptionResource($subscription),
-            'Active subscription retrieved successfully.',
+            'Current subscription period retrieved successfully.',
         );
     }
 
