@@ -193,9 +193,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
                 // ── Subscription ──────────────────────────────────────────────
                 // GET  /merchant/subscription                    — current active subscription
+                // GET  /merchant/plans                            — active plans
                 // GET  /merchant/subscription-requests           — own requests
                 // GET  /merchant/subscription-requests/{id}      — request detail
                 // POST /merchant/subscription-requests           — submit new request
+                Route::get('plans',                            [MerchantSubscriptionController::class, 'indexPlans'])->name('plans.index');
                 Route::get('subscription',                        [MerchantSubscriptionController::class, 'show'])->name('subscription.show');
                 Route::get('subscription-requests',               [MerchantSubscriptionController::class, 'indexRequests'])->name('subscription-requests.index');
                 Route::get('subscription-requests/{id}',          [MerchantSubscriptionController::class, 'showRequest'])->name('subscription-requests.show');

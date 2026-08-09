@@ -1,5 +1,6 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/shared/models/admin_plan_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 import 'package:dio/dio.dart';
@@ -27,6 +28,33 @@ class MerchantSubscriptionService {
     }
 
     return AdminSubscription.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  /// GET /merchant/plans
+  ///
+  /// Only active plans are returned by the merchant endpoint.
+  Future<List<AdminPlan>> listAvailablePlans() async {
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(
+      ApiConstants.merchantPlans,
+    );
+    final body = _map(response.data);
+    final rawData = body['data'];
+    final list = rawData is List
+        ? rawData
+        : rawData is Map
+            ? rawData['data']
+            : null;
+
+    if (list is! List) {
+      throw const FormatException(
+        'Available subscription plans data was malformed.',
+      );
+    }
+
+    return list
+        .whereType<Map>()
+        .map((item) => AdminPlan.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
   }
 
   /// GET /merchant/subscription-requests

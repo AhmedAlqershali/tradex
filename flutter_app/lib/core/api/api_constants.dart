@@ -98,6 +98,7 @@ class ApiConstants {
   // Merchant dashboard summary and analytics.
   static const String merchantDashboard = '/merchant/dashboard';
   static const String merchantAnalytics = '/merchant/analytics';
+  static const String merchantPlans = '/merchant/plans';
   static const String merchantSubscription = '/merchant/subscription';
   static const String merchantSubscriptionRequests =
       '/merchant/subscription-requests';

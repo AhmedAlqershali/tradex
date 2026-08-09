@@ -11,6 +11,11 @@ class MerchantSubscriptionLoadRequested extends MerchantSubscriptionEvent {
   const MerchantSubscriptionLoadRequested();
 }
 
+class MerchantSubscriptionPlansLoadRequested
+    extends MerchantSubscriptionEvent {
+  const MerchantSubscriptionPlansLoadRequested();
+}
+
 class MerchantSubscriptionRequestsLoadRequested
     extends MerchantSubscriptionEvent {
   const MerchantSubscriptionRequestsLoadRequested();

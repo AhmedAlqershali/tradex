@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/presentation/blocs/merchant_subscription/merchant_subscription_bloc.dart';
+import 'package:ai_saas/shared/models/admin_plan_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 
@@ -26,6 +27,20 @@ AdminSubscriptionRequest _request() {
     'phone': '0501234567',
     'payment_method': 'bank_transfer',
     'status': 'pending',
+  });
+}
+
+AdminPlan _plan() {
+  return AdminPlan.fromJson({
+    'id': 2,
+    'name': 'pro',
+    'display_name': 'Pro Plan',
+    'monthly_price': 19.99,
+    'yearly_price': 199.99,
+    'product_limit': 100,
+    'store_limit': 1,
+    'features': ['AI tools'],
+    'status': 'active',
   });
 }
 
@@ -94,6 +109,31 @@ void main() {
     );
 
     bloc.add(const MerchantSubscriptionRequestsLoadRequested());
+    await states;
+    await bloc.close();
+  });
+
+  test('loads available active merchant subscription plans', () async {
+    final plan = _plan();
+    final bloc = MerchantSubscriptionBloc(
+      loadPlans: () async => [plan],
+    );
+    final states = expectLater(
+      bloc.stream,
+      emitsInOrder([
+        isA<MerchantSubscriptionLoaded>().having(
+          (state) => state.plansLoading,
+          'plans loading',
+          true,
+        ),
+        isA<MerchantSubscriptionLoaded>()
+            .having((state) => state.plans.single.id, 'plan id', '2')
+            .having((state) => state.plans.single.displayName, 'plan name',
+                'Pro Plan'),
+      ]),
+    );
+
+    bloc.add(const MerchantSubscriptionPlansLoadRequested());
     await states;
     await bloc.close();
   });

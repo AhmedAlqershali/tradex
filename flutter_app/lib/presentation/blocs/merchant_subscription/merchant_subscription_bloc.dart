@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/merchant_subscription_service.dart';
+import 'package:ai_saas/shared/models/admin_plan_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 
@@ -14,6 +15,7 @@ class MerchantSubscriptionBloc
     extends Bloc<MerchantSubscriptionEvent, MerchantSubscriptionState> {
   MerchantSubscriptionBloc({
     Future<AdminSubscription?> Function()? loadSubscription,
+    Future<List<AdminPlan>> Function()? loadPlans,
     Future<List<AdminSubscriptionRequest>> Function()? loadRequests,
     Future<AdminSubscriptionRequest> Function(String id)? loadRequestDetails,
     Future<AdminSubscriptionRequest> Function({
@@ -27,6 +29,8 @@ class MerchantSubscriptionBloc
     })? submitRequest,
   })  : _loadSubscription = loadSubscription ??
             MerchantSubscriptionService.instance.getCurrentSubscription,
+        _loadPlans =
+            loadPlans ?? MerchantSubscriptionService.instance.listAvailablePlans,
         _loadRequests =
             loadRequests ?? MerchantSubscriptionService.instance.listRequests,
         _loadRequestDetails = loadRequestDetails ??
@@ -35,12 +39,14 @@ class MerchantSubscriptionBloc
             submitRequest ?? MerchantSubscriptionService.instance.submitRequest,
         super(const MerchantSubscriptionInitial()) {
     on<MerchantSubscriptionLoadRequested>(_onLoadRequested);
+    on<MerchantSubscriptionPlansLoadRequested>(_onPlansLoadRequested);
     on<MerchantSubscriptionRequestsLoadRequested>(_onRequestsLoadRequested);
     on<MerchantSubscriptionRequestDetailsRequested>(_onDetailsRequested);
     on<MerchantSubscriptionRequestSubmitRequested>(_onSubmitRequested);
   }
 
   final Future<AdminSubscription?> Function() _loadSubscription;
+  final Future<List<AdminPlan>> Function() _loadPlans;
   final Future<List<AdminSubscriptionRequest>> Function() _loadRequests;
   final Future<AdminSubscriptionRequest> Function(String id)
       _loadRequestDetails;
@@ -55,6 +61,7 @@ class MerchantSubscriptionBloc
   }) _submitRequest;
 
   AdminSubscription? _subscription;
+  List<AdminPlan> _plans = const [];
   List<AdminSubscriptionRequest> _requests = const [];
   AdminSubscriptionRequest? _selectedRequest;
 
@@ -69,6 +76,7 @@ class MerchantSubscriptionBloc
       if (!isClosed) {
         emit(MerchantSubscriptionLoaded(
           subscription,
+          plans: _plans,
           requests: _requests,
           selectedRequest: _selectedRequest,
         ));
@@ -80,12 +88,41 @@ class MerchantSubscriptionBloc
     }
   }
 
+  Future<void> _onPlansLoadRequested(
+    MerchantSubscriptionPlansLoadRequested event,
+    Emitter<MerchantSubscriptionState> emit,
+  ) async {
+    emit(MerchantSubscriptionLoaded(
+      _subscription,
+      plans: _plans,
+      plansLoading: true,
+      requests: _requests,
+      selectedRequest: _selectedRequest,
+    ));
+    try {
+      _plans = await _loadPlans();
+      if (!isClosed) {
+        emit(MerchantSubscriptionLoaded(
+          _subscription,
+          plans: _plans,
+          requests: _requests,
+          selectedRequest: _selectedRequest,
+        ));
+      }
+    } on ApiException catch (e) {
+      _emitFailure(emit, e.message, plansError: true);
+    } catch (e) {
+      _emitFailure(emit, e.toString(), plansError: true);
+    }
+  }
+
   Future<void> _onRequestsLoadRequested(
     MerchantSubscriptionRequestsLoadRequested event,
     Emitter<MerchantSubscriptionState> emit,
   ) async {
     emit(MerchantSubscriptionLoaded(
       _subscription,
+      plans: _plans,
       requests: _requests,
       requestsLoading: true,
       selectedRequest: _selectedRequest,
@@ -95,6 +132,7 @@ class MerchantSubscriptionBloc
       if (!isClosed) {
         emit(MerchantSubscriptionLoaded(
           _subscription,
+          plans: _plans,
           requests: _requests,
           selectedRequest: _selectedRequest,
         ));
@@ -112,6 +150,7 @@ class MerchantSubscriptionBloc
   ) async {
     emit(MerchantSubscriptionLoaded(
       _subscription,
+      plans: _plans,
       requests: _requests,
       selectedRequest: _selectedRequest,
       detailsLoading: true,
@@ -121,6 +160,7 @@ class MerchantSubscriptionBloc
       if (!isClosed) {
         emit(MerchantSubscriptionLoaded(
           _subscription,
+          plans: _plans,
           requests: _requests,
           selectedRequest: _selectedRequest,
         ));
@@ -138,6 +178,7 @@ class MerchantSubscriptionBloc
   ) async {
     emit(MerchantSubscriptionLoaded(
       _subscription,
+      plans: _plans,
       requests: _requests,
       selectedRequest: _selectedRequest,
       submitting: true,
@@ -159,6 +200,7 @@ class MerchantSubscriptionBloc
       if (!isClosed) {
         emit(MerchantSubscriptionLoaded(
           _subscription,
+          plans: _plans,
           requests: _requests,
           selectedRequest: request,
           submissionMessage:
@@ -175,11 +217,14 @@ class MerchantSubscriptionBloc
   void _emitFailure(
     Emitter<MerchantSubscriptionState> emit,
     String message,
+    {bool plansError = false}
   ) {
     if (!isClosed) {
       emit(MerchantSubscriptionFailure(
         message,
         subscription: _subscription,
+        plans: _plans,
+        plansError: plansError ? message : null,
         requests: _requests,
         selectedRequest: _selectedRequest,
       ));

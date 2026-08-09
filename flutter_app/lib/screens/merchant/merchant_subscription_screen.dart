@@ -1,4 +1,5 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/shared/models/admin_plan_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
@@ -20,12 +21,14 @@ class _MerchantSubscriptionScreenState
     extends State<MerchantSubscriptionScreen> {
   static const Color _primary = Color(0xff4D41DF);
   static const Color _bg = Color(0xffF8F9FD);
+  AdminPlan? _selectedPlan;
 
   @override
   void initState() {
     super.initState();
     final bloc = context.read<MerchantSubscriptionBloc>();
     bloc.add(const MerchantSubscriptionLoadRequested());
+    bloc.add(const MerchantSubscriptionPlansLoadRequested());
     bloc.add(const MerchantSubscriptionRequestsLoadRequested());
   }
 
@@ -52,7 +55,7 @@ class _MerchantSubscriptionScreenState
         body: BlocConsumer<MerchantSubscriptionBloc, MerchantSubscriptionState>(
           listener: (context, state) {
             if (state is MerchantSubscriptionFailure &&
-                state.requests.isNotEmpty) {
+                (state.requests.isNotEmpty || state.plansError != null)) {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(SnackBar(content: Text(state.message)));
@@ -66,7 +69,8 @@ class _MerchantSubscriptionScreenState
             }
             if (state is MerchantSubscriptionFailure &&
                 state.subscription == null &&
-                state.requests.isEmpty) {
+                state.requests.isEmpty &&
+                state.plansError == null) {
               return _Message(
                 message: state.message,
                 onRetry: () => context
@@ -82,6 +86,14 @@ class _MerchantSubscriptionScreenState
               final requests = state is MerchantSubscriptionLoaded
                   ? state.requests
                   : (state as MerchantSubscriptionFailure).requests;
+              final plans = state is MerchantSubscriptionLoaded
+                  ? state.plans
+                  : (state as MerchantSubscriptionFailure).plans;
+              final plansLoading =
+                  state is MerchantSubscriptionLoaded && state.plansLoading;
+              final plansError = state is MerchantSubscriptionFailure
+                  ? state.plansError
+                  : null;
               final requestsLoading =
                   state is MerchantSubscriptionLoaded && state.requestsLoading;
               return RefreshIndicator(
@@ -95,6 +107,12 @@ class _MerchantSubscriptionScreenState
                   children: [
                     _buildStatusCard(subscription),
                     SizedBox(height: 18.h),
+                    _buildPlanSection(
+                      plans,
+                      loading: plansLoading,
+                      error: plansError,
+                    ),
+                    SizedBox(height: 18.h),
                     _buildRequestSection(
                       requests,
                       loading: requestsLoading,
@@ -105,6 +123,149 @@ class _MerchantSubscriptionScreenState
             }
             return const SizedBox.shrink();
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlanSection(
+    List<AdminPlan> plans, {
+    required bool loading,
+    String? error,
+  }) {
+    final selectedId = _selectedPlan?.id;
+    final selectedStillAvailable =
+        selectedId != null && plans.any((plan) => plan.id == selectedId);
+    if (!selectedStillAvailable && _selectedPlan != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedPlan = null);
+      });
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'الباقات المتاحة',
+          style: GoogleFonts.ibmPlexSans(
+            fontSize: 17.sp,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xff1A1A1A),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        if (loading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (error != null && plans.isEmpty)
+          _Message(
+            message: error,
+            icon: Icons.cloud_off_outlined,
+            onRetry: () => context
+                .read<MerchantSubscriptionBloc>()
+                .add(const MerchantSubscriptionPlansLoadRequested()),
+          )
+        else if (plans.isEmpty)
+          _Message(
+            message: 'لا توجد باقات متاحة حالياً.',
+            icon: Icons.card_membership_outlined,
+            onRetry: () => context
+                .read<MerchantSubscriptionBloc>()
+                .add(const MerchantSubscriptionPlansLoadRequested()),
+          )
+        else ...[
+          ...plans.map(_buildPlanCard),
+          if (_selectedPlan != null) ...[
+            SizedBox(height: 8.h),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showRequestForm(plan: _selectedPlan),
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: Text('متابعة مع ${_selectedPlan!.displayName}'),
+              ),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPlanCard(AdminPlan plan) {
+    final selected = _selectedPlan?.id == plan.id;
+    return Card(
+      margin: EdgeInsets.only(bottom: 10.h),
+      elevation: 0,
+      color: selected ? _primary.withValues(alpha: 0.06) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        side: BorderSide(
+          color: selected ? _primary : const Color(0xffECECF2),
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.r),
+        onTap: () => setState(() => _selectedPlan = plan),
+        child: Padding(
+          padding: EdgeInsets.all(14.r),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      plan.displayName,
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: selected ? _primary : const Color(0xffAAAAAA),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                '${_priceLabel(plan.monthlyPrice, 'شهري')} · '
+                '${_priceLabel(plan.yearlyPrice, 'سنوي')}',
+                style: GoogleFonts.ibmPlexSans(
+                  color: _primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.sp,
+                ),
+              ),
+              SizedBox(height: 7.h),
+              Text(
+                'المنتجات: ${_limitLabel(plan.productLimit)} · '
+                'المتاجر: ${_limitLabel(plan.storeLimit)}',
+                style: GoogleFonts.ibmPlexSans(
+                  color: const Color(0xff707070),
+                  fontSize: 12.sp,
+                ),
+              ),
+              if (plan.features.isNotEmpty) ...[
+                SizedBox(height: 6.h),
+                Text(
+                  plan.features.join(' · '),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.ibmPlexSans(
+                    color: const Color(0xff707070),
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -216,10 +377,25 @@ class _MerchantSubscriptionScreenState
     );
   }
 
-  void _showRequestForm() {
+  void _showRequestForm({AdminPlan? plan}) {
     final subscription = _subscriptionFromState(
       context.read<MerchantSubscriptionBloc>().state,
     );
+    final selectedPlan = plan ?? _selectedPlan;
+    final availablePlans =
+        _plansFromState(context.read<MerchantSubscriptionBloc>().state);
+    if (selectedPlan == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            availablePlans.isEmpty
+                ? 'لا توجد باقات متاحة حالياً.'
+                : 'يرجى اختيار باقة أولاً.',
+          ),
+        ),
+      );
+      return;
+    }
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -227,11 +403,24 @@ class _MerchantSubscriptionScreenState
       builder: (_) => BlocProvider.value(
         value: context.read<MerchantSubscriptionBloc>(),
         child: _MerchantRequestForm(
-          suggestedPlanId: int.tryParse(subscription?.planId ?? ''),
+          suggestedPlanId: int.tryParse(
+            selectedPlan?.id ?? subscription?.planId ?? '',
+          ),
         ),
       ),
     );
   }
+
+  List<AdminPlan> _plansFromState(MerchantSubscriptionState state) {
+    if (state is MerchantSubscriptionLoaded) return state.plans;
+    if (state is MerchantSubscriptionFailure) return state.plans;
+    return const [];
+  }
+
+  String _priceLabel(double price, String cycle) =>
+      '$cycle: ${price.toStringAsFixed(2)}';
+
+  String _limitLabel(int? value) => value == null ? 'غير محدود' : '$value';
 
   AdminSubscription? _subscriptionFromState(MerchantSubscriptionState state) {
     if (state is MerchantSubscriptionLoaded) return state.subscription;

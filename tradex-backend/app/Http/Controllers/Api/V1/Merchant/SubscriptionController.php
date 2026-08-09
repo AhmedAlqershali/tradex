@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1\Merchant;
 
+use App\Contracts\Services\PlanServiceInterface;
 use App\Contracts\Services\SubscriptionRequestServiceInterface;
 use App\Contracts\Services\SubscriptionServiceInterface;
 use App\Exceptions\SubscriptionException;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Subscription\StoreSubscriptionRequestRequest;
+use App\Http\Resources\Plan\PlanResource;
 use App\Http\Resources\Subscription\SubscriptionRequestCollection;
 use App\Http\Resources\Subscription\SubscriptionRequestResource;
 use App\Http\Resources\Subscription\SubscriptionResource;
@@ -26,9 +28,23 @@ use Illuminate\Http\Request;
 class SubscriptionController extends BaseApiController
 {
     public function __construct(
+        private readonly PlanServiceInterface             $planService,
         private readonly SubscriptionServiceInterface        $subscriptionService,
         private readonly SubscriptionRequestServiceInterface $subscriptionRequestService,
     ) {}
+
+    // ── GET /api/v1/merchant/plans ─────────────────────────────────────────────
+
+    /**
+     * List active plans available for a new subscription request.
+     */
+    public function indexPlans(): JsonResponse
+    {
+        return $this->success(
+            PlanResource::collection($this->planService->listActive()),
+            'Available subscription plans retrieved successfully.',
+        );
+    }
 
     // ── GET /api/v1/merchant/subscription ─────────────────────────────────────
 

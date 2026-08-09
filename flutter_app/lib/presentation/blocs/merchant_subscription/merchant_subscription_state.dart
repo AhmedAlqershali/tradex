@@ -18,6 +18,9 @@ class MerchantSubscriptionLoading extends MerchantSubscriptionState {
 class MerchantSubscriptionLoaded extends MerchantSubscriptionState {
   const MerchantSubscriptionLoaded(
     this.subscription, {
+    this.plans = const [],
+    this.plansLoading = false,
+    this.plansError,
     this.requests = const [],
     this.requestsLoading = false,
     this.submitting = false,
@@ -27,6 +30,9 @@ class MerchantSubscriptionLoaded extends MerchantSubscriptionState {
   });
 
   final AdminSubscription? subscription;
+  final List<AdminPlan> plans;
+  final bool plansLoading;
+  final String? plansError;
   final List<AdminSubscriptionRequest> requests;
   final bool requestsLoading;
   final bool submitting;
@@ -37,6 +43,9 @@ class MerchantSubscriptionLoaded extends MerchantSubscriptionState {
   @override
   List<Object?> get props => [
         subscription,
+        plans,
+        plansLoading,
+        plansError,
         requests,
         requestsLoading,
         submitting,
@@ -50,12 +59,16 @@ class MerchantSubscriptionFailure extends MerchantSubscriptionState {
   const MerchantSubscriptionFailure(
     this.message, {
     this.subscription,
+    this.plans = const [],
+    this.plansError,
     this.requests = const [],
     this.selectedRequest,
   });
 
   final String message;
   final AdminSubscription? subscription;
+  final List<AdminPlan> plans;
+  final String? plansError;
   final List<AdminSubscriptionRequest> requests;
   final AdminSubscriptionRequest? selectedRequest;
 
@@ -63,6 +76,8 @@ class MerchantSubscriptionFailure extends MerchantSubscriptionState {
   List<Object?> get props => [
         message,
         subscription,
+        plans,
+        plansError,
         requests,
         selectedRequest,
       ];

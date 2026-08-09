@@ -83,6 +83,34 @@ class SubscriptionTest extends TestCase
 
     // ── GET /merchant/subscription-requests ───────────────────────────────────
 
+    public function test_merchant_can_list_active_subscription_plans(): void
+    {
+        ['token' => $token] = $this->actingAsMerchant();
+        Plan::factory()->active()->create([
+            'display_name' => 'Pro Plan',
+            'monthly_price' => 19.99,
+        ]);
+        Plan::factory()->create([
+            'display_name' => 'Retired Plan',
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->getJson('/api/v1/merchant/plans', $this->headers($token))
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertCount(1, $response->json('data'));
+        $this->assertSame('Pro Plan', $response->json('data.0.display_name'));
+    }
+
+    public function test_client_cannot_list_merchant_subscription_plans(): void
+    {
+        ['token' => $token] = $this->actingAsClient();
+
+        $this->getJson('/api/v1/merchant/plans', $this->headers($token))
+            ->assertForbidden();
+    }
+
     public function test_merchant_can_list_own_subscription_requests(): void
     {
         ['user' => $user, 'token' => $token] = $this->actingAsMerchant();
