@@ -1,6 +1,7 @@
 class AdminSubscription {
   const AdminSubscription({
     required this.id,
+    required this.planId,
     required this.planName,
     required this.billingCycle,
     required this.type,
@@ -13,6 +14,7 @@ class AdminSubscription {
   });
 
   final String id;
+  final String planId;
   final String planName;
   final String billingCycle;
   final String type;
@@ -28,6 +30,7 @@ class AdminSubscription {
     final planMap = plan is Map ? Map<String, dynamic>.from(plan) : const {};
     return AdminSubscription(
       id: _text(json['id']),
+      planId: _text(planMap['id']),
       planName: _text(
         planMap['display_name'] ?? planMap['name'],
         fallback: 'بدون خطة',

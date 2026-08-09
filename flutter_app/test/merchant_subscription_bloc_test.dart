@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/presentation/blocs/merchant_subscription/merchant_subscription_bloc.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
+import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 
 AdminSubscription _subscription() {
   return AdminSubscription.fromJson({
@@ -12,6 +14,18 @@ AdminSubscription _subscription() {
     'status': 'active',
     'is_entitled': true,
     'ends_at': '2026-08-20T00:00:00Z',
+  });
+}
+
+AdminSubscriptionRequest _request() {
+  return AdminSubscriptionRequest.fromJson({
+    'id': 9,
+    'plan': {'id': 2, 'display_name': 'Pro'},
+    'billing_cycle': 'monthly',
+    'full_name': 'Ahmed Ali',
+    'phone': '0501234567',
+    'payment_method': 'bank_transfer',
+    'status': 'pending',
   });
 }
 
@@ -54,6 +68,79 @@ void main() {
     );
 
     bloc.add(const MerchantSubscriptionLoadRequested());
+    await states;
+    await bloc.close();
+  });
+
+  test('loads the merchant subscription request history', () async {
+    final request = _request();
+    final bloc = MerchantSubscriptionBloc(
+      loadRequests: () async => [request],
+    );
+    final states = expectLater(
+      bloc.stream,
+      emitsInOrder([
+        isA<MerchantSubscriptionLoaded>().having(
+          (state) => state.requestsLoading,
+          'history loading',
+          true,
+        ),
+        isA<MerchantSubscriptionLoaded>().having(
+          (state) => state.requests.single.id,
+          'request id',
+          '9',
+        ),
+      ]),
+    );
+
+    bloc.add(const MerchantSubscriptionRequestsLoadRequested());
+    await states;
+    await bloc.close();
+  });
+
+  test('submits a request and exposes success state', () async {
+    final request = _request();
+    final bloc = MerchantSubscriptionBloc(
+      submitRequest: ({
+        required int planId,
+        required String billingCycle,
+        required String fullName,
+        required String phone,
+        required String paymentMethod,
+        required XFile paymentProof,
+        String? notes,
+      }) async {
+        expect(planId, 2);
+        expect(billingCycle, 'monthly');
+        expect(fullName, 'Ahmed Ali');
+        expect(paymentProof.name, 'proof.jpg');
+        return request;
+      },
+    );
+    final states = expectLater(
+      bloc.stream,
+      emitsInOrder([
+        isA<MerchantSubscriptionLoaded>().having(
+          (state) => state.submitting,
+          'submission loading',
+          true,
+        ),
+        isA<MerchantSubscriptionLoaded>().having(
+          (state) => state.submissionMessage,
+          'submission message',
+          isNotNull,
+        ),
+      ]),
+    );
+
+    bloc.add(MerchantSubscriptionRequestSubmitRequested(
+      planId: 2,
+      billingCycle: 'monthly',
+      fullName: 'Ahmed Ali',
+      phone: '0501234567',
+      paymentMethod: 'bank_transfer',
+      paymentProof: XFile('proof.jpg'),
+    ));
     await states;
     await bloc.close();
   });

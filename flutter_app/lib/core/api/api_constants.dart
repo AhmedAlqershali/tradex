@@ -99,6 +99,10 @@ class ApiConstants {
   static const String merchantDashboard = '/merchant/dashboard';
   static const String merchantAnalytics = '/merchant/analytics';
   static const String merchantSubscription = '/merchant/subscription';
+  static const String merchantSubscriptionRequests =
+      '/merchant/subscription-requests';
+  static String merchantSubscriptionRequestById(String id) =>
+      '/merchant/subscription-requests/$id';
 
   // ── Admin ────────────────────────────────────────────────────────────────────
   // System-wide overview for authenticated admin users.
