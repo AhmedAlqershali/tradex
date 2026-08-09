@@ -92,6 +92,10 @@ class ApiConstants {
   static String merchantOrderById(String id) => '/merchant/orders/$id';
   static String merchantOrderStatus(String id) => '/merchant/orders/$id/status';
 
+  // Merchant dashboard summary and analytics.
+  static const String merchantDashboard = '/merchant/dashboard';
+  static const String merchantAnalytics = '/merchant/analytics';
+
   // ── Admin ────────────────────────────────────────────────────────────────────
   // System-wide overview for authenticated admin users.
   static const String adminDashboard = '/admin/dashboard';

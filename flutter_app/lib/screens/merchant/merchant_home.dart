@@ -4,7 +4,6 @@ import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/merchant/store_settings_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
-import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,6 +26,9 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     context.read<OrderBloc>().add(const MerchantOrdersLoadRequested());
     context.read<ProductBloc>().add(const MerchantProductsLoadRequested());
     context.read<StoreBloc>().add(const MyStoreLoadRequested());
+    context
+        .read<MerchantDashboardBloc>()
+        .add(const MerchantDashboardLoadRequested());
   }
 
   @override
@@ -92,42 +94,75 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
 
   // ── Summary row: orders + products ──────────────────────────────────────────
   Widget _buildSummaryRow(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: BlocBuilder<OrderBloc, OrderState>(
-            builder: (context, state) {
-              int pendingCount = 0;
-              if (state is MerchantOrdersLoaded) {
-                pendingCount = state.orders
-                    .where((o) => o.status == OrderStatus.pendingReview)
-                    .length;
-              }
-              return _SummaryCard(
-                label: 'طلبات جديدة',
-                value: pendingCount.toString(),
-                icon: Icons.receipt_long_outlined,
-                color: _primary,
-              );
-            },
-          ),
-        ),
-        SizedBox(width: 14.w),
-        Expanded(
-          child: BlocBuilder<ProductBloc, ProductState>(
-            builder: (context, state) {
-              int productCount = 0;
-              if (state is ProductsLoaded) productCount = state.products.length;
-              return _SummaryCard(
-                label: 'المنتجات',
-                value: productCount.toString(),
-                icon: Icons.inventory_2_outlined,
-                color: const Color(0xff22C55E),
-              );
-            },
-          ),
-        ),
-      ],
+    return BlocBuilder<MerchantDashboardBloc, MerchantDashboardState>(
+      builder: (context, state) {
+        if (state is MerchantDashboardLoading ||
+            state is MerchantDashboardInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is MerchantDashboardFailure) {
+          return _DashboardMessage(
+            message: state.message,
+            onRetry: () => context
+                .read<MerchantDashboardBloc>()
+                .add(const MerchantDashboardLoadRequested()),
+          );
+        }
+        if (state is MerchantDashboardLoaded) {
+          final dashboard = state.dashboard;
+          if (dashboard.isEmpty) {
+            return const _DashboardMessage(message: 'لا توجد بيانات للوحة التحكم.');
+          }
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _SummaryCard(
+                      label: 'طلبات جديدة',
+                      value: dashboard.orders.pending.toString(),
+                      icon: Icons.receipt_long_outlined,
+                      color: _primary,
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: _SummaryCard(
+                      label: 'المنتجات',
+                      value: dashboard.products.total.toString(),
+                      icon: Icons.inventory_2_outlined,
+                      color: const Color(0xff22C55E),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SummaryCard(
+                      label: 'المبيعات المكتملة',
+                      value: '₪${dashboard.totalSales.toStringAsFixed(0)}',
+                      icon: Icons.payments_outlined,
+                      color: const Color(0xff0EA5E9),
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: _SummaryCard(
+                      label: 'مخزون منخفض',
+                      value: dashboard.products.lowStock.toString(),
+                      icon: Icons.warning_amber_outlined,
+                      color: const Color(0xffF59E0B),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
     );
   }
 
@@ -309,6 +344,41 @@ class _SummaryCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashboardMessage extends StatelessWidget {
+  const _DashboardMessage({required this.message, this.onRetry});
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Column(
+        children: [
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.ibmPlexSans(
+              fontSize: 13.sp,
+              color: const Color(0xff707070),
+            ),
+          ),
+          if (onRetry != null) ...[
+            SizedBox(height: 8.h),
+            TextButton(onPressed: onRetry, child: const Text('إعادة المحاولة')),
+          ],
         ],
       ),
     );

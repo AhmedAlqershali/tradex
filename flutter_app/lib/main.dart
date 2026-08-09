@@ -36,6 +36,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<FavoriteBloc>(create: (_) => FavoriteBloc()),
         BlocProvider<CategoryBloc>(create: (_) => CategoryBloc()),
         BlocProvider<MerchantBloc>(create: (_) => MerchantBloc()),
+        BlocProvider<MerchantDashboardBloc>(
+          create: (_) => MerchantDashboardBloc(),
+        ),
         BlocProvider<AdminDashboardBloc>(create: (_) => AdminDashboardBloc()),
         BlocProvider<AdminAnalyticsBloc>(create: (_) => AdminAnalyticsBloc()),
         BlocProvider<AdminUsersBloc>(create: (_) => AdminUsersBloc()),
