@@ -3,6 +3,7 @@ import 'package:ai_saas/screens/merchant/add_product.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/merchant/store_settings_screen.dart';
+import 'package:ai_saas/screens/merchant/merchant_subscription_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,9 +54,63 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                 SizedBox(height: 14.h),
                 _buildQuickActions(context),
                 SizedBox(height: 24.h),
+                _buildSubscriptionShortcut(context),
+                SizedBox(height: 24.h),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionShortcut(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const MerchantSubscriptionScreen(),
+        ),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: _primary.withValues(alpha: 0.12)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(9.r),
+              decoration: BoxDecoration(
+                color: _primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(Icons.card_membership_outlined,
+                  color: _primary, size: 22.sp),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('حالة الاشتراك والتجربة',
+                      style: GoogleFonts.ibmPlexSans(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xff1A1A1A))),
+                  SizedBox(height: 3.h),
+                  Text('عرض الخطة الحالية وتاريخ الانتهاء',
+                      style: GoogleFonts.ibmPlexSans(
+                          fontSize: 12.sp, color: const Color(0xff888888))),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_left_rounded,
+                color: const Color(0xff888888), size: 24.sp),
+          ],
         ),
       ),
     );
@@ -111,7 +166,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
         if (state is MerchantDashboardLoaded) {
           final dashboard = state.dashboard;
           if (dashboard.isEmpty) {
-            return const _DashboardMessage(message: 'لا توجد بيانات للوحة التحكم.');
+            return const _DashboardMessage(
+                message: 'لا توجد بيانات للوحة التحكم.');
           }
           return Column(
             children: [
@@ -183,8 +239,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
         icon: Icons.add_box_outlined,
         label: 'إضافة منتج',
         color: _primary,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const AddProduct())),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const AddProduct())),
       ),
       _QuickAction(
         icon: Icons.receipt_long_outlined,
@@ -204,8 +260,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
         icon: Icons.person_outline,
         label: 'الملف الشخصي',
         color: const Color(0xffEC4899),
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const ProfileScreen())),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
       ),
       _QuickAction(
         icon: Icons.storefront_outlined,
@@ -223,9 +279,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
       crossAxisSpacing: 14.w,
       mainAxisSpacing: 14.h,
       childAspectRatio: 1.8,
-      children: actions
-          .map((a) => _buildActionCard(a))
-          .toList(),
+      children: actions.map((a) => _buildActionCard(a)).toList(),
     );
   }
 

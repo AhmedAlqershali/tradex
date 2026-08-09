@@ -10,6 +10,7 @@ export 'favorite/favorite_bloc.dart';
 export 'category/category_bloc.dart';
 export 'merchant/merchant_bloc.dart';
 export 'merchant_dashboard/merchant_dashboard_bloc.dart';
+export 'merchant_subscription/merchant_subscription_bloc.dart';
 export 'admin_dashboard/admin_dashboard_bloc.dart';
 export 'admin_analytics/admin_analytics_bloc.dart';
 export 'admin_merchants/admin_merchants_bloc.dart';
