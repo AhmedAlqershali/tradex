@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/presentation/blocs/admin_merchants/admin_merchants_bloc.dart';
 import 'package:ai_saas/shared/models/admin_merchant_model.dart';
+import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/widgets/empty_state.dart';
 import 'package:ai_saas/shared/widgets/error_state.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +140,7 @@ class _MerchantsContent extends StatelessWidget {
             onChanged: onSearchChanged,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: 'ابحث باسم المتجر أو الوصف',
+              hintText: 'ابحث باسم المتجر أو التاجر أو البريد',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: searchController.text.isEmpty
                   ? null
@@ -267,7 +268,10 @@ class _MerchantCard extends StatelessWidget {
                   ),
                   SizedBox(height: 3.h),
                   Text(
-                    merchant.owner?.displayName ?? merchant.description,
+                    merchant.owner == null
+                        ? merchant.description
+                        : '${merchant.owner!.displayName} • '
+                            '${merchant.owner!.email}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.ibmPlexSans(
@@ -283,6 +287,22 @@ class _MerchantCard extends StatelessWidget {
                       fontSize: 10.sp,
                     ),
                   ),
+                  if (merchant.owner?.currentSubscription != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: 3.h),
+                      child: Text(
+                        _subscriptionSummary(
+                          merchant.owner!.currentSubscription!,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.ibmPlexSans(
+                          color: AppColors.primary,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -759,6 +779,16 @@ String _statusLabel(String status) {
 String _formatDate(DateTime date) =>
     '${date.year}/${date.month.toString().padLeft(2, '0')}/'
     '${date.day.toString().padLeft(2, '0')}';
+
+String _subscriptionSummary(AdminSubscription subscription) {
+  final type = subscription.isTrial ? 'تجربة' : subscription.planName;
+  final status =
+      subscription.isEntitled ? 'مستحق' : _statusLabel(subscription.status);
+  final end = subscription.endsAt == null
+      ? ''
+      : ' • حتى ${_formatDate(subscription.endsAt!)}';
+  return '$type • $status$end';
+}
 
 Color _statusColor(String status) {
   switch (status) {

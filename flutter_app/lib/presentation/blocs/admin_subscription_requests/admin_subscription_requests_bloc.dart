@@ -9,10 +9,37 @@ import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 part 'admin_subscription_requests_event.dart';
 part 'admin_subscription_requests_state.dart';
 
-class AdminSubscriptionRequestsBloc extends Bloc<
-    AdminSubscriptionRequestsEvent, AdminSubscriptionRequestsState> {
-  AdminSubscriptionRequestsBloc()
-      : super(const AdminSubscriptionRequestsInitial()) {
+typedef AdminSubscriptionRequestListLoader
+    = Future<AdminSubscriptionRequestPage> Function({
+  String? status,
+  int page,
+  int perPage,
+});
+typedef AdminSubscriptionRequestLoader = Future<AdminSubscriptionRequest>
+    Function(String id);
+typedef AdminSubscriptionProofLoader = Future<Uint8List> Function(String id);
+typedef AdminSubscriptionRejecter = Future<AdminSubscriptionRequest> Function(
+  String id,
+  String reason,
+);
+
+class AdminSubscriptionRequestsBloc extends Bloc<AdminSubscriptionRequestsEvent,
+    AdminSubscriptionRequestsState> {
+  AdminSubscriptionRequestsBloc({
+    AdminSubscriptionRequestListLoader? listRequests,
+    AdminSubscriptionRequestLoader? getRequest,
+    AdminSubscriptionProofLoader? downloadProof,
+    AdminSubscriptionRequestLoader? approve,
+    AdminSubscriptionRejecter? reject,
+  })  : _listRequests = listRequests ??
+            AdminSubscriptionRequestService.instance.listRequests,
+        _getRequest =
+            getRequest ?? AdminSubscriptionRequestService.instance.getRequest,
+        _downloadProof = downloadProof ??
+            AdminSubscriptionRequestService.instance.downloadProof,
+        _approve = approve ?? AdminSubscriptionRequestService.instance.approve,
+        _reject = reject ?? AdminSubscriptionRequestService.instance.reject,
+        super(const AdminSubscriptionRequestsInitial()) {
     on<AdminSubscriptionRequestsLoadRequested>(_onLoadRequested);
     on<AdminSubscriptionRequestsStatusChanged>(_onStatusChanged);
     on<AdminSubscriptionRequestsPageRequested>(_onPageRequested);
@@ -21,6 +48,12 @@ class AdminSubscriptionRequestsBloc extends Bloc<
     on<AdminSubscriptionRequestApproveRequested>(_onApproveRequested);
     on<AdminSubscriptionRequestRejectRequested>(_onRejectRequested);
   }
+
+  final AdminSubscriptionRequestListLoader _listRequests;
+  final AdminSubscriptionRequestLoader _getRequest;
+  final AdminSubscriptionProofLoader _downloadProof;
+  final AdminSubscriptionRequestLoader _approve;
+  final AdminSubscriptionRejecter _reject;
 
   static const _perPage = 15;
   int _page = 1;
@@ -69,8 +102,7 @@ class AdminSubscriptionRequestsBloc extends Bloc<
       proofBytes: _proofBytes,
     ));
     try {
-      _selectedRequest =
-          await AdminSubscriptionRequestService.instance.getRequest(event.id);
+      _selectedRequest = await _getRequest(event.id);
       if (!isClosed) {
         emit(AdminSubscriptionRequestsLoaded(
           page: previous ?? _emptyPage,
@@ -96,8 +128,7 @@ class AdminSubscriptionRequestsBloc extends Bloc<
       proofBytes: _proofBytes,
     ));
     try {
-      _proofBytes = await AdminSubscriptionRequestService.instance
-          .downloadProof(event.id);
+      _proofBytes = await _downloadProof(event.id);
       if (!isClosed) {
         emit(AdminSubscriptionRequestsLoaded(
           page: previous ?? _emptyPage,
@@ -118,7 +149,7 @@ class AdminSubscriptionRequestsBloc extends Bloc<
   ) async {
     await _review(
       emit,
-      () => AdminSubscriptionRequestService.instance.approve(event.id),
+      () => _approve(event.id),
     );
   }
 
@@ -128,10 +159,7 @@ class AdminSubscriptionRequestsBloc extends Bloc<
   ) async {
     await _review(
       emit,
-      () => AdminSubscriptionRequestService.instance.reject(
-        event.id,
-        event.reason,
-      ),
+      () => _reject(event.id, event.reason),
     );
   }
 
@@ -168,7 +196,7 @@ class AdminSubscriptionRequestsBloc extends Bloc<
       proofBytes: _proofBytes,
     ));
     try {
-      final page = await AdminSubscriptionRequestService.instance.listRequests(
+      final page = await _listRequests(
         status: _status,
         page: _page,
         perPage: _perPage,
@@ -191,8 +219,12 @@ class AdminSubscriptionRequestsBloc extends Bloc<
     AdminSubscriptionRequestsState current,
   ) {
     if (current is AdminSubscriptionRequestsLoaded) return current.page;
-    if (current is AdminSubscriptionRequestsLoading) return current.previousPage;
-    if (current is AdminSubscriptionRequestsFailure) return current.previousPage;
+    if (current is AdminSubscriptionRequestsLoading) {
+      return current.previousPage;
+    }
+    if (current is AdminSubscriptionRequestsFailure) {
+      return current.previousPage;
+    }
     return null;
   }
 

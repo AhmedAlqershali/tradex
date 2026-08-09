@@ -10,9 +10,15 @@ part 'admin_dashboard_state.dart';
 
 class AdminDashboardBloc
     extends Bloc<AdminDashboardEvent, AdminDashboardState> {
-  AdminDashboardBloc() : super(const AdminDashboardInitial()) {
+  AdminDashboardBloc({
+    Future<AdminDashboardModel> Function()? loadDashboard,
+  })  : _loadDashboard =
+            loadDashboard ?? AdminDashboardService.instance.getDashboard,
+        super(const AdminDashboardInitial()) {
     on<AdminDashboardLoadRequested>(_onLoadRequested);
   }
+
+  final Future<AdminDashboardModel> Function() _loadDashboard;
 
   Future<void> _onLoadRequested(
     AdminDashboardLoadRequested event,
@@ -20,7 +26,7 @@ class AdminDashboardBloc
   ) async {
     emit(const AdminDashboardLoading());
     try {
-      final dashboard = await AdminDashboardService.instance.getDashboard();
+      final dashboard = await _loadDashboard();
       if (!isClosed) emit(AdminDashboardLoaded(dashboard));
     } on ApiException catch (e) {
       if (!isClosed) emit(AdminDashboardFailure(e.message));

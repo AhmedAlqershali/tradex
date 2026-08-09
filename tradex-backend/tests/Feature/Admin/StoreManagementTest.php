@@ -134,6 +134,29 @@ class StoreManagementTest extends TestCase
             ->assertJsonPath('data.data.0.store_name', 'Alpha Electronics');
     }
 
+    public function test_index_search_matches_merchant_identity(): void
+    {
+        ['token' => $token] = $this->actingAsAdmin();
+
+        $merchant = User::factory()->merchant()->create([
+            'name'  => 'Mariam Merchant',
+            'email' => 'mariam@example.com',
+            'phone' => '0500001234',
+        ]);
+        Store::factory()->forUser($merchant)->create(['store_name' => 'The Store']);
+        Store::factory()->create(['store_name' => 'Another Store']);
+
+        $this->getJson('/api/v1/admin/stores?search=mariam@example.com', $this->headers($token))
+            ->assertOk()
+            ->assertJsonCount(1, 'data.data')
+            ->assertJsonPath('data.data.0.owner.email', 'mariam@example.com');
+
+        $this->getJson('/api/v1/admin/stores?search=0500001234', $this->headers($token))
+            ->assertOk()
+            ->assertJsonCount(1, 'data.data')
+            ->assertJsonPath('data.data.0.owner.name', 'Mariam Merchant');
+    }
+
     public function test_index_supports_status_filter(): void
     {
         ['token' => $token] = $this->actingAsAdmin();

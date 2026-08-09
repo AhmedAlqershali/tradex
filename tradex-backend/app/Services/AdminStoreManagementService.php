@@ -26,7 +26,13 @@ class AdminStoreManagementService implements AdminStoreManagementServiceInterfac
             $term = '%' . $filters['search'] . '%';
             $query->where(function ($q) use ($term) {
                 $q->where('store_name', 'like', $term)
-                  ->orWhere('description', 'like', $term);
+                  ->orWhere('description', 'like', $term)
+                  ->orWhereHas('owner', function ($ownerQuery) use ($term) {
+                      $ownerQuery
+                          ->where('name', 'like', $term)
+                          ->orWhere('email', 'like', $term)
+                          ->orWhere('phone', 'like', $term);
+                  });
             });
         }
 

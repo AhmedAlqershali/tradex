@@ -8,9 +8,31 @@ import 'package:ai_saas/shared/models/admin_merchant_model.dart';
 part 'admin_merchants_event.dart';
 part 'admin_merchants_state.dart';
 
+typedef AdminMerchantListLoader = Future<AdminMerchantPage> Function({
+  String? search,
+  String? status,
+  int page,
+  int perPage,
+});
+
+typedef AdminMerchantDetailsLoader = Future<AdminMerchant> Function(String id);
+typedef AdminMerchantStatusUpdater = Future<AdminMerchant> Function(
+  String id,
+  String status,
+);
+
 class AdminMerchantsBloc
     extends Bloc<AdminMerchantsEvent, AdminMerchantsState> {
-  AdminMerchantsBloc() : super(const AdminMerchantsInitial()) {
+  AdminMerchantsBloc({
+    AdminMerchantListLoader? listMerchants,
+    AdminMerchantDetailsLoader? getMerchant,
+    AdminMerchantStatusUpdater? updateStatus,
+  })  : _listMerchants =
+            listMerchants ?? AdminMerchantService.instance.listMerchants,
+        _getMerchant = getMerchant ?? AdminMerchantService.instance.getMerchant,
+        _updateStatus =
+            updateStatus ?? AdminMerchantService.instance.updateStatus,
+        super(const AdminMerchantsInitial()) {
     on<AdminMerchantsLoadRequested>(_onLoadRequested);
     on<AdminMerchantsSearchChanged>(_onSearchChanged);
     on<AdminMerchantsStatusFilterChanged>(_onStatusFilterChanged);
@@ -18,6 +40,10 @@ class AdminMerchantsBloc
     on<AdminMerchantDetailsRequested>(_onDetailsRequested);
     on<AdminMerchantStatusUpdateRequested>(_onStatusUpdateRequested);
   }
+
+  final AdminMerchantListLoader _listMerchants;
+  final AdminMerchantDetailsLoader _getMerchant;
+  final AdminMerchantStatusUpdater _updateStatus;
 
   String _search = '';
   String? _status;
@@ -73,8 +99,7 @@ class AdminMerchantsBloc
       selectedMerchant: _selectedMerchant,
     ));
     try {
-      _selectedMerchant =
-          await AdminMerchantService.instance.getMerchant(event.merchantId);
+      _selectedMerchant = await _getMerchant(event.merchantId);
       if (!isClosed) {
         emit(AdminMerchantsLoaded(
           page: previous ?? _emptyPage,
@@ -110,8 +135,7 @@ class AdminMerchantsBloc
       selectedMerchant: _selectedMerchant,
     ));
     try {
-      _selectedMerchant = await AdminMerchantService.instance
-          .updateStatus(event.merchantId, event.status);
+      _selectedMerchant = await _updateStatus(event.merchantId, event.status);
       await _fetch(emit, keepSelectedMerchant: true);
     } on ApiException catch (e) {
       if (!isClosed) {
@@ -142,7 +166,7 @@ class AdminMerchantsBloc
       selectedMerchant: keepSelectedMerchant ? _selectedMerchant : null,
     ));
     try {
-      final page = await AdminMerchantService.instance.listMerchants(
+      final page = await _listMerchants(
         search: _search,
         status: _status,
         page: _page,
