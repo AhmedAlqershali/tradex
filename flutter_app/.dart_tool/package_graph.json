@@ -7,15 +7,12 @@
       "name": "ai_saas",
       "version": "1.0.0+1",
       "dependencies": [
-        "bloc",
-        "cupertino_icons",
         "dio",
         "equatable",
         "flutter",
         "flutter_bloc",
         "flutter_screenutil",
         "flutter_secure_storage",
-        "font_awesome_flutter",
         "google_fonts",
         "image_picker",
         "shared_preferences"
@@ -58,13 +55,6 @@
         "test_api",
         "vector_math",
         "vm_service"
-      ]
-    },
-    {
-      "name": "bloc",
-      "version": "8.1.4",
-      "dependencies": [
-        "meta"
       ]
     },
     {
@@ -145,13 +135,6 @@
       ]
     },
     {
-      "name": "font_awesome_flutter",
-      "version": "10.9.1",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "google_fonts",
       "version": "6.3.2",
       "dependencies": [
@@ -160,11 +143,6 @@
         "http",
         "path_provider"
       ]
-    },
-    {
-      "name": "cupertino_icons",
-      "version": "1.0.8",
-      "dependencies": []
     },
     {
       "name": "flutter",
@@ -348,6 +326,13 @@
         "collection",
         "flutter",
         "nested"
+      ]
+    },
+    {
+      "name": "bloc",
+      "version": "8.1.4",
+      "dependencies": [
+        "meta"
       ]
     },
     {

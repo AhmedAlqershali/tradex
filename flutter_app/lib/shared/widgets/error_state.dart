@@ -13,7 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 //   )
 //
 // Show when a network or server error prevents data from loading.
-// For connectivity-specific errors prefer [NetworkError].
+// Use this shared state for connectivity and server failures.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ErrorState extends StatelessWidget {

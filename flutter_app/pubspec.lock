@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "2.13.0"
   bloc:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: bloc
       sha256: "106842ad6569f0b60297619e9e0b1885c2fb9bf84812935490e6c5275777804e"
@@ -65,14 +65,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   dio:
     dependency: "direct main"
     description:
@@ -248,14 +240,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  font_awesome_flutter:
-    dependency: "direct main"
-    description:
-      name: font_awesome_flutter
-      sha256: b738e35f8bb4957896c34957baf922f99c5d415b38ddc8b070d14b7fa95715d4
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.9.1"
   google_fonts:
     dependency: "direct main"
     description:

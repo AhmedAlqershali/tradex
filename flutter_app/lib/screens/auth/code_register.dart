@@ -11,7 +11,7 @@ class CodeRegister extends StatefulWidget {
   final AppType type;
 
   /// The email address that the OTP was sent to.
-  /// Passed from [EmailVerificationScreen] and forwarded to [NewPasswordScreen].
+  /// Passed from the forgot-password flow and forwarded to [NewPasswordScreen].
   final String email;
 
   const CodeRegister({
