@@ -16,12 +16,20 @@ class AdminAnalyticsLoading extends AdminAnalyticsState {
 }
 
 class AdminAnalyticsLoaded extends AdminAnalyticsState {
-  const AdminAnalyticsLoaded(this.analytics);
+  const AdminAnalyticsLoaded(
+    this.analytics, {
+    this.aiInsight,
+    this.aiLoading = false,
+    this.aiError,
+  });
 
   final AdminAnalyticsModel analytics;
+  final AdminAiInsight? aiInsight;
+  final bool aiLoading;
+  final String? aiError;
 
   @override
-  List<Object?> get props => [analytics];
+  List<Object?> get props => [analytics, aiInsight, aiLoading, aiError];
 }
 
 class AdminAnalyticsFailure extends AdminAnalyticsState {

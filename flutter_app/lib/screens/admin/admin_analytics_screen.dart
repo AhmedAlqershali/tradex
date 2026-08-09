@@ -1,6 +1,6 @@
 import 'package:ai_saas/core/theme/app_colors.dart';
-import 'package:ai_saas/core/services/admin_ai_analytics_service.dart';
 import 'package:ai_saas/presentation/blocs/admin_analytics/admin_analytics_bloc.dart';
+import 'package:ai_saas/shared/models/admin_ai_insight_model.dart';
 import 'package:ai_saas/shared/models/admin_analytics_model.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
 import 'package:ai_saas/shared/widgets/empty_state.dart';
@@ -66,7 +66,8 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
               );
             }
 
-            final analytics = (state as AdminAnalyticsLoaded).analytics;
+            final loaded = state as AdminAnalyticsLoaded;
+            final analytics = loaded.analytics;
             if (analytics.isEmpty) {
               return const EmptyState(
                 icon: Icons.insights_outlined,
@@ -74,7 +75,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                 subtitle: 'ستظهر تحليلات المنصة عند توفر بيانات كافية.',
               );
             }
-            return _AnalyticsContent(analytics: analytics);
+            return _AnalyticsContent(state: loaded);
           },
         ),
       ),
@@ -83,12 +84,13 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
 }
 
 class _AnalyticsContent extends StatelessWidget {
-  const _AnalyticsContent({required this.analytics});
+  const _AnalyticsContent({required this.state});
 
-  final AdminAnalyticsModel analytics;
+  final AdminAnalyticsLoaded state;
 
   @override
   Widget build(BuildContext context) {
+    final analytics = state.analytics;
     final status = analytics.orders.byStatus;
     final productStatus = analytics.products.byStatus;
     return RefreshIndicator(
@@ -106,7 +108,14 @@ class _AnalyticsContent extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 28.h),
         children: [
-          const _AiInsightsCard(),
+          _AiInsightsCard(
+            insight: state.aiInsight,
+            loading: state.aiLoading,
+            error: state.aiError,
+            onGenerate: () => context
+                .read<AdminAnalyticsBloc>()
+                .add(const AdminAiInsightsRequested()),
+          ),
           SizedBox(height: 14.h),
           Text(
             'أداء المنصة',
@@ -197,21 +206,18 @@ class _AnalyticsContent extends StatelessWidget {
   }
 }
 
-class _AiInsightsCard extends StatefulWidget {
-  const _AiInsightsCard();
+class _AiInsightsCard extends StatelessWidget {
+  const _AiInsightsCard({
+    required this.insight,
+    required this.loading,
+    required this.error,
+    required this.onGenerate,
+  });
 
-  @override
-  State<_AiInsightsCard> createState() => _AiInsightsCardState();
-}
-
-class _AiInsightsCardState extends State<_AiInsightsCard> {
-  Future<AdminAiInsight>? _request;
-
-  void _generate() {
-    setState(() {
-      _request = AdminAiAnalyticsService.instance.generate();
-    });
-  }
+  final AdminAiInsight? insight;
+  final bool loading;
+  final String? error;
+  final VoidCallback onGenerate;
 
   @override
   Widget build(BuildContext context) {
@@ -234,38 +240,29 @@ class _AiInsightsCardState extends State<_AiInsightsCard> {
                 ),
               ),
               OutlinedButton(
-                onPressed: _request == null ? _generate : null,
+                onPressed: loading ? null : onGenerate,
                 child: const Text('تحليل الآن'),
               ),
             ],
           ),
-          if (_request != null) ...[
+          if (loading || error != null || insight != null) ...[
             SizedBox(height: 12.h),
-            FutureBuilder<AdminAiInsight>(
-              future: _request,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const LinearProgressIndicator();
-                }
-                if (snapshot.hasError) {
-                  return Text(
-                    'تعذر إنشاء التحليل: ${snapshot.error}',
-                    style: GoogleFonts.ibmPlexSans(color: AppColors.red),
-                  );
-                }
-                final insight = snapshot.data;
-                if (insight == null || insight.result.isEmpty) {
-                  return const Text('لم يُرجع مزود الذكاء الاصطناعي نتيجة.');
-                }
-                return Text(
-                  insight.result,
-                  style: GoogleFonts.ibmPlexSans(
-                    color: AppColors.textDark,
-                    height: 1.6,
-                  ),
-                );
-              },
-            ),
+            if (loading) const LinearProgressIndicator(),
+            if (error != null)
+              Text(
+                'تعذر إنشاء التحليل: $error',
+                style: GoogleFonts.ibmPlexSans(color: AppColors.red),
+              )
+            else if (insight == null || insight!.result.isEmpty)
+              const Text('لم يُرجع مزود الذكاء الاصطناعي نتيجة.')
+            else
+              Text(
+                insight!.result,
+                style: GoogleFonts.ibmPlexSans(
+                  color: AppColors.textDark,
+                  height: 1.6,
+                ),
+              ),
           ],
         ],
       ),

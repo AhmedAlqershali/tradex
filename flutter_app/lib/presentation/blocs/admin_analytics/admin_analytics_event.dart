@@ -10,3 +10,7 @@ abstract class AdminAnalyticsEvent extends Equatable {
 class AdminAnalyticsLoadRequested extends AdminAnalyticsEvent {
   const AdminAnalyticsLoadRequested();
 }
+
+class AdminAiInsightsRequested extends AdminAnalyticsEvent {
+  const AdminAiInsightsRequested();
+}

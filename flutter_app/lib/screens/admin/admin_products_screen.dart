@@ -21,6 +21,7 @@ class AdminProductsScreen extends StatefulWidget {
 class _AdminProductsScreenState extends State<AdminProductsScreen> {
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
+  String? _status;
 
   @override
   void initState() {
@@ -92,10 +93,13 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                   _Filters(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
-                    status: null,
-                    onStatusChanged: (status) => context
-                        .read<AdminProductsBloc>()
-                        .add(AdminProductsStatusChanged(status)),
+                    status: _status,
+                    onStatusChanged: (status) {
+                      setState(() => _status = status);
+                      context
+                          .read<AdminProductsBloc>()
+                          .add(AdminProductsStatusChanged(status));
+                    },
                   ),
                   const Expanded(
                     child: EmptyState(
@@ -113,10 +117,13 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                 _Filters(
                   controller: _searchController,
                   onChanged: _onSearchChanged,
-                  status: null,
-                  onStatusChanged: (status) => context
-                      .read<AdminProductsBloc>()
-                      .add(AdminProductsStatusChanged(status)),
+                  status: _status,
+                  onStatusChanged: (status) {
+                    setState(() => _status = status);
+                    context
+                        .read<AdminProductsBloc>()
+                        .add(AdminProductsStatusChanged(status));
+                  },
                 ),
                 if (state is AdminProductsLoading)
                   const LinearProgressIndicator(minHeight: 2),
