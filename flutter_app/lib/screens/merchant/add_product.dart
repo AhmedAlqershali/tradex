@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/widgets/add_product_textfield.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
+import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,22 +11,27 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddProduct extends StatefulWidget {
-  const AddProduct({super.key});
+  const AddProduct({super.key, this.product});
+
+  final Product? product;
 
   @override
   State<AddProduct> createState() => _AddProductState();
 }
 
 class _AddProductState extends State<AddProduct> {
-  bool isEnabled1 = false;
+  bool isEnabled1 = true;
   bool isEnabled2 = false;
 
   final List<File> _attachedImages = [];
+  final List<String> _existingImageUrls = [];
+  bool _clearExistingImages = false;
   final int _maxImages = 3;
   final ImagePicker _picker = ImagePicker();
 
   final TextEditingController _nameController       = TextEditingController();
   final TextEditingController _priceController      = TextEditingController();
+  final TextEditingController _quantityController   = TextEditingController();
   final TextEditingController _categoryController   = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -33,12 +39,23 @@ class _AddProductState extends State<AddProduct> {
   void initState() {
     super.initState();
     context.read<CategoryBloc>().add(const CategoryListRequested());
+    final product = widget.product;
+    if (product != null) {
+      _nameController.text = product.name;
+      _priceController.text = product.price.toStringAsFixed(2);
+      _quantityController.text = product.quantity.toString();
+      _categoryController.text = product.category;
+      _descriptionController.text = product.description;
+      isEnabled1 = product.isVisible;
+      _existingImageUrls.addAll(product.imageUrls);
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _quantityController.dispose();
     _categoryController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -59,23 +76,46 @@ class _AddProductState extends State<AddProduct> {
       _showSnackBar(context, 'يرجى إدخال سعر صحيح');
       return;
     }
+    final quantity = int.tryParse(_quantityController.text.trim());
+    if (quantity == null || quantity < 0) {
+      _showSnackBar(context, 'يرجى إدخال كمية مخزون صحيحة');
+      return;
+    }
 
-    context.read<ProductBloc>().add(ProductCreateRequested(
-          name: name,
-          category: category.isNotEmpty ? category : 'عام',
-          price: price,
-          description: description,
-          isVisible: isEnabled1,
-          isFeatured: isEnabled2,
-          imagePaths: _attachedImages.map((f) => f.path).toList(),
-        ));
+    final imagePaths = _attachedImages.map((f) => f.path).toList();
+    if (widget.product == null) {
+      context.read<ProductBloc>().add(ProductCreateRequested(
+            name: name,
+            category: category.isNotEmpty ? category : 'عام',
+            price: price,
+            description: description,
+            quantity: quantity,
+            isVisible: isEnabled1,
+            isFeatured: isEnabled2,
+            imagePaths: imagePaths,
+          ));
+    } else {
+      context.read<ProductBloc>().add(ProductUpdateRequested(
+            widget.product!.id,
+            name: name,
+            category: category.isNotEmpty ? category : 'عام',
+            price: price,
+            description: description,
+            quantity: quantity,
+            isVisible: isEnabled1,
+            isFeatured: isEnabled2,
+            imagePaths: imagePaths,
+            clearImages: _clearExistingImages && imagePaths.isEmpty,
+          ));
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile =
           await _picker.pickImage(source: source, imageQuality: 70);
-      if (pickedFile != null && _attachedImages.length < _maxImages) {
+       if (pickedFile != null &&
+           _existingImageUrls.length + _attachedImages.length < _maxImages) {
         setState(() => _attachedImages.add(File(pickedFile.path)));
       }
     } catch (_) {}
@@ -125,9 +165,12 @@ class _AddProductState extends State<AddProduct> {
   Widget build(BuildContext context) {
     return BlocConsumer<ProductBloc, ProductState>(
       listener: (context, state) {
-        if (state is ProductCreated) {
+        if (state is ProductCreated || state is ProductUpdated) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('تم نشر المنتج بنجاح ✅',
+           content: Text(
+               widget.product == null
+                   ? 'تم نشر المنتج بنجاح ✅'
+                   : 'تم تحديث المنتج بنجاح ✅',
                 style: GoogleFonts.ibmPlexSans(color: Colors.white)),
             backgroundColor: const Color(0xff22C55E),
             behavior: SnackBarBehavior.floating,
@@ -135,15 +178,6 @@ class _AddProductState extends State<AddProduct> {
                 borderRadius: BorderRadius.circular(12.r)),
             margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           ));
-          _nameController.clear();
-          _priceController.clear();
-          _categoryController.clear();
-          _descriptionController.clear();
-          setState(() {
-            _attachedImages.clear();
-            isEnabled1 = false;
-            isEnabled2 = false;
-          });
           Navigator.maybePop(context);
         } else if (state is ProductFailure) {
           _showSnackBar(context, state.message);
@@ -164,7 +198,7 @@ class _AddProductState extends State<AddProduct> {
                     color: const Color(0xff1A1A1A), size: 20.sp),
                 onPressed: () => Navigator.maybePop(context),
               ),
-              title: Text('إضافة منتج جديد',
+               title: Text(widget.product == null ? 'إضافة منتج جديد' : 'تعديل المنتج',
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -198,6 +232,15 @@ class _AddProductState extends State<AddProduct> {
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
                   SizedBox(height: 14.h),
+
+                   AddProductTextField(
+                     controller: _quantityController,
+                     label: 'الكمية المتوفرة',
+                     hint: 'مثال: 25',
+                     icon: Icons.inventory_outlined,
+                     keyboardType: TextInputType.number,
+                   ),
+                   SizedBox(height: 14.h),
 
                   AddProductTextField(
                     controller: _categoryController,
@@ -233,7 +276,11 @@ class _AddProductState extends State<AddProduct> {
                   SizedBox(height: 28.h),
 
                   SizeButton(
-                    title: isLoading ? 'جارٍ النشر...' : 'نشر المنتج',
+                     title: isLoading
+                         ? (widget.product == null
+                             ? 'جارٍ النشر...'
+                             : 'جارٍ التحديث...')
+                         : (widget.product == null ? 'نشر المنتج' : 'حفظ التعديلات'),
                     onTap: isLoading ? null : () => _publishProduct(context),
                   ),
                   SizedBox(height: 20.h),
@@ -295,7 +342,8 @@ class _AddProductState extends State<AddProduct> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('صور المنتج (${_attachedImages.length}/$_maxImages)',
+         Text(
+             'صور المنتج (${_existingImageUrls.length + _attachedImages.length}/$_maxImages)',
             style: GoogleFonts.ibmPlexSans(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -303,6 +351,26 @@ class _AddProductState extends State<AddProduct> {
         SizedBox(height: 10.h),
         Row(
           children: [
+             ..._existingImageUrls.map(
+               (url) => Padding(
+                 padding: EdgeInsets.only(left: 8.w),
+                 child: ClipRRect(
+                   borderRadius: BorderRadius.circular(10.r),
+                   child: Image.network(
+                     url,
+                     width: 72.w,
+                     height: 72.w,
+                     fit: BoxFit.cover,
+                     errorBuilder: (_, __, ___) => Container(
+                       width: 72.w,
+                       height: 72.w,
+                       color: const Color(0xffF0F1F5),
+                       child: const Icon(Icons.broken_image_outlined),
+                     ),
+                   ),
+                 ),
+               ),
+             ),
             ..._attachedImages.map(
               (file) => Padding(
                 padding: EdgeInsets.only(left: 8.w),
@@ -315,6 +383,19 @@ class _AddProductState extends State<AddProduct> {
                           height: 72.w,
                           fit: BoxFit.cover),
                     ),
+             if (_existingImageUrls.isNotEmpty)
+               Padding(
+                 padding: EdgeInsets.only(right: 8.w),
+                 child: TextButton(
+                   onPressed: () => setState(() {
+                     _existingImageUrls.clear();
+                     _clearExistingImages = true;
+                   }),
+                   child: Text('حذف الصور الحالية',
+                       style: GoogleFonts.ibmPlexSans(
+                           color: Colors.redAccent, fontSize: 11.sp)),
+                 ),
+               ),
                     Positioned(
                       top: 2,
                       left: 2,
@@ -337,7 +418,7 @@ class _AddProductState extends State<AddProduct> {
                 ),
               ),
             ),
-            if (_attachedImages.length < _maxImages)
+             if (_existingImageUrls.length + _attachedImages.length < _maxImages)
               GestureDetector(
                 onTap: _showImageSourceSheet,
                 child: Container(

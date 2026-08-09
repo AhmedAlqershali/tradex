@@ -49,7 +49,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(const OrderLoading());
     try {
-      final orders = await OrderService.instance.getMerchantOrders();
+      final orders = await OrderService.instance.getMerchantOrders(
+        status: event.status,
+      );
       // Sync local controller for any ValueListenableBuilder dependencies.
       OrderController.instance.setOrders(orders);
       emit(MerchantOrdersLoaded(orders));
@@ -130,23 +132,19 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(const OrderLoading());
     try {
-      await OrderService.instance.patchStatus(
+      final updatedOrder = await OrderService.instance.patchStatus(
         ref: event.ref,
         status: event.status,
       );
 
       // Update the local controller cache so all ValueListenableBuilder
       // widgets reflect the new status immediately.
-      final newStatus = OrderController.parseStatus(event.status);
-      OrderController.instance.updateOrderStatus(event.ref, newStatus);
-
-      // Retrieve the updated order from the local controller.
-      final orders = OrderController.instance.orders;
-      final order = orders.firstWhere(
-        (o) => o.ref == event.ref,
-        orElse: () => throw const UnknownException('Order not found.'),
-      );
-      emit(OrderStatusUpdated(order));
+      OrderController.instance.setOrders([
+        ...OrderController.instance.orders
+            .where((order) => order.ref != updatedOrder.ref),
+        updatedOrder,
+      ]);
+      emit(OrderStatusUpdated(updatedOrder));
     } catch (e) {
       emit(OrderFailure(_errorMessage(e)));
     }

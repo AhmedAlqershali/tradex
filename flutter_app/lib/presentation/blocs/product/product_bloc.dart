@@ -44,7 +44,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(const ProductLoading());
     try {
-      final products = await ProductService.instance.getMerchantProducts();
+      final products = await ProductService.instance.getMerchantProducts(
+        status: event.status,
+      );
       emit(ProductsLoaded(products));
     } on ApiException catch (e) {
       emit(ProductFailure(e.message));
@@ -88,6 +90,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         category: event.category,
         price: event.price,
         description: event.description,
+        quantity: event.quantity,
         isVisible: event.isVisible,
         isFeatured: event.isFeatured,
         imagePaths: event.imagePaths,
@@ -110,6 +113,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         category: event.category,
         price: event.price,
         description: event.description,
+        quantity: event.quantity,
         isVisible: event.isVisible,
         isFeatured: event.isFeatured,
         imagePaths: event.imagePaths,

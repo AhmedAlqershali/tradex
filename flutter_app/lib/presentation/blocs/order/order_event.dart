@@ -14,7 +14,13 @@ class ClientOrdersLoadRequested extends OrderEvent {
 
 /// Requests loading all orders visible to the authenticated merchant.
 class MerchantOrdersLoadRequested extends OrderEvent {
-  const MerchantOrdersLoadRequested();
+  const MerchantOrdersLoadRequested({this.status});
+
+  /// Backend status filter. Null loads all merchant orders.
+  final String? status;
+
+  @override
+  List<Object?> get props => [status];
 }
 
 /// Requests loading a single order by its reference code.

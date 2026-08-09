@@ -25,7 +25,12 @@ class ProductsLoadRequested extends ProductEvent {
 }
 
 class MerchantProductsLoadRequested extends ProductEvent {
-  const MerchantProductsLoadRequested();
+  const MerchantProductsLoadRequested({this.status});
+
+  final String? status;
+
+  @override
+  List<Object?> get props => [status];
 }
 
 class ProductByIdRequested extends ProductEvent {
@@ -52,6 +57,7 @@ class ProductCreateRequested extends ProductEvent {
     required this.category,
     required this.price,
     required this.description,
+    this.quantity = 0,
     this.isVisible = true,
     this.isFeatured = false,
     this.imagePaths = const [],
@@ -61,6 +67,7 @@ class ProductCreateRequested extends ProductEvent {
   final String category;
   final double price;
   final String description;
+  final int quantity;
   final bool isVisible;
   final bool isFeatured;
 
@@ -74,6 +81,7 @@ class ProductCreateRequested extends ProductEvent {
         category,
         price,
         description,
+        quantity,
         isVisible,
         isFeatured,
         imagePaths,
@@ -87,6 +95,7 @@ class ProductUpdateRequested extends ProductEvent {
     this.category,
     this.price,
     this.description,
+    this.quantity,
     this.isVisible,
     this.isFeatured,
     this.imagePaths = const [],
@@ -98,6 +107,7 @@ class ProductUpdateRequested extends ProductEvent {
   final String? category;
   final double? price;
   final String? description;
+  final int? quantity;
   final bool? isVisible;
   final bool? isFeatured;
 
@@ -115,6 +125,7 @@ class ProductUpdateRequested extends ProductEvent {
         category,
         price,
         description,
+        quantity,
         isVisible,
         isFeatured,
         imagePaths,

@@ -97,6 +97,25 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
         ),
       ),
       centerTitle: true,
+       actions: [
+         PopupMenuButton<String>(
+           tooltip: 'تصفية الحالة',
+           icon: const Icon(Icons.filter_list_rounded, color: _textDark),
+           onSelected: (value) {
+             context.read<ProductBloc>().add(
+                   MerchantProductsLoadRequested(
+                     status: value == 'all' ? null : value,
+                   ),
+                 );
+           },
+           itemBuilder: (_) => const [
+             PopupMenuItem(value: 'all', child: Text('كل المنتجات')),
+             PopupMenuItem(value: 'active', child: Text('نشط')),
+             PopupMenuItem(value: 'inactive', child: Text('مخفي')),
+             PopupMenuItem(value: 'out_of_stock', child: Text('نفد المخزون')),
+           ],
+         ),
+       ],
     );
   }
 
@@ -161,6 +180,8 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                             color: _primary)),
                     SizedBox(width: 8.w),
                     _buildVisibilityBadge(product.isVisible),
+                     SizedBox(width: 8.w),
+                     _buildStockBadge(product.quantity, product.status),
                   ],
                 ),
               ],
@@ -168,6 +189,17 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
           ),
           Column(
             children: [
+               _iconBtn(
+                 icon: Icons.edit_outlined,
+                 color: _primary,
+                 onTap: () => Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                     builder: (_) => AddProduct(product: product),
+                   ),
+                 ),
+               ),
+               SizedBox(height: 8.h),
               _iconBtn(
                 icon: Icons.delete_outline_rounded,
                 color: Colors.redAccent,
@@ -195,6 +227,30 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
           fontSize: 10.sp,
           fontWeight: FontWeight.bold,
           color: isVisible ? const Color(0xff22C55E) : Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStockBadge(int quantity, String status) {
+    final isOutOfStock = status == 'out_of_stock' || quantity <= 0;
+    final color = isOutOfStock
+        ? Colors.redAccent
+        : quantity <= 10
+            ? Colors.orange
+            : const Color(0xff64748B);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        isOutOfStock ? 'نفد المخزون' : 'المخزون: $quantity',
+        style: GoogleFonts.ibmPlexSans(
+          fontSize: 10.sp,
+          fontWeight: FontWeight.bold,
+          color: color,
         ),
       ),
     );

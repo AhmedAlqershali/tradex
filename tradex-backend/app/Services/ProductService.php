@@ -73,12 +73,12 @@ class ProductService implements ProductServiceInterface
         if (! empty($imageFiles)) {
             $this->storeImages($product, $imageFiles);
 
-            // Set the product's primary image field to the first stored image URL
+            // Set the product's primary image field to the first stored path
             // so clients have a quick-access thumbnail without joining product_images.
             $product->refresh();
             $firstImage = $product->images()->orderBy('sort_order')->first();
             if ($firstImage) {
-                $product->image = \Illuminate\Support\Facades\Storage::url($firstImage->path);
+                $product->image = $firstImage->path;
                 $product->save();
             }
         }
@@ -104,9 +104,15 @@ class ProductService implements ProductServiceInterface
             // Delete old images from disk when replacing
             $this->deleteStoredImages($product);
             $this->storeImages($product, $imageFiles);
+            $product->refresh();
+            $firstImage = $product->images()->orderBy('sort_order')->first();
+            $product->image = $firstImage?->path;
+            $product->save();
         } elseif (! empty($data['clear_images'])) {
             $this->deleteStoredImages($product);
             $this->productRepository->syncImages($product, []);
+            $product->image = null;
+            $product->save();
         }
 
         return $product->load(['category', 'images']);

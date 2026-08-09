@@ -74,9 +74,14 @@ class OrderService {
   }
 
   /// GET /merchant/orders — all orders for the authenticated merchant's store.
-  Future<List<AppOrder>> getMerchantOrders() async {
+  Future<List<AppOrder>> getMerchantOrders({String? status}) async {
     final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(ApiConstants.merchantOrders);
+        .get<Map<String, dynamic>>(
+          ApiConstants.merchantOrders,
+          queryParameters: {
+            if (status != null && status.isNotEmpty) 'status': status,
+          },
+        );
     final raw = response.data!;
     return _extractOrderList(raw);
   }
@@ -100,14 +105,18 @@ class OrderService {
   /// [status] is one of the app's UI-vocabulary strings (pending_review,
   /// merchant_contacted, order_confirmed, preparing, completed, cancelled) —
   /// translated to the backend's enum before sending.
-  Future<void> patchStatus({
+  Future<AppOrder> patchStatus({
     required String ref,
     required String status,
   }) async {
-    await ApiClient.instance.put<Map<String, dynamic>>(
+    final response = await ApiClient.instance.put<Map<String, dynamic>>(
       ApiConstants.merchantOrderStatus(ref),
       data: {'status': _toBackendStatus(status)},
     );
+    final raw = response.data!;
+    final orderJson =
+        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
   }
 
   // ── Status vocabulary translation ─────────────────────────────────────────────

@@ -69,6 +69,27 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
         ),
       ),
       centerTitle: true,
+       actions: [
+         PopupMenuButton<String>(
+           tooltip: 'تصفية الحالة',
+           icon: const Icon(Icons.filter_list_rounded, color: _textDark),
+           onSelected: (value) {
+             context.read<OrderBloc>().add(
+                   MerchantOrdersLoadRequested(
+                     status: value == 'all' ? null : value,
+                   ),
+                 );
+           },
+           itemBuilder: (_) => const [
+             PopupMenuItem(value: 'all', child: Text('كل الطلبات')),
+             PopupMenuItem(value: 'pending', child: Text('قيد المراجعة')),
+             PopupMenuItem(value: 'confirmed', child: Text('تم التأكيد')),
+             PopupMenuItem(value: 'processing', child: Text('قيد التجهيز')),
+             PopupMenuItem(value: 'completed', child: Text('مكتمل')),
+             PopupMenuItem(value: 'cancelled', child: Text('ملغي')),
+           ],
+         ),
+       ],
     );
   }
 

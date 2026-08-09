@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'ai_result_model.dart';
 
 // ─── AI Controller ────────────────────────────────────────────────────────────
@@ -107,6 +108,7 @@ class AiController {
       request: () => _post(
         ApiConstants.aiCustomerReply,
         customerMessage,
+        storeName: UserController.instance.currentUser?.storeName,
       ),
     );
   }
@@ -160,7 +162,11 @@ class AiController {
   /// The backend requires `context` to be at least 5 characters — very short
   /// merchant input is padded so the request doesn't fail validation for a
   /// reason the user can't see.
-  Future<String> _post(String path, String context) async {
+  Future<String> _post(
+    String path,
+    String context, {
+    String? storeName,
+  }) async {
     final trimmed = context.trim();
     final safeContext = trimmed.length >= 5 ? trimmed : '$trimmed منتج مميز';
     final response = await ApiClient.instance.post<Map<String, dynamic>>(
@@ -168,6 +174,7 @@ class AiController {
       data: {
         'context': safeContext,
         'language': 'Arabic',
+        if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
       },
     );
     final raw = response.data;

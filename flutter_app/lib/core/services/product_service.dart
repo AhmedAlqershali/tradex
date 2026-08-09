@@ -65,9 +65,14 @@ class ProductService {
   /// This is intentionally separate from [getProducts], which reads the
   /// public catalog. Merchant screens must never use the public endpoint for
   /// their inventory.
-  Future<List<Product>> getMerchantProducts() async {
+  Future<List<Product>> getMerchantProducts({String? status}) async {
     final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(ApiConstants.merchantProducts);
+        .get<Map<String, dynamic>>(
+          ApiConstants.merchantProducts,
+          queryParameters: {
+            if (status != null && status.isNotEmpty) 'status': status,
+          },
+        );
     return _extractProductList(response.data!);
   }
 
@@ -97,9 +102,7 @@ class ProductService {
   /// POST /merchant/products
   /// [category] is the display name shown in the UI; it's resolved to the
   /// numeric category_id the backend requires via [_resolveCategoryId].
-  /// [quantity] defaults to 100 — the current product form has no stock-
-  /// quantity field, so this is a stopgap until one is added; merchants can
-  /// still adjust real stock levels once that field exists.
+  /// [quantity] is the merchant-managed stock quantity.
   /// [imagePaths] are attached as the `images[]` multipart field understood
   /// by the backend (there is no separate image sub-endpoint).
   Future<Product> createProduct({
@@ -109,7 +112,7 @@ class ProductService {
     required String description,
     bool isVisible = true,
     bool isFeatured = false,
-    int quantity = 100,
+    int quantity = 0,
     List<String> imagePaths = const [],
   }) async {
     final storeId = UserController.instance.currentUser?.storeId;
@@ -125,7 +128,9 @@ class ProductService {
       'price': price,
       'description': description,
       'quantity': quantity,
-      'status': isVisible ? 'active' : 'inactive',
+      'status': isVisible
+          ? (quantity > 0 ? 'active' : 'out_of_stock')
+          : 'inactive',
       for (final path in imagePaths)
         'images[]': await MultipartFile.fromFile(path),
     });
@@ -164,8 +169,12 @@ class ProductService {
     }
     if (price != null) body['price'] = price;
     if (description != null) body['description'] = description;
-    if (isVisible != null) body['status'] = isVisible ? 'active' : 'inactive';
     if (quantity != null) body['quantity'] = quantity;
+    if (isVisible != null) {
+      body['status'] = isVisible
+          ? ((quantity ?? 1) > 0 ? 'active' : 'out_of_stock')
+          : 'inactive';
+    }
 
     if (imagePaths.isNotEmpty) {
       // PHP does not parse multipart bodies on PUT requests, so file

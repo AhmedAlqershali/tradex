@@ -29,6 +29,8 @@ class Product {
   /// from client-side data that only has the display [category] name.
   final String? categoryId;
   final double price;
+  final int quantity;
+  final String status;
 
   /// Ordered list of image URLs from the server (object storage).
   /// The first entry is used as the primary image.
@@ -48,6 +50,8 @@ class Product {
     required this.category,
     this.categoryId,
     required this.price,
+    this.quantity = 0,
+    this.status = 'active',
     this.imageUrls = const [],
     this.isVisible = true,
     this.isFeatured = false,
@@ -69,6 +73,8 @@ class Product {
     String? category,
     String? categoryId,
     double? price,
+    int? quantity,
+    String? status,
     List<String>? imageUrls,
     bool? isVisible,
     bool? isFeatured,
@@ -84,6 +90,8 @@ class Product {
       category: category ?? this.category,
       categoryId: categoryId ?? this.categoryId,
       price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
+      status: status ?? this.status,
       imageUrls: imageUrls ?? this.imageUrls,
       isVisible: isVisible ?? this.isVisible,
       isFeatured: isFeatured ?? this.isFeatured,
@@ -103,6 +111,8 @@ class Product {
         'category': category,
         'categoryId': categoryId,
         'price': price,
+        'quantity': quantity,
+        'status': status,
         'imageUrls': imageUrls,
         'isVisible': isVisible,
         'isFeatured': isFeatured,
@@ -119,6 +129,8 @@ class Product {
         category: json['category'] as String? ?? '',
         categoryId: json['categoryId']?.toString(),
         price: json['price'] != null ? (json['price'] as num).toDouble() : 0.0,
+        quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+        status: json['status'] as String? ?? 'active',
         imageUrls: List<String>.from(json['imageUrls'] ?? []),
         isVisible: json['isVisible'] as bool? ?? true,
         isFeatured: json['isFeatured'] as bool? ?? false,
@@ -193,6 +205,8 @@ class Product {
       category: categoryName,
       categoryId: categoryId,
       price: json['price'] != null ? (json['price'] as num).toDouble() : 0.0,
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      status: status ?? 'active',
       imageUrls: imageUrls,
       isVisible: isVisible,
       // Backend has no "featured" concept — always false from server data.
