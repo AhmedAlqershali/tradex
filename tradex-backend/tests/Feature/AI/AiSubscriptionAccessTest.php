@@ -115,6 +115,29 @@ class AiSubscriptionAccessTest extends TestCase
         $this->assertGenerationAllowed($token);
     }
 
+    public function test_expired_subscription_cannot_supply_an_ai_plan_limit(): void
+    {
+        $merchant = User::factory()->merchant()->create();
+        $plan = Plan::factory()->active()->create(['ai_usage_limit' => 1]);
+        Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
+            'type'      => 'paid',
+            'status'    => 'active',
+            'starts_at' => now()->subMonth(),
+            'ends_at'   => now()->subDay(),
+        ]);
+        $token = $merchant->createToken('test')->plainTextToken;
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->never();
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'Expired plan must not provide AI access.',
+        ], $this->headers($token))
+            ->assertForbidden()
+            ->assertJsonPath('success', false);
+    }
+
     public function test_expired_trial_denies_every_merchant_ai_generation_endpoint(): void
     {
         ['token' => $token] = $this->merchantToken('trial', true);

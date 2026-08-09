@@ -6,12 +6,16 @@ use App\Contracts\Services\AI\AiUsageServiceInterface;
 use App\Exceptions\AiRateLimitException;
 use App\Models\AiSetting;
 use App\Models\AiUsage;
-use App\Models\Subscription;
 use App\Models\User;
+use App\Contracts\Services\SubscriptionServiceInterface;
 use Illuminate\Support\Facades\DB;
 
 class AiUsageService implements AiUsageServiceInterface
 {
+    public function __construct(
+        private readonly SubscriptionServiceInterface $subscriptionService,
+    ) {}
+
     // -------------------------------------------------------------------------
     // Limit check
     // -------------------------------------------------------------------------
@@ -175,12 +179,9 @@ class AiUsageService implements AiUsageServiceInterface
      */
     private function effectiveMonthlyLimit(User $user, ?AiSetting $setting): ?int
     {
-        // Active subscription plan
-        $subscription = Subscription::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->with('plan')
-            ->latest()
-            ->first();
+        // Use the canonical entitlement check so expired or future-dated
+        // subscription periods cannot provide AI plan access.
+        $subscription = $this->subscriptionService->getActiveForMerchant($user);
 
         if ($subscription && $subscription->plan && $subscription->plan->ai_usage_limit !== null) {
             return (int) $subscription->plan->ai_usage_limit;

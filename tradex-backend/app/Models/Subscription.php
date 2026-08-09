@@ -74,6 +74,7 @@ class Subscription extends Model
     public function isEntitled(): bool
     {
         return $this->status === 'active'
+            && ($this->starts_at === null || $this->starts_at->lte(now()))
             && $this->ends_at !== null
             && $this->ends_at->isFuture();
     }

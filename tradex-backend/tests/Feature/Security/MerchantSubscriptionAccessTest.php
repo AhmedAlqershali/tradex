@@ -63,6 +63,19 @@ class MerchantSubscriptionAccessTest extends TestCase
             ->assertOk();
     }
 
+    public function test_future_dated_subscription_does_not_grant_business_access(): void
+    {
+        ['merchant' => $merchant, 'token' => $token] = $this->merchantWithToken();
+        Subscription::factory()->forUser($merchant)->active()->create([
+            'type'      => 'paid',
+            'starts_at' => now()->addMinute(),
+            'ends_at'   => now()->addMonth(),
+        ]);
+
+        $this->getJson($this->businessUrl(), $this->headers($token))
+            ->assertForbidden();
+    }
+
     public function test_expired_trial_denies_merchant_business_access(): void
     {
         $this->assertBusinessAccessDeniedForSubscription(['type' => 'trial', 'status' => 'active']);

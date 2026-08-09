@@ -31,7 +31,8 @@ class SubscriptionService implements SubscriptionServiceInterface
         if (
             $subscription
             && $subscription->status === 'active'
-            && ($subscription->ends_at === null || $subscription->ends_at->isPast())
+            && $subscription->ends_at !== null
+            && $subscription->ends_at->isPast()
         ) {
             $subscription = $this->subscriptionRepository->markExpired($subscription);
         }

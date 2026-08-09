@@ -4,6 +4,8 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -94,6 +96,28 @@ class StoreManagementTest extends TestCase
         $response->assertOk();
         // The StoreCollection uses StoreResource which includes owner when loaded
         $this->assertNotNull($response->json('data.data.0'));
+    }
+
+    public function test_index_includes_merchant_subscription_status_and_dates(): void
+    {
+        ['token' => $token] = $this->actingAsAdmin();
+        $merchant = User::factory()->merchant()->create();
+        $store = Store::factory()->forUser($merchant)->active()->create();
+        $plan = Plan::factory()->active()->create();
+        Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
+            'type'      => 'trial',
+            'status'    => 'active',
+            'starts_at' => now()->subDay(),
+            'ends_at'   => now()->addDays(13),
+        ]);
+
+        $this->getJson('/api/v1/admin/stores', $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.data.0.id', $store->id)
+            ->assertJsonPath('data.data.0.owner.current_subscription.type', 'trial')
+            ->assertJsonPath('data.data.0.owner.current_subscription.status', 'active')
+            ->assertJsonPath('data.data.0.owner.current_subscription.starts_at', fn ($value) => is_string($value))
+            ->assertJsonPath('data.data.0.owner.current_subscription.ends_at', fn ($value) => is_string($value));
     }
 
     public function test_index_supports_search_filter(): void

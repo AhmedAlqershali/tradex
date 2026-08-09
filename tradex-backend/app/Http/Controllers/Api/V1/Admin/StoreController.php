@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\V1\Admin;
 use App\Contracts\Services\AdminStoreManagementServiceInterface;
 use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Admin\UpdateStoreStatusRequest;
+use App\Http\Resources\Store\AdminStoreCollection;
 use App\Http\Resources\Store\AdminStoreResource;
-use App\Http\Resources\Store\StoreCollection;
 use App\Models\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,7 +45,7 @@ class StoreController extends BaseApiController
         );
 
         return $this->success(
-            (new StoreCollection($paginator))->toArray($request),
+            (new AdminStoreCollection($paginator))->toArray($request),
             'Stores retrieved successfully.',
         );
     }

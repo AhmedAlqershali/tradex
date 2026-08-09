@@ -17,7 +17,10 @@ class AdminStoreManagementService implements AdminStoreManagementServiceInterfac
 
     public function listStores(array $filters): LengthAwarePaginator
     {
-        $query = Store::with(['owner:id,name,email,phone,role,status']);
+        $query = Store::with([
+            'owner:id,name,email,phone,role,status',
+            'owner.subscriptions.plan',
+        ]);
 
         if (! empty($filters['search'])) {
             $term = '%' . $filters['search'] . '%';

@@ -507,6 +507,11 @@ class _MerchantSubscriptionScreenState
           SizedBox(height: 22.h),
           _detailRow('النوع', isTrial ? 'فترة تجريبية' : 'اشتراك مدفوع'),
           _detailRow('الحالة', _statusLabel(subscription.status)),
+          if (subscription.startsAt != null)
+            _detailRow(
+              'بدأ في',
+              '${subscription.startsAt!.day}/${subscription.startsAt!.month}/${subscription.startsAt!.year}',
+            ),
           if (subscription.billingCycle.isNotEmpty)
             _detailRow(
                 'دورة الفوترة', _billingLabel(subscription.billingCycle)),
@@ -515,6 +520,18 @@ class _MerchantSubscriptionScreenState
               'ينتهي في',
               '${endsAt.day}/${endsAt.month}/${endsAt.year}'
                   '${daysRemaining != null ? ' ($daysRemaining يوم متبقٍ)' : ''}',
+            ),
+          if (!entitled)
+            Padding(
+              padding: EdgeInsets.only(top: 4.h),
+              child: Text(
+                'انتهى الوصول إلى ميزات التاجر. أرسل طلب اشتراك جديد لاستعادة الوصول بعد الموافقة.',
+                style: GoogleFonts.ibmPlexSans(
+                  color: const Color(0xffC53030),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
         ],
       ),
