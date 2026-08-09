@@ -30,7 +30,7 @@ class OrderService {
   /// [items] — list of { product_id, product_name, price, quantity }.
   /// Items are a price snapshot captured at checkout time.
   /// Returns the server-created [AppOrder] with a server-assigned ref.
-  Future<AppOrder> createOrder({
+  Future<List<AppOrder>> createOrder({
     required String customerName,
     required String customerPhone,
     required String customerCity,
@@ -48,9 +48,20 @@ class OrderService {
       },
     );
     final raw = response.data!;
-    final orderJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+    final data = raw['data'] ?? raw;
+    final list = data is List
+        ? data
+        : data is Map && data['data'] is List
+            ? data['data'] as List
+            : data is Map
+                ? [data]
+                : const [];
+    return list
+        .whereType<Map>()
+        .map((item) => AppOrder.fromServerJson(
+              _normaliseStatus(Map<String, dynamic>.from(item)),
+            ))
+        .toList();
   }
 
   // ── Fetch orders ──────────────────────────────────────────────────────────────
@@ -125,12 +136,18 @@ class OrderService {
   /// server (list/detail responses).
   static String _fromBackendStatus(String backendStatus) {
     switch (backendStatus) {
-      case 'pending':    return 'pending_review';
-      case 'confirmed':  return 'order_confirmed';
-      case 'processing': return 'preparing';
-      case 'completed':  return 'completed';
-      case 'cancelled':  return 'cancelled';
-      default:           return 'pending_review';
+      case 'pending':
+        return 'pending_review';
+      case 'confirmed':
+        return 'order_confirmed';
+      case 'processing':
+        return 'preparing';
+      case 'completed':
+        return 'completed';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return 'pending_review';
     }
   }
 
@@ -146,10 +163,15 @@ class OrderService {
 
   List<AppOrder> _extractOrderList(Map<String, dynamic> raw) {
     final data = raw['data'] ?? raw;
-    final list = data is Map && data['data'] is List ? data['data'] : data;
+    final list = data is Map && data['data'] is List
+        ? data['data']
+        : data is Map && data['id'] != null
+            ? [data]
+            : data;
     if (list is List) {
       return list
-          .cast<Map<String, dynamic>>()
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
           .map(_normaliseStatus)
           .map(AppOrder.fromServerJson)
           .toList();

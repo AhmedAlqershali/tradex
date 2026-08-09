@@ -130,6 +130,7 @@ class ApiConstants {
 
   // ── Favorites ────────────────────────────────────────────────────────────────
   static const String favorites = '/favorites';
+  // The client favorite endpoint identifies the product in the URL.
   static String favoriteById(String productId) => '/favorites/$productId';
 
   // ── AI ────────────────────────────────────────────────────────────────────────

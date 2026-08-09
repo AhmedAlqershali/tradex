@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/core/services/product_service.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/models/store_model.dart';
 
@@ -49,8 +50,8 @@ class StoreService {
   /// GET /merchant/stores — returns the authenticated merchant's stores;
   /// this app only ever creates one per merchant, so the first is "my store".
   Future<StoreModel> getMyStore() async {
-    final response =
-        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.myStores);
+    final response = await ApiClient.instance
+        .get<Map<String, dynamic>>(ApiConstants.myStores);
     final raw = response.data!;
     final list = _extractList(raw);
     if (list.isEmpty) {
@@ -89,13 +90,13 @@ class StoreService {
     final formData = FormData.fromMap({
       'logo': await MultipartFile.fromFile(filePath),
     });
-    final response = await ApiClient.instance.postFormData<Map<String, dynamic>>(
+    final response =
+        await ApiClient.instance.postFormData<Map<String, dynamic>>(
       ApiConstants.myStoreLogo(storeId),
       formData,
     );
     final raw = response.data!;
-    final body =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    final body = raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
     return body['logo'] as String? ??
         body['logo_url'] as String? ??
         body['url'] as String? ??
@@ -105,19 +106,17 @@ class StoreService {
   // ── Store products ────────────────────────────────────────────────────────────
   /// GET /stores/:id/products
   Future<List<Product>> getStoreProducts(String storeId) async {
-    final response = await ApiClient.instance.get<Map<String, dynamic>>(
-      ApiConstants.storeProducts(storeId),
-    );
-    final raw = response.data!;
-    final list = _extractList(raw);
-    return list.map((e) => Product.fromServerJson(e)).toList();
+    // There is no /stores/{id}/products route. The supported client catalog
+    // endpoint exposes store_id filtering.
+    return ProductService.instance.getProducts(storeId: storeId);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
   List<Map<String, dynamic>> _extractList(Map<String, dynamic> raw) {
     final outer = raw['data'] ?? raw;
-    final data = (outer is Map && outer['data'] is List) ? outer['data'] : outer;
+    final data =
+        (outer is Map && outer['data'] is List) ? outer['data'] : outer;
     if (data is List) {
       return data.cast<Map<String, dynamic>>();
     }

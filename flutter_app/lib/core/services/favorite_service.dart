@@ -22,17 +22,15 @@ class FavoriteService {
     final response = await ApiClient.instance
         .get<Map<String, dynamic>>(ApiConstants.favorites);
     final raw = response.data!;
-    final data = raw['data'] ?? raw;
+    final envelope = raw['data'] ?? raw;
+    final data = envelope is Map ? envelope['data'] ?? envelope : envelope;
     if (data is List) {
-      return data
-          .cast<Map<String, dynamic>>()
-          .map((e) {
-            // Server may return { product: {...} } wrappers or plain product objects.
-            final productJson =
-                e['product'] is Map ? e['product'] as Map<String, dynamic> : e;
-            return Product.fromServerJson(productJson);
-          })
-          .toList();
+      return data.cast<Map<String, dynamic>>().map((e) {
+        // Server may return { product: {...} } wrappers or plain product objects.
+        final productJson =
+            e['product'] is Map ? e['product'] as Map<String, dynamic> : e;
+        return Product.fromServerJson(productJson);
+      }).toList();
     }
     return [];
   }
@@ -40,8 +38,7 @@ class FavoriteService {
   /// POST /favorites
   Future<void> addFavorite(String productId) async {
     await ApiClient.instance.post<Map<String, dynamic>>(
-      ApiConstants.favorites,
-      data: {'product_id': productId},
+      ApiConstants.favoriteById(productId),
     );
   }
 

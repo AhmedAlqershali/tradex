@@ -87,7 +87,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
               })
           .toList();
 
-      final serverOrder = await OrderService.instance.createOrder(
+      final serverOrders = await OrderService.instance.createOrder(
         customerName: event.customerName,
         customerPhone: event.customerPhone,
         customerCity: event.customerCity,
@@ -95,27 +95,30 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         items: items,
       );
 
-      // Prefer the server-assigned ref; if the service returns a minimal
-      // response, fill in the local fields for immediate display.
-      final order = serverOrder.ref.isNotEmpty
-          ? serverOrder
-          : AppOrder(
-              ref: generateOrderRef(),
-              createdAt: DateTime.now(),
-              status: OrderStatus.pendingReview,
-              products: event.products,
-              customerName: event.customerName,
-              customerPhone: event.customerPhone,
-              customerEmail: event.customerEmail,
-              customerCity: event.customerCity,
-              customerArea: event.customerArea,
-              notes: event.notes,
-            );
+      // Checkout can create one order per store. Keep every server order in
+      // the local client history, while the confirmation screen shows the
+      // first reference for its existing single-reference contract.
+      final orders = serverOrders.isNotEmpty
+          ? serverOrders
+          : [
+              AppOrder(
+                ref: generateOrderRef(),
+                createdAt: DateTime.now(),
+                status: OrderStatus.pendingReview,
+                products: event.products,
+                customerName: event.customerName,
+                customerPhone: event.customerPhone,
+                customerEmail: event.customerEmail,
+                customerCity: event.customerCity,
+                customerArea: event.customerArea,
+                notes: event.notes,
+              ),
+            ];
 
-      // Register in the local controller so ValueListenableBuilder widgets
-      // (e.g. ClientOrderDetailsScreen) can watch status updates.
-      OrderController.instance.createOrder(order);
-      emit(OrderCreated(order));
+      for (final order in orders) {
+        OrderController.instance.createOrder(order);
+      }
+      emit(OrderCreated(orders.first));
     } catch (e) {
       emit(OrderFailure(_errorMessage(e)));
     }

@@ -58,18 +58,19 @@ class AppOrderProduct {
   factory AppOrderProduct.fromServerJson(Map<String, dynamic> json) =>
       AppOrderProduct(
         id: (json['product_id'] ?? json['id'])?.toString() ?? '',
-        name: json['product_name'] as String? ??
-            json['name'] as String? ??
-            '',
+        name: json['product_name'] as String? ?? json['name'] as String? ?? '',
         storeName: json['store_name'] as String? ??
             json['storeName'] as String? ??
-            '',
+            (json['store'] is Map
+                ? json['store']['store_name'] as String? ?? ''
+                : ''),
         price: json['price'] != null
             ? (json['price'] as num).toDouble()
-            : 0.0,
+            : json['unit_price'] != null
+                ? (json['unit_price'] as num).toDouble()
+                : 0.0,
         quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-        imageUrl: json['image_url'] as String? ??
-            json['imageUrl'] as String?,
+        imageUrl: json['image_url'] as String? ?? json['imageUrl'] as String?,
       );
 }
 
@@ -144,7 +145,8 @@ class AppOrder {
         ref: json['ref'] as String,
         createdAt: DateTime.parse(json['createdAt'] as String),
         merchantId: json['merchantId'] as String?,
-        status: _statusFromString(json['status'] as String? ?? 'pending_review'),
+        status:
+            _statusFromString(json['status'] as String? ?? 'pending_review'),
         products: (json['products'] as List<dynamic>)
             .map((e) => AppOrderProduct.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -163,24 +165,30 @@ class AppOrder {
   ///     customer_area, notes }
   factory AppOrder.fromServerJson(Map<String, dynamic> json) {
     // Server may use `ref` or `id` as the order identifier.
-    final ref = json['ref'] as String? ??
-        json['id']?.toString() ??
-        '';
+    final ref = json['ref'] as String? ?? json['id']?.toString() ?? '';
 
     // Items may be in `items` or `products` key.
     final rawItems = json['items'] ?? json['products'] ?? <dynamic>[];
-    final products = (rawItems as List<dynamic>)
-        .map((e) =>
-            AppOrderProduct.fromServerJson(e as Map<String, dynamic>))
-        .toList();
+    final storeName = json['store'] is Map
+        ? json['store']['store_name'] as String? ?? ''
+        : '';
+    final products = (rawItems as List<dynamic>).map((e) {
+      final item = Map<String, dynamic>.from(e as Map);
+      if (storeName.isNotEmpty &&
+          item['store_name'] == null &&
+          item['storeName'] == null) {
+        item['store_name'] = storeName;
+      }
+      return AppOrderProduct.fromServerJson(item);
+    }).toList();
 
     return AppOrder(
       ref: ref,
       createdAt: _parseDate(
         json['created_at'] as String? ?? json['createdAt'] as String?,
       ),
-      merchantId: json['merchant_id'] as String? ??
-          json['merchantId'] as String?,
+      merchantId:
+          json['merchant_id'] as String? ?? json['merchantId'] as String?,
       status: _statusFromString(
         json['status'] as String? ?? 'pending_review',
       ),
@@ -211,36 +219,57 @@ class AppOrder {
 
   static String _statusToString(OrderStatus s) {
     switch (s) {
-      case OrderStatus.pendingReview:     return 'pending_review';
-      case OrderStatus.merchantContacted: return 'merchant_contacted';
-      case OrderStatus.orderConfirmed:    return 'order_confirmed';
-      case OrderStatus.preparing:         return 'preparing';
-      case OrderStatus.completed:         return 'completed';
-      case OrderStatus.cancelled:         return 'cancelled';
+      case OrderStatus.pendingReview:
+        return 'pending_review';
+      case OrderStatus.merchantContacted:
+        return 'merchant_contacted';
+      case OrderStatus.orderConfirmed:
+        return 'order_confirmed';
+      case OrderStatus.preparing:
+        return 'preparing';
+      case OrderStatus.completed:
+        return 'completed';
+      case OrderStatus.cancelled:
+        return 'cancelled';
     }
   }
 
   static OrderStatus _statusFromString(String value) {
     switch (value) {
-      case 'merchant_contacted': return OrderStatus.merchantContacted;
-      case 'order_confirmed':    return OrderStatus.orderConfirmed;
-      case 'preparing':          return OrderStatus.preparing;
-      case 'completed':          return OrderStatus.completed;
-      case 'cancelled':          return OrderStatus.cancelled;
-      default:                   return OrderStatus.pendingReview;
+      case 'merchant_contacted':
+        return OrderStatus.merchantContacted;
+      case 'order_confirmed':
+        return OrderStatus.orderConfirmed;
+      case 'preparing':
+        return OrderStatus.preparing;
+      case 'completed':
+        return OrderStatus.completed;
+      case 'cancelled':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.pendingReview;
     }
   }
 
   /// Derived store name from the first product. When a proper merchant profile
   /// is linked, replace this with a dedicated [merchantStoreName] field.
-  String get storeName =>
-      products.isNotEmpty ? products.first.storeName : '—';
+  String get storeName => products.isNotEmpty ? products.first.storeName : '—';
 
   /// Arabic-formatted date string, e.g. "17 يوليو 2026".
   String get formattedDate {
     const months = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
     ];
     return '${createdAt.day} ${months[createdAt.month - 1]} ${createdAt.year}';
   }
@@ -314,12 +343,18 @@ class OrderController {
   /// Used by [OrderBloc] when patching a single order status.
   static OrderStatus parseStatus(String value) {
     switch (value) {
-      case 'merchant_contacted': return OrderStatus.merchantContacted;
-      case 'order_confirmed':    return OrderStatus.orderConfirmed;
-      case 'preparing':          return OrderStatus.preparing;
-      case 'completed':          return OrderStatus.completed;
-      case 'cancelled':          return OrderStatus.cancelled;
-      default:                   return OrderStatus.pendingReview;
+      case 'merchant_contacted':
+        return OrderStatus.merchantContacted;
+      case 'order_confirmed':
+        return OrderStatus.orderConfirmed;
+      case 'preparing':
+        return OrderStatus.preparing;
+      case 'completed':
+        return OrderStatus.completed;
+      case 'cancelled':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.pendingReview;
     }
   }
 }

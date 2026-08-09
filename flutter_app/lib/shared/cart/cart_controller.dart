@@ -74,35 +74,41 @@ class CartItem {
   factory CartItem.fromServerJson(Map<String, dynamic> json) {
     // The server item id is the cart row id; product id is a separate field.
     final serverItemId = json['id']?.toString();
-    final productId = (json['product_id'] ?? json['productId'])?.toString()
-        ?? serverItemId
-        ?? '';
+    final productMap = json['product'] is Map
+        ? Map<String, dynamic>.from(json['product'] as Map)
+        : null;
+    final productId =
+        (json['product_id'] ?? json['productId'] ?? productMap?['id'])
+                ?.toString() ??
+            serverItemId ??
+            '';
 
     // Product name may come as `name`, `product_name`, or inside a nested product.
-    final productMap = json['product'] is Map
-        ? json['product'] as Map<String, dynamic>
-        : null;
+    final name = json['name'] as String? ??
+        json['product_name'] as String? ??
+        productMap?['name'] as String? ??
+        '';
 
-    final name = json['name'] as String?
-        ?? json['product_name'] as String?
-        ?? productMap?['name'] as String?
-        ?? '';
+    final nestedStore = productMap?['store'];
+    final storeName = json['store_name'] as String? ??
+        json['storeName'] as String? ??
+        productMap?['store_name'] as String? ??
+        productMap?['storeName'] as String? ??
+        (nestedStore is Map ? nestedStore['store_name'] as String? : '') ??
+        '';
 
-    final storeName = json['store_name'] as String?
-        ?? json['storeName'] as String?
-        ?? productMap?['store_name'] as String?
-        ?? productMap?['storeName'] as String?
-        ?? '';
-
-    final imageUrl = json['image_url'] as String?
-        ?? json['imageUrl'] as String?
-        ?? productMap?['image_url'] as String?;
+    final imageUrl = json['image_url'] as String? ??
+        json['imageUrl'] as String? ??
+        productMap?['image'] as String? ??
+        productMap?['image_url'] as String?;
 
     final price = json['price'] != null
         ? (json['price'] as num).toDouble()
-        : productMap?['price'] != null
-            ? (productMap!['price'] as num).toDouble()
-            : 0.0;
+        : json['unit_price'] != null
+            ? (json['unit_price'] as num).toDouble()
+            : productMap?['price'] != null
+                ? (productMap!['price'] as num).toDouble()
+                : 0.0;
 
     final quantity = (json['quantity'] as num?)?.toInt() ?? 1;
 
@@ -140,11 +146,9 @@ class CartController {
 
   List<CartItem> get items => itemsNotifier.value;
 
-  double get total =>
-      items.fold(0.0, (sum, item) => sum + item.lineTotal);
+  double get total => items.fold(0.0, (sum, item) => sum + item.lineTotal);
 
-  int get itemCount =>
-      items.fold(0, (sum, item) => sum + item.quantity);
+  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
 
   bool get isEmpty => items.isEmpty;
 
@@ -179,8 +183,7 @@ class CartController {
     final index = list.indexWhere((e) => e.id == id);
     if (index < 0) return;
     if (list[index].quantity > 1) {
-      list[index] =
-          list[index].copyWith(quantity: list[index].quantity - 1);
+      list[index] = list[index].copyWith(quantity: list[index].quantity - 1);
     } else {
       list.removeAt(index);
     }
@@ -188,8 +191,8 @@ class CartController {
   }
 
   void remove(String id) {
-    itemsNotifier.value =
-        List<CartItem>.from(items)..removeWhere((e) => e.id == id);
+    itemsNotifier.value = List<CartItem>.from(items)
+      ..removeWhere((e) => e.id == id);
   }
 
   /// Replaces the entire cart with [items] fetched from the server.

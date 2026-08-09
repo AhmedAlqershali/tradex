@@ -21,15 +21,15 @@ class CartService {
   /// GET /cart
   /// Returns the current user's cart items from the server.
   Future<List<CartItem>> getCart() async {
-    final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(ApiConstants.cart);
+    final response =
+        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.cart);
     final raw = response.data!;
     return _extractCartItems(raw);
   }
 
   /// POST /cart/items
-  /// Adds a product to the server cart. Returns the updated cart item.
-  Future<CartItem> addItem({
+  /// Adds a product to the server cart. Returns the updated cart items.
+  Future<List<CartItem>> addItem({
     required String productId,
     required int quantity,
   }) async {
@@ -38,14 +38,12 @@ class CartService {
       data: {'product_id': productId, 'quantity': quantity},
     );
     final raw = response.data!;
-    final itemJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return CartItem.fromServerJson(itemJson);
+    return _extractCartItems(raw);
   }
 
   /// PUT /cart/items/:itemId
   /// Updates the quantity of an existing cart item on the server.
-  Future<CartItem> updateItem({
+  Future<List<CartItem>> updateItem({
     required String itemId,
     required int quantity,
   }) async {
@@ -54,9 +52,7 @@ class CartService {
       data: {'quantity': quantity},
     );
     final raw = response.data!;
-    final itemJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return CartItem.fromServerJson(itemJson);
+    return _extractCartItems(raw);
   }
 
   /// DELETE /cart/items/:itemId
@@ -65,11 +61,16 @@ class CartService {
         .delete<Map<String, dynamic>>(ApiConstants.cartItem(itemId));
   }
 
-  /// DELETE /cart
-  /// Clears all items from the server-side cart.
+  /// Clears all items from the server-side cart. The backend intentionally
+  /// exposes item deletion only, so use the supported item route for each row.
   Future<void> clearCart() async {
-    await ApiClient.instance
-        .delete<Map<String, dynamic>>(ApiConstants.cart);
+    final items = await getCart();
+    for (final item in items) {
+      final serverItemId = item.serverItemId;
+      if (serverItemId != null && serverItemId.isNotEmpty) {
+        await removeItem(serverItemId);
+      }
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -86,7 +87,8 @@ class CartService {
     }
 
     return list
-        .cast<Map<String, dynamic>>()
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
         .map(CartItem.fromServerJson)
         .toList();
   }

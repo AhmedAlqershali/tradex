@@ -74,10 +74,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) async {
     final previousItems = _currentItems();
     try {
-      await CartService.instance.addItem(
+      final items = await CartService.instance.addItem(
         productId: event.productId,
         quantity: event.quantity,
       );
+      CartController.instance.setItems(items);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
@@ -90,10 +91,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) async {
     final previousItems = _currentItems();
     try {
-      await CartService.instance.updateItem(
+      final items = await CartService.instance.updateItem(
         itemId: event.itemId,
         quantity: event.quantity,
       );
+      CartController.instance.setItems(items);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
@@ -107,6 +109,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final previousItems = _currentItems();
     try {
       await CartService.instance.removeItem(event.itemId);
+      final items = await CartService.instance.getCart();
+      CartController.instance.setItems(items);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
