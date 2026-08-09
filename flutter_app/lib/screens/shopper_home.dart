@@ -31,6 +31,9 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
     // Load stores and products from the real backend.
     context.read<StoreBloc>().add(const StoresLoadRequested());
     context.read<ProductBloc>().add(const ProductsLoadRequested());
+    context
+        .read<ClientDashboardBloc>()
+        .add(const ClientDashboardLoadRequested());
   }
 
   @override
@@ -49,6 +52,8 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const _ClientDashboardCounters(),
+                      SizedBox(height: 16.h),
                       const HomeSearchBar(),
                       SizedBox(height: 16.h),
                       const HomeHeroBanner(),
@@ -67,6 +72,174 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Client dashboard counters ───────────────────────────────────────────────
+
+class _ClientDashboardCounters extends StatelessWidget {
+  const _ClientDashboardCounters();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ClientDashboardBloc, ClientDashboardState>(
+      builder: (context, state) {
+        if (state is ClientDashboardInitial ||
+            state is ClientDashboardLoading) {
+          return SizedBox(
+            height: 96.h,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state is ClientDashboardFailure) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: _DashboardCountersError(
+              message: state.message,
+              onRetry: () => context
+                  .read<ClientDashboardBloc>()
+                  .add(const ClientDashboardLoadRequested()),
+            ),
+          );
+        }
+
+        if (state is ClientDashboardLoaded) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _DashboardCounterCard(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'طلباتي',
+                    value: state.dashboard.ordersCount,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: _DashboardCounterCard(
+                    icon: Icons.favorite_border_rounded,
+                    label: 'مفضلاتي',
+                    value: state.dashboard.favoritesCount,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+class _DashboardCounterCard extends StatelessWidget {
+  const _DashboardCounterCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        child: Row(
+          children: [
+            Container(
+              width: 38.w,
+              height: 38.w,
+              decoration: BoxDecoration(
+                color: const Color(0xffEDE9FF),
+                borderRadius: BorderRadius.circular(11.r),
+              ),
+              child: Icon(icon, color: const Color(0xff4D41DF), size: 21.sp),
+            ),
+            SizedBox(width: 10.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$value',
+                  style: TextStyle(
+                    color: const Color(0xff1A1A1A),
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: const Color(0xff888888),
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardCountersError extends StatelessWidget {
+  const _DashboardCountersError({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: const Color(0xffFEE2E2),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              color: const Color(0xffEF4444),
+              size: 22.sp,
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                message,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: const Color(0xff7F1D1D),
+                  fontSize: 12.sp,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('إعادة المحاولة'),
+            ),
+          ],
         ),
       ),
     );
@@ -96,7 +269,8 @@ class _NearbyStoresSection extends StatelessWidget {
           children: [
             SectionHeader(
               title: 'متاجر قريبة منك',
-              onTap: () => Navigator.push(context,
+              onTap: () => Navigator.push(
+                  context,
                   MaterialPageRoute(
                       builder: (_) => const NearbyStoresScreen())),
             ),
@@ -147,7 +321,8 @@ class _NearbyProductsSection extends StatelessWidget {
           children: [
             SectionHeader(
               title: 'منتجات مختارة لك',
-              onTap: () => Navigator.push(context,
+              onTap: () => Navigator.push(
+                  context,
                   MaterialPageRoute(
                       builder: (_) => const RecentlyArrivedScreen())),
             ),
