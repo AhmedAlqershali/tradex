@@ -12,3 +12,4 @@
 - [Sanctum guard switching in tests](sanctum-guard-switching.md) — flush cached auth guards when one feature test switches bearer identities between simulated requests.
 - [PHPUnit throttle isolation](phpunit-throttle-isolation.md) — flush the in-memory test cache between feature tests so auth, API, and AI throttle counters cannot leak across cases.
 - [PHPUnit server precedence](phpunit-server-precedence.md) — Laravel may prefer Replit-injected $_SERVER values over PHPUnit <env> settings; use test-only <server> overrides when needed.
+- [Laravel test encryption key](laravel-test-encryption-key.md) — full feature tests need a process-only APP_KEY when the imported environment does not provide one.
