@@ -378,9 +378,6 @@ class _MerchantSubscriptionScreenState
   }
 
   void _showRequestForm({AdminPlan? plan}) {
-    final subscription = _subscriptionFromState(
-      context.read<MerchantSubscriptionBloc>().state,
-    );
     final selectedPlan = plan ?? _selectedPlan;
     final availablePlans =
         _plansFromState(context.read<MerchantSubscriptionBloc>().state);
@@ -404,7 +401,7 @@ class _MerchantSubscriptionScreenState
         value: context.read<MerchantSubscriptionBloc>(),
         child: _MerchantRequestForm(
           suggestedPlanId: int.tryParse(
-            selectedPlan?.id ?? subscription?.planId ?? '',
+            selectedPlan.id,
           ),
         ),
       ),
@@ -421,12 +418,6 @@ class _MerchantSubscriptionScreenState
       '$cycle: ${price.toStringAsFixed(2)}';
 
   String _limitLabel(int? value) => value == null ? 'غير محدود' : '$value';
-
-  AdminSubscription? _subscriptionFromState(MerchantSubscriptionState state) {
-    if (state is MerchantSubscriptionLoaded) return state.subscription;
-    if (state is MerchantSubscriptionFailure) return state.subscription;
-    return null;
-  }
 
   Color _requestStatusColor(String status) {
     switch (status) {
