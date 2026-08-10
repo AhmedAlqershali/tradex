@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\V1\Admin\SubscriptionRequestController as AdminSubscriptionRequestController;
 use App\Http\Controllers\Api\V1\Admin\SubscriptionProofController;
 use App\Http\Controllers\Api\V1\AiController;
+use App\Http\Controllers\Api\V1\NotificationController;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
@@ -104,6 +105,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::put('/password', [ProfileController::class, 'changePassword'])->name('password');
             Route::post('/avatar',  [ProfileController::class, 'updateAvatar'])->name('avatar');
         });
+
+        // ── In-app notifications (all authenticated roles) ──────────────────
+        Route::get('notifications', [NotificationController::class, 'index'])
+            ->name('notifications.index');
+        Route::patch('notifications/{id}/read', [NotificationController::class, 'markRead'])
+            ->name('notifications.read');
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])
+            ->name('notifications.read-all');
 
         // ── Client (cart + orders + favorites + reviews) ──────────────────────
         Route::middleware('role:client')

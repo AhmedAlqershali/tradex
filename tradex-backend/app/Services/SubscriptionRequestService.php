@@ -6,6 +6,7 @@ use App\Contracts\Repositories\SubscriptionRequestRepositoryInterface;
 use App\Contracts\Services\PlanServiceInterface;
 use App\Contracts\Services\SubscriptionRequestServiceInterface;
 use App\Contracts\Services\SubscriptionServiceInterface;
+use App\Contracts\Services\UserNotificationServiceInterface;
 use App\Exceptions\SubscriptionException;
 use App\Models\SubscriptionRequest;
 use App\Models\User;
@@ -21,6 +22,7 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
         private readonly SubscriptionRequestRepositoryInterface $subscriptionRequestRepository,
         private readonly SubscriptionServiceInterface $subscriptionService,
         private readonly PlanServiceInterface $planService,
+        private readonly UserNotificationServiceInterface $notificationService,
     ) {}
 
     // ── Admin-facing ──────────────────────────────────────────────────────────
@@ -47,7 +49,7 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
             throw SubscriptionException::alreadyReviewed($request->status);
         }
 
-        return DB::transaction(function () use ($request, $admin) {
+        $updated = DB::transaction(function () use ($request, $admin) {
             $this->subscriptionService->activateForMerchant(
                 $request->user,
                 $request->plan,
@@ -60,6 +62,16 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
                 'reviewed_at' => now(),
             ]);
         });
+
+        $this->notificationService->create(
+            $request->user,
+            'subscription_approved',
+            'تمت الموافقة على الاشتراك',
+            "تمت الموافقة على طلب الاشتراك لخطة {$request->plan->display_name}.",
+            ['subscription_request_id' => $request->id, 'status' => $updated->status],
+        );
+
+        return $updated;
     }
 
     /**
@@ -73,12 +85,24 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
             throw SubscriptionException::alreadyReviewed($request->status);
         }
 
-        return $this->subscriptionRequestRepository->update($request, [
+        $updated = $this->subscriptionRequestRepository->update($request, [
             'status'            => 'rejected',
             'rejection_reason'  => $reason,
             'reviewed_by'       => $admin->id,
             'reviewed_at'       => now(),
         ]);
+
+        $this->notificationService->create(
+            $request->user,
+            'subscription_rejected',
+            'تم رفض طلب الاشتراك',
+            $reason
+                ? "تم رفض طلب الاشتراك: {$reason}"
+                : 'تم رفض طلب الاشتراك من الإدارة.',
+            ['subscription_request_id' => $request->id, 'status' => $updated->status],
+        );
+
+        return $updated;
     }
 
     // ── Merchant-facing ──────────────────────────────────────────────────────

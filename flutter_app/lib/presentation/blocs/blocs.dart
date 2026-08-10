@@ -21,3 +21,4 @@ export 'admin_plans/admin_plans_bloc.dart';
 export 'admin_reviews/admin_reviews_bloc.dart';
 export 'admin_subscription_requests/admin_subscription_requests_bloc.dart';
 export 'admin_products/admin_products_bloc.dart';
+export 'notifications/notifications_bloc.dart';

@@ -4,6 +4,7 @@ import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/edit_profile_screen.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
+import 'package:ai_saas/screens/notifications_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
@@ -21,8 +22,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const Color _primary  = Color(0xff4D41DF);
-  static const Color _bg       = Color(0xffF8F9FD);
+  static const Color _primary = Color(0xff4D41DF);
+  static const Color _bg = Color(0xffF8F9FD);
   static const Color _textDark = Color(0xff1A1A1A);
   static const Color _textGray = Color(0xff707070);
 
@@ -47,13 +48,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (userState is UserUpdating) user = userState.user;
 
               final displayName = user?.displayName ?? 'مستخدم Tradex';
-              final region      = user?.region ?? '';
-              final photoPath   = user?.photoPath;
+              final region = user?.region ?? '';
+              final photoPath = user?.photoPath;
 
               return SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(
-                    horizontal: 20.w, vertical: 20.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                 child: Column(
                   children: [
                     // ── Avatar & name ──────────────────────────────────────
@@ -119,8 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 SizedBox(width: 2.w),
                                 Text(region,
                                     style: GoogleFonts.ibmPlexSans(
-                                        fontSize: 13.sp,
-                                        color: _textGray)),
+                                        fontSize: 13.sp, color: _textGray)),
                               ],
                             ),
                           ],
@@ -182,7 +181,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildSettingsTile(
           icon: Icons.notifications_outlined,
           label: 'الإشعارات',
-          onTap: () {},
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const NotificationsScreen(),
+            ),
+          ),
         ),
         _buildSettingsTile(
           icon: Icons.language_outlined,
@@ -300,8 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(14.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(14.r)),
                 child: ProductImage(
                   url: product.imageUrl,
                   fit: BoxFit.cover,
@@ -386,9 +389,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: OutlinedButton.icon(
             onPressed: isLoading
                 ? null
-                : () => context
-                    .read<AuthBloc>()
-                    .add(const AuthLogoutRequested()),
+                : () =>
+                    context.read<AuthBloc>().add(const AuthLogoutRequested()),
             icon: isLoading
                 ? SizedBox(
                     width: 16.w,

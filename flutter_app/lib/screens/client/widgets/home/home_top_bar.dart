@@ -1,5 +1,6 @@
 import 'package:ai_saas/screens/client/cart_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
+import 'package:ai_saas/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,9 +29,17 @@ class HomeTopBar extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           _IconCircleButton(
+            icon: Icons.notifications_none_rounded,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          _IconCircleButton(
             icon: Icons.shopping_cart_outlined,
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const CartScreen())),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const CartScreen())),
           ),
           const Spacer(),
           Flexible(
@@ -69,8 +78,7 @@ class HomeTopBar extends StatelessWidget {
           IconButton(
             onPressed: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const SearchScreen())),
-            icon:
-                Icon(Icons.menu_rounded, size: 26.sp, color: Colors.black87),
+            icon: Icon(Icons.menu_rounded, size: 26.sp, color: Colors.black87),
           ),
         ],
       ),

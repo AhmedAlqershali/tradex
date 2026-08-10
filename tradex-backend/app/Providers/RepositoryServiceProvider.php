@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Contracts\Repositories\ReviewRepositoryInterface;
+use App\Contracts\Repositories\UserNotificationRepositoryInterface;
 use App\Contracts\Services\ReviewServiceInterface;
 use App\Repositories\Eloquent\ReviewRepository;
+use App\Repositories\Eloquent\UserNotificationRepository;
 use App\Services\ReviewService;
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Contracts\Services\AI\AiUsageServiceInterface;
@@ -36,6 +38,7 @@ use App\Contracts\Services\StoreServiceInterface;
 use App\Contracts\Services\SubscriptionRequestServiceInterface;
 use App\Contracts\Services\SubscriptionServiceInterface;
 use App\Contracts\Services\UserManagementServiceInterface;
+use App\Contracts\Services\UserNotificationServiceInterface;
 use App\Repositories\Eloquent\CartRepository;
 use App\Repositories\Eloquent\CategoryRepository;
 use App\Repositories\Eloquent\FavoriteRepository;
@@ -61,6 +64,7 @@ use App\Services\StoreService;
 use App\Services\SubscriptionRequestService;
 use App\Services\SubscriptionService;
 use App\Services\UserManagementService;
+use App\Services\UserNotificationService;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -84,6 +88,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SubscriptionServiceInterface::class,        SubscriptionService::class);
         $this->app->bind(SubscriptionRequestServiceInterface::class, SubscriptionRequestService::class);
         $this->app->bind(ReviewServiceInterface::class,             ReviewService::class);
+        $this->app->bind(UserNotificationServiceInterface::class,  UserNotificationService::class);
 
         // ── Dashboard & management services ───────────────────────────────────
         $this->app->bind(MerchantDashboardServiceInterface::class,    MerchantDashboardService::class);
@@ -102,6 +107,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(SubscriptionRepositoryInterface::class,         SubscriptionRepository::class);
         $this->app->bind(SubscriptionRequestRepositoryInterface::class,  SubscriptionRequestRepository::class);
         $this->app->bind(ReviewRepositoryInterface::class,               ReviewRepository::class);
+        $this->app->bind(UserNotificationRepositoryInterface::class,      UserNotificationRepository::class);
 
         // ── AI SaaS ───────────────────────────────────────────────────────────
         $this->app->bind(AiProviderInterface::class, function ($app) {

@@ -58,6 +58,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AdminProductsBloc>(
           create: (_) => AdminProductsBloc(),
         ),
+        BlocProvider<NotificationsBloc>(
+          create: (_) => NotificationsBloc(),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(360, 690),

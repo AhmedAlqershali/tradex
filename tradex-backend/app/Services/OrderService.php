@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Repositories\CartRepositoryInterface;
 use App\Contracts\Repositories\OrderRepositoryInterface;
 use App\Contracts\Services\OrderServiceInterface;
+use App\Contracts\Services\UserNotificationServiceInterface;
 use App\Exceptions\CartException;
 use App\Exceptions\OrderException;
 use App\Models\Order;
@@ -19,6 +20,7 @@ class OrderService implements OrderServiceInterface
     public function __construct(
         private readonly OrderRepositoryInterface $orderRepository,
         private readonly CartRepositoryInterface  $cartRepository,
+        private readonly UserNotificationServiceInterface $notificationService,
     ) {}
 
     /**
@@ -81,6 +83,27 @@ class OrderService implements OrderServiceInterface
             return $orders;
         });
 
+        foreach ($orders as $order) {
+            $this->notificationService->create(
+                $client,
+                'order_placed',
+                'تم استلام طلبك',
+                "تم استلام طلبك رقم #{$order->id} بنجاح.",
+                ['order_id' => $order->id, 'status' => $order->status],
+            );
+
+            $merchant = $order->store?->owner;
+            if ($merchant) {
+                $this->notificationService->create(
+                    $merchant,
+                    'new_order',
+                    'طلب جديد',
+                    "لديك طلب جديد رقم #{$order->id}.",
+                    ['order_id' => $order->id, 'status' => $order->status],
+                );
+            }
+        }
+
         return $orders;
     }
 
@@ -121,6 +144,17 @@ class OrderService implements OrderServiceInterface
 
         $cancelled = $this->orderRepository->cancelForClient($order);
 
+        $merchant = $cancelled->store?->owner;
+        if ($merchant) {
+            $this->notificationService->create(
+                $merchant,
+                'order_cancelled',
+                'تم إلغاء طلب',
+                "قام العميل بإلغاء الطلب رقم #{$cancelled->id}.",
+                ['order_id' => $cancelled->id, 'status' => $cancelled->status],
+            );
+        }
+
         return $cancelled;
     }
 
@@ -149,6 +183,16 @@ class OrderService implements OrderServiceInterface
         }
 
         $updated = $this->orderRepository->updateStatus($order, $newStatus);
+
+        if ($updated->client) {
+            $this->notificationService->create(
+                $updated->client,
+                'order_status_updated',
+                'تحديث حالة الطلب',
+                "تم تحديث حالة طلبك رقم #{$updated->id} إلى {$updated->status}.",
+                ['order_id' => $updated->id, 'status' => $updated->status],
+            );
+        }
 
         return $updated;
     }

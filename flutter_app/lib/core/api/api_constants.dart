@@ -50,6 +50,11 @@ class ApiConstants {
   static const String meAvatar = '/profile/avatar';
   static const String mePassword = '/profile/password';
 
+  // ── Notifications ─────────────────────────────────────────────────────────
+  static const String notifications = '/notifications';
+  static String notificationById(String id) => '/notifications/$id/read';
+  static const String notificationsReadAll = '/notifications/read-all';
+
   // ── Stores ───────────────────────────────────────────────────────────────────
   // Public/client browsing.
   static const String stores = '/stores';
