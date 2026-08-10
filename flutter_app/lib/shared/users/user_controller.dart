@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_saas/models/app_type.dart';
@@ -19,8 +18,7 @@ import 'user_model.dart';
 //   - login / startRegistration / logout / forgotPassword / verifyOtp /
 //     resetPassword all make real API calls via AuthService.
 //   - Tokens are stored in SecureStorageService (flutter_secure_storage).
-//   - loadSession() tries the stored JWT first; falls back to the legacy
-//     SharedPreferences session during the transition period.
+//   - loadSession() restores only a server-validated Sanctum token.
 //
 // Profile mutations (UserService):
 //   - updateProfile → PUT /profile
@@ -64,11 +62,10 @@ class UserController {
   ///
   /// Priority:
   ///   1. SecureStorage token → GET /profile (Phase B live path)
-  ///   2. SharedPreferences session (legacy migration path)
-  ///   3. null → navigate to onboarding
+  ///   2. null → navigate to onboarding
   ///
-  /// Network errors on the splash screen degrade gracefully to the legacy path
-  /// rather than blocking the user.
+  /// Session validation failures fail closed rather than restoring a local
+  /// identity without server confirmation.
   Future<AppUser?> loadSession() async {
     try {
       final token = await SecureStorageService.instance.readAccessToken();
@@ -96,9 +93,12 @@ class UserController {
       return null;
     }
 
-    // No secure token exists. A legacy session is used only as a migration
-    // path for installations that predate the Sanctum-backed flow.
-    return _loadLegacySession();
+    // Legacy identity data is no longer an authentication mechanism. Remove it
+    // so a tampered or stale SharedPreferences record cannot restore access
+    // without a server-validated Sanctum token.
+    await _clearLegacySession();
+    currentUserNotifier.value = null;
+    return null;
   }
 
   // ── Login ─────────────────────────────────────────────────────────────────────
@@ -419,21 +419,7 @@ class UserController {
     return e.message;
   }
 
-  // ── Legacy SharedPreferences (migration support) ──────────────────────────────
-
-  Future<AppUser?> _loadLegacySession() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_sessionKey);
-      if (raw == null) return null;
-      final user = AppUser.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-      currentUserNotifier.value = user;
-      return user;
-    } catch (e) {
-      debugPrint('UserController._loadLegacySession error: $e');
-      return null;
-    }
-  }
+  // ── Legacy session cleanup ───────────────────────────────────────────────────
 
   Future<void> _clearLegacySession() async {
     try {
