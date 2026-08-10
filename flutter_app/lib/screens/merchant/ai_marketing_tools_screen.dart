@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
 import 'package:ai_saas/shared/ai/ai_result_model.dart';
@@ -837,7 +838,7 @@ if (message.contains('401')) {
 return 'انتهت جلسة الدخول. يرجى تسجيل الدخول مرة أخرى.';
 }
 
-if (message.contains('403')) {
+if (error is ForbiddenException || message.contains('403')) {
 return 'ليس لديك صلاحية لاستخدام هذه الخدمة.';
 }
 

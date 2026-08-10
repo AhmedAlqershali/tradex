@@ -103,6 +103,11 @@ class ApiClient {
   }
 
   ApiException _mapDioException(DioException e) {
+    return mapDioExceptionForTesting(e);
+  }
+
+  /// Exposes the unchanged response mapping for focused network-layer tests.
+  static ApiException mapDioExceptionForTesting(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -115,6 +120,13 @@ class ApiClient {
       case DioExceptionType.badResponse:
         final status = e.response?.statusCode ?? 0;
         if (status == 401) return const AuthException();
+        if (status == 403) {
+          final body = e.response?.data;
+          final message =
+              (body is Map ? body['message'] as String? : null) ??
+                  'ليس لديك صلاحية لتنفيذ هذا الإجراء.';
+          return ForbiddenException(message);
+        }
         final body = e.response?.data;
         final message = (body is Map ? body['message'] as String? : null) ??
             'خطأ في الخادم ($status)';
@@ -129,7 +141,7 @@ class ApiClient {
     }
   }
 
-  Map<String, List<String>> _parseValidationErrors(dynamic body) {
+  static Map<String, List<String>> _parseValidationErrors(dynamic body) {
     if (body is! Map) return {};
     final raw = body['errors'];
     if (raw is! Map) return {};

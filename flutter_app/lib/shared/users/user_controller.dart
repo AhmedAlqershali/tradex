@@ -412,6 +412,7 @@ class UserController {
       return first ?? e.message;
     }
     if (e is AuthException) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    if (e is ForbiddenException) return e.message;
     if (e is NetworkException) return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
     if (e is TimeoutException) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
     if (e is ServerException) return 'حدث خطأ في الخادم. حاول لاحقاً.';

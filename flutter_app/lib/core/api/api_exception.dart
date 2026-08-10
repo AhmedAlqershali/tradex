@@ -47,6 +47,13 @@ final class AuthException extends ApiException {
   ]);
 }
 
+/// The authenticated user is not allowed to perform this action (HTTP 403).
+final class ForbiddenException extends ApiException {
+  const ForbiddenException([
+    super.message = 'ليس لديك صلاحية لتنفيذ هذا الإجراء.',
+  ]);
+}
+
 /// The client sent a malformed request (HTTP 422 / validation failure).
 final class ValidationException extends ApiException {
   const ValidationException(super.message, {this.errors = const {}});
