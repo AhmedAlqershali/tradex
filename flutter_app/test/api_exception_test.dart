@@ -5,6 +5,17 @@ import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 
 void main() {
+  test('network logger never logs request or response bodies', () {
+    final logger = ApiClient.logInterceptorForTesting() as LogInterceptor;
+
+    expect(logger.request, isFalse);
+    expect(logger.requestHeader, isFalse);
+    expect(logger.requestBody, isFalse);
+    expect(logger.responseHeader, isFalse);
+    expect(logger.responseBody, isFalse);
+    expect(logger.error, isFalse);
+  });
+
   test('maps a Laravel 403 response to ForbiddenException', () {
     final exception = ApiClient.mapDioExceptionForTesting(
       DioException(

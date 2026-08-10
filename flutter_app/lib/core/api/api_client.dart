@@ -200,18 +200,28 @@ class ApiClient {
 
   // ── Log interceptor (debug only) ──────────────────────────────────────────────
 
-  Interceptor _logInterceptor() {
+  /// Exposed only so the network logging policy can be regression-tested.
+  static Interceptor logInterceptorForTesting() {
     return LogInterceptor(
-      request:         kDebugMode,
+      // Request metadata can contain URLs with sensitive identifiers. Keep
+      // request logging disabled; diagnostics should never include auth
+      // context from the shared client.
+      request:         false,
       // Request bodies can contain passwords and password-reset tokens.
       // Never log them, even in debug builds.
       requestBody:     false,
-      responseBody:    kDebugMode,
+      // API responses may contain PII, order data, payment metadata, and
+      // admin-only records. Never print response bodies to device logs.
+      responseBody:    false,
       responseHeader:  false,
       requestHeader:   false,
-      error:           true,
+      // Avoid logging DioException.toString(), which can include response
+      // details for failed authenticated requests.
+      error:           false,
       // ignore: avoid_print
       logPrint: (obj) { if (kDebugMode) debugPrint(obj.toString()); },
     );
   }
+
+  Interceptor _logInterceptor() => logInterceptorForTesting();
 }

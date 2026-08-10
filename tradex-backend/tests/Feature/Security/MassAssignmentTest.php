@@ -295,6 +295,7 @@ class MassAssignmentTest extends TestCase
     public function test_create_product_ignores_total_sold(): void
     {
         $merchant = User::factory()->create(['role' => 'merchant', 'status' => 'active']);
+        $this->entitleMerchant($merchant);
         $store    = Store::factory()->create(['user_id' => $merchant->id, 'status' => 'active']);
         $token    = $merchant->createToken('test')->plainTextToken;
 
@@ -306,12 +307,12 @@ class MassAssignmentTest extends TestCase
             'total_sold' => 9999, // attacker inflates sold count
         ], $this->headers($token));
 
-        if ($response->status() === 201) {
-            $productId = $response->json('data.id');
-            $this->assertDatabaseHas('products', [
-                'id'         => $productId,
-                'total_sold' => 0, // must be 0, not 9999
-            ]);
-        }
+        $response->assertCreated();
+
+        $productId = $response->json('data.id');
+        $this->assertDatabaseHas('products', [
+            'id'         => $productId,
+            'total_sold' => 0, // must be 0, not 9999
+        ]);
     }
 }
