@@ -1,1 +1,27 @@
 
+workflows:
+  android-release:
+    name: Tradex Android Release
+    instance_type: mac_m2
+    max_build_duration: 60
+
+    environment:
+      flutter: stable
+      groups:
+        - tradex_signing
+
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          cd flutter_app
+          flutter pub get
+
+      - name: Build Android APK
+        script: |
+          cd flutter_app
+          flutter build apk --release -t lib/main.dart \
+            --dart-define=TRADEX_BASE_URL=https://tradex-v2us.onrender.com/api/v1
+
+    artifacts:
+      - flutter_app/build/app/outputs/flutter-apk/app-release.apk
+```
