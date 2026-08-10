@@ -13,7 +13,9 @@ workflows:
         script: flutter pub get
 
       - name: Build Android App Bundle
-        script: flutter build appbundle --release
+        script: |
+          flutter build appbundle --release \
+            --dart-define=TRADEX_BASE_URL="$TRADEX_BASE_URL"
 
     artifacts:
       - build/app/outputs/bundle/release/*.aab
