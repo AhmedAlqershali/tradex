@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -44,6 +45,31 @@ class AuthTest extends TestCase
             'email'    => 'client@example.com',
             'password' => 'Password123!',
         ])->assertOk();
+    }
+
+    public function test_registration_ignores_privileged_user_fields(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register/client', [
+            'name'                  => 'Untrusted Client',
+            'email'                 => 'untrusted@example.com',
+            'phone'                 => '0501234567',
+            'password'              => 'Password123!',
+            'password_confirmation' => 'Password123!',
+            'role'                  => 'admin',
+            'is_admin'              => true,
+            'status'                => 'active',
+            'permissions'           => ['*'],
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.user.role', 'client')
+            ->assertJsonMissingPath('data.user.password');
+
+        $this->assertDatabaseHas('users', [
+            'email'  => 'untrusted@example.com',
+            'role'   => 'client',
+            'status' => 'active',
+        ]);
     }
 
     public function test_merchant_can_register(): void
@@ -112,6 +138,33 @@ class AuthTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJson(['success' => false]);
+    }
+
+    public function test_logout_revokes_only_the_current_token(): void
+    {
+        $user = User::factory()->client()->create();
+        $token = $user->createToken('device')->plainTextToken;
+        $otherToken = $user->createToken('other-device')->plainTextToken;
+
+        $this->postJson('/api/v1/auth/logout', [], $this->headers($token))
+            ->assertOk();
+
+        // Laravel's auth manager is shared across simulated requests in a
+        // feature test. Clear its cached guard so this request resolves the
+        // bearer token again, matching separate real HTTP requests.
+        Auth::forgetGuards();
+        $this->getJson('/api/v1/auth/me', $this->headers($token))
+            ->assertUnauthorized();
+
+        Auth::forgetGuards();
+        $this->getJson('/api/v1/auth/me', $this->headers($otherToken))
+            ->assertOk();
+    }
+
+    public function test_invalid_token_is_rejected(): void
+    {
+        $this->getJson('/api/v1/auth/me', $this->headers('not-a-valid-sanctum-token'))
+            ->assertUnauthorized();
     }
 
     // ── Me / Logout ───────────────────────────────────────────────────────────

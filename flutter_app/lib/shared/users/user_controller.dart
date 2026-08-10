@@ -77,18 +77,27 @@ class UserController {
         currentUserNotifier.value = user;
         return user;
       }
-    } on AuthException {
-      // Token present but refresh failed — expired session.
+    } on ApiException {
+      // A stored token is authoritative only after the server validates it.
+      // Never fall back to the legacy local session after a failed validation:
+      // that would keep the UI authenticated without a valid Sanctum token.
       await SecureStorageService.instance.clearAll();
       await _clearLegacySession();
       currentUserNotifier.value = null;
       return null;
     } catch (e) {
-      // Network/server error on splash — degrade to legacy session.
-      debugPrint('UserController.loadSession (JWT) error: $e');
+      // Storage/parsing failures must also fail closed. Do not restore a
+      // locally cached identity when a stored server session could not be
+      // validated.
+      await SecureStorageService.instance.clearAll();
+      await _clearLegacySession();
+      currentUserNotifier.value = null;
+      debugPrint('UserController.loadSession failed closed: $e');
+      return null;
     }
 
-    // Legacy fallback: SharedPreferences session from the pre-Phase-B builds.
+    // No secure token exists. A legacy session is used only as a migration
+    // path for installations that predate the Sanctum-backed flow.
     return _loadLegacySession();
   }
 

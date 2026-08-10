@@ -98,6 +98,21 @@ class PasswordResetTest extends TestCase
             ->assertJsonPath('success', false);
     }
 
+    public function test_reset_does_not_reveal_unknown_email(): void
+    {
+        $response = $this->postJson('/api/v1/auth/password/reset', [
+            'email'                 => 'nobody@example.com',
+            'token'                 => 'completely-invalid-token',
+            'password'              => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('message', 'Validation failed.')
+            ->assertDontSee('No account found with that email address.')
+            ->assertDontSee('nobody@example.com');
+    }
+
     public function test_reset_requires_email_token_and_password(): void
     {
         $this->postJson('/api/v1/auth/password/reset', [])

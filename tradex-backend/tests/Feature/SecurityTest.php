@@ -73,6 +73,17 @@ class SecurityTest extends TestCase
         $this->getJson('/api/v1/admin/dashboard')->assertStatus(401);
     }
 
+    public function test_revoked_token_is_rejected(): void
+    {
+        $user = User::factory()->client()->create();
+        $token = $user->createToken('test')->plainTextToken;
+
+        $user->tokens()->delete();
+
+        $this->getJson('/api/v1/auth/me', $this->headers($token))
+            ->assertStatus(401);
+    }
+
     // =========================================================================
     // Client cannot access merchant routes (403)
     // =========================================================================
@@ -104,6 +115,27 @@ class SecurityTest extends TestCase
              ->assertStatus(403);
     }
 
+    public function test_client_cannot_change_role_through_profile_update(): void
+    {
+        $client = User::factory()->client()->create();
+        $token = $this->tokenFor($client);
+
+        $this->putJson('/api/v1/profile', [
+            'name'        => 'Still Client',
+            'role'        => 'admin',
+            'is_admin'    => true,
+            'permissions' => ['*'],
+            'status'      => 'active',
+        ], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.role', 'client');
+
+        $this->assertDatabaseHas('users', [
+            'id'   => $client->id,
+            'role' => 'client',
+        ]);
+    }
+
     // =========================================================================
     // Merchant cannot access admin routes (403)
     // =========================================================================
@@ -115,6 +147,27 @@ class SecurityTest extends TestCase
 
         $this->getJson('/api/v1/admin/users', $this->headers($token))
              ->assertStatus(403);
+    }
+
+    public function test_merchant_cannot_escalate_role_via_admin_endpoint(): void
+    {
+        $merchant = User::factory()->merchant()->create();
+        $client = User::factory()->client()->create();
+        $token = $this->tokenFor($merchant);
+
+        $this->putJson("/api/v1/admin/users/{$merchant->id}/role", [
+            'role' => 'admin',
+        ], $this->headers($token))
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas('users', [
+            'id'   => $merchant->id,
+            'role' => 'merchant',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'id'   => $client->id,
+            'role' => 'client',
+        ]);
     }
 
     public function test_merchant_cannot_manage_categories(): void

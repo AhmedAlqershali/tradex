@@ -191,7 +191,9 @@ class ApiClient {
   Interceptor _logInterceptor() {
     return LogInterceptor(
       request:         kDebugMode,
-      requestBody:     kDebugMode,
+      // Request bodies can contain passwords and password-reset tokens.
+      // Never log them, even in debug builds.
+      requestBody:     false,
       responseBody:    kDebugMode,
       responseHeader:  false,
       requestHeader:   false,

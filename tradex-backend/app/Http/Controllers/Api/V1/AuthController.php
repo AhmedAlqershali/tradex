@@ -136,8 +136,11 @@ class AuthController extends BaseApiController
                 'This password reset token is invalid or has expired.',
                 422
             ),
+            // Do not disclose whether the supplied email belongs to an
+            // account. A reset token is already required, so this response
+            // should be indistinguishable from any other invalid token.
             Password::INVALID_USER   => $this->error(
-                'No account found with that email address.',
+                'This password reset token is invalid or has expired.',
                 422
             ),
             Password::RESET_THROTTLED => $this->error(
