@@ -171,6 +171,9 @@ class SubscriptionRequestTest extends TestCase
             'user_id' => $req->user_id,
             'type'    => 'subscription_rejected',
         ]);
+        $this->assertDatabaseMissing('subscriptions', [
+            'user_id' => $req->user_id,
+        ]);
     }
 
     public function test_rejection_reason_is_required(): void

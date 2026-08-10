@@ -91,4 +91,55 @@ void main() {
       ]),
     );
   });
+
+  test('completes rejection and exposes the rejected status', () async {
+    final bloc = AdminSubscriptionRequestsBloc(
+      listRequests: ({
+        String? status,
+        int page = 1,
+        int perPage = 15,
+      }) async =>
+          _page('rejected'),
+      getRequest: (id) async => _request('pending'),
+      reject: (id, reason) async {
+        expect(id, '7');
+        expect(reason, 'Payment proof is unclear.');
+        return _request('rejected');
+      },
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const AdminSubscriptionRequestsLoadRequested());
+    await expectLater(
+      bloc.stream,
+      emitsThrough(isA<AdminSubscriptionRequestsLoaded>()),
+    );
+
+    bloc.add(const AdminSubscriptionRequestDetailsRequested('7'));
+    await expectLater(
+      bloc.stream,
+      emitsThrough(
+        isA<AdminSubscriptionRequestsLoaded>().having(
+          (state) => state.selectedRequest?.status,
+          'selected status',
+          'pending',
+        ),
+      ),
+    );
+
+    bloc.add(const AdminSubscriptionRequestRejectRequested(
+      '7',
+      'Payment proof is unclear.',
+    ));
+    await expectLater(
+      bloc.stream,
+      emitsThrough(
+        isA<AdminSubscriptionRequestsLoaded>().having(
+          (state) => state.selectedRequest?.status,
+          'rejected status',
+          'rejected',
+        ),
+      ),
+    );
+  });
 }

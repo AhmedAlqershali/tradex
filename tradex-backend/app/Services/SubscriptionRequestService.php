@@ -45,18 +45,25 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
      */
     public function approve(SubscriptionRequest $request, User $admin): SubscriptionRequest
     {
-        if ($request->status !== 'pending') {
-            throw SubscriptionException::alreadyReviewed($request->status);
-        }
-
         $updated = DB::transaction(function () use ($request, $admin) {
+            // Lock the request before checking its status so two admins cannot
+            // approve/reject the same pending payment at the same time.
+            $lockedRequest = SubscriptionRequest::query()
+                ->with(['user', 'plan'])
+                ->lockForUpdate()
+                ->findOrFail($request->id);
+
+            if ($lockedRequest->status !== 'pending') {
+                throw SubscriptionException::alreadyReviewed($lockedRequest->status);
+            }
+
             $this->subscriptionService->activateForMerchant(
-                $request->user,
-                $request->plan,
-                $request->billing_cycle,
+                $lockedRequest->user,
+                $lockedRequest->plan,
+                $lockedRequest->billing_cycle,
             );
 
-            return $this->subscriptionRequestRepository->update($request, [
+            return $this->subscriptionRequestRepository->update($lockedRequest, [
                 'status'      => 'approved',
                 'reviewed_by' => $admin->id,
                 'reviewed_at' => now(),
@@ -81,16 +88,25 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
      */
     public function reject(SubscriptionRequest $request, User $admin, string $reason): SubscriptionRequest
     {
-        if ($request->status !== 'pending') {
-            throw SubscriptionException::alreadyReviewed($request->status);
-        }
+        $updated = DB::transaction(function () use ($request, $admin, $reason) {
+            // Use the same lock as approval so a rejection racing an approval
+            // cannot leave the request and subscription in different states.
+            $lockedRequest = SubscriptionRequest::query()
+                ->with(['user', 'plan'])
+                ->lockForUpdate()
+                ->findOrFail($request->id);
 
-        $updated = $this->subscriptionRequestRepository->update($request, [
-            'status'            => 'rejected',
-            'rejection_reason'  => $reason,
-            'reviewed_by'       => $admin->id,
-            'reviewed_at'       => now(),
-        ]);
+            if ($lockedRequest->status !== 'pending') {
+                throw SubscriptionException::alreadyReviewed($lockedRequest->status);
+            }
+
+            return $this->subscriptionRequestRepository->update($lockedRequest, [
+                'status'            => 'rejected',
+                'rejection_reason'  => $reason,
+                'reviewed_by'       => $admin->id,
+                'reviewed_at'       => now(),
+            ]);
+        });
 
         $this->notificationService->create(
             $request->user,
@@ -135,24 +151,49 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
             throw SubscriptionException::planInactive($plan->display_name ?? 'selected');
         }
 
-        // Guard: a merchant may not submit a new request while one is already pending.
-        $hasPending = $this->subscriptionRequestRepository
-            ->getForMerchant($merchant)
-            ->where('status', 'pending')
-            ->isNotEmpty();
+        $proofPath = null;
 
-        if ($hasPending) {
-            throw SubscriptionException::pendingRequestExists();
+        try {
+            return DB::transaction(function () use (
+                $merchant,
+                $data,
+                $proofImage,
+                &$proofPath,
+            ) {
+                // Serialize submissions for this merchant. The earlier
+                // collection check was vulnerable to two concurrent uploads
+                // both observing no pending request.
+                User::query()
+                    ->whereKey($merchant->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (SubscriptionRequest::query()
+                    ->where('user_id', $merchant->id)
+                    ->pending()
+                    ->exists()) {
+                    throw SubscriptionException::pendingRequestExists();
+                }
+
+                // Store on PRIVATE disk — sensitive financial document.
+                // The 'local' disk is not publicly accessible; access requires
+                // a secure admin-only download endpoint.
+                $data['user_id'] = $merchant->id;
+                $proofPath = $proofImage->store('subscription-proofs', 'local');
+                $data['payment_proof_image'] = $proofPath;
+                $data['status'] = 'pending';
+
+                return $this->subscriptionRequestRepository->create($data);
+            });
+        } catch (\Throwable $exception) {
+            // A database rollback cannot remove a file already written to the
+            // local disk, so clean up an upload if persistence fails.
+            if ($proofPath !== null) {
+                Storage::disk('local')->delete($proofPath);
+            }
+
+            throw $exception;
         }
-
-        // Store on PRIVATE disk — sensitive financial document.
-        // The 'local' disk is not publicly accessible; access requires a
-        // temporary signed URL generated server-side (see SubscriptionRequestResource).
-        $data['user_id']              = $merchant->id;
-        $data['payment_proof_image']  = $proofImage->store('subscription-proofs', 'local');
-        $data['status']               = 'pending';
-
-        return $this->subscriptionRequestRepository->create($data);
     }
 
     /**
