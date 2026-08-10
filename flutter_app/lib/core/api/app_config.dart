@@ -25,7 +25,7 @@ class AppConfig {
   // with TRADEX_BASE_URL for development or staging.
   static const String baseUrl = String.fromEnvironment(
     'TRADEX_BASE_URL',
-    defaultValue: 'https://api.tradex.ps/v1',
+    defaultValue: 'https://tradex-v2us.onrender.com/v1',
   );
 
   // ── Environment helpers ───────────────────────────────────────────────────────
