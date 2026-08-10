@@ -7,12 +7,8 @@ environment:
 flutter: stable
 scripts:
 - name: Get Flutter packages
-script: |
-cd flutter_app
-flutter pub get
+script: cd flutter_app && flutter pub get
 - name: Build Android APK
-script: |
-cd flutter_app
-flutter build apk --release -t lib/main.dart --dart-define=TRADEX_BASE_URL=https://tradex-v2us.onrender.com/api/v1
+script: cd flutter_app && flutter build apk --release -t lib/main.dart --dart-define=TRADEX_BASE_URL=https://tradex-v2us.onrender.com/api/v1
 artifacts:
 - flutter_app/build/app/outputs/flutter-apk/app-release.apk
