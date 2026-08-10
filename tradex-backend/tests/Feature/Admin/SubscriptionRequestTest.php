@@ -167,6 +167,10 @@ class SubscriptionRequestTest extends TestCase
             ->assertJsonPath('data.status', 'rejected');
 
         $this->assertDatabaseHas('subscription_requests', ['id' => $req->id, 'status' => 'rejected']);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $req->user_id,
+            'type'    => 'subscription_rejected',
+        ]);
     }
 
     public function test_rejection_reason_is_required(): void

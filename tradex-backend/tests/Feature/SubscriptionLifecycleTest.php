@@ -121,6 +121,10 @@ class SubscriptionLifecycleTest extends TestCase
 
             $this->assertSame(2, Subscription::where('user_id', $merchant->id)->count());
             $this->assertSame('approved', SubscriptionRequest::findOrFail($requestId)->status);
+            $this->assertDatabaseHas('user_notifications', [
+                'user_id' => $merchant->id,
+                'type'    => 'subscription_approved',
+            ]);
         } finally {
             Carbon::setTestNow();
         }

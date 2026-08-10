@@ -60,7 +60,11 @@ class OrderTest extends TestCase
 
     public function test_client_can_checkout_and_order_is_created(): void
     {
-        ['client' => $client, 'clientToken' => $token, 'product' => $product] = $this->seedCheckoutFixture();
+        [
+            'merchant' => $merchant,
+            'client' => $client,
+            'clientToken' => $token,
+        ] = $this->seedCheckoutFixture();
 
         $response = $this->postJson('/api/v1/orders', [
             'customer_name'  => 'John Test',
@@ -73,6 +77,14 @@ class OrderTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'client_id' => $client->id,
             'status'    => 'pending',
+        ]);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $client->id,
+            'type'    => 'order_placed',
+        ]);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $merchant->id,
+            'type'    => 'new_order',
         ]);
     }
 
@@ -121,6 +133,10 @@ class OrderTest extends TestCase
 
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertSame('cancelled', $order->fresh()->status);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $order->store->owner->id,
+            'type'    => 'order_cancelled',
+        ]);
     }
 
     public function test_client_cannot_cancel_confirmed_order(): void
@@ -178,6 +194,10 @@ class OrderTest extends TestCase
             ->assertJson(['success' => true]);
 
         $this->assertSame('confirmed', $order->fresh()->status);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $order->client_id,
+            'type'    => 'order_status_updated',
+        ]);
     }
 
     public function test_merchant_cannot_set_invalid_order_status(): void
