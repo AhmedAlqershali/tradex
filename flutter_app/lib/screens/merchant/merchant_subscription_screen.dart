@@ -1,4 +1,5 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/core/services/whatsapp_support_service.dart';
 import 'package:ai_saas/shared/models/admin_plan_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_model.dart';
 import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
@@ -524,18 +525,46 @@ class _MerchantSubscriptionScreenState
           if (!entitled)
             Padding(
               padding: EdgeInsets.only(top: 4.h),
-              child: Text(
-                'انتهى الوصول إلى ميزات التاجر. أرسل طلب اشتراك جديد لاستعادة الوصول بعد الموافقة.',
-                style: GoogleFonts.ibmPlexSans(
-                  color: const Color(0xffC53030),
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'انتهى الوصول إلى ميزات التاجر. أرسل طلب اشتراك جديد لاستعادة الوصول بعد الموافقة.',
+                    style: GoogleFonts.ibmPlexSans(
+                      color: const Color(0xffC53030),
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _openWhatsAppSupport,
+                      icon: const Icon(Icons.chat_rounded),
+                      label: const Text(
+                        'Contact Support via WhatsApp\n+972 59 766 8446',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
       ),
     );
+  }
+
+  Future<void> _openWhatsAppSupport() async {
+    final opened = await WhatsAppSupportService.openChat();
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تعذر فتح واتساب. تواصل مع الدعم على +972597668446.'),
+        ),
+      );
+    }
   }
 
   Widget _detailRow(String label, String value) {
