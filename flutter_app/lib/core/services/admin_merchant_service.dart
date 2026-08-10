@@ -23,7 +23,7 @@ class AdminMerchantService {
       ApiConstants.adminStores,
       queryParameters: query,
     );
-    final raw = _map(response.data);
+    final raw = _map(_map(response.data)['data']);
     return AdminMerchantPage(
       merchants: _list(raw['data']).map(AdminMerchant.fromJson).toList(),
       pagination:

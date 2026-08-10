@@ -25,7 +25,7 @@ class AdminCategoryService {
       ApiConstants.adminCategories,
       queryParameters: query,
     );
-    final raw = _map(response.data);
+    final raw = _map(_map(response.data)['data']);
     return AdminCategoryPage(
       categories: _list(raw['data']).map(AdminCategory.fromJson).toList(),
       pagination: AdminCategoryPagination.fromJson(_map(raw['pagination'])),

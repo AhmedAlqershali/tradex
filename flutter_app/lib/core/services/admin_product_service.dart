@@ -26,9 +26,10 @@ class AdminProductService {
       ApiConstants.adminProducts,
       queryParameters: query,
     );
-    final body = _map(response.data);
-    final products =
-        _list(body['data']).map(Product.fromServerJson).toList(growable: false);
+    final body = _map(_map(response.data)['data']);
+    final products = _list(body['data'])
+        .map(Product.fromServerJson)
+        .toList(growable: false);
     return AdminProductPage(
       products: products,
       pagination: AdminProductPagination.fromJson(_map(body['pagination'])),
