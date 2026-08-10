@@ -5,6 +5,8 @@ workflows:
 
     environment:
       flutter: stable
+      android_signing:
+        - tradex-upload-key.jks
 
     scripts:
       - name: Get Flutter packages
