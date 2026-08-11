@@ -840,6 +840,9 @@ class _AiToolSheetState extends State<_AiToolSheet> {
     }
 
     if (error is ForbiddenException || message.contains('403')) {
+      if (message.contains('active trial or paid subscription')) {
+        return 'لاستخدام أدوات الذكاء الاصطناعي، فعّل التجربة المجانية أو اشترك في خطة مدفوعة.';
+      }
       return 'ليس لديك صلاحية لاستخدام هذه الخدمة.';
     }
 
