@@ -35,16 +35,18 @@ class FavoriteService {
     return [];
   }
 
-  /// POST /favorites
-  Future<void> addFavorite(String productId) async {
+  /// POST /favorites, then refresh the complete authoritative list.
+  Future<List<Product>> addFavorite(String productId) async {
     await ApiClient.instance.post<Map<String, dynamic>>(
       ApiConstants.favoriteById(productId),
     );
+    return getFavorites();
   }
 
-  /// DELETE /favorites/:productId
-  Future<void> removeFavorite(String productId) async {
+  /// DELETE /favorites/:productId, then refresh the complete authoritative list.
+  Future<List<Product>> removeFavorite(String productId) async {
     await ApiClient.instance
         .delete<Map<String, dynamic>>(ApiConstants.favoriteById(productId));
+    return getFavorites();
   }
 }

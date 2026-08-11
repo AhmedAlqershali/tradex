@@ -26,7 +26,7 @@ class FavoriteRepository implements FavoriteRepositoryInterface
 
     public function add(User $user, int $productId): Favorite
     {
-        $favorite = Favorite::create([
+        $favorite = Favorite::firstOrCreate([
             'user_id'    => $user->id,
             'product_id' => $productId,
         ]);

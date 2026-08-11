@@ -55,22 +55,18 @@ class CartService {
     return _extractCartItems(raw);
   }
 
-  /// DELETE /cart/items/:itemId
-  Future<void> removeItem(String itemId) async {
-    await ApiClient.instance
+  /// DELETE /cart/items/:itemId. Returns the authoritative cart response.
+  Future<List<CartItem>> removeItem(String itemId) async {
+    final response = await ApiClient.instance
         .delete<Map<String, dynamic>>(ApiConstants.cartItem(itemId));
+    return _extractCartItems(response.data!);
   }
 
-  /// Clears all items from the server-side cart. The backend intentionally
-  /// exposes item deletion only, so use the supported item route for each row.
-  Future<void> clearCart() async {
-    final items = await getCart();
-    for (final item in items) {
-      final serverItemId = item.serverItemId;
-      if (serverItemId != null && serverItemId.isNotEmpty) {
-        await removeItem(serverItemId);
-      }
-    }
+  /// DELETE /cart. Returns the authoritative empty cart response.
+  Future<List<CartItem>> clearCart() async {
+    final response = await ApiClient.instance
+        .delete<Map<String, dynamic>>(ApiConstants.cart);
+    return _extractCartItems(response.data!);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────

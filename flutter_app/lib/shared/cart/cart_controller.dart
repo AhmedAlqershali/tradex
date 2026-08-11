@@ -94,7 +94,9 @@ class CartItem {
         json['storeName'] as String? ??
         productMap?['store_name'] as String? ??
         productMap?['storeName'] as String? ??
-        (nestedStore is Map ? nestedStore['store_name'] as String? : '') ??
+        (nestedStore is Map
+            ? (nestedStore['store_name'] ?? nestedStore['name']) as String?
+            : '') ??
         '';
 
     final imageUrl = json['image_url'] as String? ??

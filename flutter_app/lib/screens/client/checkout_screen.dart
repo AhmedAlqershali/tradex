@@ -17,19 +17,19 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  static const Color _primary    = Color(0xff4D41DF);
+  static const Color _primary = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
-  static const Color _textDark   = Color(0xff1A1A1A);
-  static const Color _textGray   = Color(0xff888888);
-  static const Color _cardBg     = Colors.white;
-  static const Color _fieldFill  = Color(0xffF3F3F8);
+  static const Color _textDark = Color(0xff1A1A1A);
+  static const Color _textGray = Color(0xff888888);
+  static const Color _cardBg = Colors.white;
+  static const Color _fieldFill = Color(0xffF3F3F8);
 
-  final _formKey   = GlobalKey<FormState>();
-  final _nameCtrl  = TextEditingController(text: '');
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController(text: '');
   final _phoneCtrl = TextEditingController(text: '');
   final _emailCtrl = TextEditingController(text: '');
-  final _cityCtrl  = TextEditingController(text: '');
-  final _areaCtrl  = TextEditingController(text: '');
+  final _cityCtrl = TextEditingController(text: '');
+  final _areaCtrl = TextEditingController(text: '');
   final _notesCtrl = TextEditingController();
 
   @override
@@ -74,8 +74,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return BlocConsumer<OrderBloc, OrderState>(
       listener: (context, state) {
         if (state is OrderCreated) {
-          // Clear the cart after successful order.
-          context.read<CartBloc>().add(const CartCleared());
+          // The backend clears the cart inside the checkout transaction.
+          // Refresh to reflect that authoritative result; do not clear local
+          // state independently.
+          context.read<CartBloc>().add(const CartLoadRequested());
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -207,9 +209,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       width: double.infinity,
                       height: 52.h,
                       child: ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () => _confirmOrder(context),
+                        onPressed:
+                            isLoading ? null : () => _confirmOrder(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _primary,
                           foregroundColor: Colors.white,
@@ -314,9 +315,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Text(
         'ملخص الطلب',
         style: GoogleFonts.ibmPlexSans(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.bold,
-            color: _textDark),
+            fontSize: 15.sp, fontWeight: FontWeight.bold, color: _textDark),
       ),
       SizedBox(height: 12.h),
       ...items.map(
@@ -397,15 +396,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           maxLines: maxLines,
           textDirection: TextDirection.rtl,
           validator: isRequired
-              ? (v) => (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
+              ? (v) =>
+                  (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
               : null,
           style: GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textDark),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.ibmPlexSans(
                 fontSize: 12.sp, color: const Color(0xffBBBBBB)),
-            prefixIcon:
-                Icon(icon, size: 18.sp, color: const Color(0xffBBBBBB)),
+            prefixIcon: Icon(icon, size: 18.sp, color: const Color(0xffBBBBBB)),
             filled: true,
             fillColor: _fieldFill,
             contentPadding:
@@ -425,13 +424,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide:
-                  const BorderSide(color: Colors.redAccent, width: 1),
+              borderSide: const BorderSide(color: Colors.redAccent, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide:
-                  const BorderSide(color: Colors.redAccent, width: 1.5),
+              borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
             ),
           ),
         ),

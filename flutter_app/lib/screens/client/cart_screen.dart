@@ -15,10 +15,10 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  static const Color _primary    = Color(0xff4D41DF);
+  static const Color _primary = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
-  static const Color _textDark   = Color(0xff1A1A1A);
-  static const Color _textGray   = Color(0xff888888);
+  static const Color _textDark = Color(0xff1A1A1A);
+  static const Color _textGray = Color(0xff888888);
 
   @override
   void initState() {
@@ -76,8 +76,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   // ── AppBar ─────────────────────────────────────────────────────────────────
-  PreferredSizeWidget _buildAppBar(
-      BuildContext context, List<CartItem> items) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, List<CartItem> items) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0.5,
@@ -98,8 +97,7 @@ class _CartScreenState extends State<CartScreen> {
       actions: [
         if (items.isNotEmpty)
           TextButton(
-            onPressed: () =>
-                context.read<CartBloc>().add(const CartCleared()),
+            onPressed: () => context.read<CartBloc>().add(const CartCleared()),
             child: Text(
               'مسح الكل',
               style: GoogleFonts.ibmPlexSans(
@@ -115,8 +113,7 @@ class _CartScreenState extends State<CartScreen> {
 
   // ── Body ───────────────────────────────────────────────────────────────────
   Widget _buildBody(BuildContext context, List<CartItem> items) {
-    final double total =
-        items.fold(0, (sum, item) => sum + item.lineTotal);
+    final double total = items.fold(0, (sum, item) => sum + item.lineTotal);
 
     return Column(
       children: [
@@ -233,12 +230,7 @@ class _CartScreenState extends State<CartScreen> {
                         .read<CartBloc>()
                         .add(CartItemRemoved(item.serverItemId!));
                   } else {
-                    context
-                        .read<CartBloc>()
-                        .add(CartLocalItemDecremented(item.id));
-                    if (item.quantity <= 1) {
-                      CartController.instance.remove(item.id);
-                    }
+                    context.read<CartBloc>().add(const CartLoadRequested());
                   }
                 },
                 child: Container(
@@ -257,9 +249,24 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   _qtyButton(
                     icon: Icons.remove_rounded,
-                    onTap: () => context
-                        .read<CartBloc>()
-                        .add(CartLocalItemDecremented(item.id)),
+                    onTap: () {
+                      if (item.serverItemId == null) {
+                        context.read<CartBloc>().add(const CartLoadRequested());
+                        return;
+                      }
+                      if (item.quantity <= 1) {
+                        context
+                            .read<CartBloc>()
+                            .add(CartItemRemoved(item.serverItemId!));
+                      } else {
+                        context.read<CartBloc>().add(
+                              CartItemQuantityUpdated(
+                                itemId: item.serverItemId!,
+                                quantity: item.quantity - 1,
+                              ),
+                            );
+                      }
+                    },
                   ),
                   SizedBox(width: 10.w),
                   Text(
@@ -270,9 +277,18 @@ class _CartScreenState extends State<CartScreen> {
                   SizedBox(width: 10.w),
                   _qtyButton(
                     icon: Icons.add_rounded,
-                    onTap: () => context
-                        .read<CartBloc>()
-                        .add(CartLocalItemIncremented(item.id)),
+                    onTap: () {
+                      if (item.serverItemId == null) {
+                        context.read<CartBloc>().add(const CartLoadRequested());
+                        return;
+                      }
+                      context.read<CartBloc>().add(
+                            CartItemQuantityUpdated(
+                              itemId: item.serverItemId!,
+                              quantity: item.quantity + 1,
+                            ),
+                          );
+                    },
                   ),
                 ],
               ),
@@ -283,8 +299,7 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _qtyButton(
-      {required IconData icon, required VoidCallback onTap}) {
+  Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

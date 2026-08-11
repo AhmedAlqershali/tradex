@@ -128,6 +128,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('cart/items',         [CartController::class, 'addItem'])->name('cart.items.add');
                 Route::put('cart/items/{id}',     [CartController::class, 'updateItem'])->name('cart.items.update');
                 Route::delete('cart/items/{id}',  [CartController::class, 'removeItem'])->name('cart.items.remove');
+                Route::delete('cart',              [CartController::class, 'clear'])->name('cart.clear');
 
                 // Orders
                 Route::post('orders',             [ClientOrderController::class, 'store'])->name('orders.store');

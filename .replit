@@ -66,7 +66,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd tradex-backend && export DB_CONNECTION=sqlite DB_DATABASE=/home/runner/workspace/tradex-backend/database/database.sqlite CACHE_STORE=file SESSION_DRIVER=file MAIL_MAILER=log APP_ENV=local APP_DEBUG=true && php artisan config:clear && php -S 0.0.0.0:5000 -t public public/index.php"
+args = "cd tradex-backend && export DB_CONNECTION=sqlite DB_DATABASE=/home/runner/workspace/tradex-backend/database/database.sqlite CACHE_STORE=file SESSION_DRIVER=file MAIL_MAILER=log APP_ENV=local APP_DEBUG=true APP_KEY=\"base64:$(printf '%s' \"$SESSION_SECRET\" | sha256sum | cut -d' ' -f1 | xxd -r -p | base64 -w0)\" && php artisan config:clear && php -S 0.0.0.0:5000 -t public public/index.php"
 waitForPort = 5000
 
 [[ports]]

@@ -190,7 +190,9 @@ class CartTest extends TestCase
         $product = $this->activeProduct();
 
         $cart = Cart::factory()->forUser($client)->create();
-        $item = CartItem::factory()->forCart($cart)->forProduct($product)->create();
+        $item = CartItem::factory()->forCart($cart)->forProduct($product)->create([
+            'quantity' => 1,
+        ]);
 
         $this->deleteJson("/api/v1/cart/items/{$item->id}", [], $this->headers($token))
              ->assertOk()
@@ -210,5 +212,37 @@ class CartTest extends TestCase
 
         $this->deleteJson("/api/v1/cart/items/{$otherItem->id}", [], $this->headers($token))
              ->assertStatus(404);
+    }
+
+    public function test_client_can_clear_their_server_cart(): void
+    {
+        ['client' => $client, 'token' => $token] = $this->actingAsClient();
+        $product = $this->activeProduct();
+        $cart = Cart::factory()->forUser($client)->create();
+        CartItem::factory()->forCart($cart)->forProduct($product)->create(['quantity' => 2]);
+
+        $this->deleteJson('/api/v1/cart', [], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.item_count', 0)
+            ->assertJsonCount(0, 'data.items');
+
+        $this->assertDatabaseMissing('cart_items', ['cart_id' => $cart->id]);
+    }
+
+    public function test_updating_cart_rejects_a_product_that_is_no_longer_available(): void
+    {
+        ['client' => $client, 'token' => $token] = $this->actingAsClient();
+        $product = $this->activeProduct();
+        $cart = Cart::factory()->forUser($client)->create();
+        $item = CartItem::factory()->forCart($cart)->forProduct($product)->create([
+            'quantity' => 1,
+        ]);
+        $product->update(['status' => 'out_of_stock']);
+
+        $this->putJson("/api/v1/cart/items/{$item->id}", ['quantity' => 2], $this->headers($token))
+            ->assertStatus(422)
+            ->assertJson(['success' => false]);
+
+        $this->assertDatabaseHas('cart_items', ['id' => $item->id, 'quantity' => 1]);
     }
 }

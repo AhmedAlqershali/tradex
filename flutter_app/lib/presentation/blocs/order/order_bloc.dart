@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/order_service.dart';
-import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
 
 part 'order_event.dart';
@@ -97,29 +96,18 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         items: items,
       );
 
-      // Checkout can create one order per store. Keep every server order in
-      // the local client history, while the confirmation screen shows the
-      // first reference for its existing single-reference contract.
-      final orders = serverOrders.isNotEmpty
-          ? serverOrders
-          : [
-              AppOrder(
-                ref: generateOrderRef(),
-                createdAt: DateTime.now(),
-                status: OrderStatus.pendingReview,
-                products: event.products,
-                customerName: event.customerName,
-                customerPhone: event.customerPhone,
-                customerEmail: event.customerEmail,
-                customerCity: event.customerCity,
-                customerArea: event.customerArea,
-                notes: event.notes,
-              ),
-            ];
-
-      for (final order in orders) {
-        OrderController.instance.createOrder(order);
+      // A successful checkout must always contain server-created orders. Never
+      // fabricate a local order when the API returns an empty/malformed body.
+      if (serverOrders.isEmpty) {
+        throw StateError('Checkout succeeded without a server order.');
       }
+      final orders = serverOrders;
+      OrderController.instance.setOrders([
+        ...orders,
+        ...OrderController.instance.orders.where(
+          (existing) => !orders.any((order) => order.ref == existing.ref),
+        ),
+      ]);
       emit(OrderCreated(orders.first));
     } catch (e) {
       emit(OrderFailure(_errorMessage(e)));

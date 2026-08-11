@@ -84,4 +84,16 @@ class CartController extends BaseApiController
 
         return $this->success(new CartResource($cart), 'Item removed from cart.');
     }
+
+    // ── DELETE /api/v1/cart ──────────────────────────────────────────────────
+
+    public function clear(Request $request): JsonResponse
+    {
+        $this->cartService->clearCart($request->user());
+
+        return $this->success(
+            new CartResource($this->cartService->getCart($request->user())),
+            'Cart cleared.',
+        );
+    }
 }

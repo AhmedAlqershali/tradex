@@ -108,8 +108,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) async {
     final previousItems = _currentItems();
     try {
-      await CartService.instance.removeItem(event.itemId);
-      final items = await CartService.instance.getCart();
+      final items = await CartService.instance.removeItem(event.itemId);
       CartController.instance.setItems(items);
       emit(_loadedFromController());
     } catch (e) {
@@ -123,9 +122,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   ) async {
     final previousItems = _currentItems();
     try {
-      await CartService.instance.clearCart();
-      CartController.instance.clear();
-      emit(const CartLoaded(items: [], total: 0.0, itemCount: 0));
+      final items = await CartService.instance.clearCart();
+      CartController.instance.setItems(items);
+      emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
     }
@@ -135,23 +134,22 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartLocalItemAdded event,
     Emitter<CartState> emit,
   ) async {
-    CartController.instance.addItem(event.item);
-    emit(_loadedFromController());
+    // Cart persistence is server-owned. Keep this legacy event as a refresh
+    // rather than allowing a local-only cart mutation.
+    add(const CartLoadRequested());
   }
 
   Future<void> _onCartLocalItemDecremented(
     CartLocalItemDecremented event,
     Emitter<CartState> emit,
   ) async {
-    CartController.instance.decrement(event.itemId);
-    emit(_loadedFromController());
+    add(const CartLoadRequested());
   }
 
   Future<void> _onCartLocalItemIncremented(
     CartLocalItemIncremented event,
     Emitter<CartState> emit,
   ) async {
-    CartController.instance.increment(event.itemId);
-    emit(_loadedFromController());
+    add(const CartLoadRequested());
   }
 }

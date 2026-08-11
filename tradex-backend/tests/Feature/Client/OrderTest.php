@@ -276,6 +276,23 @@ class OrderTest extends TestCase
         $this->assertDatabaseHas('orders', ['status' => 'pending']);
     }
 
+    public function test_checkout_rejects_a_product_that_became_unavailable(): void
+    {
+        $store = $this->activeStore();
+        ['token' => $token, 'product' => $product] = $this->clientWithCart($store, 1);
+        $product->update(['status' => 'out_of_stock']);
+
+        $this->postJson('/api/v1/orders', $this->contactPayload(), $this->headers($token))
+            ->assertStatus(422)
+            ->assertJson(['success' => false]);
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseHas('cart_items', [
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ]);
+    }
+
     // =========================================================================
     // GET /api/v1/orders
     // =========================================================================

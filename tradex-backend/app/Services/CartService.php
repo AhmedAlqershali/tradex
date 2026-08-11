@@ -58,8 +58,14 @@ class CartService implements CartServiceInterface
             throw new ModelNotFoundException("Cart item #{$itemId} not found.");
         }
 
+        if (! $item->product || $item->product->status !== 'active') {
+            throw CartException::productUnavailable(
+                $item->product?->name ?? "Product #{$item->product_id}",
+            );
+        }
+
         // Validate new quantity against current stock
-        if ($item->product && $quantity > $item->product->quantity) {
+        if ($quantity > $item->product->quantity) {
             throw CartException::insufficientStock(
                 $item->product->name,
                 $item->product->quantity,

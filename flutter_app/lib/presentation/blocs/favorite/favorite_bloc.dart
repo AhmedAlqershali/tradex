@@ -62,15 +62,15 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     Emitter<FavoriteState> emit,
   ) async {
     final previous = _currentProducts();
-    // Optimistic update.
-    FavoriteController.instance.addFavorite(event.product);
-    final optimistic = List<Product>.from(FavoriteController.instance.favorites);
-    emit(FavoriteLoaded(optimistic));
     try {
-      await FavoriteService.instance.addFavorite(event.product.id);
+      final products =
+          await FavoriteService.instance.addFavorite(event.product.id);
+      FavoriteController.instance.clear();
+      for (final product in products) {
+        FavoriteController.instance.addFavorite(product);
+      }
+      emit(FavoriteLoaded(products));
     } catch (e) {
-      // Rollback optimistic update on failure.
-      FavoriteController.instance.removeFavorite(event.product.id);
       emit(FavoriteFailure(message: _errorMessage(e), products: previous));
     }
   }
@@ -82,19 +82,15 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     Emitter<FavoriteState> emit,
   ) async {
     final previous = _currentProducts();
-    // Optimistic update.
-    FavoriteController.instance.removeFavorite(event.productId);
-    final optimistic = List<Product>.from(FavoriteController.instance.favorites);
-    emit(FavoriteLoaded(optimistic));
     try {
-      await FavoriteService.instance.removeFavorite(event.productId);
+      final products =
+          await FavoriteService.instance.removeFavorite(event.productId);
+      FavoriteController.instance.clear();
+      for (final product in products) {
+        FavoriteController.instance.addFavorite(product);
+      }
+      emit(FavoriteLoaded(products));
     } catch (e) {
-      // Rollback: re-add the product from previous list.
-      final removed = previous.firstWhere(
-        (p) => p.id == event.productId,
-        orElse: () => previous.first,
-      );
-      FavoriteController.instance.addFavorite(removed);
       emit(FavoriteFailure(message: _errorMessage(e), products: previous));
     }
   }

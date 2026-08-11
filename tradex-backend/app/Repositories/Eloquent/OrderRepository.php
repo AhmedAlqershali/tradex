@@ -36,7 +36,11 @@ class OrderRepository implements OrderRepositoryInterface
 
                 $product = Product::whereKey($item['product_id'])->lockForUpdate()->first();
 
-                if (! $product || $product->quantity < $item['quantity']) {
+                if (
+                    ! $product
+                    || $product->status !== 'active'
+                    || $product->quantity < $item['quantity']
+                ) {
                     throw OrderException::insufficientStock(
                         $item['product_name'],
                         $product?->quantity ?? 0,
