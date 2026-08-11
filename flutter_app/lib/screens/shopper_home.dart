@@ -14,6 +14,7 @@ import 'package:ai_saas/shared/widgets/section_header.dart';
 import 'package:ai_saas/core/services/location_service.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/shared/widgets/location_selector.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,19 +55,29 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
     try {
       // Laravel is authoritative for a previously selected location. Avoid
       // replacing it with a new GPS reading every time Home is reopened.
-      await UserController.instance.refreshProfile();
-      final saved = UserController.instance.currentUser;
-      if (saved?.region != null && saved!.region!.isNotEmpty) {
-        if (!mounted) return;
-        setState(() {
-          _currentRegion = saved.region;
-          _currentLocationName = saved.locationName ?? saved.region;
-          _isLocationLoading = false;
-        });
-        context.read<StoreBloc>().add(
-              StoresLoadRequested(region: saved.region),
-            );
-        return;
+      //
+      // A transient profile failure must not prevent the existing device
+      // location flow from running. Auth failures still stop here so we do not
+      // request GPS for a session that the server has rejected.
+      try {
+        await UserController.instance.refreshProfile();
+        final saved = UserController.instance.currentUser;
+        if (saved?.region != null && saved!.region!.isNotEmpty) {
+          if (!mounted) return;
+          setState(() {
+            _currentRegion = saved.region;
+            _currentLocationName = saved.locationName ?? saved.region;
+            _isLocationLoading = false;
+          });
+          context.read<StoreBloc>().add(
+                StoresLoadRequested(region: saved.region),
+              );
+          return;
+        }
+      } on ApiException catch (error) {
+        if (error is AuthException) rethrow;
+        // Continue to the real GPS path. If saving the GPS result also fails,
+        // the outer API error handler presents that failure to the user.
       }
 
       final result = await LocationService.instance.getCurrentLocation();
@@ -92,6 +103,12 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
         _isLocationLoading = false;
       });
       context.read<StoreBloc>().add(StoresLoadRequested(region: result.region));
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLocationLoading = false;
+        _locationError = error.message;
+      });
     } on LocationException catch (error) {
       if (!mounted) return;
       setState(() {

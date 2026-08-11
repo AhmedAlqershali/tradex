@@ -60,6 +60,25 @@ class StoreTest extends TestCase
         $this->assertEquals(4, $found['products_count']);
     }
 
+    public function test_store_list_filters_by_region(): void
+    {
+        Store::factory()->active()->create([
+            'store_name' => 'Central Store',
+            'region' => 'الوسطى',
+        ]);
+        Store::factory()->active()->create([
+            'store_name' => 'Gaza Store',
+            'region' => 'غزة',
+        ]);
+
+        $response = $this->getJson('/api/v1/stores?region=' . urlencode('الوسطى'));
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data.data')
+            ->assertJsonPath('data.data.0.store_name', 'Central Store')
+            ->assertJsonPath('data.data.0.region', 'الوسطى');
+    }
+
     public function test_store_list_response_shape(): void
     {
         Store::factory()->active()->create();

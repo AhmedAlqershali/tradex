@@ -36,18 +36,21 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedStoreCategory = widget.initialCategory ?? '';
+    _selectedCategoryId = widget.initialCategoryId;
     context.read<CategoryBloc>().add(const CategoryListRequested());
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _searchQuery = widget.initialQuery!;
       _searchController.text = widget.initialQuery!;
       // Trigger search immediately.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ProductBloc>().add(ProductSearchRequested(_searchQuery));
+        context.read<ProductBloc>().add(ProductSearchRequested(
+              _searchQuery,
+              categoryId: _selectedCategoryId,
+            ));
       });
     } else if (widget.initialCategoryId != null &&
         widget.initialCategoryId!.isNotEmpty) {
-      _selectedStoreCategory = widget.initialCategory ?? '';
-      _selectedCategoryId = widget.initialCategoryId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<ProductBloc>().add(ProductsLoadRequested(
               category: _selectedStoreCategory,
