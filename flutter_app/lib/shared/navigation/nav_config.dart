@@ -4,15 +4,6 @@ import 'package:ai_saas/screens/merchant/ai_marketing_tools_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_home.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
-import 'package:ai_saas/screens/admin/admin_dashboard_screen.dart';
-import 'package:ai_saas/screens/admin/admin_analytics_screen.dart';
-import 'package:ai_saas/screens/admin/admin_merchants_screen.dart';
-import 'package:ai_saas/screens/admin/admin_users_screen.dart';
-import 'package:ai_saas/screens/admin/admin_categories_screen.dart';
-import 'package:ai_saas/screens/admin/admin_plans_screen.dart';
-import 'package:ai_saas/screens/admin/admin_reviews_screen.dart';
-import 'package:ai_saas/screens/admin/admin_subscription_requests_screen.dart';
-import 'package:ai_saas/screens/admin/admin_products_screen.dart';
 import 'package:ai_saas/screens/profile_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
@@ -86,69 +77,9 @@ class NavConfig {
           ),
         ];
 
+      // Admin accounts are managed through the Web Admin Dashboard only.
       case AppType.admin:
-        return [
-          const BnItem(
-            widget: AdminDashboardScreen(),
-            title: 'نظرة عامة',
-            icon: Icons.dashboard_outlined,
-            activeIcon: Icons.dashboard_rounded,
-          ),
-          const BnItem(
-            widget: AdminAnalyticsScreen(),
-            title: 'التحليلات',
-            icon: Icons.insights_outlined,
-            activeIcon: Icons.insights,
-          ),
-          const BnItem(
-            widget: AdminUsersScreen(),
-            title: 'المستخدمون',
-            icon: Icons.people_outline,
-            activeIcon: Icons.people,
-          ),
-          const BnItem(
-            widget: AdminMerchantsScreen(),
-            title: 'التجار',
-            icon: Icons.storefront_outlined,
-            activeIcon: Icons.storefront,
-          ),
-          const BnItem(
-            widget: AdminProductsScreen(),
-            title: 'المنتجات',
-            icon: Icons.inventory_2_outlined,
-            activeIcon: Icons.inventory_2,
-          ),
-          const BnItem(
-            widget: AdminCategoriesScreen(),
-            title: 'التصنيفات',
-            icon: Icons.category_outlined,
-            activeIcon: Icons.category,
-          ),
-          const BnItem(
-            widget: AdminPlansScreen(),
-            title: 'الخطط',
-            icon: Icons.card_membership_outlined,
-            activeIcon: Icons.card_membership,
-          ),
-          const BnItem(
-            widget: AdminReviewsScreen(),
-            title: 'المراجعات',
-            icon: Icons.rate_review_outlined,
-            activeIcon: Icons.rate_review,
-          ),
-          const BnItem(
-            widget: AdminSubscriptionRequestsScreen(),
-            title: 'طلبات الاشتراك',
-            icon: Icons.receipt_long_outlined,
-            activeIcon: Icons.receipt_long,
-          ),
-          const BnItem(
-            widget: ProfileScreen(),
-            title: 'حسابي',
-            icon: Icons.person_outline,
-            activeIcon: Icons.person,
-          ),
-        ];
+        return const [];
     }
   }
 }

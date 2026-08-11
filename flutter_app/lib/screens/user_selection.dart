@@ -1,5 +1,4 @@
 import 'package:ai_saas/screens/auth/register_screen.dart';
-import 'package:ai_saas/screens/auth/login_screen.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -123,24 +122,6 @@ class _UserSelectionState extends State<UserSelection> {
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: Colors.grey.shade500,
-                              ),
-                            ),
-                            SizedBox(height: 10.h),
-                            TextButton(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const LoginScreen(type: AppType.admin),
-                                ),
-                              ),
-                              child: Text(
-                                'دخول الإدارة',
-                                style: TextStyle(
-                                  color: primaryColor,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
                               ),
                             ),
                           ],
