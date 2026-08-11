@@ -103,11 +103,14 @@ class StoreTest extends TestCase
         $this->putJson("/api/v1/merchant/stores/{$store->id}", [
             'store_name'  => 'Updated Store Name',
             'description' => 'New description',
+            'phone'       => '0599123456',
         ], $this->headers($token))
             ->assertOk()
-            ->assertJsonPath('data.store_name', 'Updated Store Name');
+            ->assertJsonPath('data.store_name', 'Updated Store Name')
+            ->assertJsonPath('data.phone', '0599123456');
 
         $this->assertDatabaseHas('stores', ['id' => $store->id, 'store_name' => 'Updated Store Name']);
+        $this->assertDatabaseHas('users', ['id' => $store->user_id, 'phone' => '0599123456']);
     }
 
     public function test_merchant_cannot_update_another_merchants_store(): void

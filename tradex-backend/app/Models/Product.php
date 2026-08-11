@@ -44,6 +44,15 @@ class Product extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product): void {
+            if ((int) $product->quantity === 0 && $product->status === 'active') {
+                $product->status = 'out_of_stock';
+            }
+        });
+    }
+
     // -------------------------------------------------------------------------
     // Relationships
     // -------------------------------------------------------------------------

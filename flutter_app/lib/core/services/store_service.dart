@@ -67,10 +67,12 @@ class StoreService {
     required String storeId,
     String? name,
     String? description,
+    String? phone,
   }) async {
     final body = <String, dynamic>{};
     if (name != null) body['store_name'] = name;
     if (description != null) body['description'] = description;
+    if (phone != null) body['phone'] = phone;
 
     final response = await ApiClient.instance.put<Map<String, dynamic>>(
       ApiConstants.myStoreById(storeId),

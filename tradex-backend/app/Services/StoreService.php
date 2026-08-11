@@ -74,6 +74,11 @@ class StoreService implements StoreServiceInterface
      */
     public function updateStore(Store $store, array $data): Store
     {
+        if (array_key_exists('phone', $data)) {
+            $store->owner()->update(['phone' => $data['phone']]);
+            unset($data['phone']);
+        }
+
         return $this->storeRepository->update($store, $data);
     }
 

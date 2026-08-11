@@ -163,6 +163,28 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', ['name' => 'Wireless Earbuds', 'store_id' => $store->id]);
     }
 
+    public function test_zero_stock_product_is_persisted_as_out_of_stock(): void
+    {
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+
+        $response = $this->postJson('/api/v1/merchant/products', [
+            'store_id' => $store->id,
+            'name' => 'Unavailable Item',
+            'price' => 10,
+            'quantity' => 0,
+            'status' => 'active',
+        ], $this->headers($token));
+
+        $response->assertCreated()
+            ->assertJsonPath('data.status', 'out_of_stock')
+            ->assertJsonPath('data.is_available', false);
+        $this->assertDatabaseHas('products', [
+            'id' => $response->json('data.id'),
+            'status' => 'out_of_stock',
+            'quantity' => 0,
+        ]);
+    }
+
     public function test_merchant_can_create_product_with_images(): void
     {
         Storage::fake('public');

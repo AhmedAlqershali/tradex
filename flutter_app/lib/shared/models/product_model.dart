@@ -1,3 +1,5 @@
+import 'package:ai_saas/core/api/app_config.dart';
+
 /// Represents a product in the Tradex catalog.
 ///
 /// Populated from the server via [Product.fromServerJson] (GET /products,
@@ -148,10 +150,12 @@ class Product {
     if (rawImages is List) {
       for (final img in rawImages) {
         if (img is Map) {
-          final url = img['url'] as String? ?? img['image_url'] as String?;
-          if (url != null && url.isNotEmpty) imageUrls.add(url);
+          final url = img['url']?.toString() ?? img['image_url']?.toString();
+          if (url != null && url.isNotEmpty) {
+            imageUrls.add(AppConfig.resolveMediaUrl(url));
+          }
         } else if (img is String) {
-          imageUrls.add(img);
+          imageUrls.add(AppConfig.resolveMediaUrl(img));
         }
       }
     }
@@ -159,13 +163,17 @@ class Product {
     if (imageUrls.isEmpty) {
       final plain = json['imageUrls'] ?? json['image_urls'];
       if (plain is List) {
-        imageUrls = List<String>.from(plain);
+        imageUrls = plain
+            .map((value) => AppConfig.resolveMediaUrl(value.toString()))
+            .toList();
       }
     }
     // Final fallback: the single primary thumbnail the backend always sends.
     if (imageUrls.isEmpty) {
       final primary = json['image'] as String?;
-      if (primary != null && primary.isNotEmpty) imageUrls.add(primary);
+      if (primary != null && primary.isNotEmpty) {
+        imageUrls.add(AppConfig.resolveMediaUrl(primary));
+      }
     }
 
     // Backend sends `category` as a nested {id, name} object (or omits it
@@ -204,8 +212,8 @@ class Product {
       description: json['description'] as String? ?? '',
       category: categoryName,
       categoryId: categoryId,
-      price: json['price'] != null ? (json['price'] as num).toDouble() : 0.0,
-      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      price: _toDouble(json['price']),
+      quantity: _toInt(json['quantity']),
       status: status ?? 'active',
       imageUrls: imageUrls,
       isVisible: isVisible,
@@ -220,5 +228,15 @@ class Product {
   static DateTime _parseDate(String? value) {
     if (value == null) return DateTime.now();
     return DateTime.tryParse(value) ?? DateTime.now();
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return value == null ? 0.0 : double.tryParse(value.toString()) ?? 0.0;
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return value == null ? 0 : int.tryParse(value.toString()) ?? 0;
   }
 }

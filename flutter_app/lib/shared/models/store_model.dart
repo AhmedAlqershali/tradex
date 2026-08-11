@@ -21,6 +21,7 @@ class StoreModel {
   final String? tag;
   final String? badge;
   final double? rating;
+  final String? phone;
 
   StoreModel({
     this.id,
@@ -31,6 +32,7 @@ class StoreModel {
     this.tag,
     this.badge,
     this.rating,
+    this.phone,
   });
 
   // ── Local JSON serialisation ──────────────────────────────────────────────────
@@ -44,18 +46,19 @@ class StoreModel {
         'tag': tag,
         'badge': badge,
         'rating': rating,
+        'phone': phone,
       };
 
   factory StoreModel.fromJson(Map<String, dynamic> json) => StoreModel(
-        id: json['id'] as String?,
+        id: json['id']?.toString(),
         title: json['title'] as String? ?? '',
         subTitle: json['subTitle'] as String? ?? '',
         imageUrl: json['imageUrl'] as String? ?? '',
         location: json['location'] as String?,
         tag: json['tag'] as String?,
         badge: json['badge'] as String?,
-        rating:
-            json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+        rating: _toDouble(json['rating']),
+        phone: json['phone']?.toString(),
       );
 
   /// Constructs a [StoreModel] from a server API response (snake_case keys).
@@ -80,8 +83,13 @@ class StoreModel {
               : json['category']?.toString()) ??
           json['tag'] as String?,
       badge: json['badge'] as String?,
-      rating:
-          json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      rating: _toDouble(json['rating']),
+      phone: json['phone']?.toString(),
     );
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return value == null ? null : double.tryParse(value.toString());
   }
 }

@@ -16,6 +16,7 @@ class StoreRepository implements StoreRepositoryInterface
     {
         return Store::where('user_id', $merchant->id)
             ->withCount('products')
+            ->with('owner:id,phone')
             ->orderBy('store_name')
             ->get();
     }
@@ -29,6 +30,7 @@ class StoreRepository implements StoreRepositoryInterface
         return Store::where('id', $storeId)
             ->where('user_id', $merchant->id)
             ->withCount('products')
+            ->with('owner:id,phone')
             ->first();
     }
 
@@ -39,7 +41,7 @@ class StoreRepository implements StoreRepositoryInterface
     {
         $store->update($data);
 
-        return $store->fresh();
+        return $store->fresh(['owner:id,phone']);
     }
 
     /**
@@ -49,6 +51,6 @@ class StoreRepository implements StoreRepositoryInterface
     {
         $store->update(['logo' => $path]);
 
-        return $store->fresh();
+        return $store->fresh(['owner:id,phone']);
     }
 }

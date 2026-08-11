@@ -19,6 +19,7 @@ class StoreResource extends JsonResource
                 : null,
             'status'         => $this->status,
             'products_count' => $this->products_count ?? 0,
+            'phone'         => $this->whenLoaded('owner', fn () => $this->owner?->phone),
             'created_at'     => $this->created_at?->toIso8601String(),
         ];
     }

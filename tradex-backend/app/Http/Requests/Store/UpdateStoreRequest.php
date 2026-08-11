@@ -24,6 +24,7 @@ class UpdateStoreRequest extends FormRequest
         return [
             'store_name'  => ['sometimes', 'string', 'min:2', 'max:100'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'phone'       => ['sometimes', 'nullable', 'string', 'max:20'],
         ];
     }
 

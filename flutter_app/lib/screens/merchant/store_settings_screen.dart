@@ -31,6 +31,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
   File? _pickedLogo;
@@ -47,6 +48,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -55,6 +57,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     _initialized = true;
     _nameController.text = store.title;
     _descriptionController.text = store.subTitle;
+    _phoneController.text = store.phone ?? '';
     _currentLogoUrl = store.imageUrl;
   }
 
@@ -84,6 +87,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
           MyStoreUpdateRequested(
             name: name,
             description: _descriptionController.text.trim(),
+            phone: _phoneController.text.trim(),
           ),
         );
   }

@@ -62,6 +62,7 @@ class ProductRepository implements ProductRepositoryInterface
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->where('status', 'active')
+            ->where('quantity', '>', 0)
             ->whereHas('store', fn ($q) => $q->where('status', 'active'));
 
         // Search by product name and description
@@ -111,6 +112,7 @@ class ProductRepository implements ProductRepositoryInterface
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->where('status', 'active')
+            ->where('quantity', '>', 0)
             ->whereHas('store', fn ($q) => $q->where('status', 'active'))
             ->find($id);
     }

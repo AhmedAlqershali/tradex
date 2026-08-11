@@ -74,6 +74,7 @@ class StoreBloc extends Bloc<StoreEvent, StoreState> {
         storeId: storeId,
         name: event.name,
         description: event.description,
+        phone: event.phone,
       );
       emit(StoreUpdated(store));
     } on ApiException catch (e) {

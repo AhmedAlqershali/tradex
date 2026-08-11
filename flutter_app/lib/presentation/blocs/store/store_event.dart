@@ -28,13 +28,15 @@ class MyStoreUpdateRequested extends StoreEvent {
   const MyStoreUpdateRequested({
     this.name,
     this.description,
+    this.phone,
   });
 
   final String? name;
   final String? description;
+  final String? phone;
 
   @override
-  List<Object?> get props => [name, description];
+  List<Object?> get props => [name, description, phone];
 }
 
 class StoreLogoUploadRequested extends StoreEvent {
