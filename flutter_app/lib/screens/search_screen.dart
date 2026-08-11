@@ -1,6 +1,6 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
-import 'package:ai_saas/shared/models/category_filter_model.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:flutter/material.dart';
@@ -33,29 +33,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   final TextEditingController _searchController = TextEditingController();
 
-  final List<CategoryFilterModel> filterCategories = [
-    CategoryFilterModel(name: 'مطاعم', icon: Icons.restaurant),
-    CategoryFilterModel(name: 'كافيهات', icon: Icons.local_cafe_outlined),
-    CategoryFilterModel(name: 'ملابس', icon: Icons.checkroom),
-    CategoryFilterModel(
-        name: 'مساحات عمل', icon: Icons.business_center_outlined),
-    CategoryFilterModel(name: 'هدايا', icon: Icons.card_giftcard),
-    CategoryFilterModel(name: 'أحذية', icon: Icons.shopping_bag_outlined),
-    CategoryFilterModel(name: 'سيارات', icon: Icons.time_to_leave_outlined),
-    CategoryFilterModel(name: 'مجوهرات', icon: Icons.diamond_outlined),
-    CategoryFilterModel(name: 'كوزمتكس', icon: Icons.content_cut_outlined),
-    CategoryFilterModel(name: 'سوبرماركت', icon: Icons.shopping_cart_outlined),
-    CategoryFilterModel(name: 'مول', icon: Icons.corporate_fare_outlined),
-    CategoryFilterModel(name: 'متاجر', icon: Icons.storefront),
-    CategoryFilterModel(name: 'إلكترونيات', icon: Icons.devices_other_outlined),
-    CategoryFilterModel(
-        name: 'مستلزمات طبية', icon: Icons.medical_services_outlined),
-    CategoryFilterModel(name: 'بصريات', icon: Icons.remove_red_eye_outlined),
-  ];
-
   @override
   void initState() {
     super.initState();
+    context.read<CategoryBloc>().add(const CategoryListRequested());
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _searchQuery = widget.initialQuery!;
       _searchController.text = widget.initialQuery!;
@@ -108,13 +89,21 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onCategorySelected(String category) {
+    final options = context.read<CategoryBloc>().state is CategoriesLoaded
+        ? (context.read<CategoryBloc>().state as CategoriesLoaded).options
+        : const <CategoryOption>[];
+    final selected = options.where((option) => option.name == category);
     setState(() {
       _selectedStoreCategory =
           _selectedStoreCategory == category ? '' : category;
+      _selectedCategoryId = _selectedStoreCategory.isEmpty || selected.isEmpty
+          ? null
+          : selected.first.id;
     });
     context.read<ProductBloc>().add(ProductsLoadRequested(
           category:
               _selectedStoreCategory.isNotEmpty ? _selectedStoreCategory : null,
+          categoryId: _selectedCategoryId,
         ));
   }
 
@@ -177,43 +166,42 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
 
               // ── Category chips ──
-              SizedBox(
-                height: 38.h,
-                child: ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: filterCategories.length,
-                  separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                  itemBuilder: (context, index) {
-                    final cat = filterCategories[index];
-                    final isSelected = _selectedStoreCategory == cat.name;
-                    return GestureDetector(
-                      onTap: () => _onCategorySelected(cat.name),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xff4D41DF)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xff4D41DF)
-                                : const Color(0xffEFEFEF),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(cat.icon,
-                                size: 14.sp,
+              BlocBuilder<CategoryBloc, CategoryState>(
+                builder: (context, categoryState) {
+                  if (categoryState is! CategoriesLoaded ||
+                      categoryState.options.isEmpty) {
+                    return const SizedBox(height: 38);
+                  }
+                  final options = categoryState.options;
+                  return SizedBox(
+                    height: 38.h,
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: options.length,
+                      separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                      itemBuilder: (context, index) {
+                        final option = options[index];
+                        final isSelected = _selectedCategoryId == option.id;
+                        return GestureDetector(
+                          onTap: () => _onCategorySelected(option.name),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xff4D41DF)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
                                 color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xff888888)),
-                            SizedBox(width: 4.w),
-                            Text(
-                              cat.name,
+                                    ? const Color(0xff4D41DF)
+                                    : const Color(0xffEFEFEF),
+                              ),
+                            ),
+                            child: Text(
+                              option.name,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 12.sp,
                                 color: isSelected
@@ -224,12 +212,12 @@ class _SearchScreenState extends State<SearchScreen> {
                                     : FontWeight.normal,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
 
               SizedBox(height: 12.h),
@@ -350,12 +338,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     crossAxisSpacing: 10.w,
                     mainAxisSpacing: 10.h,
                     childAspectRatio: 1.2,
-                    children: filterCategories.map((cat) {
-                      final isSelected = _selectedStoreCategory == cat.name;
+                    children: _categoryOptions(context).map((option) {
+                      final isSelected = _selectedCategoryId == option.id;
                       return GestureDetector(
                         onTap: () {
                           Navigator.pop(ctx);
-                          _onCategorySelected(cat.name);
+                          _onCategorySelected(option.name);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -372,13 +360,13 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(cat.icon,
+                              Icon(Icons.category_outlined,
                                   size: 22.sp,
                                   color: isSelected
                                       ? const Color(0xff4D41DF)
                                       : const Color(0xff888888)),
                               SizedBox(height: 4.h),
-                              Text(cat.name,
+                              Text(option.name,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.ibmPlexSans(
                                       fontSize: 10.sp,
@@ -401,6 +389,11 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       },
     );
+  }
+
+  List<CategoryOption> _categoryOptions(BuildContext context) {
+    final state = context.read<CategoryBloc>().state;
+    return state is CategoriesLoaded ? state.options : const [];
   }
 
   Widget _buildProductCard(BuildContext context, Product product) {

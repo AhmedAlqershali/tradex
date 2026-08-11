@@ -276,6 +276,16 @@ class UserController {
     currentUserNotifier.value = user;
   }
 
+  /// Refreshes the authenticated profile from Laravel.
+  ///
+  /// The server response is authoritative, including the avatar URL. This is
+  /// used by screens that need to reflect profile changes made outside the
+  /// current Flutter process.
+  Future<void> refreshProfile() async {
+    final user = await UserService.instance.getMe();
+    currentUserNotifier.value = user;
+  }
+
   /// Updates mutable profile fields via PUT /profile.
   ///
   /// If [photoPath] is a local file path, it is uploaded first via

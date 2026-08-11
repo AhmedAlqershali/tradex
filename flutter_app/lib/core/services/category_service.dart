@@ -45,28 +45,6 @@ class CategoryService {
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
-  List<String> _extractStringList(Map<String, dynamic> raw) {
-    // Backend wraps paginated collections as { data: { data: [...], links,
-    // meta } } — unwrap one extra level when present.
-    final outer = raw['data'] ?? raw;
-    final data =
-        (outer is Map && outer['data'] is List) ? outer['data'] : outer;
-    if (data is List) {
-      return data
-          .map((e) {
-            if (e is String) return e;
-            // Server may return [{ "id": ..., "name": "..." }] objects.
-            if (e is Map) {
-              return (e['name'] ?? e['label'] ?? e['value'] ?? '').toString();
-            }
-            return e.toString();
-          })
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
-    return [];
-  }
-
   List<CategoryOption> _extractOptions(Map<String, dynamic> raw) {
     final outer = raw['data'] ?? raw;
     final data =

@@ -12,6 +12,7 @@ import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/models/store_model.dart';
 import 'package:ai_saas/shared/widgets/section_header.dart';
 import 'package:ai_saas/core/services/location_service.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,6 +33,7 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
   @override
   void initState() {
     super.initState();
+    UserController.instance.refreshProfile().catchError((_) {});
     _loadHomeData();
     context.read<CategoryBloc>().add(const CategoryListRequested());
     context.read<ProductBloc>().add(const ProductsLoadRequested());
@@ -108,7 +110,7 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
                       SizedBox(height: 24.h),
                       const HomeCategoriesRow(),
                       SizedBox(height: 24.h),
-                      _NearbyStoresSection(),
+                      _NearbyStoresSection(region: _currentRegion),
                       SizedBox(height: 24.h),
                       _NearbyProductsSection(),
                       SizedBox(height: 24.h),
@@ -297,6 +299,10 @@ class _DashboardCountersError extends StatelessWidget {
 // ─── Nearby Stores ────────────────────────────────────────────────────────────
 
 class _NearbyStoresSection extends StatelessWidget {
+  const _NearbyStoresSection({this.region});
+
+  final String? region;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<StoreBloc, StoreState>(
@@ -325,14 +331,11 @@ class _NearbyStoresSection extends StatelessWidget {
         return Column(
           children: [
             SectionHeader(
-              title: _currentRegion == null
-                  ? 'متاجر المنطقة'
-                  : 'متاجر في $_currentRegion',
+              title: region == null ? 'متاجر المنطقة' : 'متاجر في $region',
               onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) =>
-                          NearbyStoresScreen(region: _currentRegion))),
+                      builder: (_) => NearbyStoresScreen(region: region))),
             ),
             SizedBox(height: 12.h),
             SizedBox(

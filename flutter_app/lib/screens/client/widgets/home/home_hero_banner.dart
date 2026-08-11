@@ -20,15 +20,14 @@ class HomeHeroBanner extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-            colors: [_primary, const Color(0xff6A5AE0)]),
+        gradient: LinearGradient(colors: [_primary, const Color(0xff6A5AE0)]),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'تسوّق في النصيرات',
+            'اكتشف متاجر منطقتك',
             style: GoogleFonts.ibmPlexSans(
                 color: Colors.white,
                 fontSize: 20.sp,
@@ -42,7 +41,8 @@ class HomeHeroBanner extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
-            onPressed: () => Navigator.push(context,
+            onPressed: () => Navigator.push(
+                context,
                 MaterialPageRoute(
                     builder: (_) => const RecentlyArrivedScreen())),
             style: ElevatedButton.styleFrom(
@@ -53,8 +53,7 @@ class HomeHeroBanner extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
             ),
             child: Text('اكتشف الآن',
-                style: TextStyle(
-                    fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

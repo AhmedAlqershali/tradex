@@ -1,4 +1,5 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,18 +39,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     if (n.contains('electronic') || n.contains('device')) return Icons.devices;
     if (n.contains('fashion') || n.contains('cloth')) return Icons.checkroom;
     if (n.contains('shoe')) return Icons.hiking;
-    if (n.contains('home') || n.contains('kitchen')) return Icons.kitchen_outlined;
+    if (n.contains('home') || n.contains('kitchen')) {
+      return Icons.kitchen_outlined;
+    }
     if (n.contains('food') || n.contains('grocer')) return Icons.restaurant;
-    if (n.contains('beauty') || n.contains('cosmetic') || n.contains('personal care')) {
+    if (n.contains('beauty') ||
+        n.contains('cosmetic') ||
+        n.contains('personal care')) {
       return Icons.brush;
     }
-    if (n.contains('sport') || n.contains('outdoor')) return Icons.sports_soccer;
+    if (n.contains('sport') || n.contains('outdoor')) {
+      return Icons.sports_soccer;
+    }
     if (n.contains('toy') || n.contains('game')) return Icons.toys_outlined;
-    if (n.contains('book') || n.contains('stationery')) return Icons.menu_book_outlined;
-    if (n.contains('health') || n.contains('wellness')) return Icons.favorite_border;
-    if (n.contains('auto') || n.contains('car')) return Icons.directions_car_outlined;
-    if (n.contains('jewel') || n.contains('accessor')) return Icons.diamond_outlined;
-    if (n.contains('baby') || n.contains('kid')) return Icons.child_friendly_outlined;
+    if (n.contains('book') || n.contains('stationery')) {
+      return Icons.menu_book_outlined;
+    }
+    if (n.contains('health') || n.contains('wellness')) {
+      return Icons.favorite_border;
+    }
+    if (n.contains('auto') || n.contains('car')) {
+      return Icons.directions_car_outlined;
+    }
+    if (n.contains('jewel') || n.contains('accessor')) {
+      return Icons.diamond_outlined;
+    }
+    if (n.contains('baby') || n.contains('kid')) {
+      return Icons.child_friendly_outlined;
+    }
     if (n.contains('office') || n.contains('work')) return Icons.laptop;
     if (n.contains('service')) return Icons.shopping_bag_outlined;
     return Icons.category_outlined;
@@ -126,7 +143,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                   if (state is CategoryFailure) {
                     return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20.w, vertical: 30.h),
                       child: Column(
                         children: [
                           Text(
@@ -154,10 +172,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     );
                   }
 
-                  final names =
-                      state is CategoriesLoaded ? state.categories : const <String>[];
+                  final options = state is CategoriesLoaded
+                      ? state.options
+                      : const <CategoryOption>[];
 
-                  if (names.isEmpty) {
+                  if (options.isEmpty) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 40.h),
                       child: Text(
@@ -172,7 +191,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
                   return GridView.builder(
                     padding: EdgeInsets.all(8.r),
-                    itemCount: names.length,
+                    itemCount: options.length,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -182,7 +201,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       childAspectRatio: 1.2,
                     ),
                     itemBuilder: (context, index) {
-                      final name = names[index];
+                      final option = options[index];
+                      final name = option.name;
 
                       return Container(
                         decoration: BoxDecoration(
@@ -200,7 +220,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => SearchScreen(initialCategory: name),
+                              builder: (_) => SearchScreen(
+                                initialCategory: name,
+                                initialCategoryId: option.id,
+                              ),
                             ),
                           ),
                           child: Column(
