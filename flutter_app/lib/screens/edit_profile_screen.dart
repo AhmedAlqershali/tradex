@@ -113,12 +113,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_pickedPhoto != null) {
       photoImage = FileImage(_pickedPhoto!);
     } else if (savedPhotoPath != null && savedPhotoPath.isNotEmpty) {
-      photoImage = savedPhotoPath.startsWith('http://') ||
-              savedPhotoPath.startsWith('https://')
-          ? NetworkImage(AppConfig.resolveMediaUrl(savedPhotoPath))
-          : File(savedPhotoPath).existsSync()
-              ? FileImage(File(savedPhotoPath))
-              : null;
+      if (savedPhotoPath.startsWith('http://') ||
+          savedPhotoPath.startsWith('https://')) {
+        photoImage = NetworkImage(AppConfig.resolveMediaUrl(savedPhotoPath));
+      }
     }
 
     return Directionality(

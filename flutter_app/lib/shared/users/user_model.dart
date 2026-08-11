@@ -9,7 +9,7 @@ import 'package:ai_saas/core/api/app_config.dart';
 //
 // Server fields:
 //   id           → server-assigned UUID.
-//   photoPath    → network URL after upload via POST /profile/avatar.
+//   photoPath    → server-backed network URL after upload via POST /profile/avatar.
 //   storeId      → comes from the backend merchant profile on registration.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -39,8 +39,8 @@ class AppUser {
   /// City/region selected during registration (e.g. 'غزة', 'خانيونس').
   final String? region;
 
-  /// Profile photo URL. Contains a network URL after upload via POST /profile/avatar,
-  /// or a local file path when a new photo has been picked but not yet uploaded.
+  /// Authoritative server URL for the profile photo. A picked local file is
+  /// transient UI input only and must be uploaded before it reaches this model.
   final String? photoPath;
 
   final DateTime createdAt;
@@ -155,7 +155,18 @@ class AppUser {
 
   static String? _resolvePhotoPath(String? value) {
     if (value == null || value.trim().isEmpty) return null;
-    return AppConfig.resolveMediaUrl(value);
+    final trimmed = value.trim();
+    final parsed = Uri.tryParse(trimmed);
+    final isAbsoluteUrl =
+        parsed != null && parsed.hasScheme && parsed.host.isNotEmpty;
+    final isRootRelativeServerPath = trimmed.startsWith('/storage/');
+
+    // Never promote an arbitrary local/device path into the user's durable
+    // profile state. Laravel returns either an absolute Storage::url() value
+    // or a root-relative public storage path.
+    if (!isAbsoluteUrl && !isRootRelativeServerPath) return null;
+
+    return AppConfig.resolveMediaUrl(trimmed);
   }
 
   static DateTime _parseDate(String? value) {

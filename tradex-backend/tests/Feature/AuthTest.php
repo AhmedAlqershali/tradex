@@ -7,6 +7,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -126,6 +127,29 @@ class AuthTest extends TestCase
             ->assertOk()
             ->assertJson(['success' => true])
             ->assertJsonStructure(['data' => ['token', 'user']]);
+    }
+
+    public function test_login_returns_the_server_avatar_url_after_a_new_session(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/persisted-avatar.jpg', 'avatar bytes');
+
+        User::factory()->create([
+            'email'    => 'avatar@example.com',
+            'password' => bcrypt('Password123!'),
+            'role'     => 'client',
+            'avatar'   => 'avatars/persisted-avatar.jpg',
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email'    => 'avatar@example.com',
+            'password' => 'Password123!',
+        ])
+            ->assertOk()
+            ->assertJsonPath(
+                'data.user.avatar',
+                Storage::disk('public')->url('avatars/persisted-avatar.jpg'),
+            );
     }
 
     public function test_login_fails_with_wrong_password(): void

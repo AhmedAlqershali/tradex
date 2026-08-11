@@ -55,9 +55,11 @@ class UserService {
     final response = await ApiClient.instance
         .postFormData<Map<String, dynamic>>(ApiConstants.meAvatar, formData);
     final user = parseProfileResponse(response.data!);
-    if (user.photoPath == null) {
+    final avatarUrl = user.photoPath;
+    if (avatarUrl == null ||
+        !(avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://'))) {
       throw const UnknownException(
-        'تم رفع الصورة لكن لم يُرجع الخادم بيانات الصورة.',
+        'تم رفع الصورة لكن لم يُرجع الخادم رابط الصورة.',
       );
     }
     return user;

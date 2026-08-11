@@ -12,6 +12,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -342,7 +343,9 @@ class AuthService implements AuthServiceInterface
             'email'          => $user->email,
             'phone'          => $user->phone,
             'role'           => $user->role,
-            'avatar'         => $user->avatar,
+            'avatar'         => $user->avatar
+                ? Storage::disk('public')->url($user->avatar)
+                : null,
             // Mobile clients use this flag to gate features behind verification
             // (e.g. showing a "verify your email" banner in Flutter).
             'email_verified' => $user->hasVerifiedEmail(),

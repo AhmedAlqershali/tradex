@@ -48,6 +48,16 @@ void main() {
       expect(local.photoPath, isNot(contains('localhost')));
     });
 
+    test('does not treat a device file path as a persisted avatar', () {
+      final user = AppUser.fromServerJson({
+        'id': 3,
+        'role': 'client',
+        'avatar': '/data/user/0/ps.tradex.app/cache/avatar.jpg',
+      });
+
+      expect(user.photoPath, isNull);
+    });
+
     test('maps the Laravel store_name and logo contract', () {
       final store = StoreModel.fromServerJson({
         'id': 7,

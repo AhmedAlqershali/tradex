@@ -278,8 +278,9 @@ class UserController {
 
   /// Updates mutable profile fields via PUT /profile.
   ///
-  /// If [photoPath] is a local file path (not starting with http), the avatar
-  /// is uploaded first via POST /profile/avatar and the returned URL is stored.
+  /// If [photoPath] is a local file path, it is uploaded first via
+  /// POST /profile/avatar. Only Laravel's returned server URL is stored in the
+  /// user model; the picked device path is never a permanent avatar value.
   Future<void> updateProfile({
     String? name,
     String? email,

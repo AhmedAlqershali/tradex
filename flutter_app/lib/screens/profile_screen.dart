@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/edit_profile_screen.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
@@ -204,10 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Image.asset('assets/images/client.png', fit: BoxFit.cover),
       );
     }
-    final file = File(photoPath);
-    return file.existsSync()
-        ? Image.file(file, fit: BoxFit.cover)
-        : Image.asset('assets/images/client.png', fit: BoxFit.cover);
+    return Image.asset('assets/images/client.png', fit: BoxFit.cover);
   }
 
   Future<void> _showChangePasswordDialog(BuildContext context) async {
