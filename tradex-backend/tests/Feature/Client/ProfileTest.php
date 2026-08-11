@@ -116,6 +116,46 @@ class ProfileTest extends TestCase
             ->assertJsonPath('data.phone', '0509998888');
     }
 
+    public function test_client_can_persist_and_restore_location(): void
+    {
+        ['user' => $user, 'token' => $token] = $this->actingAsRole('client');
+
+        $this->putJson('/api/v1/profile', [
+            'region' => 'الوسطى',
+            'location_name' => 'دير البلح',
+            'latitude' => 31.4175,
+            'longitude' => 34.3732,
+        ], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.region', 'الوسطى')
+            ->assertJsonPath('data.location_name', 'دير البلح')
+            ->assertJsonPath('data.latitude', 31.4175)
+            ->assertJsonPath('data.longitude', 34.3732);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'region' => 'الوسطى',
+            'location_name' => 'دير البلح',
+        ]);
+
+        $this->getJson('/api/v1/profile', $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.region', 'الوسطى')
+            ->assertJsonPath('data.location_name', 'دير البلح');
+    }
+
+    public function test_location_coordinates_are_validated(): void
+    {
+        ['token' => $token] = $this->actingAsRole('client');
+
+        $this->putJson('/api/v1/profile', [
+            'latitude' => 91,
+            'longitude' => -181,
+        ], $this->headers($token))
+            ->assertStatus(422)
+            ->assertJson(['success' => false]);
+    }
+
     public function test_client_can_update_email_to_unique_address(): void
     {
         ['user' => $user, 'token' => $token] = $this->actingAsRole('client');

@@ -310,19 +310,17 @@ class UserController {
       }
 
       // Update text fields on the server when at least one is provided.
-      if (name != null || email != null || phone != null) {
+      if (name != null || email != null || phone != null || region != null) {
         updated = await UserService.instance.updateMe(
           name: name,
           email: email,
           phone: phone,
+          region: region,
         );
       }
 
       final current = currentUserNotifier.value;
       if (updated != null) {
-        // Region is not part of the existing Laravel profile contract, so
-        // retain it as a UI-only value while every server-backed field comes
-        // from the response just received.
         currentUserNotifier.value =
             updated.copyWith(region: region ?? current?.region);
       } else if (current != null) {
@@ -331,6 +329,31 @@ class UserController {
           region: region,
         );
       }
+    } on ApiException catch (e) {
+      authErrorNotifier.value = _localiseError(e);
+      rethrow;
+    } finally {
+      _end();
+    }
+  }
+
+  /// Persists a GPS-resolved or manually selected location through Laravel.
+  /// The returned profile is authoritative and replaces the local notifier.
+  Future<void> updateLocation({
+    required String? region,
+    required String? locationName,
+    required double? latitude,
+    required double? longitude,
+  }) async {
+    _begin();
+    try {
+      final updated = await UserService.instance.updateLocation(
+        region: region,
+        locationName: locationName,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      currentUserNotifier.value = updated;
     } on ApiException catch (e) {
       authErrorNotifier.value = _localiseError(e);
       rethrow;

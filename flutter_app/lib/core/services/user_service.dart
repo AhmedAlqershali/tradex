@@ -32,14 +32,38 @@ class UserService {
     String? name,
     String? email,
     String? phone,
+    String? region,
+    String? locationName,
   }) async {
     final body = <String, dynamic>{};
     if (name != null) body['name'] = name;
     if (email != null) body['email'] = email;
     if (phone != null) body['phone'] = phone;
+    if (region != null) body['region'] = region;
+    if (locationName != null) body['location_name'] = locationName;
 
     final response = await ApiClient.instance
         .put<Map<String, dynamic>>(ApiConstants.me, data: body);
+    return parseProfileResponse(response.data!);
+  }
+
+  /// Persists the complete selected/current location through the existing
+  /// authoritative profile endpoint.
+  Future<AppUser> updateLocation({
+    required String? region,
+    required String? locationName,
+    required double? latitude,
+    required double? longitude,
+  }) async {
+    final response = await ApiClient.instance.put<Map<String, dynamic>>(
+      ApiConstants.me,
+      data: {
+        'region': region,
+        'location_name': locationName,
+        'latitude': latitude,
+        'longitude': longitude,
+      },
+    );
     return parseProfileResponse(response.data!);
   }
 
@@ -57,7 +81,8 @@ class UserService {
     final user = parseProfileResponse(response.data!);
     final avatarUrl = user.photoPath;
     if (avatarUrl == null ||
-        !(avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://'))) {
+        !(avatarUrl.startsWith('http://') ||
+            avatarUrl.startsWith('https://'))) {
       throw const UnknownException(
         'تم رفع الصورة لكن لم يُرجع الخادم رابط الصورة.',
       );

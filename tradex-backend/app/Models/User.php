@@ -32,6 +32,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'phone',
+        'region',
+        'location_name',
+        'latitude',
+        'longitude',
         'password',
         'avatar',
     ];
@@ -51,6 +55,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'status'            => 'string',
+            'latitude'          => 'float',
+            'longitude'         => 'float',
         ];
     }
 

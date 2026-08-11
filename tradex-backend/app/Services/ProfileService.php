@@ -37,7 +37,15 @@ class ProfileService implements ProfileServiceInterface
         // intentionally clear the nullable phone field. Only fields sent by
         // the client are changed; omitted fields remain untouched.
         $updates = [];
-        foreach (['name', 'email', 'phone'] as $field) {
+        foreach ([
+            'name',
+            'email',
+            'phone',
+            'region',
+            'location_name',
+            'latitude',
+            'longitude',
+        ] as $field) {
             if (array_key_exists($field, $data)) {
                 $updates[$field] = $data[$field];
             }
@@ -93,6 +101,10 @@ class ProfileService implements ProfileServiceInterface
             'name'   => $user->name,
             'email'  => $user->email,
             'phone'  => $user->phone,
+            'region' => $user->region,
+            'location_name' => $user->location_name,
+            'latitude' => $user->latitude,
+            'longitude' => $user->longitude,
             'role'   => $user->role,
             'created_at' => $user->created_at?->toIso8601String(),
             'avatar' => $user->avatar

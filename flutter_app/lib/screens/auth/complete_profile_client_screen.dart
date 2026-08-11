@@ -29,7 +29,7 @@ class _CompleteProfileClientScreenState
   static const Color _primary = Color(0xff4D41DF);
   static const Color _bg = Color(0xffF8F9FD);
 
-  String? _selectedRegion = 'غزة';
+  String? _selectedRegion = UserController.instance.currentUser?.region;
   bool _isLocating = false;
 
   final List<Map<String, dynamic>> _regions = [
@@ -42,6 +42,12 @@ class _CompleteProfileClientScreenState
   ];
 
   Future<void> _onNext() async {
+    if (_selectedRegion == null || _selectedRegion!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('اختر منطقتك أولاً.')),
+      );
+      return;
+    }
     await UserController.instance.updateProfile(region: _selectedRegion);
     if (!mounted) return;
     Navigator.push(

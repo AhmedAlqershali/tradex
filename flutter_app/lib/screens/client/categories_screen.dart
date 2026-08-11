@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ai_saas/shared/widgets/location_selector.dart';
 
 // ─── CategoriesScreen ─────────────────────────────────────────────────────────
 //
@@ -93,10 +94,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           size: 25.sp,
         ),
         actions: [
-          Icon(
-            Icons.location_on_outlined,
-            color: const Color(0xff4D41DF),
-            size: 25.sp,
+          IconButton(
+            tooltip: 'تحديد الموقع',
+            onPressed: () => showLocationSelector(context),
+            icon: Icon(
+              Icons.location_on_outlined,
+              color: const Color(0xff4D41DF),
+              size: 25.sp,
+            ),
           ),
         ],
         backgroundColor: Colors.transparent,

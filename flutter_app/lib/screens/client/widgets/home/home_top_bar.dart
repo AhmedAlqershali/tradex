@@ -18,6 +18,7 @@ class HomeTopBar extends StatelessWidget {
     this.isLocationLoading = false,
     this.locationError,
     this.onLocationRetry,
+    this.onLocationTap,
   });
 
   static const Color _primary = Color(0xff4D41DF);
@@ -25,6 +26,7 @@ class HomeTopBar extends StatelessWidget {
   final bool isLocationLoading;
   final String? locationError;
   final VoidCallback? onLocationRetry;
+  final VoidCallback? onLocationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -78,33 +80,41 @@ class HomeTopBar extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.location_on_rounded,
-                        color: _primary, size: 16.sp),
-                    SizedBox(width: 4.w),
-                    Flexible(
-                      child: isLocationLoading
-                          ? Text(
-                              'جارٍ تحديد موقعك...',
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.ibmPlexSans(
-                                fontSize: 13.sp,
-                                color: const Color(0xff888888),
-                              ),
-                            )
-                          : Text(
-                              locationName ?? 'حدد موقعك',
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.ibmPlexSans(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xff1A1A1A),
-                              ),
-                            ),
+                InkWell(
+                  onTap: onLocationTap,
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on_rounded,
+                            color: _primary, size: 16.sp),
+                        SizedBox(width: 4.w),
+                        Flexible(
+                          child: isLocationLoading
+                              ? Text(
+                                  'جارٍ تحديد موقعك...',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.ibmPlexSans(
+                                    fontSize: 13.sp,
+                                    color: const Color(0xff888888),
+                                  ),
+                                )
+                              : Text(
+                                  locationName ?? 'حدد موقعك',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.ibmPlexSans(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xff1A1A1A),
+                                  ),
+                                ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 if (locationError != null)
                   GestureDetector(

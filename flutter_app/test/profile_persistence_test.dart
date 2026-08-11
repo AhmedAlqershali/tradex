@@ -29,6 +29,28 @@ void main() {
       expect(user.photoPath, 'https://cdn.example/avatar.jpg');
     });
 
+    test('parses the persisted location contract', () {
+      final user = UserService.parseProfileResponseForTesting({
+        'success': true,
+        'data': {
+          'id': 42,
+          'name': 'Saved Name',
+          'email': 'saved@example.com',
+          'phone': null,
+          'role': 'client',
+          'region': 'الوسطى',
+          'location_name': 'دير البلح',
+          'latitude': 31.4175,
+          'longitude': 34.3732,
+        },
+      });
+
+      expect(user.region, 'الوسطى');
+      expect(user.locationName, 'دير البلح');
+      expect(user.latitude, 31.4175);
+      expect(user.longitude, 34.3732);
+    });
+
     test('resolves root-relative and local Laravel avatar URLs', () {
       final relative = AppUser.fromServerJson({
         'id': 1,

@@ -8,10 +8,12 @@ class CurrentLocationResult {
   const CurrentLocationResult({
     required this.position,
     this.region,
+    this.locationName,
   });
 
   final Position position;
   final String? region;
+  final String? locationName;
 }
 
 /// Uses the device's existing location services and returns the region name
@@ -64,13 +66,31 @@ class LocationService {
           position.longitude,
         );
         if (placemarks.isNotEmpty) {
-          region = _matchRegion(placemarks.first);
+          final placemark = placemarks.first;
+          region = _matchRegion(placemark);
+          final name = _locationName(placemark);
+          if (region == null || name == null) {
+            throw const LocationException(
+              'تعذر تحديد منطقتك الحالية. حاول مجدداً أو اختر المنطقة يدوياً.',
+            );
+          }
+          return CurrentLocationResult(
+            position: position,
+            region: region,
+            locationName: name,
+          );
         }
+      } on LocationException {
+        rethrow;
       } on Exception {
-        // GPS was successful even if reverse geocoding is unavailable.
+        throw const LocationException(
+          'تعذر تحديد اسم منطقتك الحالية. حاول مجدداً أو اختر المنطقة يدوياً.',
+        );
       }
 
-      return CurrentLocationResult(position: position, region: region);
+      throw const LocationException(
+        'تعذر تحديد اسم منطقتك الحالية. حاول مجدداً أو اختر المنطقة يدوياً.',
+      );
     } on LocationException {
       rethrow;
     } on LocationServiceDisabledException {
@@ -86,6 +106,21 @@ class LocationService {
         'استغرق تحديد موقعك وقتاً طويلاً. تأكد من تفعيل GPS ثم حاول مجدداً.',
       );
     }
+  }
+
+  String? _locationName(Placemark placemark) {
+    final values = <String?>[
+      placemark.locality,
+      placemark.subLocality,
+      placemark.administrativeArea,
+      placemark.subAdministrativeArea,
+    ];
+
+    for (final value in values) {
+      final trimmed = value?.trim();
+      if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+    }
+    return null;
   }
 
   String? _matchRegion(Placemark placemark) {

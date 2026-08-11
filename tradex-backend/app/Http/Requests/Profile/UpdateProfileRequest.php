@@ -17,6 +17,10 @@ class UpdateProfileRequest extends FormRequest
             'name'  => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:20'],
+            'region' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'location_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'latitude' => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['sometimes', 'nullable', 'numeric', 'between:-180,180'],
         ];
     }
 

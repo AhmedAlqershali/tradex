@@ -13,6 +13,7 @@ import 'package:ai_saas/shared/models/store_model.dart';
 import 'package:ai_saas/shared/widgets/section_header.dart';
 import 'package:ai_saas/core/services/location_service.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/shared/widgets/location_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,13 +28,13 @@ class ShopperHomePage extends StatefulWidget {
 class _ShopperHomePageState extends State<ShopperHomePage> {
   static const Color _scaffoldBg = Color(0xffF8F9FD);
   String? _currentRegion;
+  String? _currentLocationName;
   String? _locationError;
   bool _isLocationLoading = true;
 
   @override
   void initState() {
     super.initState();
-    UserController.instance.refreshProfile().catchError((_) {});
     _loadHomeData();
     context.read<CategoryBloc>().add(const CategoryListRequested());
     context.read<ProductBloc>().add(const ProductsLoadRequested());
@@ -51,6 +52,23 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
     }
 
     try {
+      // Laravel is authoritative for a previously selected location. Avoid
+      // replacing it with a new GPS reading every time Home is reopened.
+      await UserController.instance.refreshProfile();
+      final saved = UserController.instance.currentUser;
+      if (saved?.region != null && saved!.region!.isNotEmpty) {
+        if (!mounted) return;
+        setState(() {
+          _currentRegion = saved.region;
+          _currentLocationName = saved.locationName ?? saved.region;
+          _isLocationLoading = false;
+        });
+        context.read<StoreBloc>().add(
+              StoresLoadRequested(region: saved.region),
+            );
+        return;
+      }
+
       final result = await LocationService.instance.getCurrentLocation();
       if (!mounted) return;
       if (result.region == null || result.region!.isEmpty) {
@@ -61,8 +79,16 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
         return;
       }
 
+      await UserController.instance.updateLocation(
+        region: result.region,
+        locationName: result.locationName,
+        latitude: result.position.latitude,
+        longitude: result.position.longitude,
+      );
+      if (!mounted) return;
       setState(() {
         _currentRegion = result.region;
+        _currentLocationName = result.locationName;
         _isLocationLoading = false;
       });
       context.read<StoreBloc>().add(StoresLoadRequested(region: result.region));
@@ -91,10 +117,14 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
           child: Column(
             children: [
               HomeTopBar(
-                locationName: _currentRegion,
+                locationName: _currentLocationName ?? _currentRegion,
                 isLocationLoading: _isLocationLoading,
                 locationError: _locationError,
                 onLocationRetry: _loadHomeData,
+                onLocationTap: () => showLocationSelector(
+                  context,
+                  onSelected: _loadHomeData,
+                ),
               ),
               Expanded(
                 child: SingleChildScrollView(

@@ -39,6 +39,14 @@ class AppUser {
   /// City/region selected during registration (e.g. 'غزة', 'خانيونس').
   final String? region;
 
+  /// Resolved display name returned by the location provider or selected by
+  /// the user.
+  final String? locationName;
+
+  /// Coordinates persisted by Laravel for the latest GPS selection.
+  final double? latitude;
+  final double? longitude;
+
   /// Authoritative server URL for the profile photo. A picked local file is
   /// transient UI input only and must be uploaded before it reaches this model.
   final String? photoPath;
@@ -55,6 +63,9 @@ class AppUser {
     this.storeName,
     this.storeCategory,
     this.region,
+    this.locationName,
+    this.latitude,
+    this.longitude,
     this.photoPath,
     required this.createdAt,
   });
@@ -83,6 +94,9 @@ class AppUser {
       'storeName': storeName,
       'storeCategory': storeCategory,
       'region': region,
+      'locationName': locationName,
+      'latitude': latitude,
+      'longitude': longitude,
       'photoPath': photoPath,
       'createdAt': createdAt.toIso8601String(),
     };
@@ -102,6 +116,9 @@ class AppUser {
       storeName: json['storeName'] as String?,
       storeCategory: json['storeCategory'] as String?,
       region: json['region'] as String?,
+      locationName: json['locationName'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       photoPath: json['photoPath'] as String?,
       createdAt: _parseDate(json['createdAt'] as String?),
     );
@@ -141,6 +158,10 @@ class AppUser {
       storeCategory: _stringValue(json['store_category']) ??
           _stringValue(json['storeCategory']),
       region: _stringValue(json['region']),
+      locationName: _stringValue(json['location_name']) ??
+          _stringValue(json['locationName']),
+      latitude: _numberValue(json['latitude']),
+      longitude: _numberValue(json['longitude']),
       photoPath: _resolvePhotoPath(
         _stringValue(json['avatar']) ??
             _stringValue(json['photo_url']) ??
@@ -180,6 +201,11 @@ class AppUser {
     return value.toString();
   }
 
+  static double? _numberValue(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '');
+  }
+
   // ── Immutable update ─────────────────────────────────────────────────────────
 
   // Sentinel used to distinguish "pass null explicitly" from "omitted".
@@ -195,6 +221,9 @@ class AppUser {
     Object? storeName = _absent,
     Object? storeCategory = _absent,
     Object? region = _absent,
+    Object? locationName = _absent,
+    Object? latitude = _absent,
+    Object? longitude = _absent,
     Object? photoPath = _absent,
     DateTime? createdAt,
   }) {
@@ -210,6 +239,10 @@ class AppUser {
           ? this.storeCategory
           : storeCategory as String?,
       region: region == _absent ? this.region : region as String?,
+      locationName:
+          locationName == _absent ? this.locationName : locationName as String?,
+      latitude: latitude == _absent ? this.latitude : latitude as double?,
+      longitude: longitude == _absent ? this.longitude : longitude as double?,
       photoPath: photoPath == _absent ? this.photoPath : photoPath as String?,
       createdAt: createdAt ?? this.createdAt,
     );
