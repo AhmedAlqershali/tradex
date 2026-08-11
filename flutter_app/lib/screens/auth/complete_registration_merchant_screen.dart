@@ -47,6 +47,7 @@ String? _selectedCategory;
 File? _logoFile;
 
 bool _isLoading = false;
+bool _isLocating = false;
 
 final ImagePicker _picker = ImagePicker();
 
@@ -821,16 +822,13 @@ Widget _buildDropdownField() {
    crossAxisAlignment: CrossAxisAlignment.stretch,
    children: [
      DropdownButtonFormField<String>(
-      value: _selectedRegion,
+      value: LocationService.supportedRegions.contains(_selectedRegion)
+          ? _selectedRegion
+          : null,
 isExpanded: true,
 dropdownColor: Colors.white,
 
-items: const [
-'غزة',
-'خانيونس',
-'الوسطى',
-'رفح',
-].map(
+items: LocationService.supportedRegions.map(
 (String value) {
 return DropdownMenuItem<String>(
 value: value,
@@ -859,12 +857,21 @@ decoration: _inputDecoration(
      ),
      SizedBox(height: 8.h),
      OutlinedButton.icon(
-       onPressed: _useCurrentLocation,
-       icon: Icon(
-         Icons.my_location,
-         size: 16.sp,
-         color: primaryColor,
-       ),
+       onPressed: _isLocating ? null : _useCurrentLocation,
+       icon: _isLocating
+           ? SizedBox(
+               width: 16.sp,
+               height: 16.sp,
+               child: CircularProgressIndicator(
+                 strokeWidth: 2,
+                 color: primaryColor,
+               ),
+             )
+           : Icon(
+               Icons.my_location,
+               size: 16.sp,
+               color: primaryColor,
+             ),
        label: Text(
          'استخدام موقعي الحالي',
          style: GoogleFonts.ibmPlexSans(
@@ -887,6 +894,12 @@ decoration: _inputDecoration(
 }
 
 Future<void> _useCurrentLocation() async {
+ if (_isLocating) {
+  return;
+ }
+ setState(() {
+  _isLocating = true;
+ });
  try {
    final result = await LocationService.instance.getCurrentLocation();
    if (!mounted) {
@@ -920,6 +933,12 @@ Future<void> _useCurrentLocation() async {
        const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
      );
    }
+ } finally {
+  if (mounted) {
+   setState(() {
+    _isLocating = false;
+   });
+  }
  }
 }
 

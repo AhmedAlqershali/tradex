@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -19,7 +21,7 @@ class LocationService {
   LocationService._();
   static final LocationService instance = LocationService._();
 
-  static const _regions = <String>[
+  static const supportedRegions = <String>[
     'غزة',
     'شمال غزة',
     'الوسطى',
@@ -29,45 +31,62 @@ class LocationService {
   ];
 
   Future<CurrentLocationResult> getCurrentLocation() async {
-    if (!await Geolocator.isLocationServiceEnabled()) {
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        throw const LocationException(
+          'خدمات الموقع غير مفعلة. فعّل الموقع ثم حاول مجدداً.',
+        );
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied) {
+        throw const LocationException('تم رفض إذن الوصول إلى موقعك.');
+      }
+      if (permission == LocationPermission.deniedForever) {
+        throw const LocationException(
+          'تم رفض إذن الموقع نهائياً. فعّله من إعدادات التطبيق.',
+        );
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+
+      String? region;
+      try {
+        final placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          region = _matchRegion(placemarks.first);
+        }
+      } on Exception {
+        // GPS was successful even if reverse geocoding is unavailable.
+      }
+
+      return CurrentLocationResult(position: position, region: region);
+    } on LocationException {
+      rethrow;
+    } on LocationServiceDisabledException {
       throw const LocationException(
         'خدمات الموقع غير مفعلة. فعّل الموقع ثم حاول مجدداً.',
       );
-    }
-
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied) {
-      throw const LocationException('تم رفض إذن الوصول إلى موقعك.');
-    }
-    if (permission == LocationPermission.deniedForever) {
+    } on PermissionDeniedException {
       throw const LocationException(
-        'تم رفض إذن الموقع نهائياً. فعّله من إعدادات التطبيق.',
+        'تم رفض إذن الوصول إلى موقعك. اسمح للتطبيق باستخدام الموقع ثم حاول مجدداً.',
+      );
+    } on TimeoutException {
+      throw const LocationException(
+        'استغرق تحديد موقعك وقتاً طويلاً. تأكد من تفعيل GPS ثم حاول مجدداً.',
       );
     }
-
-    final position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
-    );
-
-    String? region;
-    try {
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-      if (placemarks.isNotEmpty) {
-        region = _matchRegion(placemarks.first);
-      }
-    } on Exception {
-      // GPS was successful even if reverse geocoding is unavailable.
-    }
-
-    return CurrentLocationResult(position: position, region: region);
   }
 
   String? _matchRegion(Placemark placemark) {
@@ -81,17 +100,29 @@ class LocationService {
     const aliases = <String, List<String>>{
       'غزة': ['غزة', 'gaza'],
       'شمال غزة': ['شمال غزة', 'north gaza'],
-      'الوسطى': ['الوسطى', 'central gaza', 'deir al-balah'],
+      'الوسطى': ['الوسطى', 'central gaza'],
       'خانيونس': ['خانيونس', 'خان يونس', 'khan yunis', 'khan younis'],
       'رفح': ['رفح', 'rafah'],
       'دير البلح': ['دير البلح', 'deir al-balah'],
     };
 
-    for (final region in _regions) {
-      if (aliases[region]!.any(
-        (alias) => values.any((value) => value.contains(alias)),
-      )) {
-        return region;
+    final orderedAliases = aliases.entries
+        .expand(
+          (entry) => entry.value.map(
+            (alias) => (region: entry.key, alias: alias.toLowerCase()),
+          ),
+        )
+        .toList()
+      ..sort((a, b) => b.alias.length.compareTo(a.alias.length));
+
+    for (final entry in orderedAliases) {
+      if (values.any((value) => value == entry.alias)) {
+        return entry.region;
+      }
+    }
+    for (final entry in orderedAliases) {
+      if (values.any((value) => value.contains(entry.alias))) {
+        return entry.region;
       }
     }
     return null;

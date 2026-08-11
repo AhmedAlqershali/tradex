@@ -22,6 +22,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _currentSelectedLocation;
   File? _pickedPhoto;
   bool _isSaving = false;
+  bool _isLocating = false;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -210,7 +211,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         // 4. حقل الموقع
                         _buildFieldLabel('الموقع الحالي'),
                         DropdownButtonFormField<String>(
-                          value: _currentSelectedLocation,
+                          value: LocationService.supportedRegions
+                                  .contains(_currentSelectedLocation)
+                              ? _currentSelectedLocation
+                              : null,
                           isExpanded: true,
                           icon: Icon(Icons.keyboard_arrow_down_rounded,
                               color: Colors.grey, size: 20.sp),
@@ -224,13 +228,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             fillColor: inputFillColor,
                             prefixIcon: Icons.location_on_outlined,
                           ),
-                          items: <String>[
-                            'غزة',
-                            'شمال غزة',
-                            'الوسطى',
-                            'خانيونس',
-                            'رفح'
-                          ].map((String value) {
+                          items: LocationService.supportedRegions
+                              .map((String value) {
                             return DropdownMenuItem<String>(
                                 value: value, child: Text(value));
                           }).toList(),
@@ -241,7 +240,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                         // 5. زر جلب الموقع
                         InkWell(
-                          onTap: _useCurrentLocation,
+                          onTap: _isLocating ? null : _useCurrentLocation,
                           borderRadius: BorderRadius.circular(12.r),
                           child: Container(
                             width: double.infinity,
@@ -256,8 +255,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.my_location_rounded,
-                                    color: primaryColor, size: 18.sp),
+                                _isLocating
+                                    ? SizedBox(
+                                        width: 18.sp,
+                                        height: 18.sp,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: primaryColor,
+                                        ),
+                                      )
+                                    : Icon(Icons.my_location_rounded,
+                                        color: primaryColor, size: 18.sp),
                                 SizedBox(width: 10.w),
                                 Text('استخدام موقعي الحالي',
                                     style: GoogleFonts.ibmPlexSans(
@@ -307,6 +315,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _useCurrentLocation() async {
+    if (_isLocating) return;
+    setState(() => _isLocating = true);
     try {
       final result = await LocationService.instance.getCurrentLocation();
       if (!mounted) return;
@@ -334,6 +344,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
       }
     }
   }

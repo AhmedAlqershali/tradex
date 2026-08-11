@@ -30,10 +30,12 @@ class _CompleteProfileClientScreenState
   static const Color _bg = Color(0xffF8F9FD);
 
   String? _selectedRegion = 'غزة';
+  bool _isLocating = false;
 
   final List<Map<String, dynamic>> _regions = [
     {'name': 'غزة', 'icon': Icons.location_on_outlined},
     {'name': 'شمال غزة', 'icon': Icons.map_outlined},
+    {'name': 'الوسطى', 'icon': Icons.map_outlined},
     {'name': 'خانيونس', 'icon': Icons.explore_outlined},
     {'name': 'رفح', 'icon': Icons.navigation_outlined},
     {'name': 'دير البلح', 'icon': Icons.location_on_outlined},
@@ -135,9 +137,17 @@ class _CompleteProfileClientScreenState
                         width: double.infinity,
                         height: 48.h,
                         child: OutlinedButton.icon(
-                          onPressed: _useCurrentLocation,
-                          icon: Icon(Icons.my_location,
-                              size: 18.sp, color: _primary),
+                          onPressed: _isLocating ? null : _useCurrentLocation,
+                          icon: _isLocating
+                              ? SizedBox(
+                                  width: 18.sp,
+                                  height: 18.sp,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(Icons.my_location,
+                                  size: 18.sp, color: _primary),
                           label: Text(
                             'استخدام موقعي الحالي',
                             style: GoogleFonts.ibmPlexSans(
@@ -295,6 +305,8 @@ class _CompleteProfileClientScreenState
   }
 
   Future<void> _useCurrentLocation() async {
+    if (_isLocating) return;
+    setState(() => _isLocating = true);
     try {
       final result = await LocationService.instance.getCurrentLocation();
       if (!mounted) return;
@@ -321,6 +333,10 @@ class _CompleteProfileClientScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
       }
     }
   }
