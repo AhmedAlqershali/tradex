@@ -45,12 +45,18 @@ class ProductByIdRequested extends ProductEvent {
 }
 
 class ProductSearchRequested extends ProductEvent {
-  const ProductSearchRequested(this.query);
+  const ProductSearchRequested(
+    this.query, {
+    this.categoryId,
+    this.storeId,
+  });
 
   final String query;
+  final String? categoryId;
+  final String? storeId;
 
   @override
-  List<Object?> get props => [query];
+  List<Object?> get props => [query, categoryId, storeId];
 }
 
 class ProductCreateRequested extends ProductEvent {

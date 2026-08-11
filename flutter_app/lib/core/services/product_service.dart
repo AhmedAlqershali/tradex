@@ -91,10 +91,19 @@ class ProductService {
   /// GET /products?search=
   /// There is no separate /products/search route — search is a query
   /// parameter on the main listing endpoint.
-  Future<List<Product>> search(String query) async {
+  Future<List<Product>> search(
+    String query, {
+    String? categoryId,
+    String? storeId,
+  }) async {
     final response = await ApiClient.instance.get<Map<String, dynamic>>(
       ApiConstants.products,
-      queryParameters: {'search': query},
+      queryParameters: {
+        'search': query,
+        if (categoryId != null && categoryId.isNotEmpty)
+          'category_id': categoryId,
+        if (storeId != null && storeId.isNotEmpty) 'store_id': storeId,
+      },
     );
     final raw = response.data!;
     return _extractProductList(raw);

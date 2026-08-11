@@ -78,7 +78,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(const ProductLoading());
     try {
-      final results = await ProductService.instance.search(event.query);
+      final results = await ProductService.instance.search(
+        event.query,
+        categoryId: event.categoryId,
+        storeId: event.storeId,
+      );
       emit(ProductSearchResult(results, event.query));
     } catch (e) {
       emit(ProductFailure(_errorMessage(e)));

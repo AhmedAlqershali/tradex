@@ -63,6 +63,13 @@ class Product {
   /// Convenience getter — first image URL or empty string when no images exist.
   String get imageUrl => imageUrls.isNotEmpty ? imageUrls.first : '';
 
+  /// Server-authoritative catalog availability.
+  ///
+  /// The client catalog only receives active, in-stock products, but keeping
+  /// this derived from the server fields prevents local UI state from making
+  /// an inactive or out-of-stock product purchasable.
+  bool get isAvailable => status == 'active' && quantity > 0;
+
   // ── Immutable update helper ─────────────────────────────────────────────────
 
   Product copyWith({
@@ -203,12 +210,15 @@ class Product {
 
     return Product(
       id: json['id']?.toString() ?? '',
-      merchantId: json['merchant_id']?.toString() ?? json['merchantId'] as String?,
+      merchantId:
+          json['merchant_id']?.toString() ?? json['merchantId'] as String?,
       storeId: json['store_id']?.toString() ?? json['storeId'] as String?,
       name: json['name'] as String? ?? '',
       storeName: json['store_name'] as String? ??
           json['storeName'] as String? ??
-          (json['store'] is Map ? (json['store']['store_name'] as String? ?? '') : ''),
+          (json['store'] is Map
+              ? (json['store']['store_name'] as String? ?? '')
+              : ''),
       description: json['description'] as String? ?? '',
       category: categoryName,
       categoryId: categoryId,
@@ -218,7 +228,8 @@ class Product {
       imageUrls: imageUrls,
       isVisible: isVisible,
       // Backend has no "featured" concept — always false from server data.
-      isFeatured: json['is_featured'] as bool? ?? json['isFeatured'] as bool? ?? false,
+      isFeatured:
+          json['is_featured'] as bool? ?? json['isFeatured'] as bool? ?? false,
       createdAt: _parseDate(
         json['created_at'] as String? ?? json['createdAt'] as String?,
       ),
