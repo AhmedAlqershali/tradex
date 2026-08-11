@@ -13,3 +13,4 @@
 - [PHPUnit throttle isolation](phpunit-throttle-isolation.md) — flush the in-memory test cache between feature tests so auth, API, and AI throttle counters cannot leak across cases.
 - [PHPUnit server precedence](phpunit-server-precedence.md) — Laravel may prefer Replit-injected $_SERVER values over PHPUnit <env> settings; use test-only <server> overrides when needed.
 - [Laravel test encryption key](laravel-test-encryption-key.md) — full feature tests need a process-only APP_KEY when the imported environment does not provide one.
+- [Product nullable updates](product-null-update.md) — preserve explicit nulls through service and repository updates so nullable merchant fields can be cleared.

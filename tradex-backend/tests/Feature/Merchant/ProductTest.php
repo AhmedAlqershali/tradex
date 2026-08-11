@@ -296,6 +296,32 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', ['id' => $product->id, 'name' => 'New Name']);
     }
 
+    public function test_update_can_clear_nullable_fields_without_changing_omitted_fields(): void
+    {
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $category = Category::factory()->create();
+        $product = Product::factory()->forStore($store)->inCategory($category)->create([
+            'name'        => 'Keep This Name',
+            'description' => 'Remove this description',
+        ]);
+
+        $this->putJson("/api/v1/merchant/products/{$product->id}", [
+            'category_id' => null,
+            'description' => null,
+        ], $this->headers($token))
+             ->assertOk()
+             ->assertJsonPath('data.name', 'Keep This Name')
+             ->assertJsonPath('data.category_id', null)
+             ->assertJsonPath('data.description', null);
+
+        $this->assertDatabaseHas('products', [
+            'id'          => $product->id,
+            'name'        => 'Keep This Name',
+            'category_id' => null,
+            'description' => null,
+        ]);
+    }
+
     public function test_merchant_cannot_update_another_merchants_product(): void
     {
         ['token' => $token] = $this->actingAsMerchant();

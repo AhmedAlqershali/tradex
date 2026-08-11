@@ -88,14 +88,14 @@ class ProductService implements ProductServiceInterface
 
     public function update(Product $product, array $data, array $imageFiles = []): Product
     {
-        $updatable = array_filter([
-            'category_id' => $data['category_id'] ?? $product->category_id,
-            'name'        => $data['name']        ?? null,
-            'description' => $data['description'] ?? $product->description,
-            'price'       => $data['price']       ?? null,
-            'quantity'    => $data['quantity']    ?? null,
-            'status'      => $data['status']      ?? null,
-        ], fn ($v) => ! is_null($v));
+        $updatable = array_intersect_key($data, array_flip([
+            'category_id',
+            'name',
+            'description',
+            'price',
+            'quantity',
+            'status',
+        ]));
 
         $product = $this->productRepository->update($product, $updatable);
 

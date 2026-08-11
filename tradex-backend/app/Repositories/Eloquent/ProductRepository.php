@@ -151,7 +151,7 @@ class ProductRepository implements ProductRepositoryInterface
      */
     public function update(Product $product, array $data): Product
     {
-        $product->update(array_filter($data, fn ($v) => ! is_null($v)));
+        $product->update($data);
 
         return $product->fresh();
     }
