@@ -6,6 +6,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionRequest;
 use App\Models\User;
+use App\Contracts\Services\SubscriptionServiceInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -39,6 +40,10 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertSame('trial', $trial->type);
         $this->assertSame('active', $trial->status);
         $this->assertTrue($trial->ends_at->equalTo($trial->starts_at->copy()->addDays(14)));
+
+        // Re-running initialization for the same merchant is idempotent.
+        app(SubscriptionServiceInterface::class)->startTrial($merchant);
+        $this->assertSame(1, Subscription::where('user_id', $merchant->id)->count());
 
         $this->getJson('/api/v1/merchant/subscription', $merchantHeaders)
             ->assertOk()

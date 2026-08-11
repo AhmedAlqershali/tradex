@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Subscription;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -77,7 +78,7 @@ class AuthTest extends TestCase
     {
         Notification::fake();
 
-        $this->postJson('/api/v1/auth/register/merchant', [
+        $response = $this->postJson('/api/v1/auth/register/merchant', [
             'name'                  => 'Test Merchant',
             'email'                 => 'merchant@example.com',
             'phone'                 => '0509876543',
@@ -86,14 +87,46 @@ class AuthTest extends TestCase
             'store_name'            => 'Test Store',
         ])
             ->assertStatus(201)
-            ->assertJson(['success' => true]);
+            ->assertJson(['success' => true])
+            ->assertJsonPath('data.user.current_subscription.type', 'trial')
+            ->assertJsonPath('data.user.current_subscription.status', 'active')
+            ->assertJsonPath('data.user.current_subscription.is_trial', true)
+            ->assertJsonPath('data.user.current_subscription.is_entitled', true);
 
-        $this->assertDatabaseHas('users', ['email' => 'merchant@example.com', 'role' => 'merchant']);
+        $merchant = User::where('email', 'merchant@example.com')->firstOrFail();
+        $trial = Subscription::where('user_id', $merchant->id)->firstOrFail();
+
+        $this->assertSame('merchant', $merchant->role);
+        $this->assertSame('trial', $trial->type);
+        $this->assertSame('active', $trial->status);
+        $this->assertTrue($trial->ends_at->equalTo($trial->starts_at->copy()->addDays(14)));
+        $this->assertSame(1, Subscription::where('user_id', $merchant->id)->count());
         $this->assertDatabaseHas('stores', ['store_name' => 'Test Store']);
         Notification::assertNotSentTo(
-            User::where('email', 'merchant@example.com')->first(),
+            $merchant,
             VerifyEmail::class
         );
+
+        $this->getJson('/api/v1/auth/me', $this->headers($response->json('data.token')))
+            ->assertOk()
+            ->assertJsonPath('data.current_subscription.type', 'trial')
+            ->assertJsonPath('data.current_subscription.is_entitled', true);
+    }
+
+    public function test_client_and_admin_profiles_do_not_receive_merchant_trial_state(): void
+    {
+        $client = User::factory()->client()->create();
+        $admin = User::factory()->admin()->create();
+
+        foreach ([$client, $admin] as $user) {
+            $this->getJson('/api/v1/auth/me', $this->headers(
+                $user->createToken('test')->plainTextToken,
+            ))
+                ->assertOk()
+                ->assertJsonMissingPath('data.current_subscription');
+        }
+
+        $this->assertDatabaseCount('subscriptions', 0);
     }
 
     public function test_registration_requires_unique_email(): void

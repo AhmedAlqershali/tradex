@@ -32,7 +32,7 @@ class SubscriptionService implements SubscriptionServiceInterface
             $subscription
             && $subscription->status === 'active'
             && $subscription->ends_at !== null
-            && $subscription->ends_at->isPast()
+            && $subscription->ends_at->lte(now())
         ) {
             $subscription = $this->subscriptionRepository->markExpired($subscription);
         }
@@ -42,36 +42,39 @@ class SubscriptionService implements SubscriptionServiceInterface
 
     public function startTrial(User $merchant): Subscription
     {
-        $existing = $this->getCurrentForMerchant($merchant);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($merchant) {
+            $lockedMerchant = $this->subscriptionRepository->lockUserForSubscription($merchant);
+            $existing = $this->getCurrentForMerchant($lockedMerchant);
 
-        if ($existing) {
-            return $existing;
-        }
+            if ($existing) {
+                return $existing;
+            }
 
-        $startsAt = now();
-        $trialPlan = Plan::firstOrCreate(
-            ['name' => self::TRIAL_PLAN_NAME],
-            [
-                'display_name'   => 'Free Trial',
-                'monthly_price'  => 0,
-                'yearly_price'   => 0,
-                'ai_usage_limit' => null,
-                'product_limit'  => null,
-                'store_limit'    => 1,
-                'features'       => ['trial' => true],
-                'status'         => 'active',
-            ],
-        );
+            $startsAt = now();
+            $trialPlan = Plan::firstOrCreate(
+                ['name' => self::TRIAL_PLAN_NAME],
+                [
+                    'display_name'   => 'Free Trial',
+                    'monthly_price'  => 0,
+                    'yearly_price'   => 0,
+                    'ai_usage_limit' => null,
+                    'product_limit'  => null,
+                    'store_limit'    => 1,
+                    'features'       => ['trial' => true],
+                    'status'         => 'active',
+                ],
+            );
 
-        return $this->subscriptionRepository->create([
-            'user_id'       => $merchant->id,
-            'plan_id'       => $trialPlan->id,
-            'billing_cycle' => 'monthly',
-            'type'          => 'trial',
-            'status'        => 'active',
-            'starts_at'     => $startsAt,
-            'ends_at'       => $startsAt->copy()->addDays(self::TRIAL_DAYS),
-        ]);
+            return $this->subscriptionRepository->create([
+                'user_id'       => $lockedMerchant->id,
+                'plan_id'       => $trialPlan->id,
+                'billing_cycle' => 'monthly',
+                'type'          => 'trial',
+                'status'        => 'active',
+                'starts_at'     => $startsAt,
+                'ends_at'       => $startsAt->copy()->addDays(self::TRIAL_DAYS),
+            ]);
+        });
     }
 
     /**
@@ -83,6 +86,7 @@ class SubscriptionService implements SubscriptionServiceInterface
     public function activateForMerchant(User $merchant, Plan $plan, string $billingCycle): Subscription
     {
         $this->subscriptionRepository->cancelActiveForUser($merchant);
+        $startsAt = now();
 
         return $this->subscriptionRepository->create([
             'user_id'       => $merchant->id,
@@ -90,10 +94,10 @@ class SubscriptionService implements SubscriptionServiceInterface
             'billing_cycle' => $billingCycle,
             'type'          => 'paid',
             'status'        => 'active',
-            'starts_at'     => now(),
+            'starts_at'     => $startsAt,
             'ends_at'       => $billingCycle === 'yearly'
-                ? now()->addYear()
-                : now()->addMonth(),
+                ? $startsAt->copy()->addYear()
+                : $startsAt->copy()->addMonth(),
         ]);
     }
 }

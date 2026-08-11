@@ -8,6 +8,11 @@ use App\Models\User;
 interface SubscriptionRepositoryInterface
 {
     /**
+     * Serialize subscription initialization for a merchant.
+     */
+    public function lockUserForSubscription(User $user): User;
+
+    /**
      * Find the merchant's current active subscription, if any.
      */
     public function findActiveForUser(User $user): ?Subscription;

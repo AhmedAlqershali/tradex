@@ -8,6 +8,14 @@ use App\Models\User;
 
 class SubscriptionRepository implements SubscriptionRepositoryInterface
 {
+    public function lockUserForSubscription(User $user): User
+    {
+        return User::query()
+            ->whereKey($user->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
     /**
      * Find the merchant's current active subscription (latest first).
      */

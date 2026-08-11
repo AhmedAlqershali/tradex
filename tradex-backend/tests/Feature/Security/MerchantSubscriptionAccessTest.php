@@ -76,6 +76,31 @@ class MerchantSubscriptionAccessTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_subscription_expires_at_the_exact_server_time_boundary(): void
+    {
+        ['merchant' => $merchant, 'token' => $token] = $this->merchantWithToken();
+        $expiresAt = now()->addDay();
+
+        Subscription::factory()->forUser($merchant)->active()->create([
+            'type'    => 'trial',
+            'ends_at' => $expiresAt,
+        ]);
+
+        Carbon::setTestNow($expiresAt);
+
+        try {
+            $this->getJson($this->businessUrl(), $this->headers($token))
+                ->assertForbidden();
+
+            $this->assertDatabaseHas('subscriptions', [
+                'user_id' => $merchant->id,
+                'status'  => 'expired',
+            ]);
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
     public function test_expired_trial_denies_merchant_business_access(): void
     {
         $this->assertBusinessAccessDeniedForSubscription(['type' => 'trial', 'status' => 'active']);

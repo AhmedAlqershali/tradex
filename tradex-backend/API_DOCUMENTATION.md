@@ -178,7 +178,10 @@ Revokes the current Sanctum token.
 
 ### `GET /auth/me` 🔐
 
-Returns the authenticated user profile. Merchants also receive their stores array.
+Returns the authenticated user profile. Merchants also receive their stores
+array and a `current_subscription` object containing the current trial/paid
+type, status, entitlement flag, and server-calculated start/end timestamps.
+Clients and admins do not receive merchant subscription state.
 
 ---
 

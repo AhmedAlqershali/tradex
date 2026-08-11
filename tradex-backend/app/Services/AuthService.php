@@ -337,7 +337,7 @@ class AuthService implements AuthServiceInterface
 
     private function userPayload(User $user): array
     {
-        return [
+        $payload = [
             'id'             => $user->id,
             'name'           => $user->name,
             'email'          => $user->email,
@@ -350,6 +350,20 @@ class AuthService implements AuthServiceInterface
             // (e.g. showing a "verify your email" banner in Flutter).
             'email_verified' => $user->hasVerifiedEmail(),
         ];
+
+        if ($user->isMerchant()) {
+            $subscription = $this->subscriptionService->getCurrentForMerchant($user);
+            $payload['current_subscription'] = $subscription ? [
+                'type'        => $subscription->type,
+                'status'      => $subscription->status,
+                'is_trial'    => $subscription->isTrial(),
+                'is_entitled' => $subscription->isEntitled(),
+                'starts_at'   => $subscription->starts_at?->toIso8601String(),
+                'ends_at'     => $subscription->ends_at?->toIso8601String(),
+            ] : null;
+        }
+
+        return $payload;
     }
 
     private function ensureGoogleUserCanAuthenticate(User $user): User
