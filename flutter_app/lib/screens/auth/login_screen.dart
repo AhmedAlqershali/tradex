@@ -274,6 +274,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: socialButton(
                               label: 'Google',
                               icon: Icons.g_mobiledata_rounded,
+                              onTap: isLoading
+                                  ? null
+                                  : () => context
+                                      .read<AuthBloc>()
+                                      .add(const AuthGoogleLoginRequested()),
+                              loading: isLoading,
                             ),
                           ),
                           SizedBox(width: 12.w),
@@ -338,7 +344,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget socialButton({required String label, required IconData icon}) {
+  Widget socialButton({
+    required String label,
+    required IconData icon,
+    VoidCallback? onTap,
+    bool loading = false,
+  }) {
     return Container(
       height: 50.h,
       decoration: BoxDecoration(
@@ -348,13 +359,27 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14.r),
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('تسجيل الدخول عبر $label غير متاح حالياً.')),
-        ),
+        onTap: loading
+            ? null
+            : onTap ??
+                () => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'تسجيل الدخول عبر $label غير متاح حالياً.',
+                        ),
+                      ),
+                    ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24.sp, color: Colors.black87),
+            if (loading && label == 'Google')
+              SizedBox(
+                width: 20.sp,
+                height: 20.sp,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(icon, size: 24.sp, color: Colors.black87),
             SizedBox(width: 6.w),
             Text(label,
                 style: GoogleFonts.ibmPlexSans(

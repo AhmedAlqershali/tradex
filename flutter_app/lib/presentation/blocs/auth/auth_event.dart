@@ -20,6 +20,13 @@ class AuthLoginRequested extends AuthEvent {
   List<Object?> get props => [email, password, role];
 }
 
+class AuthGoogleLoginRequested extends AuthEvent {
+  const AuthGoogleLoginRequested();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class AuthRegisterRequested extends AuthEvent {
   const AuthRegisterRequested({
     required this.name,

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/services/google_sign_in_service.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -8,8 +9,12 @@ export 'auth_event.dart';
 export 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(const AuthInitial()) {
+  AuthBloc({GoogleSignInService? googleSignInService})
+      : _googleSignInService =
+            googleSignInService ?? GoogleSignInService.instance,
+        super(const AuthInitial()) {
     on<AuthLoginRequested>(_onLoginRequested);
+    on<AuthGoogleLoginRequested>(_onGoogleLoginRequested);
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthForgotPasswordRequested>(_onForgotPasswordRequested);
@@ -17,6 +22,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthResetPasswordRequested>(_onResetPasswordRequested);
     on<AuthSessionLoaded>(_onSessionLoaded);
   }
+
+  final GoogleSignInService _googleSignInService;
 
   // ── Login ──────────────────────────────────────────────────────────────────
 
@@ -39,6 +46,59 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthFailure(message: 'حدث خطأ غير متوقع. حاول مجدداً.'));
       }
     }
+  }
+
+  Future<void> _onGoogleLoginRequested(
+    AuthGoogleLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    try {
+      final credential = await _googleSignInService.signIn();
+      if (credential == null) {
+        if (!isClosed) emit(const AuthGoogleSignInCancelled());
+        return;
+      }
+
+      final user = await UserController.instance.loginWithGoogle(
+        credential: credential,
+      );
+      if (!isClosed) {
+        emit(AuthAuthenticated(user: user, isGoogle: true));
+      }
+    } on GoogleSignInException catch (e) {
+      if (!isClosed) emit(AuthFailure(message: e.message));
+    } on ApiException catch (e) {
+      if (!isClosed) {
+        emit(AuthFailure(message: _googleApiErrorMessage(e)));
+      }
+    } catch (_) {
+      if (!isClosed) {
+        emit(const AuthFailure(
+          message: 'تعذر تسجيل الدخول عبر Google. حاول مرة أخرى.',
+        ));
+      }
+    }
+  }
+
+  String _googleApiErrorMessage(ApiException error) {
+    if (error is ValidationException) {
+      final first = error.errors.values.firstOrNull?.firstOrNull;
+      return first ?? 'تعذر التحقق من حساب Google. حاول مرة أخرى.';
+    }
+    if (error is AuthException) {
+      return 'بيانات اعتماد Google غير صالحة أو منتهية الصلاحية.';
+    }
+    if (error is NetworkException) {
+      return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+    }
+    if (error is TimeoutException) {
+      return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
+    }
+    if (error is ServerException && error.statusCode == 503) {
+      return 'تسجيل الدخول عبر Google غير مهيأ حالياً. حاول لاحقاً.';
+    }
+    return error.message;
   }
 
   // ── Register ───────────────────────────────────────────────────────────────

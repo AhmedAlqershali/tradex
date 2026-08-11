@@ -131,6 +131,26 @@ class UserController {
     }
   }
 
+  /// Authenticates with Google, then stores the returned Laravel Sanctum
+  /// token through the same path as email/password login.
+  Future<AppUser> loginWithGoogle({required String credential}) async {
+    _begin();
+    try {
+      final result = await AuthService.instance.loginWithGoogle(
+        credential: credential,
+      );
+      await _storeTokens(result.tokens);
+      currentUserNotifier.value = result.user;
+      await _clearLegacySession();
+      return result.user;
+    } on ApiException catch (e) {
+      authErrorNotifier.value = _localiseGoogleError(e);
+      rethrow;
+    } finally {
+      _end();
+    }
+  }
+
   // ── Register ──────────────────────────────────────────────────────────────────
 
   /// POST /auth/register/client or /auth/register/merchant.
@@ -430,6 +450,26 @@ class UserController {
     }
     if (e is TimeoutException) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
     if (e is ServerException) return 'حدث خطأ في الخادم. حاول لاحقاً.';
+    return e.message;
+  }
+
+  String _localiseGoogleError(ApiException e) {
+    if (e is ValidationException) {
+      final first = e.errors.values.firstOrNull?.firstOrNull;
+      return first ?? 'تعذر التحقق من حساب Google. حاول مرة أخرى.';
+    }
+    if (e is AuthException) {
+      return 'بيانات اعتماد Google غير صالحة أو منتهية الصلاحية.';
+    }
+    if (e is NetworkException) {
+      return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+    }
+    if (e is TimeoutException) {
+      return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
+    }
+    if (e is ServerException && e.statusCode == 503) {
+      return 'تسجيل الدخول عبر Google غير مهيأ حالياً. حاول لاحقاً.';
+    }
     return e.message;
   }
 

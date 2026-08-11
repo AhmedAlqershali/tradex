@@ -30,6 +30,7 @@ class ApiConstants {
   static const String registerClient = '/auth/register/client';
   static const String registerMerchant = '/auth/register/merchant';
   static const String login = '/auth/login';
+  static const String googleLogin = '/auth/google';
   static const String logout = '/auth/logout';
   // Backend does not implement a refresh-token endpoint — Sanctum issues a
   // single long-lived token per login. Kept unused by ApiClient's 401

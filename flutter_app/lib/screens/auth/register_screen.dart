@@ -4,6 +4,7 @@ import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
 import 'package:ai_saas/screens/auth/complete_registration_merchant_screen.dart';
 import 'package:ai_saas/screens/auth/login_screen.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
+import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -149,7 +150,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          if (widget.type == AppType.merchant) {
+          if (state.isGoogle) {
+            // Google auth is a login/link flow. The server is authoritative
+            // for the role; do not send a Google user through registration
+            // profile completion or infer a merchant role from this screen.
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BnScreen(type: state.user.role),
+              ),
+            );
+          } else if (widget.type == AppType.merchant) {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -457,6 +468,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: socialButton(
                                   label: 'Google',
                                   icon: Icons.g_mobiledata_rounded,
+                                  onTap: isLoading
+                                      ? null
+                                      : () => context
+                                          .read<AuthBloc>()
+                                          .add(const AuthGoogleLoginRequested()),
+                                  loading: isLoading,
                                 ),
                               ),
                               const SizedBox(
@@ -577,6 +594,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget socialButton({
     required String label,
     required IconData icon,
+    VoidCallback? onTap,
+    bool loading = false,
   }) {
     return SizedBox(
       height: 50,
@@ -590,13 +609,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('التسجيل عبر $label غير متاح حالياً.')),
-          ),
+          onTap: loading
+              ? null
+              : onTap ??
+                  () => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('التسجيل عبر $label غير متاح حالياً.'),
+                        ),
+                      ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 22, color: Colors.black87),
+              if (loading && label == 'Google')
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Icon(icon, size: 22, color: Colors.black87),
               const SizedBox(width: 6),
               Text(
                 label,
