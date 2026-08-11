@@ -588,24 +588,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color: borderColor,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: Colors.black87,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.ibmPlexSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.black87,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('التسجيل عبر $label غير متاح حالياً.')),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: Colors.black87),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.ibmPlexSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

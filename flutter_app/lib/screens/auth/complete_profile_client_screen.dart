@@ -1,5 +1,6 @@
 import 'package:ai_saas/screens/auth/complete_profile_photo_screen.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/core/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,16 +27,16 @@ class CompleteProfileClientScreen extends StatefulWidget {
 class _CompleteProfileClientScreenState
     extends State<CompleteProfileClientScreen> {
   static const Color _primary = Color(0xff4D41DF);
-  static const Color _bg      = Color(0xffF8F9FD);
+  static const Color _bg = Color(0xffF8F9FD);
 
   String? _selectedRegion = 'غزة';
 
   final List<Map<String, dynamic>> _regions = [
-    {'name': 'غزة',        'icon': Icons.location_on_outlined},
-    {'name': 'شمال غزة',  'icon': Icons.map_outlined},
-    {'name': 'خانيونس',   'icon': Icons.explore_outlined},
-    {'name': 'رفح',        'icon': Icons.navigation_outlined},
-    {'name': 'دير البلح',  'icon': Icons.location_on_outlined},
+    {'name': 'غزة', 'icon': Icons.location_on_outlined},
+    {'name': 'شمال غزة', 'icon': Icons.map_outlined},
+    {'name': 'خانيونس', 'icon': Icons.explore_outlined},
+    {'name': 'رفح', 'icon': Icons.navigation_outlined},
+    {'name': 'دير البلح', 'icon': Icons.location_on_outlined},
   ];
 
   Future<void> _onNext() async {
@@ -134,7 +135,7 @@ class _CompleteProfileClientScreenState
                         width: double.infinity,
                         height: 48.h,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: _useCurrentLocation,
                           icon: Icon(Icons.my_location,
                               size: 18.sp, color: _primary),
                           label: Text(
@@ -159,8 +160,8 @@ class _CompleteProfileClientScreenState
                       // Region selection list
                       ...List.generate(_regions.length, (index) {
                         final region = _regions[index];
-                        final name   = region['name'] as String;
-                        final icon   = region['icon'] as IconData;
+                        final name = region['name'] as String;
+                        final icon = region['icon'] as IconData;
                         final selected = _selectedRegion == name;
 
                         return GestureDetector(
@@ -247,8 +248,7 @@ class _CompleteProfileClientScreenState
 
               // ── Fixed bottom CTA ────────────────────────────────────────
               Container(
-                padding:
-                    EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 28.h),
+                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 28.h),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   border: Border(
@@ -292,5 +292,36 @@ class _CompleteProfileClientScreenState
         ),
       ),
     );
+  }
+
+  Future<void> _useCurrentLocation() async {
+    try {
+      final result = await LocationService.instance.getCurrentLocation();
+      if (!mounted) return;
+      if (result.region == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                  'تعذر مطابقة موقعك مع منطقة متاحة. اختر المنطقة يدوياً.')),
+        );
+        return;
+      }
+      setState(() => _selectedRegion = result.region);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تم تحديد الموقع: ${result.region}')),
+      );
+    } on LocationException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
+        );
+      }
+    }
   }
 }

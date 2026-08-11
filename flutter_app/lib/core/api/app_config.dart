@@ -28,6 +28,23 @@ class AppConfig {
     defaultValue: 'https://tradex-v2us.onrender.com/api/v1',
   );
 
+  /// Resolves media paths returned by the API without coupling the UI to a
+  /// deployment hostname. The API normally returns an absolute Storage URL,
+  /// but older environments may return a root-relative path.
+  static String resolveMediaUrl(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty ||
+        trimmed.startsWith('http://') ||
+        trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+
+    final apiUri = Uri.parse(baseUrl);
+    final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+    return apiUri.replace(path: '', query: null, fragment: null).toString() +
+        path;
+  }
+
   // ── Environment helpers ───────────────────────────────────────────────────────
   // Compile-time flag — true only in release/profile builds.
   static const bool isProduction = bool.fromEnvironment('dart.vm.product');

@@ -280,11 +280,11 @@ class UserController {
 
       // Update text fields on the server when at least one is provided.
       AppUser? updated;
-      if (name != null || phone != null || region != null) {
+      if (name != null || email != null || phone != null) {
         updated = await UserService.instance.updateMe(
           name: name,
+          email: email,
           phone: phone,
-          city: region,
         );
       }
 
@@ -293,12 +293,13 @@ class UserController {
       if (updated != null) {
         currentUserNotifier.value = updated.copyWith(
           photoPath: resolvedPhotoPath ?? current?.photoPath,
-          // email is not sent/returned by this update call — keep existing value.
-          email: email ?? updated.email,
+          email: updated.email,
+          region: region ?? current?.region,
         );
       } else if (current != null) {
         currentUserNotifier.value = current.copyWith(
           email: email,
+          region: region,
           photoPath: resolvedPhotoPath,
         );
       }
@@ -353,7 +354,8 @@ class UserController {
       if (existing != null) {
         currentUserNotifier.value = existing.copyWith(
           storeName: store.title.isNotEmpty ? store.title : storeName,
-          storeId: (store.id?.isNotEmpty ?? false) ? store.id : existing.storeId,
+          storeId:
+              (store.id?.isNotEmpty ?? false) ? store.id : existing.storeId,
           storeCategory: storeCategory,
           region: region,
           photoPath: resolvedLogoPath ?? existing.photoPath,
@@ -411,9 +413,11 @@ class UserController {
       final first = e.errors.values.firstOrNull?.firstOrNull;
       return first ?? e.message;
     }
-    if (e is AuthException) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    if (e is AuthException)
+      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
     if (e is ForbiddenException) return e.message;
-    if (e is NetworkException) return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+    if (e is NetworkException)
+      return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
     if (e is TimeoutException) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
     if (e is ServerException) return 'حدث خطأ في الخادم. حاول لاحقاً.';
     return e.message;

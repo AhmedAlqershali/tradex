@@ -1,4 +1,5 @@
 import 'package:ai_saas/models/app_type.dart';
+import 'package:ai_saas/core/api/app_config.dart';
 
 // ─── AppUser ──────────────────────────────────────────────────────────────────
 //
@@ -140,14 +141,21 @@ class AppUser {
       storeCategory:
           json['store_category'] as String? ?? json['storeCategory'] as String?,
       region: json['region'] as String?,
-      photoPath: json['avatar'] as String? ??
-          json['photo_url'] as String? ??
-          json['avatar_url'] as String? ??
-          json['photoPath'] as String?,
+      photoPath: _resolvePhotoPath(
+        json['avatar'] as String? ??
+            json['photo_url'] as String? ??
+            json['avatar_url'] as String? ??
+            json['photoPath'] as String?,
+      ),
       createdAt: _parseDate(
         json['created_at'] as String? ?? json['createdAt'] as String?,
       ),
     );
+  }
+
+  static String? _resolvePhotoPath(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return AppConfig.resolveMediaUrl(value);
   }
 
   static DateTime _parseDate(String? value) {

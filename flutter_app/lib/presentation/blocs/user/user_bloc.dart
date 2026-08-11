@@ -46,7 +46,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       await UserController.instance.updateProfile(
         name: event.name,
         phone: event.phone,
-        region: event.city,
       );
       final updated = UserController.instance.currentUser;
       if (!isClosed) {

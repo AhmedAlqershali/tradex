@@ -8,6 +8,9 @@ import 'package:ai_saas/screens/notifications_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
+import 'package:ai_saas/core/api/app_config.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -76,28 +79,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   offset: const Offset(0, 10),
                                 ),
                               ],
-                              image: photoPath != null
-                                  ? (photoPath.startsWith('http://') ||
-                                          photoPath.startsWith('https://'))
-                                      ? DecorationImage(
-                                          image: NetworkImage(photoPath),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : File(photoPath).existsSync()
-                                          ? DecorationImage(
-                                              image: FileImage(File(photoPath)),
-                                              fit: BoxFit.cover,
-                                            )
-                                          : const DecorationImage(
-                                              image: AssetImage(
-                                                  'assets/images/client.png'),
-                                              fit: BoxFit.cover,
-                                            )
-                                  : const DecorationImage(
-                                      image: AssetImage(
-                                          'assets/images/client.png'),
-                                      fit: BoxFit.cover,
-                                    ),
+                              color: Colors.white,
+                            ),
+                            child: ClipOval(
+                              child: _buildAvatarImage(photoPath),
                             ),
                           ),
                           SizedBox(height: 16.h),
@@ -176,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildSettingsTile(
           icon: Icons.lock_outline,
           label: 'تغيير كلمة المرور',
-          onTap: () {},
+          onTap: () => _showChangePasswordDialog(context),
         ),
         _buildSettingsTile(
           icon: Icons.notifications_outlined,
@@ -191,10 +176,126 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildSettingsTile(
           icon: Icons.language_outlined,
           label: 'اللغة',
-          onTap: () {},
+          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تغيير اللغة غير متاح حالياً.'),
+            ),
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildAvatarImage(String? photoPath) {
+    if (photoPath == null || photoPath.isEmpty) {
+      return Image.asset('assets/images/client.png', fit: BoxFit.cover);
+    }
+    if (photoPath.startsWith('http://') || photoPath.startsWith('https://')) {
+      return Image.network(
+        AppConfig.resolveMediaUrl(photoPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            Image.asset('assets/images/client.png', fit: BoxFit.cover),
+      );
+    }
+    final file = File(photoPath);
+    return file.existsSync()
+        ? Image.file(file, fit: BoxFit.cover)
+        : Image.asset('assets/images/client.png', fit: BoxFit.cover);
+  }
+
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+    final currentController = TextEditingController();
+    final newController = TextEditingController();
+    final confirmController = TextEditingController();
+    var saving = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('تغيير كلمة المرور'),
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentController,
+                  obscureText: true,
+                  decoration:
+                      const InputDecoration(labelText: 'كلمة المرور الحالية'),
+                ),
+                TextField(
+                  controller: newController,
+                  obscureText: true,
+                  decoration:
+                      const InputDecoration(labelText: 'كلمة المرور الجديدة'),
+                ),
+                TextField(
+                  controller: confirmController,
+                  obscureText: true,
+                  decoration:
+                      const InputDecoration(labelText: 'تأكيد كلمة المرور'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: saving ? null : () => Navigator.pop(dialogContext),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (currentController.text.isEmpty ||
+                          newController.text.length < 6 ||
+                          newController.text != confirmController.text) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('تحقق من بيانات كلمة المرور')),
+                        );
+                        return;
+                      }
+                      setDialogState(() => saving = true);
+                      try {
+                        await UserService.instance.changePassword(
+                          currentPassword: currentController.text,
+                          newPassword: newController.text,
+                        );
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                        if (mounted) {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            const SnackBar(
+                                content: Text('تم تغيير كلمة المرور')),
+                          );
+                        }
+                      } on ApiException catch (e) {
+                        setDialogState(() => saving = false);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.message)),
+                          );
+                        }
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('حفظ'),
+            ),
+          ],
+        ),
+      ),
+    );
+    currentController.dispose();
+    newController.dispose();
+    confirmController.dispose();
   }
 
   Widget _buildSettingsTile({

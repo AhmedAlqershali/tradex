@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/core/api/app_config.dart';
+import 'package:ai_saas/core/services/location_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -18,8 +20,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   String? _currentSelectedLocation;
-  File?   _pickedPhoto;
-  bool    _isSaving = false;
+  File? _pickedPhoto;
+  bool _isSaving = false;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -27,7 +29,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     final user = UserController.instance.currentUser;
-    _nameController  = TextEditingController(text: user?.name ?? '');
+    _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
     _currentSelectedLocation = user?.region;
   }
@@ -41,7 +43,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _pickProfilePhoto() async {
     try {
-      final XFile? file = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      final XFile? file = await _picker.pickImage(
+          source: ImageSource.gallery, imageQuality: 80);
       if (file != null) setState(() => _pickedPhoto = File(file.path));
     } catch (e) {
       debugPrint('Photo pick error: $e');
@@ -84,8 +87,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     ImageProvider? photoImage;
     if (_pickedPhoto != null) {
       photoImage = FileImage(_pickedPhoto!);
-    } else if (savedPhotoPath != null && File(savedPhotoPath).existsSync()) {
-      photoImage = FileImage(File(savedPhotoPath));
+    } else if (savedPhotoPath != null && savedPhotoPath.isNotEmpty) {
+      photoImage = savedPhotoPath.startsWith('http://') ||
+              savedPhotoPath.startsWith('https://')
+          ? NetworkImage(AppConfig.resolveMediaUrl(savedPhotoPath))
+          : File(savedPhotoPath).existsSync()
+              ? FileImage(File(savedPhotoPath))
+              : null;
     }
 
     return Directionality(
@@ -97,12 +105,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           elevation: 0.5,
           centerTitle: true,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20.sp),
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: textColor, size: 20.sp),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             'المعلومات الشخصية',
-            style: GoogleFonts.ibmPlexSans(color: textColor, fontSize: 16.sp, fontWeight: FontWeight.bold),
+            style: GoogleFonts.ibmPlexSans(
+                color: textColor, fontSize: 16.sp, fontWeight: FontWeight.bold),
           ),
         ),
         body: SafeArea(
@@ -111,7 +121,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -129,11 +140,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   height: 110.w,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: primaryColor.withValues(alpha: 0.2), width: 3.w),
+                                    border: Border.all(
+                                        color:
+                                            primaryColor.withValues(alpha: 0.2),
+                                        width: 3.w),
                                     image: photoImage != null
-                                        ? DecorationImage(image: photoImage, fit: BoxFit.cover)
+                                        ? DecorationImage(
+                                            image: photoImage,
+                                            fit: BoxFit.cover)
                                         : const DecorationImage(
-                                            image: AssetImage('assets/images/client.png'),
+                                            image: AssetImage(
+                                                'assets/images/client.png'),
                                             fit: BoxFit.cover,
                                           ),
                                   ),
@@ -143,8 +160,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   left: 5.w,
                                   child: Container(
                                     padding: EdgeInsets.all(8.r),
-                                    decoration: const BoxDecoration(color: primaryColor, shape: BoxShape.circle),
-                                    child: Icon(Icons.camera_alt_rounded, size: 16.sp, color: Colors.white),
+                                    decoration: const BoxDecoration(
+                                        color: primaryColor,
+                                        shape: BoxShape.circle),
+                                    child: Icon(Icons.camera_alt_rounded,
+                                        size: 16.sp, color: Colors.white),
                                   ),
                                 ),
                               ],
@@ -157,7 +177,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         _buildFieldLabel('الاسم كامل'),
                         TextFormField(
                           controller: _nameController,
-                          style: GoogleFonts.ibmPlexSans(color: textColor, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                          style: GoogleFonts.ibmPlexSans(
+                              color: textColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500),
                           decoration: _inputDecoration(
                             hint: 'أدخل اسمك الكامل',
                             fillColor: inputFillColor,
@@ -172,7 +195,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textDirection: TextDirection.ltr,
-                          style: GoogleFonts.ibmPlexSans(color: textColor, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                          style: GoogleFonts.ibmPlexSans(
+                              color: textColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500),
                           decoration: _inputDecoration(
                             hint: 'example@gmail.com',
                             fillColor: inputFillColor,
@@ -186,24 +212,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         DropdownButtonFormField<String>(
                           value: _currentSelectedLocation,
                           isExpanded: true,
-                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey, size: 20.sp),
+                          icon: Icon(Icons.keyboard_arrow_down_rounded,
+                              color: Colors.grey, size: 20.sp),
                           dropdownColor: Colors.white,
-                          style: GoogleFonts.ibmPlexSans(color: textColor, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                          style: GoogleFonts.ibmPlexSans(
+                              color: textColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500),
                           decoration: _inputDecoration(
                             hint: 'اختر موقعك الحالي',
                             fillColor: inputFillColor,
                             prefixIcon: Icons.location_on_outlined,
                           ),
-                          items: <String>['غزة', 'شمال غزة', 'الوسطى', 'خانيونس', 'رفح'].map((String value) {
-                            return DropdownMenuItem<String>(value: value, child: Text(value));
+                          items: <String>[
+                            'غزة',
+                            'شمال غزة',
+                            'الوسطى',
+                            'خانيونس',
+                            'رفح'
+                          ].map((String value) {
+                            return DropdownMenuItem<String>(
+                                value: value, child: Text(value));
                           }).toList(),
-                          onChanged: (newValue) => setState(() => _currentSelectedLocation = newValue),
+                          onChanged: (newValue) => setState(
+                              () => _currentSelectedLocation = newValue),
                         ),
                         SizedBox(height: 24.h),
 
                         // 5. زر جلب الموقع
                         InkWell(
-                          onTap: () {},
+                          onTap: _useCurrentLocation,
                           borderRadius: BorderRadius.circular(12.r),
                           child: Container(
                             width: double.infinity,
@@ -211,15 +249,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             decoration: BoxDecoration(
                               color: primaryColor.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: primaryColor.withValues(alpha: 0.1), width: 1.w),
+                              border: Border.all(
+                                  color: primaryColor.withValues(alpha: 0.1),
+                                  width: 1.w),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.my_location_rounded, color: primaryColor, size: 18.sp),
+                                Icon(Icons.my_location_rounded,
+                                    color: primaryColor, size: 18.sp),
                                 SizedBox(width: 10.w),
                                 Text('استخدام موقعي الحالي',
-                                    style: GoogleFonts.ibmPlexSans(color: primaryColor, fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                                    style: GoogleFonts.ibmPlexSans(
+                                        color: primaryColor,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -240,13 +284,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     onPressed: _isSaving ? null : _save,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r)),
                       elevation: 0,
                     ),
                     child: _isSaving
-                        ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        ? const CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2)
                         : Text('حفظ التغييرات',
-                            style: GoogleFonts.ibmPlexSans(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                            style: GoogleFonts.ibmPlexSans(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
                   ),
                 ),
               ),
@@ -257,25 +306,69 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Future<void> _useCurrentLocation() async {
+    try {
+      final result = await LocationService.instance.getCurrentLocation();
+      if (!mounted) return;
+      if (result.region == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'تم تحديد موقعك، لكن تعذر مطابقة المنطقة تلقائياً. اخترها من القائمة.'),
+          ),
+        );
+        return;
+      }
+      setState(() => _currentSelectedLocation = result.region);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تم تحديد الموقع: ${result.region}')),
+      );
+    } on LocationException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
+        );
+      }
+    }
+  }
+
   Widget _buildFieldLabel(String label) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h, right: 4.w),
       child: Text(label,
-          style: GoogleFonts.ibmPlexSans(color: const Color(0xff0d1e3d), fontWeight: FontWeight.bold, fontSize: 14.sp)),
+          style: GoogleFonts.ibmPlexSans(
+              color: const Color(0xff0d1e3d),
+              fontWeight: FontWeight.bold,
+              fontSize: 14.sp)),
     );
   }
 
-  InputDecoration _inputDecoration({required String hint, required Color fillColor, required IconData prefixIcon}) {
+  InputDecoration _inputDecoration(
+      {required String hint,
+      required Color fillColor,
+      required IconData prefixIcon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.ibmPlexSans(color: Colors.black38, fontSize: 13.sp),
+      hintStyle:
+          GoogleFonts.ibmPlexSans(color: Colors.black38, fontSize: 13.sp),
       filled: true,
       fillColor: fillColor,
       contentPadding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
       prefixIcon: Icon(prefixIcon, color: Colors.black45, size: 20.sp),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: Color(0xff623ce7), width: 1.5)),
     );
   }

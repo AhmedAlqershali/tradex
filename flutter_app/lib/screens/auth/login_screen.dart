@@ -340,17 +340,23 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: const Color(0xFFEFEFEF)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 24.sp, color: Colors.black87),
-          SizedBox(width: 6.w),
-          Text(label,
-              style: GoogleFonts.ibmPlexSans(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                  color: Colors.black87)),
-        ],
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14.r),
+        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تسجيل الدخول عبر $label غير متاح حالياً.')),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 24.sp, color: Colors.black87),
+            SizedBox(width: 6.w),
+            Text(label,
+                style: GoogleFonts.ibmPlexSans(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                    color: Colors.black87)),
+          ],
+        ),
       ),
     );
   }

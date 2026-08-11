@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 
 // ─── UserService ──────────────────────────────────────────────────────────────
@@ -32,13 +33,13 @@ class UserService {
   /// PUT /profile
   Future<AppUser> updateMe({
     String? name,
+    String? email,
     String? phone,
-    String? city,
   }) async {
     final body = <String, dynamic>{};
     if (name != null) body['name'] = name;
+    if (email != null) body['email'] = email;
     if (phone != null) body['phone'] = phone;
-    if (city != null) body['city'] = city;
 
     final response = await ApiClient.instance
         .put<Map<String, dynamic>>(ApiConstants.me, data: body);
@@ -59,14 +60,33 @@ class UserService {
     final response = await ApiClient.instance
         .postFormData<Map<String, dynamic>>(ApiConstants.meAvatar, formData);
     final raw = response.data!;
-    final body =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    final body = raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
     // ProfileService::userPayload() returns the resolved Storage URL under
     // the 'avatar' key — the other keys are kept as a defensive fallback.
-    return body['avatar'] as String? ??
+    final avatar = body['avatar'] as String? ??
         body['avatar_url'] as String? ??
         body['url'] as String? ??
-        body['avatarUrl'] as String? ??
-        '';
+        body['avatarUrl'] as String?;
+    if (avatar == null || avatar.trim().isEmpty) {
+      throw const UnknownException(
+        'تم رفع الصورة لكن لم يُرجع الخادم رابط الصورة.',
+      );
+    }
+    return avatar;
+  }
+
+  /// PUT /profile/password
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await ApiClient.instance.put<Map<String, dynamic>>(
+      ApiConstants.mePassword,
+      data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': newPassword,
+      },
+    );
   }
 }
