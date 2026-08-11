@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/core/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -816,7 +817,10 @@ size: 20.sp,
 // ============================================================
 
 Widget _buildDropdownField() {
-return DropdownButtonFormField<String>(
+ return Column(
+   crossAxisAlignment: CrossAxisAlignment.stretch,
+   children: [
+     DropdownButtonFormField<String>(
       value: _selectedRegion,
 isExpanded: true,
 dropdownColor: Colors.white,
@@ -852,7 +856,71 @@ color: textColor,
 decoration: _inputDecoration(
 'اختر المنطقة',
 ),
-);
+     ),
+     SizedBox(height: 8.h),
+     OutlinedButton.icon(
+       onPressed: _useCurrentLocation,
+       icon: Icon(
+         Icons.my_location,
+         size: 16.sp,
+         color: primaryColor,
+       ),
+       label: Text(
+         'استخدام موقعي الحالي',
+         style: GoogleFonts.ibmPlexSans(
+           fontSize: 12.sp,
+           color: primaryColor,
+           fontWeight: FontWeight.bold,
+         ),
+       ),
+       style: OutlinedButton.styleFrom(
+         padding: EdgeInsets.symmetric(vertical: 10.h),
+         side: BorderSide.none,
+         backgroundColor: primaryColor.withValues(alpha: 0.05),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(10.r),
+         ),
+       ),
+     ),
+   ],
+ );
+}
+
+Future<void> _useCurrentLocation() async {
+ try {
+   final result = await LocationService.instance.getCurrentLocation();
+   if (!mounted) {
+     return;
+   }
+   if (result.region == null) {
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(
+         content: Text(
+           'تم تحديد موقعك، لكن تعذر مطابقة المنطقة تلقائياً. اخترها من القائمة.',
+         ),
+       ),
+     );
+     return;
+   }
+   setState(() {
+     _selectedRegion = result.region;
+   });
+   ScaffoldMessenger.of(context).showSnackBar(
+     SnackBar(content: Text('تم تحديد الموقع: ${result.region}')),
+   );
+ } on LocationException catch (e) {
+   if (mounted) {
+     ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text(e.message)),
+     );
+   }
+ } catch (_) {
+   if (mounted) {
+     ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
+     );
+   }
+ }
 }
 
 // ============================================================

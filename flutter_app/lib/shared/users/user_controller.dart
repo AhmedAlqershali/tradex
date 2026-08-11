@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_saas/models/app_type.dart';
+import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/auth_service.dart';
 import 'package:ai_saas/core/services/store_service.dart';
@@ -277,6 +278,11 @@ class UserController {
         resolvedPhotoPath =
             await UserService.instance.uploadAvatar(filePath: photoPath);
       }
+      if (resolvedPhotoPath != null &&
+          !resolvedPhotoPath.startsWith('http://') &&
+          !resolvedPhotoPath.startsWith('https://')) {
+        resolvedPhotoPath = AppConfig.resolveMediaUrl(resolvedPhotoPath);
+      }
 
       // Update text fields on the server when at least one is provided.
       AppUser? updated;
@@ -413,11 +419,15 @@ class UserController {
       final first = e.errors.values.firstOrNull?.firstOrNull;
       return first ?? e.message;
     }
-    if (e is AuthException)
+    if (e is AuthException) {
       return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-    if (e is ForbiddenException) return e.message;
-    if (e is NetworkException)
+    }
+    if (e is ForbiddenException) {
+      return e.message;
+    }
+    if (e is NetworkException) {
       return 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+    }
     if (e is TimeoutException) return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
     if (e is ServerException) return 'حدث خطأ في الخادم. حاول لاحقاً.';
     return e.message;

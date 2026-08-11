@@ -236,7 +236,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              // Navigate to forgot password
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'استعادة كلمة المرور تتم عبر رابط البريد الإلكتروني. هذه الواجهة غير متاحة حالياً.',
+                                  ),
+                                ),
+                              );
                             },
                             child: Text(
                               'نسيت كلمة المرور؟',
