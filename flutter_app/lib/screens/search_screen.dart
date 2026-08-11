@@ -11,8 +11,14 @@ import 'package:google_fonts/google_fonts.dart';
 class SearchScreen extends StatefulWidget {
   final String? initialQuery;
   final String? initialCategory;
+  final String? initialCategoryId;
 
-  const SearchScreen({super.key, this.initialQuery, this.initialCategory});
+  const SearchScreen({
+    super.key,
+    this.initialQuery,
+    this.initialCategory,
+    this.initialCategoryId,
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -22,6 +28,7 @@ class _SearchScreenState extends State<SearchScreen> {
   // ignore: unused_field — reserved for future region-filter feature
   final String _selectedRegion = 'المنطقة';
   String _selectedStoreCategory = '';
+  String? _selectedCategoryId;
   String _searchQuery = '';
 
   final TextEditingController _searchController = TextEditingController();
@@ -30,7 +37,8 @@ class _SearchScreenState extends State<SearchScreen> {
     CategoryFilterModel(name: 'مطاعم', icon: Icons.restaurant),
     CategoryFilterModel(name: 'كافيهات', icon: Icons.local_cafe_outlined),
     CategoryFilterModel(name: 'ملابس', icon: Icons.checkroom),
-    CategoryFilterModel(name: 'مساحات عمل', icon: Icons.business_center_outlined),
+    CategoryFilterModel(
+        name: 'مساحات عمل', icon: Icons.business_center_outlined),
     CategoryFilterModel(name: 'هدايا', icon: Icons.card_giftcard),
     CategoryFilterModel(name: 'أحذية', icon: Icons.shopping_bag_outlined),
     CategoryFilterModel(name: 'سيارات', icon: Icons.time_to_leave_outlined),
@@ -40,7 +48,8 @@ class _SearchScreenState extends State<SearchScreen> {
     CategoryFilterModel(name: 'مول', icon: Icons.corporate_fare_outlined),
     CategoryFilterModel(name: 'متاجر', icon: Icons.storefront),
     CategoryFilterModel(name: 'إلكترونيات', icon: Icons.devices_other_outlined),
-    CategoryFilterModel(name: 'مستلزمات طبية', icon: Icons.medical_services_outlined),
+    CategoryFilterModel(
+        name: 'مستلزمات طبية', icon: Icons.medical_services_outlined),
     CategoryFilterModel(name: 'بصريات', icon: Icons.remove_red_eye_outlined),
   ];
 
@@ -52,9 +61,17 @@ class _SearchScreenState extends State<SearchScreen> {
       _searchController.text = widget.initialQuery!;
       // Trigger search immediately.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context
-            .read<ProductBloc>()
-            .add(ProductSearchRequested(_searchQuery));
+        context.read<ProductBloc>().add(ProductSearchRequested(_searchQuery));
+      });
+    } else if (widget.initialCategoryId != null &&
+        widget.initialCategoryId!.isNotEmpty) {
+      _selectedStoreCategory = widget.initialCategory ?? '';
+      _selectedCategoryId = widget.initialCategoryId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ProductBloc>().add(ProductsLoadRequested(
+              category: _selectedStoreCategory,
+              categoryId: _selectedCategoryId,
+            ));
       });
     } else if (widget.initialCategory != null &&
         widget.initialCategory!.isNotEmpty) {
@@ -96,9 +113,8 @@ class _SearchScreenState extends State<SearchScreen> {
           _selectedStoreCategory == category ? '' : category;
     });
     context.read<ProductBloc>().add(ProductsLoadRequested(
-          category: _selectedStoreCategory.isNotEmpty
-              ? _selectedStoreCategory
-              : null,
+          category:
+              _selectedStoreCategory.isNotEmpty ? _selectedStoreCategory : null,
         ));
   }
 
@@ -113,8 +129,7 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               // ── Search bar ──
               Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 child: Row(
                   children: [
                     Expanded(
@@ -123,8 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                              color: const Color(0xffEFEFEF)),
+                          border: Border.all(color: const Color(0xffEFEFEF)),
                         ),
                         child: TextField(
                           controller: _searchController,
@@ -137,8 +151,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 fontSize: 13.sp,
                                 color: const Color(0xffAAAAAA)),
                             prefixIcon: Icon(Icons.search_rounded,
-                                size: 20.sp,
-                                color: const Color(0xffAAAAAA)),
+                                size: 20.sp, color: const Color(0xffAAAAAA)),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
                                 vertical: 12.h, horizontal: 12.w),
@@ -226,8 +239,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: BlocBuilder<ProductBloc, ProductState>(
                   builder: (context, state) {
                     if (state is ProductLoading) {
-                      return const Center(
-                          child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     List<Product> products = [];
@@ -243,8 +255,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.search_off_rounded,
-                                size: 60.sp,
-                                color: Colors.grey.shade300),
+                                size: 60.sp, color: Colors.grey.shade300),
                             SizedBox(height: 12.h),
                             Text(
                               _searchQuery.isEmpty
@@ -263,8 +274,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                       physics: const BouncingScrollPhysics(),
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 0.7,
                         crossAxisSpacing: 12.w,
@@ -318,8 +328,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 topRight: Radius.circular(24.r),
               ),
             ),
-            padding:
-                EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             child: Column(
               children: [
                 Container(
@@ -342,8 +351,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     mainAxisSpacing: 10.h,
                     childAspectRatio: 1.2,
                     children: filterCategories.map((cat) {
-                      final isSelected =
-                          _selectedStoreCategory == cat.name;
+                      final isSelected = _selectedStoreCategory == cat.name;
                       return GestureDetector(
                         onTap: () {
                           Navigator.pop(ctx);
@@ -408,8 +416,7 @@ class _SearchScreenState extends State<SearchScreen> {
           borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 8)
+                color: Colors.black.withValues(alpha: 0.03), blurRadius: 8)
           ],
         ),
         child: Column(
@@ -417,8 +424,7 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(14.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(14.r)),
                 child: ProductImage(
                   url: product.imageUrl,
                   fit: BoxFit.cover,
@@ -456,12 +462,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       Container(
                         padding: EdgeInsets.all(4.r),
                         decoration: BoxDecoration(
-                            color: const Color(0xff4D41DF)
-                                .withValues(alpha: 0.1),
+                            color:
+                                const Color(0xff4D41DF).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6.r)),
                         child: Icon(Icons.add_rounded,
-                            size: 16.sp,
-                            color: const Color(0xff4D41DF)),
+                            size: 16.sp, color: const Color(0xff4D41DF)),
                       ),
                     ],
                   ),

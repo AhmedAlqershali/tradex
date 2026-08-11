@@ -105,6 +105,7 @@ class ProfileService implements ProfileServiceInterface
                 'id'          => $s->id,
                 'store_name'  => $s->store_name,
                 'description' => $s->description,
+                'region'      => $s->region,
                 'logo'        => $s->logo
                     ? Storage::disk('public')->url($s->logo)
                     : null,

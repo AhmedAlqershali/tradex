@@ -32,15 +32,17 @@ class StoreController extends BaseApiController
      * Query parameters:
      *   per_page  int     — 1–100 (default: 15)
      *   search    string  — partial match on store name (optional)
+     *   region    string  — exact current/selected region (optional)
      */
     public function index(Request $request): JsonResponse
     {
         $request->validate([
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'search'   => ['nullable', 'string', 'max:100'],
+            'region'   => ['nullable', 'string', 'max:100'],
         ]);
 
-        $filters    = $request->only(['per_page', 'search']);
+        $filters    = $request->only(['per_page', 'search', 'region']);
         $paginator  = $this->storeService->listActive($filters);
         $collection = new StoreCollection($paginator);
 

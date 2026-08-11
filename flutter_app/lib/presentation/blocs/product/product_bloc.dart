@@ -33,6 +33,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final products = await ProductService.instance.getProducts(
         category: event.category,
+        categoryId: event.categoryId,
         storeId: event.storeId,
         featured: event.featured,
         page: event.page,

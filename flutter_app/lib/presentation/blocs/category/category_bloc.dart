@@ -23,8 +23,13 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   ) async {
     emit(const CategoryLoading());
     try {
-      final categories = await CategoryService.instance.getCategories();
-      if (!isClosed) emit(CategoriesLoaded(categories));
+      final options = await CategoryService.instance.getCategoryOptions();
+      if (!isClosed) {
+        emit(CategoriesLoaded(
+          options.map((option) => option.name).toList(),
+          options: options,
+        ));
+      }
     } on ApiException catch (e) {
       if (!isClosed) emit(CategoryFailure(e.message));
     } catch (e) {

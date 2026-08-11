@@ -77,7 +77,9 @@ class StoreModel {
       subTitle:
           json['description'] as String? ?? json['subTitle'] as String? ?? '',
       imageUrl: rawImage is String ? AppConfig.resolveMediaUrl(rawImage) : '',
-      location: json['city'] as String? ?? json['location'] as String?,
+      location: json['region'] as String? ??
+          json['city'] as String? ??
+          json['location'] as String?,
       tag: (json['category'] is Map
               ? (json['category'] as Map)['name']?.toString()
               : json['category']?.toString()) ??

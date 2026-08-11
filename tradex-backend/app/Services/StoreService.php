@@ -34,6 +34,10 @@ class StoreService implements StoreServiceInterface
             $query->where('store_name', 'like', '%' . $filters['search'] . '%');
         }
 
+        if (! empty($filters['region'])) {
+            $query->where('region', $filters['region']);
+        }
+
         return $query->orderBy('store_name')
             ->paginate($perPage)
             ->withQueryString();

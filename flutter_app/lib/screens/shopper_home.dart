@@ -11,6 +11,7 @@ import 'package:ai_saas/screens/recently_arrived_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/models/store_model.dart';
 import 'package:ai_saas/shared/widgets/section_header.dart';
+import 'package:ai_saas/core/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,16 +25,58 @@ class ShopperHomePage extends StatefulWidget {
 
 class _ShopperHomePageState extends State<ShopperHomePage> {
   static const Color _scaffoldBg = Color(0xffF8F9FD);
+  String? _currentRegion;
+  String? _locationError;
+  bool _isLocationLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Load stores and products from the real backend.
-    context.read<StoreBloc>().add(const StoresLoadRequested());
+    _loadHomeData();
+    context.read<CategoryBloc>().add(const CategoryListRequested());
     context.read<ProductBloc>().add(const ProductsLoadRequested());
     context
         .read<ClientDashboardBloc>()
         .add(const ClientDashboardLoadRequested());
+  }
+
+  Future<void> _loadHomeData() async {
+    if (mounted) {
+      setState(() {
+        _isLocationLoading = true;
+        _locationError = null;
+      });
+    }
+
+    try {
+      final result = await LocationService.instance.getCurrentLocation();
+      if (!mounted) return;
+      if (result.region == null || result.region!.isEmpty) {
+        setState(() {
+          _isLocationLoading = false;
+          _locationError = 'تعذر مطابقة موقعك مع منطقة مدعومة.';
+        });
+        return;
+      }
+
+      setState(() {
+        _currentRegion = result.region;
+        _isLocationLoading = false;
+      });
+      context.read<StoreBloc>().add(StoresLoadRequested(region: result.region));
+    } on LocationException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLocationLoading = false;
+        _locationError = error.message;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLocationLoading = false;
+        _locationError = 'تعذر الحصول على موقعك الحالي.';
+      });
+    }
   }
 
   @override
@@ -45,7 +88,12 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
         body: SafeArea(
           child: Column(
             children: [
-              const HomeTopBar(),
+              HomeTopBar(
+                locationName: _currentRegion,
+                isLocationLoading: _isLocationLoading,
+                locationError: _locationError,
+                onLocationRetry: _loadHomeData,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -263,16 +311,28 @@ class _NearbyStoresSection extends StatelessWidget {
           );
         }
 
+        if (stores.isEmpty && state is StoreFailure) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Text(
+              state.message,
+              style: TextStyle(color: Colors.red.shade700, fontSize: 12.sp),
+            ),
+          );
+        }
         if (stores.isEmpty) return const SizedBox.shrink();
 
         return Column(
           children: [
             SectionHeader(
-              title: 'متاجر قريبة منك',
+              title: _currentRegion == null
+                  ? 'متاجر المنطقة'
+                  : 'متاجر في $_currentRegion',
               onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => const NearbyStoresScreen())),
+                      builder: (_) =>
+                          NearbyStoresScreen(region: _currentRegion))),
             ),
             SizedBox(height: 12.h),
             SizedBox(

@@ -41,12 +41,15 @@ class ProductService {
   /// The backend has no "featured" concept, so [featured] is not sent.
   Future<List<Product>> getProducts({
     String? category,
+    String? categoryId,
     String? storeId,
     bool featured = false,
     int page = 1,
   }) async {
     final query = <String, dynamic>{'page': page};
-    if (category != null && category.isNotEmpty) {
+    if (categoryId != null && categoryId.isNotEmpty) {
+      query['category_id'] = categoryId;
+    } else if (category != null && category.isNotEmpty) {
       final categoryId = await _resolveCategoryId(category);
       if (categoryId != null) query['category_id'] = categoryId;
     }
@@ -66,13 +69,12 @@ class ProductService {
   /// public catalog. Merchant screens must never use the public endpoint for
   /// their inventory.
   Future<List<Product>> getMerchantProducts({String? status}) async {
-    final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(
-          ApiConstants.merchantProducts,
-          queryParameters: {
-            if (status != null && status.isNotEmpty) 'status': status,
-          },
-        );
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(
+      ApiConstants.merchantProducts,
+      queryParameters: {
+        if (status != null && status.isNotEmpty) 'status': status,
+      },
+    );
     return _extractProductList(response.data!);
   }
 
@@ -128,15 +130,15 @@ class ProductService {
       'price': price,
       'description': description,
       'quantity': quantity,
-      'status': isVisible
-          ? (quantity > 0 ? 'active' : 'out_of_stock')
-          : 'inactive',
+      'status':
+          isVisible ? (quantity > 0 ? 'active' : 'out_of_stock') : 'inactive',
       for (final path in imagePaths)
         'images[]': await MultipartFile.fromFile(path),
     });
 
     final response = await ApiClient.instance
-        .postFormData<Map<String, dynamic>>(ApiConstants.merchantProducts, formData);
+        .postFormData<Map<String, dynamic>>(
+            ApiConstants.merchantProducts, formData);
     final raw = response.data!;
     final productJson =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
@@ -186,7 +188,8 @@ class ProductService {
         for (final path in imagePaths)
           'images[]': await MultipartFile.fromFile(path),
       });
-      final response = await ApiClient.instance.postFormData<Map<String, dynamic>>(
+      final response =
+          await ApiClient.instance.postFormData<Map<String, dynamic>>(
         ApiConstants.merchantProductById(id),
         formData,
       );
@@ -272,15 +275,19 @@ class ProductService {
 
   List<String> _extractStringList(Map<String, dynamic> raw) {
     final outer = raw['data'] ?? raw;
-    final data = (outer is Map && outer['data'] is List) ? outer['data'] : outer;
+    final data =
+        (outer is Map && outer['data'] is List) ? outer['data'] : outer;
     if (data is List) {
-      return data.map((e) {
-        if (e is String) return e;
-        if (e is Map) {
-          return (e['name'] ?? e['label'] ?? e['value'] ?? '').toString();
-        }
-        return e.toString();
-      }).where((s) => s.isNotEmpty).toList();
+      return data
+          .map((e) {
+            if (e is String) return e;
+            if (e is Map) {
+              return (e['name'] ?? e['label'] ?? e['value'] ?? '').toString();
+            }
+            return e.toString();
+          })
+          .where((s) => s.isNotEmpty)
+          .toList();
     }
     return [];
   }

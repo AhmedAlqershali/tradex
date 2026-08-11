@@ -16,12 +16,13 @@ class CategoryLoading extends CategoryState {
 }
 
 class CategoriesLoaded extends CategoryState {
-  const CategoriesLoaded(this.categories);
+  const CategoriesLoaded(this.categories, {this.options = const []});
 
   final List<String> categories;
+  final List<CategoryOption> options;
 
   @override
-  List<Object?> get props => [categories];
+  List<Object?> get props => [categories, options];
 }
 
 class CitiesLoaded extends CategoryState {

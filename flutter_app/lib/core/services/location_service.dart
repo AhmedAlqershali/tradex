@@ -14,9 +14,8 @@ class CurrentLocationResult {
   final String? region;
 }
 
-/// Uses the device's existing location services. This deliberately stops at
-/// the app's existing region field because the current API has no latitude,
-/// longitude, address, city, or region profile fields.
+/// Uses the device's existing location services and returns the region name
+/// used by the marketplace's existing location flow.
 class LocationService {
   LocationService._();
   static final LocationService instance = LocationService._();

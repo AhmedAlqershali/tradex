@@ -24,9 +24,13 @@ class StoreService {
 
   // ── Browse ────────────────────────────────────────────────────────────────────
   /// GET /stores
-  Future<List<StoreModel>> getAllStores() async {
-    final response =
-        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.stores);
+  Future<List<StoreModel>> getAllStores({String? region}) async {
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(
+      ApiConstants.stores,
+      queryParameters: {
+        if (region != null && region.trim().isNotEmpty) 'region': region,
+      },
+    );
     final raw = response.data!;
     final list = _extractList(raw);
     return list.map((e) => StoreModel.fromServerJson(e)).toList();
@@ -61,17 +65,18 @@ class StoreService {
   }
 
   /// PUT /merchant/stores/:id
-  /// Backend only accepts store_name and description — city/category are not
-  /// part of the store record on this backend.
+  /// Backend accepts store_name, description, region, and phone.
   Future<StoreModel> updateMyStore({
     required String storeId,
     String? name,
     String? description,
+    String? region,
     String? phone,
   }) async {
     final body = <String, dynamic>{};
     if (name != null) body['store_name'] = name;
     if (description != null) body['description'] = description;
+    if (region != null) body['region'] = region;
     if (phone != null) body['phone'] = phone;
 
     final response = await ApiClient.instance.put<Map<String, dynamic>>(

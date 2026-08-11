@@ -1,18 +1,22 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 
+class CategoryOption {
+  const CategoryOption({required this.id, required this.name});
+
+  final String id;
+  final String name;
+}
+
 // ─── CategoryService ──────────────────────────────────────────────────────────
 //
 // Handles the categories lookup endpoint.
 //
 // Endpoints:
-//   GET /categories → paginated List<String>
+//   GET /categories → paginated [{id, name}] records
 //
-// Note: the backend has no cities/regions endpoint at all — city selection
-// in the app (checkout, profile screens) already uses a static hardcoded
-// list rather than an API call, so [getCities] below is kept only for
-// forward-compatibility if the backend adds one later; it currently returns
-// an empty list rather than hitting a route that doesn't exist.
+// The legacy [getCities] method remains for unrelated screens that still
+// compile against it; Home uses the device location service instead.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CategoryService {
@@ -21,18 +25,22 @@ class CategoryService {
 
   // ── Categories ────────────────────────────────────────────────────────────────
   /// GET /categories
-  /// Returns the list of product/store category strings defined on the backend.
+  /// Returns category names while preserving the server IDs through
+  /// [getCategoryOptions] for product filtering.
   Future<List<String>> getCategories() async {
+    final options = await getCategoryOptions();
+    return options.map((option) => option.name).toList();
+  }
+
+  Future<List<CategoryOption>> getCategoryOptions() async {
     final response = await ApiClient.instance
         .get<Map<String, dynamic>>(ApiConstants.categories);
     final raw = response.data!;
-    return _extractStringList(raw);
+    return _extractOptions(raw);
   }
 
   // ── Cities ────────────────────────────────────────────────────────────────────
-  /// The backend has no cities/regions endpoint — always returns an empty
-  /// list. Kept so [CategoryBloc]'s existing CitiesRequested handler (which
-  /// nothing currently listens to) doesn't need to change.
+  /// Kept for existing callers; Home does not use this legacy path.
   Future<List<String>> getCities() async => const [];
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -41,17 +49,40 @@ class CategoryService {
     // Backend wraps paginated collections as { data: { data: [...], links,
     // meta } } — unwrap one extra level when present.
     final outer = raw['data'] ?? raw;
-    final data = (outer is Map && outer['data'] is List) ? outer['data'] : outer;
+    final data =
+        (outer is Map && outer['data'] is List) ? outer['data'] : outer;
     if (data is List) {
-      return data.map((e) {
-        if (e is String) return e;
-        // Server may return [{ "id": ..., "name": "..." }] objects.
-        if (e is Map) {
-          return (e['name'] ?? e['label'] ?? e['value'] ?? '').toString();
-        }
-        return e.toString();
-      }).where((s) => s.isNotEmpty).toList();
+      return data
+          .map((e) {
+            if (e is String) return e;
+            // Server may return [{ "id": ..., "name": "..." }] objects.
+            if (e is Map) {
+              return (e['name'] ?? e['label'] ?? e['value'] ?? '').toString();
+            }
+            return e.toString();
+          })
+          .where((s) => s.isNotEmpty)
+          .toList();
     }
     return [];
+  }
+
+  List<CategoryOption> _extractOptions(Map<String, dynamic> raw) {
+    final outer = raw['data'] ?? raw;
+    final data =
+        (outer is Map && outer['data'] is List) ? outer['data'] : outer;
+    if (data is! List) return const [];
+
+    return data
+        .whereType<Map>()
+        .map((item) {
+          return CategoryOption(
+            id: item['id'].toString(),
+            name: (item['name'] ?? item['label'] ?? item['value'] ?? '')
+                .toString(),
+          );
+        })
+        .where((option) => option.name.isNotEmpty)
+        .toList();
   }
 }

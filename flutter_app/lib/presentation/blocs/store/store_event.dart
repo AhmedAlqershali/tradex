@@ -8,7 +8,12 @@ abstract class StoreEvent extends Equatable {
 }
 
 class StoresLoadRequested extends StoreEvent {
-  const StoresLoadRequested();
+  const StoresLoadRequested({this.region});
+
+  final String? region;
+
+  @override
+  List<Object?> get props => [region];
 }
 
 class StoreByIdRequested extends StoreEvent {

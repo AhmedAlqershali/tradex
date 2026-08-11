@@ -366,6 +366,7 @@ class UserController {
       final store = await StoreService.instance.updateMyStore(
         storeId: storeId,
         name: storeName.isNotEmpty ? storeName : 'متجري',
+        region: region,
       );
 
       // Update local user state with the confirmed store info.

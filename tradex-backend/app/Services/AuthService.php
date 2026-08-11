@@ -382,6 +382,7 @@ class AuthService implements AuthServiceInterface
             'id'          => $store->id,
             'store_name'  => $store->store_name,
             'description' => $store->description,
+            'region'      => $store->region,
             'logo'        => $store->logo,
             'status'      => $store->status,
         ];

@@ -118,6 +118,27 @@ class StoreSearchTest extends TestCase
             ->assertJsonPath('success', false);
     }
 
+    public function test_region_returns_only_stores_in_the_requested_region(): void
+    {
+        $central = $this->createActiveStore('Central Store');
+        $central->update(['region' => 'الوسطى']);
+        $gaza = $this->createActiveStore('Gaza Store');
+        $gaza->update(['region' => 'غزة']);
+
+        $response = $this->getJson('/api/v1/stores?region=' . urlencode('الوسطى'))
+            ->assertOk();
+
+        $names = collect($response->json('data.data'))->pluck('store_name');
+        $this->assertSame(['Central Store'], $names->all());
+    }
+
+    public function test_region_is_validated(): void
+    {
+        $this->getJson('/api/v1/stores?region=' . str_repeat('a', 101))
+            ->assertStatus(422)
+            ->assertJsonPath('success', false);
+    }
+
     public function test_per_page_must_be_positive_integer(): void
     {
         $this->getJson('/api/v1/stores?per_page=-1')

@@ -7,7 +7,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NearbyStoresScreen extends StatefulWidget {
-  const NearbyStoresScreen({super.key});
+  const NearbyStoresScreen({super.key, this.region});
+
+  final String? region;
 
   @override
   State<NearbyStoresScreen> createState() => _NearbyStoresScreenState();
@@ -17,7 +19,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<StoreBloc>().add(const StoresLoadRequested());
+    context.read<StoreBloc>().add(StoresLoadRequested(region: widget.region));
   }
 
   @override
@@ -35,7 +37,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
             onPressed: () => Navigator.maybePop(context),
           ),
           title: Text(
-            'المتاجر القريبة',
+            widget.region == null ? 'المتاجر' : 'متاجر ${widget.region}',
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff1A1A1A),
               fontWeight: FontWeight.bold,
@@ -59,13 +61,12 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
                     SizedBox(height: 16.h),
                     Text(state.message,
                         style: GoogleFonts.ibmPlexSans(
-                            fontSize: 13.sp,
-                            color: const Color(0xff888888))),
+                            fontSize: 13.sp, color: const Color(0xff888888))),
                     SizedBox(height: 20.h),
                     ElevatedButton(
                       onPressed: () => context
                           .read<StoreBloc>()
-                          .add(const StoresLoadRequested()),
+                          .add(StoresLoadRequested(region: widget.region)),
                       child: Text('إعادة المحاولة',
                           style: GoogleFonts.ibmPlexSans()),
                     ),
@@ -81,8 +82,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
               return Center(
                 child: Text('لا توجد متاجر',
                     style: GoogleFonts.ibmPlexSans(
-                        fontSize: 14.sp,
-                        color: const Color(0xff888888))),
+                        fontSize: 14.sp, color: const Color(0xff888888))),
               );
             }
 
@@ -156,13 +156,11 @@ class StoreCard extends StatelessWidget {
               errorBuilder: (_, __, ___) => Container(
                 height: 160.h,
                 color: Colors.grey.shade100,
-                child:
-                    const Icon(Icons.broken_image, color: Colors.grey),
+                child: const Icon(Icons.broken_image, color: Colors.grey),
               ),
             ),
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -184,8 +182,7 @@ class StoreCard extends StatelessWidget {
                         Row(
                           children: [
                             Icon(Icons.location_on_outlined,
-                                size: 12.sp,
-                                color: const Color(0xff888888)),
+                                size: 12.sp, color: const Color(0xff888888)),
                             SizedBox(width: 2.w),
                             Expanded(
                               child: Text(
@@ -203,8 +200,8 @@ class StoreCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 8.w, vertical: 4.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                     decoration: BoxDecoration(
                       color: const Color(0xffFFF8E7),
                       borderRadius: BorderRadius.circular(8.r),
@@ -212,8 +209,7 @@ class StoreCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(Icons.star_rounded,
-                            size: 14.sp,
-                            color: const Color(0xffF59E0B)),
+                            size: 14.sp, color: const Color(0xffF59E0B)),
                         SizedBox(width: 3.w),
                         Text(rating,
                             style: GoogleFonts.ibmPlexSans(

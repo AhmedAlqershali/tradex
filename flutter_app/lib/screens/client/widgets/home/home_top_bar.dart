@@ -1,6 +1,7 @@
 import 'package:ai_saas/screens/client/cart_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/notifications_screen.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,9 +12,19 @@ import 'package:google_fonts/google_fonts.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class HomeTopBar extends StatelessWidget {
-  const HomeTopBar({super.key});
+  const HomeTopBar({
+    super.key,
+    this.locationName,
+    this.isLocationLoading = false,
+    this.locationError,
+    this.onLocationRetry,
+  });
 
   static const Color _primary = Color(0xff4D41DF);
+  final String? locationName;
+  final bool isLocationLoading;
+  final String? locationError;
+  final VoidCallback? onLocationRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +32,31 @@ class HomeTopBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 22.r,
-            backgroundColor: _primary.withValues(alpha: 0.1),
-            child: Icon(Icons.person_outline_rounded,
-                color: _primary, size: 22.sp),
+          ValueListenableBuilder(
+            valueListenable: UserController.instance.currentUserNotifier,
+            builder: (context, user, _) {
+              final avatar = user?.photoPath;
+              return CircleAvatar(
+                radius: 22.r,
+                backgroundColor: _primary.withValues(alpha: 0.1),
+                child: avatar == null || avatar.isEmpty
+                    ? Icon(Icons.person_outline_rounded,
+                        color: _primary, size: 22.sp)
+                    : ClipOval(
+                        child: Image.network(
+                          avatar,
+                          width: 44.r,
+                          height: 44.r,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.person_outline_rounded,
+                            color: _primary,
+                            size: 22.sp,
+                          ),
+                        ),
+                      ),
+              );
+            },
           ),
           SizedBox(width: 10.w),
           _IconCircleButton(
@@ -54,23 +85,46 @@ class HomeTopBar extends StatelessWidget {
                         color: _primary, size: 16.sp),
                     SizedBox(width: 4.w),
                     Flexible(
-                      child: Text(
-                        'النصيرات',
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.ibmPlexSans(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xff1A1A1A),
-                        ),
-                      ),
+                      child: isLocationLoading
+                          ? Text(
+                              'جارٍ تحديد موقعك...',
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 13.sp,
+                                color: const Color(0xff888888),
+                              ),
+                            )
+                          : Text(
+                              locationName ?? 'حدد موقعك',
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.ibmPlexSans(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xff1A1A1A),
+                              ),
+                            ),
                     ),
                   ],
                 ),
-                Text(
-                  'المنطقة الوسطى',
-                  style: GoogleFonts.ibmPlexSans(
-                      fontSize: 10.sp, color: Colors.black38),
-                ),
+                if (locationError != null)
+                  GestureDetector(
+                    onTap: onLocationRetry,
+                    child: Text(
+                      'تعذر تحديد الموقع — إعادة المحاولة',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 10.sp,
+                        color: _primary,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    'الموقع الحالي',
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 10.sp, color: Colors.black38),
+                  ),
               ],
             ),
           ),

@@ -26,7 +26,8 @@ class StoreBloc extends Bloc<StoreEvent, StoreState> {
   ) async {
     emit(const StoreLoading());
     try {
-      final stores = await StoreService.instance.getAllStores();
+      final stores =
+          await StoreService.instance.getAllStores(region: event.region);
       emit(StoresLoaded(stores));
     } on ApiException catch (e) {
       emit(StoreFailure(e.message));

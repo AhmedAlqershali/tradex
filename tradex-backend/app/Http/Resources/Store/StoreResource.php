@@ -14,6 +14,7 @@ class StoreResource extends JsonResource
             'id'         => $this->id,
             'store_name' => $this->store_name,
             'description' => $this->description,
+            'region'     => $this->region,
             'logo'       => $this->logo
                 ? Storage::disk('public')->url($this->logo)
                 : null,
