@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,12 +33,29 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   List<AppNotification> _items = const [];
   int _lastPage = 1;
 
+  /// Reloads from Laravel and completes only after the request has finished.
+  ///
+  /// This is used by [RefreshIndicator] so its progress cannot finish before
+  /// the authoritative server state has been applied.
+  Future<void> refresh() {
+    final completer = Completer<void>();
+    add(NotificationsLoadRequested(completer: completer));
+    return completer.future;
+  }
+
   Future<void> _onLoad(
     NotificationsLoadRequested event,
     Emitter<NotificationsState> emit,
   ) async {
     _page = 1;
-    await _fetch(emit, replace: true);
+    try {
+      await _fetch(emit, replace: true);
+    } finally {
+      final completer = event.completer;
+      if (completer != null && !completer.isCompleted) {
+        completer.complete();
+      }
+    }
   }
 
   Future<void> _onNextPage(
@@ -81,11 +100,10 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     final index = _items.indexWhere((item) => item.id == event.id);
     if (index == -1 || _items[index].isRead) return;
     final previous = List<AppNotification>.from(_items);
-    _items = [..._items]..[index] = _items[index].copyWith(
-        isRead: true,
-        readAt: DateTime.now(),
-      );
-    emit(NotificationsLoaded(_items, _lastPage, currentPage: _page));
+    // Do not present a successful local read before Laravel confirms it.
+    // Otherwise a failed PATCH briefly looks successful and can be lost on
+    // the next server refresh.
+    emit(NotificationsLoading(items: previous));
     try {
       final updated = await _markRead(event.id);
       _items = [..._items]..[index] = updated;
@@ -111,10 +129,18 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   ) async {
     if (_items.every((item) => item.isRead)) return;
     final previous = List<AppNotification>.from(_items);
-    _items = _items.map((item) => item.copyWith(isRead: true)).toList();
-    emit(NotificationsLoaded(_items, _lastPage, currentPage: _page));
+    // Wait for the server mutation before changing the visible read state.
+    emit(NotificationsLoading(items: previous));
     try {
       await _markAllRead();
+      _items = _items.map((item) => item.copyWith(isRead: true)).toList();
+      if (!isClosed) {
+        emit(NotificationsLoaded(
+          _items,
+          _lastPage,
+          currentPage: _page,
+        ));
+      }
     } on ApiException catch (e) {
       _items = previous;
       if (!isClosed) emit(NotificationsFailure(e.message, _items));

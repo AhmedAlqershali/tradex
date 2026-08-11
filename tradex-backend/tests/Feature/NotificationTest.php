@@ -85,6 +85,11 @@ class NotificationTest extends TestCase
         ]);
         $this->assertNotNull($mine->fresh()->read_at);
         $this->assertNull($theirs->fresh()->read_at);
+
+        // The read state remains authoritative after a fresh API read.
+        $this->getJson('/api/v1/notifications', $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.data.0.is_read', true);
     }
 
     public function test_user_can_mark_all_own_notifications_read(): void

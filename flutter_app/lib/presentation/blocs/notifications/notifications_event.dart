@@ -8,7 +8,9 @@ abstract class NotificationsEvent extends Equatable {
 }
 
 class NotificationsLoadRequested extends NotificationsEvent {
-  const NotificationsLoadRequested();
+  const NotificationsLoadRequested({this.completer});
+
+  final Completer<void>? completer;
 }
 
 class NotificationReadRequested extends NotificationsEvent {

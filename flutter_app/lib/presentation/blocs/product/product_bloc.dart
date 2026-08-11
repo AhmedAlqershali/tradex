@@ -20,6 +20,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<CategoriesLoadRequested>(_onCategoriesLoadRequested);
   }
 
+  String _errorMessage(Object error) {
+    if (error is ApiException) return error.message;
+    return 'تعذر إكمال العملية. حاول مرة أخرى.';
+  }
+
   Future<void> _onProductsLoadRequested(
     ProductsLoadRequested event,
     Emitter<ProductState> emit,
@@ -33,8 +38,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         page: event.page,
       );
       emit(ProductsLoaded(products));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -48,8 +53,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         status: event.status,
       );
       emit(ProductsLoaded(products));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -61,8 +66,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final product = await ProductService.instance.getProductById(event.id);
       emit(ProductDetailLoaded(product));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -74,8 +79,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final results = await ProductService.instance.search(event.query);
       emit(ProductSearchResult(results, event.query));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -96,8 +101,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         imagePaths: event.imagePaths,
       );
       emit(ProductCreated(product));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -120,8 +125,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         clearImages: event.clearImages,
       );
       emit(ProductUpdated(product));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -133,8 +138,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       await ProductService.instance.deleteProduct(event.id);
       emit(ProductDeleted(event.id));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 
@@ -146,8 +151,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final categories = await ProductService.instance.getCategories();
       emit(ProductCategoriesLoaded(categories));
-    } on ApiException catch (e) {
-      emit(ProductFailure(e.message));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
     }
   }
 }

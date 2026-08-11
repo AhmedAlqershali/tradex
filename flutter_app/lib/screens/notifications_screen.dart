@@ -89,9 +89,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
             return RefreshIndicator(
               color: _primary,
-              onRefresh: () async => context
-                  .read<NotificationsBloc>()
-                  .add(const NotificationsLoadRequested()),
+              onRefresh: () => context.read<NotificationsBloc>().refresh(),
               child: ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(16.r),
