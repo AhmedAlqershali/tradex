@@ -94,6 +94,12 @@ class _GoogleIdentityProvider implements GoogleIdentityProvider {
     if (account == null) return null;
 
     final authentication = await account.authentication;
-    return authentication.idToken;
+    final idToken = authentication.idToken;
+    if (idToken == null || idToken.trim().isEmpty) {
+      throw const GoogleSignInException(
+        'تعذر الحصول على رمز Google. تحقق من إعدادات التطبيق وحاول مرة أخرى.',
+      );
+    }
+    return idToken;
   }
 }

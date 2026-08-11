@@ -15,7 +15,8 @@ workflows:
       - name: Build Android App Bundle
         script: |
           flutter build appbundle --release \
-            --dart-define=TRADEX_BASE_URL="$TRADEX_BASE_URL"
+            --dart-define=TRADEX_BASE_URL="$TRADEX_BASE_URL" \
+            --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID"
 
     artifacts:
       - build/app/outputs/bundle/release/*.aab

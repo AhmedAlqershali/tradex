@@ -24,6 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final GoogleSignInService _googleSignInService;
+  bool _googleLoginInFlight = false;
 
   // ── Login ──────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthGoogleLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // The UI disables the button while loading, but guard at the BLoC boundary
+    // as well because events can still be queued by rapid duplicate taps.
+    if (_googleLoginInFlight) return;
+    _googleLoginInFlight = true;
     emit(const AuthLoading());
     try {
       final credential = await _googleSignInService.signIn();
@@ -78,6 +83,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: 'تعذر تسجيل الدخول عبر Google. حاول مرة أخرى.',
         ));
       }
+    } finally {
+      _googleLoginInFlight = false;
     }
   }
 
