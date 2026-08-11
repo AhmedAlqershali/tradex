@@ -22,6 +22,11 @@ interface AuthServiceInterface
     public function login(string $email, string $password, string $deviceName): array;
 
     /**
+     * Authenticate a Google identity and return a Sanctum token.
+     */
+    public function loginWithGoogle(string $credential, string $deviceName): array;
+
+    /**
      * Revoke the currently-used token.
      */
     public function logout(User $user): void;

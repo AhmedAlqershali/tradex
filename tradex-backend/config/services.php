@@ -67,4 +67,11 @@ return [
         'base_url' => env('GEMINI_BASE_URL',  'https://generativelanguage.googleapis.com/v1beta'),
     ],
 
+    // ── Google Sign-In ────────────────────────────────────────────────────────
+    // This is the OAuth client ID for the app that issues Google ID tokens.
+    // It is configuration, not a secret; never store client secrets here.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+    ],
+
 ];

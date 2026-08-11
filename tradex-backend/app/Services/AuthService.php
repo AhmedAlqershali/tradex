@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Contracts\Services\AuthServiceInterface;
+use App\Contracts\Services\GoogleTokenVerifierInterface;
+use App\Exceptions\GoogleAuthenticationException;
 use App\Models\Store;
 use App\Models\User;
 use App\Contracts\Services\SubscriptionServiceInterface;
@@ -10,12 +12,14 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
 {
     public function __construct(
         private readonly SubscriptionServiceInterface $subscriptionService,
+        private readonly GoogleTokenVerifierInterface $googleTokenVerifier,
     ) {}
 
     // -------------------------------------------------------------------------
@@ -147,6 +151,87 @@ class AuthService implements AuthServiceInterface
     }
 
     /**
+     * Authenticate a verified Google identity.
+     *
+     * Google can only create or link a normal client account. Existing
+     * password accounts are linked by verified email, while a Google subject
+     * can never be moved between users.
+     *
+     * @throws GoogleAuthenticationException|ValidationException
+     */
+    public function loginWithGoogle(string $credential, string $deviceName): array
+    {
+        $identity = $this->googleTokenVerifier->verify($credential);
+        $email = strtolower(trim($identity['email']));
+
+        $user = DB::transaction(function () use ($identity, $email) {
+            $linkedUser = User::where('google_id', $identity['sub'])
+                ->lockForUpdate()
+                ->first();
+
+            if ($linkedUser) {
+                if (strcasecmp($linkedUser->email, $email) !== 0) {
+                    throw new GoogleAuthenticationException(
+                        'This Google account is linked to a different email address.',
+                        409
+                    );
+                }
+
+                return $this->ensureGoogleUserCanAuthenticate($linkedUser);
+            }
+
+            // Email is verified by Google, so link an existing non-admin
+            // Tradex account instead of creating a duplicate user.
+            $user = User::whereRaw('LOWER(email) = ?', [$email])
+                ->lockForUpdate()
+                ->first();
+
+            if ($user) {
+                $this->ensureGoogleUserCanAuthenticate($user);
+
+                if ($user->google_id !== null && $user->google_id !== $identity['sub']) {
+                    throw new GoogleAuthenticationException(
+                        'This Tradex account is linked to a different Google account.',
+                        409
+                    );
+                }
+
+                if ($user->google_id === null) {
+                    $user->google_id = $identity['sub'];
+                    $user->email_verified_at ??= now();
+                    $user->save();
+                }
+
+                return $user->fresh();
+            }
+
+            $newUser = new User();
+            $newUser->fill([
+                'name'     => $identity['name'] ?? Str::before($email, '@'),
+                'email'    => $email,
+                // Keep the existing non-null password schema intact. The
+                // random value is never returned or used for Google login.
+                'password' => Hash::make(Str::random(64)),
+            ]);
+            $newUser->google_id = $identity['sub'];
+            $newUser->role = 'client';
+            $newUser->status = 'active';
+            $newUser->email_verified_at = now();
+            $newUser->save();
+
+            return $newUser;
+        });
+
+        $user->tokens()->where('name', $deviceName)->delete();
+        $token = $user->createToken($deviceName)->plainTextToken;
+
+        return [
+            'user'  => $this->userPayload($user),
+            'token' => $token,
+        ];
+    }
+
+    /**
      * Revoke the currently-used token.
      */
     public function logout(User $user): void
@@ -262,6 +347,30 @@ class AuthService implements AuthServiceInterface
             // (e.g. showing a "verify your email" banner in Flutter).
             'email_verified' => $user->hasVerifiedEmail(),
         ];
+    }
+
+    private function ensureGoogleUserCanAuthenticate(User $user): User
+    {
+        if ($user->role === 'admin') {
+            throw new GoogleAuthenticationException(
+                'Admin accounts cannot authenticate with Google.',
+                403
+            );
+        }
+
+        if ($user->status !== 'active') {
+            $message = match ($user->status) {
+                'banned'   => 'Your account has been banned. Please contact support.',
+                'inactive' => 'Your account is inactive. Please contact support.',
+                default    => 'Your account is not active.',
+            };
+
+            throw ValidationException::withMessages([
+                'credential' => [$message],
+            ]);
+        }
+
+        return $user;
     }
 
     private function storePayload(Store $store): array
