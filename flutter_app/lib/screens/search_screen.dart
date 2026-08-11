@@ -79,9 +79,11 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() => _searchQuery = query);
     if (query.trim().isEmpty) {
       context.read<ProductBloc>().add(ProductsLoadRequested(
-            category: _selectedStoreCategory.isNotEmpty
+            category: _selectedCategoryId == null &&
+                    _selectedStoreCategory.isNotEmpty
                 ? _selectedStoreCategory
                 : null,
+            categoryId: _selectedCategoryId,
           ));
     } else {
       context.read<ProductBloc>().add(ProductSearchRequested(query.trim()));

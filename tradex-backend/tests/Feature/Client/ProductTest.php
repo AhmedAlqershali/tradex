@@ -87,6 +87,17 @@ class ProductTest extends TestCase
              ->assertJsonCount(2, 'data.data');
     }
 
+    public function test_category_with_no_products_returns_an_empty_list(): void
+    {
+        $store = $this->activeStore();
+        $category = Category::factory()->create();
+
+        $this->getJson("/api/v1/products?category_id={$category->id}")
+             ->assertOk()
+             ->assertJsonPath('data.data', [])
+             ->assertJsonPath('data.pagination.total', 0);
+    }
+
     public function test_filter_by_store_id(): void
     {
         $store1 = $this->activeStore();
@@ -209,7 +220,8 @@ class ProductTest extends TestCase
                  ->assertJsonStructure([
                      'data' => [
                          'data' => [[
-                             'id', 'name', 'price', 'status', 'image', 'images',
+                            'id', 'store_id', 'category_id', 'name', 'price',
+                            'status', 'image', 'images',
                              'store'    => ['id', 'store_name', 'status'],
                              'category' => ['id', 'name'],
                          ]],
