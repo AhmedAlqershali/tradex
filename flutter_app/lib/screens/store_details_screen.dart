@@ -18,21 +18,34 @@ class StoreDetailsScreen extends StatefulWidget {
 }
 
 class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
+  StoreModel? _serverStore;
+  List<Product> _products = const [];
+  String? _storeError;
+  String? _productsError;
+  bool _storeLoading = true;
+  bool _productsLoading = false;
+
+  String? get _storeId => widget.store.id;
+
   @override
   void initState() {
     super.initState();
-    final storeId = widget.store.id;
-    if (storeId != null && storeId.isNotEmpty) {
-      context
-          .read<StoreBloc>()
-          .add(StoreProductsLoadRequested(storeId));
+    final storeId = _storeId;
+    if (storeId == null || storeId.isEmpty) {
+      _storeLoading = false;
+      _storeError = 'تعذر تحديد المتجر المطلوب.';
+      return;
     }
+
+    // The list item is only the navigation input. Reload the selected store so
+    // this screen always reflects Laravel's current record.
+    context.read<StoreBloc>().add(StoreByIdRequested(storeId));
   }
 
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xff4D41DF);
-    const Color textColor    = Color(0xff1A1A1A);
+    const Color textColor = Color(0xff1A1A1A);
     const Color subTextColor = Color(0xff718096);
 
     return Directionality(
@@ -57,162 +70,272 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             onPressed: () => Navigator.maybePop(context),
           ),
         ),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ─── Store hero image ───
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.r),
-                  child: Image.network(
-                    widget.store.imageUrl,
-                    height: 180.h,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 180.h,
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.broken_image),
-                    ),
-                  ),
-                ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 16.h),
-
-                    // ─── Store name + rating ───
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            widget.store.title,
-                            style: GoogleFonts.ibmPlexSans(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (widget.store.rating != null)
-                          _buildRatingBadge(widget.store.rating!,
-                              primaryColor),
-                      ],
-                    ),
-
-                    SizedBox(height: 8.h),
-
-                    Text(
-                      widget.store.subTitle,
-                      style: GoogleFonts.ibmPlexSans(
-                        fontSize: 13.sp,
-                        color: subTextColor,
-                        height: 1.5,
-                      ),
-                    ),
-
-                    if (widget.store.location != null) ...[
-                      SizedBox(height: 8.h),
-                      Row(
-                        children: [
-                          Icon(Icons.location_on_outlined,
-                              size: 14.sp, color: subTextColor),
-                          SizedBox(width: 4.w),
-                          Text(
-                            widget.store.location!,
-                            style: GoogleFonts.ibmPlexSans(
-                                fontSize: 13.sp, color: subTextColor),
-                          ),
-                        ],
-                      ),
-                    ],
-
-                    SizedBox(height: 24.h),
-
-                    // ─── Products section ───
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'منتجات المتجر',
-                          style: GoogleFonts.ibmPlexSans(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                  ],
-                ),
-              ),
-
-              // ─── Products grid ───
-              BlocBuilder<StoreBloc, StoreState>(
-                builder: (context, state) {
-                  if (state is StoreLoading) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32.h),
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  List<Product> products = [];
-                  if (state is StoreProductsLoaded &&
-                      state.storeId == widget.store.id) {
-                    products = state.products;
-                  }
-
-                  if (products.isEmpty) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 24.h),
-                      child: Center(
-                        child: Text('لا توجد منتجات في هذا المتجر',
-                            style: GoogleFonts.ibmPlexSans(
-                                fontSize: 14.sp,
-                                color: const Color(0xff888888))),
-                      ),
-                    );
-                  }
-
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.72,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) =>
-                          _buildProductCard(context, products[index],
-                              primaryColor, textColor),
-                    ),
-                  );
-                },
-              ),
-
-              SizedBox(height: 24.h),
-            ],
-          ),
+        body: BlocListener<StoreBloc, StoreState>(
+          listener: _handleStoreState,
+          child: _buildBody(primaryColor, textColor, subTextColor),
         ),
       ),
+    );
+  }
+
+  void _handleStoreState(BuildContext context, StoreState state) {
+    if (state is StoreDetailLoaded && state.store.id == _storeId) {
+      setState(() {
+        _serverStore = state.store;
+        _storeLoading = false;
+        _storeError = null;
+        _productsLoading = true;
+        _productsError = null;
+      });
+      context.read<StoreBloc>().add(StoreProductsLoadRequested(_storeId!));
+      return;
+    }
+
+    if (state is StoreProductsLoaded && state.storeId == _storeId) {
+      setState(() {
+        _products = state.products;
+        _productsLoading = false;
+        _productsError = null;
+      });
+      return;
+    }
+
+    if (state is StoreFailure) {
+      setState(() {
+        if (_serverStore == null) {
+          _storeLoading = false;
+          _storeError = state.message;
+        } else {
+          _productsLoading = false;
+          _productsError = state.message;
+        }
+      });
+    }
+  }
+
+  Widget _buildBody(Color primaryColor, Color textColor, Color subTextColor) {
+    if (_storeLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_storeError != null) {
+      return _buildErrorState(
+        _storeError!,
+        () {
+          setState(() {
+            _storeLoading = true;
+            _storeError = null;
+          });
+          context.read<StoreBloc>().add(StoreByIdRequested(_storeId!));
+        },
+      );
+    }
+
+    final store = _serverStore;
+    if (store == null) {
+      return _buildErrorState('تعذر تحميل بيانات المتجر.', () {
+        context.read<StoreBloc>().add(StoreByIdRequested(_storeId!));
+      });
+    }
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ─── Store hero image ───
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: store.imageUrl.isEmpty
+                  ? _storeImagePlaceholder(180.h)
+                  : Image.network(
+                      store.imageUrl,
+                      height: 180.h,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          _storeImagePlaceholder(180.h),
+                    ),
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16.h),
+
+                // ─── Store name + rating ───
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        store.title,
+                        style: GoogleFonts.ibmPlexSans(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (store.rating != null)
+                      _buildRatingBadge(store.rating!, primaryColor),
+                  ],
+                ),
+
+                SizedBox(height: 8.h),
+
+                Text(
+                  store.subTitle,
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp,
+                    color: subTextColor,
+                    height: 1.5,
+                  ),
+                ),
+
+                if (store.location != null && store.location!.isNotEmpty) ...[
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 14.sp, color: subTextColor),
+                      SizedBox(width: 4.w),
+                      Text(
+                        store.location!,
+                        style: GoogleFonts.ibmPlexSans(
+                            fontSize: 13.sp, color: subTextColor),
+                      ),
+                    ],
+                  ),
+                ],
+
+                SizedBox(height: 24.h),
+
+                // ─── Products section ───
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'منتجات المتجر',
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+              ],
+            ),
+          ),
+
+          // ─── Products grid ───
+          if (_productsLoading)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 32.h),
+              child: const Center(child: CircularProgressIndicator()),
+            )
+          else if (_productsError != null)
+            _buildProductsError()
+          else if (_products.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+              child: Center(
+                child: Text('لا توجد منتجات في هذا المتجر',
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 14.sp, color: const Color(0xff888888))),
+              ),
+            )
+          else
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.72,
+                  crossAxisSpacing: 12.w,
+                  mainAxisSpacing: 12.h,
+                ),
+                itemCount: _products.length,
+                itemBuilder: (context, index) => _buildProductCard(
+                    context, _products[index], primaryColor, textColor),
+              ),
+            ),
+
+          SizedBox(height: 24.h),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded,
+                size: 56.sp, color: Colors.grey.shade400),
+            SizedBox(height: 14.h),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp, color: const Color(0xff888888))),
+            SizedBox(height: 18.h),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductsError() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+      child: Column(
+        children: [
+          Text(_productsError!,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.ibmPlexSans(
+                  fontSize: 13.sp, color: const Color(0xff888888))),
+          SizedBox(height: 10.h),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _productsLoading = true;
+                _productsError = null;
+              });
+              context
+                  .read<StoreBloc>()
+                  .add(StoreProductsLoadRequested(_storeId!));
+            },
+            child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _storeImagePlaceholder(double height) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      child: const Icon(Icons.storefront_outlined, color: Colors.grey),
     );
   }
 
@@ -225,8 +348,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.star_rounded,
-              size: 14.sp, color: const Color(0xffF59E0B)),
+          Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xffF59E0B)),
           SizedBox(width: 3.w),
           Text(
             rating.toStringAsFixed(1),
@@ -262,8 +384,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(14.r)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(14.r)),
                 child: ProductImage(
                   url: product.imageUrl,
                   fit: BoxFit.cover,
