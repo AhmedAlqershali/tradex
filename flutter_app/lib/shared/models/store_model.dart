@@ -1,3 +1,5 @@
+import 'package:ai_saas/core/api/app_config.dart';
+
 /// Represents a store in the Tradex catalog.
 ///
 /// Kept lean for the local-only phase.
@@ -52,35 +54,34 @@ class StoreModel {
         location: json['location'] as String?,
         tag: json['tag'] as String?,
         badge: json['badge'] as String?,
-        rating: json['rating'] != null
-            ? (json['rating'] as num).toDouble()
-            : null,
+        rating:
+            json['rating'] != null ? (json['rating'] as num).toDouble() : null,
       );
 
   /// Constructs a [StoreModel] from a server API response (snake_case keys).
   factory StoreModel.fromServerJson(Map<String, dynamic> json) {
+    final rawImage = json['logo'] ??
+        json['logo_url'] ??
+        json['imageUrl'] ??
+        json['image_url'];
+
     return StoreModel(
       id: json['id']?.toString(),
-      title: json['name'] as String? ??
+      title: json['store_name'] as String? ??
+          json['name'] as String? ??
           json['title'] as String? ??
           '',
-      subTitle: json['description'] as String? ??
-          json['subTitle'] as String? ??
-          '',
-      imageUrl: json['logo_url'] as String? ??
-          json['imageUrl'] as String? ??
-          json['image_url'] as String? ??
-          '',
-      location: json['city'] as String? ??
-          json['location'] as String?,
+      subTitle:
+          json['description'] as String? ?? json['subTitle'] as String? ?? '',
+      imageUrl: rawImage is String ? AppConfig.resolveMediaUrl(rawImage) : '',
+      location: json['city'] as String? ?? json['location'] as String?,
       tag: (json['category'] is Map
               ? (json['category'] as Map)['name']?.toString()
               : json['category']?.toString()) ??
           json['tag'] as String?,
       badge: json['badge'] as String?,
-      rating: json['rating'] != null
-          ? (json['rating'] as num).toDouble()
-          : null,
+      rating:
+          json['rating'] != null ? (json['rating'] as num).toDouble() : null,
     );
   }
 }

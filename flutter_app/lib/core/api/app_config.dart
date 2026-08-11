@@ -33,13 +33,29 @@ class AppConfig {
   /// but older environments may return a root-relative path.
   static String resolveMediaUrl(String value) {
     final trimmed = value.trim();
-    if (trimmed.isEmpty ||
-        trimmed.startsWith('http://') ||
-        trimmed.startsWith('https://')) {
+    if (trimmed.isEmpty) {
       return trimmed;
     }
 
     final apiUri = Uri.parse(baseUrl);
+    final parsed = Uri.tryParse(trimmed);
+    if (parsed != null && parsed.hasScheme && parsed.host.isNotEmpty) {
+      // Local Laravel development commonly generates http://localhost URLs
+      // from APP_URL. Those URLs are not reachable by a device or the
+      // proxied Replit preview, so keep the returned path but use the same
+      // origin as the configured API.
+      if (parsed.host != 'localhost' &&
+          parsed.host != '127.0.0.1' &&
+          parsed.host != '0.0.0.0') {
+        return trimmed;
+      }
+
+      final localPath = parsed.path.isEmpty ? '/' : parsed.path;
+      return apiUri.replace(path: '', query: null, fragment: null).toString() +
+          localPath +
+          (parsed.hasQuery ? '?${parsed.query}' : '');
+    }
+
     final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
     return apiUri.replace(path: '', query: null, fragment: null).toString() +
         path;

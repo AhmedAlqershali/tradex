@@ -90,10 +90,10 @@ class AppUser {
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      phone: json['phone'] as String,
+      id: json['id']?.toString() ?? '',
+      name: json['name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      phone: json['phone'] as String? ?? '',
       role: AppType.values.firstWhere(
         (e) => e.name == json['role'],
         orElse: () => AppType.client,
@@ -103,7 +103,7 @@ class AppUser {
       storeCategory: json['storeCategory'] as String?,
       region: json['region'] as String?,
       photoPath: json['photoPath'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: _parseDate(json['createdAt'] as String?),
     );
   }
 
@@ -125,30 +125,30 @@ class AppUser {
 
     return AppUser(
       id: json['id']?.toString() ?? '',
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      phone: json['phone'] as String? ?? '',
+      name: _stringValue(json['name']) ?? '',
+      email: _stringValue(json['email']) ?? '',
+      phone: _stringValue(json['phone']) ?? '',
       role: AppType.values.firstWhere(
-        (e) => e.name == (json['role'] as String? ?? 'client'),
+        (e) => e.name == (_stringValue(json['role']) ?? 'client'),
         orElse: () => AppType.client,
       ),
-      storeId: json['store_id'] as String? ??
-          json['storeId'] as String? ??
+      storeId: _stringValue(json['store_id']) ??
+          _stringValue(json['storeId']) ??
           firstStore?['id']?.toString(),
-      storeName: json['store_name'] as String? ??
-          json['storeName'] as String? ??
-          firstStore?['store_name'] as String?,
-      storeCategory:
-          json['store_category'] as String? ?? json['storeCategory'] as String?,
-      region: json['region'] as String?,
+      storeName: _stringValue(json['store_name']) ??
+          _stringValue(json['storeName']) ??
+          _stringValue(firstStore?['store_name']),
+      storeCategory: _stringValue(json['store_category']) ??
+          _stringValue(json['storeCategory']),
+      region: _stringValue(json['region']),
       photoPath: _resolvePhotoPath(
-        json['avatar'] as String? ??
-            json['photo_url'] as String? ??
-            json['avatar_url'] as String? ??
-            json['photoPath'] as String?,
+        _stringValue(json['avatar']) ??
+            _stringValue(json['photo_url']) ??
+            _stringValue(json['avatar_url']) ??
+            _stringValue(json['photoPath']),
       ),
       createdAt: _parseDate(
-        json['created_at'] as String? ?? json['createdAt'] as String?,
+        _stringValue(json['created_at']) ?? _stringValue(json['createdAt']),
       ),
     );
   }
@@ -161,6 +161,12 @@ class AppUser {
   static DateTime _parseDate(String? value) {
     if (value == null) return DateTime.now();
     return DateTime.tryParse(value) ?? DateTime.now();
+  }
+
+  static String? _stringValue(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    return value.toString();
   }
 
   // ── Immutable update ─────────────────────────────────────────────────────────

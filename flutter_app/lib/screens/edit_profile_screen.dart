@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/core/api/app_config.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/location_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
   String? _currentSelectedLocation;
   File? _pickedPhoto;
   bool _isSaving = false;
@@ -32,6 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = UserController.instance.currentUser;
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
+    _phoneController = TextEditingController(text: user?.phone ?? '');
     _currentSelectedLocation = user?.region;
   }
 
@@ -39,6 +42,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -57,23 +61,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     setState(() => _isSaving = true);
 
-    await UserController.instance.updateProfile(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      region: _currentSelectedLocation,
-      photoPath: _pickedPhoto?.path,
-    );
+    try {
+      await UserController.instance.updateProfile(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        region: _currentSelectedLocation,
+        photoPath: _pickedPhoto?.path,
+      );
 
-    if (!mounted) return;
-    setState(() => _isSaving = false);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('تم حفظ التغييرات', style: GoogleFonts.ibmPlexSans()),
-        backgroundColor: const Color(0xff623ce7),
-      ),
-    );
-    Navigator.pop(context);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تم حفظ التغييرات', style: GoogleFonts.ibmPlexSans()),
+          backgroundColor: const Color(0xff623ce7),
+        ),
+      );
+      Navigator.pop(context);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message, style: GoogleFonts.ibmPlexSans()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تعذر حفظ التغييرات. حاول مرة أخرى.',
+              style: GoogleFonts.ibmPlexSans()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -208,7 +232,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         SizedBox(height: 20.h),
 
-                        // 4. حقل الموقع
+                        // 4. حقل الهاتف
+                        _buildFieldLabel('رقم الهاتف'),
+                        TextFormField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          textDirection: TextDirection.ltr,
+                          style: GoogleFonts.ibmPlexSans(
+                              color: textColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500),
+                          decoration: _inputDecoration(
+                            hint: 'أدخل رقم هاتفك',
+                            fillColor: inputFillColor,
+                            prefixIcon: Icons.phone_outlined,
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+
+                        // 5. حقل الموقع
                         _buildFieldLabel('الموقع الحالي'),
                         DropdownButtonFormField<String>(
                           value: LocationService.supportedRegions

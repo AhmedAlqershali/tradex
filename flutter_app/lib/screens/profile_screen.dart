@@ -151,12 +151,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildSettingsTile(
           icon: Icons.person_outline,
           label: 'تعديل الملف الشخصي',
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const EditProfileScreen(),
-            ),
-          ),
+          onTap: () async {
+            final userBloc = context.read<UserBloc>();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const EditProfileScreen(),
+              ),
+            );
+            if (mounted) {
+              userBloc.add(const UserLoadRequested());
+            }
+          },
         ),
         _buildSettingsTile(
           icon: Icons.lock_outline,

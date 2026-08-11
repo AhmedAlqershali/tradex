@@ -64,7 +64,7 @@ class ProfileTest extends TestCase
 
     public function test_client_can_update_name_and_phone(): void
     {
-        ['token' => $token] = $this->actingAsRole('client');
+        ['user' => $user, 'token' => $token] = $this->actingAsRole('client');
 
         $this->putJson('/api/v1/profile', [
             'name'  => 'Updated Name',
@@ -73,6 +73,47 @@ class ProfileTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.name', 'Updated Name')
             ->assertJsonPath('data.phone', '0501112222');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Updated Name',
+            'phone' => '0501112222',
+        ]);
+    }
+
+    public function test_client_can_clear_nullable_phone(): void
+    {
+        ['user' => $user, 'token' => $token] = $this->actingAsRole('client');
+        $user->update(['phone' => '0501112222']);
+
+        $this->putJson('/api/v1/profile', [
+            'phone' => null,
+        ], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.phone', null);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'phone' => null,
+        ]);
+    }
+
+    public function test_profile_retrieval_returns_persisted_values_after_update(): void
+    {
+        ['user' => $user, 'token' => $token] = $this->actingAsRole('client');
+
+        $this->putJson('/api/v1/profile', [
+            'name' => 'Authoritative Name',
+            'email' => 'authoritative@example.com',
+            'phone' => '0509998888',
+        ], $this->headers($token))->assertOk();
+
+        $this->getJson('/api/v1/profile', $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.id', $user->id)
+            ->assertJsonPath('data.name', 'Authoritative Name')
+            ->assertJsonPath('data.email', 'authoritative@example.com')
+            ->assertJsonPath('data.phone', '0509998888');
     }
 
     public function test_client_can_update_email_to_unique_address(): void

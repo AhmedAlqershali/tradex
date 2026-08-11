@@ -64,6 +64,35 @@ class AvatarUploadTest extends TestCase
         $this->assertNotNull($response->json('data.avatar'));
     }
 
+    public function test_avatar_is_returned_by_profile_after_upload(): void
+    {
+        $user  = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+
+        $upload = $this->postJson('/api/v1/profile/avatar', [
+            'avatar' => UploadedFile::fake()->image('session-avatar.jpg'),
+        ], $this->headers($token))->assertOk();
+
+        $avatar = $upload->json('data.avatar');
+        $this->getJson('/api/v1/profile', $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.avatar', $avatar);
+    }
+
+    public function test_avatar_upload_only_updates_the_authenticated_user(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create(['avatar' => 'avatars/other.jpg']);
+        $token = $owner->createToken('test')->plainTextToken;
+
+        $this->postJson('/api/v1/profile/avatar', [
+            'avatar' => UploadedFile::fake()->image('owner.jpg'),
+        ], $this->headers($token))->assertOk();
+
+        $this->assertNotNull($owner->fresh()->avatar);
+        $this->assertSame('avatars/other.jpg', $other->fresh()->avatar);
+    }
+
     public function test_uploading_new_avatar_replaces_old_one(): void
     {
         Storage::disk('public')->put('avatars/old_avatar.jpg', 'dummy content');

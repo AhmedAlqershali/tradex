@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_saas/models/app_type.dart';
-import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/auth_service.dart';
 import 'package:ai_saas/core/services/store_service.dart';
@@ -270,7 +269,7 @@ class UserController {
     }
   }
 
-  // ── Profile mutations (Phase C will wire to UserService) ──────────────────────
+  // ── Profile mutations ─────────────────────────────────────────────────────────
 
   /// Stores an already-constructed [AppUser] directly.
   Future<void> setUser(AppUser user) async {
@@ -290,22 +289,16 @@ class UserController {
   }) async {
     _begin();
     try {
-      // Upload avatar first if a new local file path was provided.
-      String? resolvedPhotoPath = photoPath;
+      // Upload avatar first if a new local file path was provided. The upload
+      // response contains the complete authoritative user, not just a URL.
+      AppUser? updated;
       if (photoPath != null &&
           !photoPath.startsWith('http://') &&
           !photoPath.startsWith('https://')) {
-        resolvedPhotoPath =
-            await UserService.instance.uploadAvatar(filePath: photoPath);
-      }
-      if (resolvedPhotoPath != null &&
-          !resolvedPhotoPath.startsWith('http://') &&
-          !resolvedPhotoPath.startsWith('https://')) {
-        resolvedPhotoPath = AppConfig.resolveMediaUrl(resolvedPhotoPath);
+        updated = await UserService.instance.uploadAvatar(filePath: photoPath);
       }
 
       // Update text fields on the server when at least one is provided.
-      AppUser? updated;
       if (name != null || email != null || phone != null) {
         updated = await UserService.instance.updateMe(
           name: name,
@@ -314,19 +307,17 @@ class UserController {
         );
       }
 
-      // Merge server response with local overrides.
       final current = currentUserNotifier.value;
       if (updated != null) {
-        currentUserNotifier.value = updated.copyWith(
-          photoPath: resolvedPhotoPath ?? current?.photoPath,
-          email: updated.email,
-          region: region ?? current?.region,
-        );
+        // Region is not part of the existing Laravel profile contract, so
+        // retain it as a UI-only value while every server-backed field comes
+        // from the response just received.
+        currentUserNotifier.value =
+            updated.copyWith(region: region ?? current?.region);
       } else if (current != null) {
         currentUserNotifier.value = current.copyWith(
           email: email,
           region: region,
-          photoPath: resolvedPhotoPath,
         );
       }
     } on ApiException catch (e) {
@@ -361,12 +352,13 @@ class UserController {
       }
 
       // Upload logo if a new local file path was provided.
-      String? resolvedLogoPath = logoPath;
       if (logoPath != null &&
           !logoPath.startsWith('http://') &&
           !logoPath.startsWith('https://')) {
-        resolvedLogoPath = await StoreService.instance
-            .uploadStoreLogo(storeId: storeId, filePath: logoPath);
+        await StoreService.instance.uploadStoreLogo(
+          storeId: storeId,
+          filePath: logoPath,
+        );
       }
 
       // Persist store details on the server.
@@ -384,7 +376,8 @@ class UserController {
               (store.id?.isNotEmpty ?? false) ? store.id : existing.storeId,
           storeCategory: storeCategory,
           region: region,
-          photoPath: resolvedLogoPath ?? existing.photoPath,
+          // Store logo is a store field, never the user's profile avatar.
+          photoPath: existing.photoPath,
         );
       }
     } on ApiException catch (e) {

@@ -23,10 +23,7 @@ class UserService {
   Future<AppUser> getMe() async {
     final response =
         await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.me);
-    final raw = response.data!;
-    final userJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppUser.fromServerJson(userJson);
+    return parseProfileResponse(response.data!);
   }
 
   // ── Update profile ────────────────────────────────────────────────────────────
@@ -43,37 +40,41 @@ class UserService {
 
     final response = await ApiClient.instance
         .put<Map<String, dynamic>>(ApiConstants.me, data: body);
-    final raw = response.data!;
-    final userJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppUser.fromServerJson(userJson);
+    return parseProfileResponse(response.data!);
   }
 
   // ── Upload avatar ─────────────────────────────────────────────────────────────
   /// POST /profile/avatar
   /// [filePath] — absolute path from the image picker.
-  /// Returns the hosted avatar URL.
-  Future<String> uploadAvatar({required String filePath}) async {
+  /// Returns the authoritative profile returned by Laravel, including the
+  /// hosted avatar URL.
+  Future<AppUser> uploadAvatar({required String filePath}) async {
     final formData = FormData.fromMap({
       'avatar': await MultipartFile.fromFile(filePath),
     });
     final response = await ApiClient.instance
         .postFormData<Map<String, dynamic>>(ApiConstants.meAvatar, formData);
-    final raw = response.data!;
-    final body = raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    // ProfileService::userPayload() returns the resolved Storage URL under
-    // the 'avatar' key — the other keys are kept as a defensive fallback.
-    final avatar = body['avatar'] as String? ??
-        body['avatar_url'] as String? ??
-        body['url'] as String? ??
-        body['avatarUrl'] as String?;
-    if (avatar == null || avatar.trim().isEmpty) {
+    final user = parseProfileResponse(response.data!);
+    if (user.photoPath == null) {
       throw const UnknownException(
-        'تم رفع الصورة لكن لم يُرجع الخادم رابط الصورة.',
+        'تم رفع الصورة لكن لم يُرجع الخادم بيانات الصورة.',
       );
     }
-    return avatar;
+    return user;
   }
+
+  /// Extracts the authoritative user object from either the standard
+  /// `{data: {...}}` envelope or a flat response.
+  static AppUser parseProfileResponse(Map<String, dynamic> raw) {
+    final userJson = raw['data'] is Map
+        ? Map<String, dynamic>.from(raw['data'] as Map)
+        : raw;
+    return AppUser.fromServerJson(userJson);
+  }
+
+  /// Exposed for contract tests without making a network request.
+  static AppUser parseProfileResponseForTesting(Map<String, dynamic> raw) =>
+      parseProfileResponse(raw);
 
   /// PUT /profile/password
   Future<void> changePassword({

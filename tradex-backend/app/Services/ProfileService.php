@@ -33,11 +33,19 @@ class ProfileService implements ProfileServiceInterface
             }
         }
 
-        $user->update(array_filter([
-            'name'  => $data['name']  ?? null,
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-        ], fn ($v) => ! is_null($v)));
+        // Use array_key_exists instead of array_filter so a client can
+        // intentionally clear the nullable phone field. Only fields sent by
+        // the client are changed; omitted fields remain untouched.
+        $updates = [];
+        foreach (['name', 'email', 'phone'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $updates[$field] = $data[$field];
+            }
+        }
+
+        if ($updates !== []) {
+            $user->update($updates);
+        }
 
         return $this->userPayload($user->fresh(['stores']));
     }
@@ -55,14 +63,23 @@ class ProfileService implements ProfileServiceInterface
 
     public function updateAvatar(User $user, UploadedFile $file): array
     {
-        // Delete the old avatar if it exists
-        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-            Storage::disk('public')->delete($user->avatar);
-        }
-
+        $oldPath = $user->avatar;
         $path = $file->store('avatars', 'public');
 
-        $user->update(['avatar' => $path]);
+        try {
+            $user->update(['avatar' => $path]);
+        } catch (\Throwable $exception) {
+            // Do not leave an orphaned upload when the database write fails.
+            Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+
+        // Remove the previous file only after the new reference is persisted.
+        // This keeps the existing valid avatar available if storage or the
+        // database rejects the replacement.
+        if ($oldPath && $oldPath !== $path && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
 
         return $this->userPayload($user->fresh(['stores']));
     }
@@ -77,6 +94,7 @@ class ProfileService implements ProfileServiceInterface
             'email'  => $user->email,
             'phone'  => $user->phone,
             'role'   => $user->role,
+            'created_at' => $user->created_at?->toIso8601String(),
             'avatar' => $user->avatar
                 ? Storage::disk('public')->url($user->avatar)
                 : null,
@@ -87,7 +105,9 @@ class ProfileService implements ProfileServiceInterface
                 'id'          => $s->id,
                 'store_name'  => $s->store_name,
                 'description' => $s->description,
-                'logo'        => $s->logo,
+                'logo'        => $s->logo
+                    ? Storage::disk('public')->url($s->logo)
+                    : null,
                 'status'      => $s->status,
             ])->values();
         }
