@@ -12,6 +12,7 @@ mkdir -p \
     bootstrap/cache
 
 php artisan storage:link --force
+php artisan migrate --force --no-interaction
 php artisan optimize
 
 exec "$@"

@@ -25,9 +25,10 @@ php -S 0.0.0.0:${PORT:-8000} -t public docker/router.php
 The Docker image uses `docker/router.php` as the PHP built-in server router so
 existing files under `public/` (including Vite assets) are served directly.
 
-The entrypoint creates writable Laravel directories, runs `storage:link`, and
-runs `php artisan optimize` before starting that one Laravel web server with
-`public` as its document root.
+The entrypoint creates writable Laravel directories, runs `storage:link`, applies
+pending schema-only migrations with `php artisan migrate --force`, and runs
+`php artisan optimize` before starting that one Laravel web server with `public`
+as its document root. It does not run seeders or create users.
 
 ## Required environment variable names
 
@@ -94,14 +95,13 @@ PostgreSQL connection definition, and the Docker image now includes the
 2. Set the `DB_*` variables in Render.
 3. Review/export/import the existing SQLite data separately if production must
    retain it; do not point PostgreSQL at the SQLite file.
-4. Run `php artisan migrate --force` once against the intended PostgreSQL
-   database.
+4. The container entrypoint runs `php artisan migrate --force` against the
+   configured PostgreSQL database before serving requests.
 5. Seed only through an explicit, reviewed data migration or import. The
    deployment configuration does not run seeders.
 
-The added sessions migration is schema-only and has not been run. It supports
-the configured database-backed Admin Dashboard sessions when the first
-production migration is approved.
+The sessions migration is schema-only and is applied by the container entrypoint.
+It supports the configured database-backed Admin Dashboard sessions.
 
 SQLite on Render is only a temporary single-instance option with a paid
 Persistent Disk mounted over the database/storage locations and a backup plan.
