@@ -1,5 +1,6 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/edit_profile_screen.dart';
+import 'package:ai_saas/screens/change_password_screen.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
 import 'package:ai_saas/screens/notifications_screen.dart';
@@ -7,8 +8,8 @@ import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:ai_saas/core/api/app_config.dart';
-import 'package:ai_saas/core/api/api_exception.dart';
-import 'package:ai_saas/core/services/user_service.dart';
+import 'package:ai_saas/core/localization/app_locale_controller.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,18 +38,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
         child: Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: l10n.textDirection,
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, userState) {
               AppUser? user;
               if (userState is UserLoaded) user = userState.user;
               if (userState is UserUpdating) user = userState.user;
 
-              final displayName = user?.displayName ?? 'مستخدم Tradex';
+              final displayName = user?.displayName ?? l10n.defaultUser;
               final region = user?.region ?? '';
               final photoPath = user?.photoPath;
 
@@ -137,10 +139,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSettingsSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('الإعدادات',
+        Text(l10n.settings,
             style: GoogleFonts.ibmPlexSans(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
@@ -148,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(height: 12.h),
         _buildSettingsTile(
           icon: Icons.person_outline,
-          label: 'تعديل الملف الشخصي',
+          label: l10n.editProfile,
           onTap: () async {
             final userBloc = context.read<UserBloc>();
             await Navigator.push(
@@ -164,12 +167,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _buildSettingsTile(
           icon: Icons.lock_outline,
-          label: 'تغيير كلمة المرور',
-          onTap: () => _showChangePasswordDialog(context),
+          label: l10n.changePassword,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ChangePasswordScreen(),
+            ),
+          ),
         ),
         _buildSettingsTile(
           icon: Icons.notifications_outlined,
-          label: 'الإشعارات',
+          label: l10n.notifications,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -179,12 +187,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _buildSettingsTile(
           icon: Icons.language_outlined,
-          label: 'اللغة',
-          onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تغيير اللغة غير متاح حالياً.'),
-            ),
-          ),
+          label: l10n.language,
+          onTap: () => _showLanguagePicker(context),
         ),
       ],
     );
@@ -205,98 +209,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Image.asset('assets/images/client.png', fit: BoxFit.cover);
   }
 
-  Future<void> _showChangePasswordDialog(BuildContext context) async {
-    final currentController = TextEditingController();
-    final newController = TextEditingController();
-    final confirmController = TextEditingController();
-    var saving = false;
-
-    await showDialog<void>(
+  Future<void> _showLanguagePicker(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('تغيير كلمة المرور'),
-          content: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: currentController,
-                  obscureText: true,
-                  decoration:
-                      const InputDecoration(labelText: 'كلمة المرور الحالية'),
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.w, 4.h, 24.w, 12.h),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  l10n.language,
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: _textDark,
+                  ),
                 ),
-                TextField(
-                  controller: newController,
-                  obscureText: true,
-                  decoration:
-                      const InputDecoration(labelText: 'كلمة المرور الجديدة'),
-                ),
-                TextField(
-                  controller: confirmController,
-                  obscureText: true,
-                  decoration:
-                      const InputDecoration(labelText: 'تأكيد كلمة المرور'),
-                ),
-              ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: saving ? null : () => Navigator.pop(dialogContext),
-              child: const Text('إلغاء'),
+            _languageOption(
+              sheetContext,
+              const Locale('ar'),
+              l10n.languageArabic,
+              l10n.isArabic,
             ),
-            FilledButton(
-              onPressed: saving
-                  ? null
-                  : () async {
-                      if (currentController.text.isEmpty ||
-                          newController.text.length < 6 ||
-                          newController.text != confirmController.text) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('تحقق من بيانات كلمة المرور')),
-                        );
-                        return;
-                      }
-                      setDialogState(() => saving = true);
-                      try {
-                        await UserService.instance.changePassword(
-                          currentPassword: currentController.text,
-                          newPassword: newController.text,
-                        );
-                        if (dialogContext.mounted) Navigator.pop(dialogContext);
-                        if (mounted) {
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            const SnackBar(
-                                content: Text('تم تغيير كلمة المرور')),
-                          );
-                        }
-                      } on ApiException catch (e) {
-                        setDialogState(() => saving = false);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(e.message)),
-                          );
-                        }
-                      }
-                    },
-              child: saving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('حفظ'),
+            _languageOption(
+              sheetContext,
+              const Locale('en'),
+              l10n.languageEnglish,
+              !l10n.isArabic,
             ),
+            SizedBox(height: 12.h),
           ],
         ),
       ),
     );
-    currentController.dispose();
-    newController.dispose();
-    confirmController.dispose();
+  }
+
+  Widget _languageOption(
+    BuildContext context,
+    Locale locale,
+    String label,
+    bool selected,
+  ) {
+    return ListTile(
+      title: Text(label, style: GoogleFonts.ibmPlexSans(fontSize: 15.sp)),
+      trailing:
+          selected ? const Icon(Icons.check_rounded, color: _primary) : null,
+      onTap: () async {
+        await AppLocaleController.instance.setLocale(locale);
+        if (context.mounted) Navigator.pop(context);
+      },
+    );
   }
 
   Widget _buildSettingsTile({
@@ -356,7 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('المفضلة',
+            Text(AppLocalizations.of(context).favorites,
                 style: GoogleFonts.ibmPlexSans(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -463,7 +432,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               size: 40.sp, color: const Color(0xffCCCCCC)),
           SizedBox(height: 12.h),
           Text(
-            'لا توجد منتجات مفضلة',
+            AppLocalizations.of(context).noFavorites,
             style: GoogleFonts.ibmPlexSans(
                 fontSize: 14.sp, color: const Color(0xff888888)),
           ),
@@ -500,7 +469,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: const CircularProgressIndicator(strokeWidth: 2))
                 : Icon(Icons.logout_rounded, size: 18.sp),
             label: Text(
-              isLoading ? 'جارٍ تسجيل الخروج...' : 'تسجيل الخروج',
+              isLoading
+                  ? AppLocalizations.of(context).loggingOut
+                  : AppLocalizations.of(context).logout,
               style: GoogleFonts.ibmPlexSans(
                   fontSize: 15.sp, fontWeight: FontWeight.bold),
             ),

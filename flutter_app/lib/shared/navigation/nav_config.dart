@@ -9,34 +9,35 @@ import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/shopper_home.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_saas/shared/navigation/nav_item.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 
 class NavConfig {
-  static List<BnItem> getItems(AppType type) {
+  static List<BnItem> getItems(AppType type, AppLocalizations l10n) {
     switch (type) {
       // 👇 العميل
       case AppType.client:
         return [
           BnItem(
             widget: ShopperHomePage(),
-            title: 'الرئيسية',
+            title: l10n.home,
             icon: Icons.home_outlined,
             activeIcon: Icons.home,
           ),
           BnItem(
             widget: SearchScreen(),
-            title: 'بحث',
+            title: l10n.search,
             icon: Icons.search_outlined,
             activeIcon: Icons.search,
           ),
           BnItem(
             widget: CategoriesScreen(),
-            title: 'التصنيفات',
+            title: l10n.categories,
             icon: Icons.category_outlined,
             activeIcon: Icons.category_rounded,
           ),
           BnItem(
             widget: ProfileScreen(),
-            title: 'حسابي',
+            title: l10n.account,
             icon: Icons.person_outline,
             activeIcon: Icons.person,
           ),
@@ -47,31 +48,31 @@ class NavConfig {
         return [
           BnItem(
             widget: MerchantHomePage(),
-            title: 'الرئيسية',
+            title: l10n.home,
             icon: Icons.dashboard_outlined,
             activeIcon: Icons.dashboard_rounded,
           ),
           BnItem(
             widget: MerchantOrdersScreen(),
-            title: 'الطلبات',
+            title: l10n.orders,
             icon: Icons.receipt_long_outlined,
             activeIcon: Icons.receipt_long_rounded,
           ),
-          const BnItem(
+          BnItem(
             widget: AlMarketingToolsScreen(),
-            title: 'AI أدوات',
+            title: l10n.aiTools,
             icon: Icons.auto_awesome_outlined,
             activeIcon: Icons.auto_awesome_rounded,
           ),
-          const BnItem(
+          BnItem(
             widget: MerchantProductsScreen(),
-            title: 'منتجاتي',
+            title: l10n.myProducts,
             icon: Icons.inventory_2_outlined,
             activeIcon: Icons.inventory_2_rounded,
           ),
-          const BnItem(
+          BnItem(
             widget: ProfileScreen(),
-            title: 'حسابي',
+            title: l10n.account,
             icon: Icons.person_outline,
             activeIcon: Icons.person,
           ),

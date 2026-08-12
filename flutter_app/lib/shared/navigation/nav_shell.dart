@@ -1,5 +1,6 @@
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/navigation/nav_config.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -17,10 +18,12 @@ class _BnScreenState extends State<BnScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final items = NavConfig.getItems(widget.type);
+    final items = NavConfig.getItems(widget.type, AppLocalizations.of(context));
     if (items.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('لا توجد شاشات متاحة')),
+      return Scaffold(
+        body: Center(
+          child: Text(AppLocalizations.of(context).noScreensAvailable),
+        ),
       );
     }
     final selectedIndex = _currentIndex.clamp(0, items.length - 1);

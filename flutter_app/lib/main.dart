@@ -1,15 +1,19 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
+import 'package:ai_saas/core/localization/app_locale_controller.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/splash_screen.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLocaleController.instance.load();
 
   // When a 401 cannot be recovered via token refresh, notify UserController so
   // it can clear user state. Done via callback to avoid a circular import
@@ -64,18 +68,28 @@ class MyApp extends StatelessWidget {
           create: (_) => NotificationsBloc(),
         ),
       ],
-      child: ScreenUtilInit(
-        designSize: const Size(360, 690),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: _buildTheme(),
-            home: const SplashScreen(),
-            // home: const BnScreen(type: AppType.client),
-          );
-        },
+      child: ValueListenableBuilder<Locale>(
+        valueListenable: AppLocaleController.instance.localeNotifier,
+        builder: (context, locale, _) => ScreenUtilInit(
+          designSize: const Size(360, 690),
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: _buildTheme(),
+              locale: locale,
+              supportedLocales: const [Locale('ar'), Locale('en')],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              home: const SplashScreen(),
+            );
+          },
+        ),
       ),
     );
   }
