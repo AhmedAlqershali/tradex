@@ -310,8 +310,7 @@ class UserController {
       // response contains the complete authoritative user, not just a URL.
       AppUser? updated;
       if (photoPath != null &&
-          !photoPath.startsWith('http://') &&
-          !photoPath.startsWith('https://')) {
+          !AppUser.isServerPhotoPath(photoPath)) {
         updated = await UserService.instance.uploadAvatar(filePath: photoPath);
       }
 

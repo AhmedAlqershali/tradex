@@ -61,4 +61,31 @@ void main() {
       contains('active trial or paid subscription'),
     );
   });
+
+  test('maps an avatar validation failure to a typed 422 exception', () {
+    final exception = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/profile/avatar'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/profile/avatar'),
+          statusCode: 422,
+          data: <String, dynamic>{
+            'success': false,
+            'message': 'The avatar must be an image.',
+            'errors': <String, dynamic>{
+              'avatar': <String>['The avatar must be an image.'],
+            },
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+
+    expect(exception, isA<ValidationException>());
+    expect(exception.message, 'The avatar must be an image.');
+    expect(
+      (exception as ValidationException).errors['avatar'],
+      contains('The avatar must be an image.'),
+    );
+  });
 }

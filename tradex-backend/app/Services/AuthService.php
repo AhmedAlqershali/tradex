@@ -344,7 +344,7 @@ class AuthService implements AuthServiceInterface
             'phone'          => $user->phone,
             'role'           => $user->role,
             'avatar'         => $user->avatar
-                ? Storage::disk('public')->url($user->avatar)
+                ? url('/storage/'.ltrim($user->avatar, '/'))
                 : null,
             // Mobile clients use this flag to gate features behind verification
             // (e.g. showing a "verify your email" banner in Flutter).

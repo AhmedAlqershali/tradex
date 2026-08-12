@@ -107,9 +107,7 @@ class ProfileService implements ProfileServiceInterface
             'longitude' => $user->longitude,
             'role'   => $user->role,
             'created_at' => $user->created_at?->toIso8601String(),
-            'avatar' => $user->avatar
-                ? Storage::disk('public')->url($user->avatar)
-                : null,
+            'avatar' => $this->avatarUrl($user->avatar),
         ];
 
         if ($user->isMerchant() && $user->relationLoaded('stores')) {
@@ -126,5 +124,22 @@ class ProfileService implements ProfileServiceInterface
         }
 
         return $payload;
+    }
+
+    /**
+     * Return an absolute URL for the public avatar.
+     *
+     * Storage::url() uses the configured APP_URL, which is commonly left at
+     * Laravel's localhost default in local/Replit processes. Building the
+     * public path through Laravel's URL generator keeps the response absolute
+     * while using the current request host when one is available.
+     */
+    private function avatarUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        return url('/storage/'.ltrim($path, '/'));
     }
 }

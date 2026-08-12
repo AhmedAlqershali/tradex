@@ -61,7 +61,10 @@ class AvatarUploadTest extends TestCase
         ], $this->headers($token));
 
         $response->assertOk();
-        $this->assertNotNull($response->json('data.avatar'));
+        $avatar = $response->json('data.avatar');
+        $this->assertIsString($avatar);
+        $this->assertNotFalse(filter_var($avatar, FILTER_VALIDATE_URL));
+        $this->assertStringContainsString('/storage/avatars/', parse_url($avatar, PHP_URL_PATH));
     }
 
     public function test_avatar_is_returned_by_profile_after_upload(): void
@@ -159,6 +162,9 @@ class AvatarUploadTest extends TestCase
         ], $this->headers($token))
             ->assertStatus(422)
             ->assertJsonPath('success', false);
+
+        $this->assertNull($user->fresh()->avatar);
+        $this->assertEmpty(Storage::disk('public')->allFiles('avatars'));
     }
 
     public function test_avatar_must_not_exceed_2mb(): void

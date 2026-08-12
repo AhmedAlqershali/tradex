@@ -125,7 +125,12 @@ class AppUser {
       locationName: json['locationName'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      photoPath: json['photoPath'] as String?,
+      // Legacy session JSON may contain either the server-backed camelCase
+      // value or an older avatar key. Apply the same server-path guard used
+      // for API responses so a device path can never become durable state.
+      photoPath: _resolvePhotoPath(
+        _stringValue(json['photoPath']) ?? _stringValue(json['avatar']),
+      ),
       // Deliberately ignore any locally cached subscription/trial fields.
       // Laravel `/auth/me` is the only authority for entitlement state.
       createdAt: _parseDate(json['createdAt'] as String?),
@@ -198,6 +203,22 @@ class AppUser {
     if (!isAbsoluteUrl && !isRootRelativeServerPath) return null;
 
     return AppConfig.resolveMediaUrl(trimmed);
+  }
+
+  /// Returns whether [value] is a server-owned avatar reference rather than
+  /// a path returned by the native image picker.
+  ///
+  /// The backend normally returns an absolute URL. `/storage/...` is also
+  /// accepted because older Laravel deployments may return a root-relative
+  /// public-storage URL.
+  static bool isServerPhotoPath(String value) {
+    final trimmed = value.trim();
+    if (trimmed.startsWith('/storage/')) return true;
+
+    final parsed = Uri.tryParse(trimmed);
+    return parsed != null &&
+        (parsed.scheme == 'http' || parsed.scheme == 'https') &&
+        parsed.host.isNotEmpty;
   }
 
   static DateTime _parseDate(String? value) {

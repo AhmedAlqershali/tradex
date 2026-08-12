@@ -80,6 +80,27 @@ void main() {
       expect(user.photoPath, isNull);
     });
 
+    test('does not restore a legacy local photoPath as durable state', () {
+      final user = AppUser.fromJson({
+        'id': 'legacy-user',
+        'name': 'Legacy',
+        'email': 'legacy@example.com',
+        'phone': '',
+        'role': 'client',
+        'photoPath': '/data/user/0/cache/picked-avatar.jpg',
+        'createdAt': '2026-08-11T00:00:00Z',
+      });
+
+      expect(user.photoPath, isNull);
+    });
+
+    test('recognizes server avatar URLs but not picker paths', () {
+      expect(AppUser.isServerPhotoPath('https://api.example/storage/a.jpg'),
+          isTrue);
+      expect(AppUser.isServerPhotoPath('/storage/avatars/a.jpg'), isTrue);
+      expect(AppUser.isServerPhotoPath('/data/user/0/cache/a.jpg'), isFalse);
+    });
+
     test('maps the Laravel store_name and logo contract', () {
       final store = StoreModel.fromServerJson({
         'id': 7,

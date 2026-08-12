@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/location_service.dart';
@@ -113,8 +114,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_pickedPhoto != null) {
       photoImage = FileImage(_pickedPhoto!);
     } else if (savedPhotoPath != null && savedPhotoPath.isNotEmpty) {
-      if (savedPhotoPath.startsWith('http://') ||
-          savedPhotoPath.startsWith('https://')) {
+      if (AppUser.isServerPhotoPath(savedPhotoPath)) {
         photoImage = NetworkImage(AppConfig.resolveMediaUrl(savedPhotoPath));
       }
     }

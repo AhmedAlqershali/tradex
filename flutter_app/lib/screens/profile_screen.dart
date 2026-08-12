@@ -198,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (photoPath == null || photoPath.isEmpty) {
       return Image.asset('assets/images/client.png', fit: BoxFit.cover);
     }
-    if (photoPath.startsWith('http://') || photoPath.startsWith('https://')) {
+    if (AppUser.isServerPhotoPath(photoPath)) {
       return Image.network(
         AppConfig.resolveMediaUrl(photoPath),
         fit: BoxFit.cover,

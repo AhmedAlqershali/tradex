@@ -49,6 +49,19 @@ class AuthTest extends TestCase
         ])->assertOk();
     }
 
+    public function test_registration_response_has_a_null_server_avatar_until_upload(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register/client', [
+            'name'                  => 'Avatar Client',
+            'email'                 => 'avatar-registration@example.com',
+            'phone'                 => '0501234567',
+            'password'              => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ])->assertStatus(201);
+
+        $response->assertJsonPath('data.user.avatar', null);
+    }
+
     public function test_registration_ignores_privileged_user_fields(): void
     {
         $response = $this->postJson('/api/v1/auth/register/client', [
@@ -174,15 +187,18 @@ class AuthTest extends TestCase
             'avatar'   => 'avatars/persisted-avatar.jpg',
         ]);
 
-        $this->postJson('/api/v1/auth/login', [
+        $response = $this->postJson('/api/v1/auth/login', [
             'email'    => 'avatar@example.com',
             'password' => 'Password123!',
-        ])
-            ->assertOk()
-            ->assertJsonPath(
-                'data.user.avatar',
-                Storage::disk('public')->url('avatars/persisted-avatar.jpg'),
-            );
+        ])->assertOk();
+
+        $avatar = $response->json('data.user.avatar');
+        $this->assertIsString($avatar);
+        $this->assertNotFalse(filter_var($avatar, FILTER_VALIDATE_URL));
+        $this->assertStringContainsString(
+            '/storage/avatars/persisted-avatar.jpg',
+            parse_url($avatar, PHP_URL_PATH),
+        );
     }
 
     public function test_login_fails_with_wrong_password(): void
