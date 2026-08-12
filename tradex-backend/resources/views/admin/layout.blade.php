@@ -22,7 +22,10 @@
                     <span aria-hidden="true">▦</span> Dashboard
                 </a>
                 <p class="px-4 pb-2 pt-8 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600">Management</p>
-                @foreach (['Users', 'Merchants & stores', 'Categories', 'Plans & subscriptions', 'Products', 'Reviews', 'Orders'] as $item)
+                <a href="{{ route('admin.merchants.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+                    <span aria-hidden="true">◈</span> Merchants & stores
+                </a>
+                @foreach (['Users', 'Categories', 'Plans & subscriptions', 'Products', 'Reviews', 'Orders'] as $item)
                     <div class="flex cursor-not-allowed items-center justify-between rounded-xl px-4 py-3 text-sm text-slate-500" aria-disabled="true">
                         <span class="flex items-center gap-3"><span aria-hidden="true">•</span>{{ $item }}</span>
                         <span class="text-[10px] uppercase tracking-wider text-slate-700">Phase 2</span>
@@ -65,6 +68,7 @@
                     <summary class="cursor-pointer px-5 py-3 text-sm font-semibold text-slate-600">Open navigation</summary>
                     <nav class="grid grid-cols-2 gap-2 px-5 pb-4 sm:grid-cols-4" aria-label="Mobile admin navigation">
                         <a href="{{ route('admin.dashboard') }}" class="rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700">Dashboard</a>
+                        <a href="{{ route('admin.merchants.index') }}" class="rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700">Merchants</a>
                         <span class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-400">Management · Phase 2</span>
                     </nav>
                 </details>
