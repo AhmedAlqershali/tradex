@@ -153,4 +153,51 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('current user notifier update reaches the profile avatar widget',
+      (tester) async {
+    final user = ValueNotifier<AppUser?>(
+      AppUser.fromServerJson({
+        'id': 42,
+        'name': 'Profile User',
+        'email': 'profile@example.com',
+        'role': AppType.client.name,
+        'avatar': 'https://cdn.example/old-avatar.jpg',
+      }),
+    );
+
+    await tester.pumpWidget(
+      ValueListenableBuilder<AppUser?>(
+        valueListenable: user,
+        builder: (_, value, __) => MaterialApp(
+          home: ProfileAvatar(photoPath: value?.photoPath),
+        ),
+      ),
+    );
+    expect(
+      find.byKey(const ValueKey(
+        'profile-avatar-network:https://cdn.example/old-avatar.jpg',
+      )),
+      findsOneWidget,
+    );
+
+    user.value = AppUser.fromServerJson({
+      'id': 42,
+      'name': 'Profile User',
+      'email': 'profile@example.com',
+      'role': AppType.client.name,
+      'avatar': 'https://cdn.example/new-avatar.jpg',
+    });
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey(
+        'profile-avatar-network:https://cdn.example/new-avatar.jpg',
+      )),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey(
+      'profile-avatar-network:https://cdn.example/old-avatar.jpg',
+    )), findsNothing);
+  });
 }

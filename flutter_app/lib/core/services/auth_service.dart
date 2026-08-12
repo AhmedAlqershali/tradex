@@ -1,6 +1,7 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/shared/users/avatar_diagnostics.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 
 // ─── Value objects ────────────────────────────────────────────────────────────
@@ -123,6 +124,7 @@ class AuthService {
     // Handle both wrapped { data: {...} } and flat responses.
     final userJson =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    AvatarDiagnostics.log('/auth/me response avatar', userJson['avatar']);
     return AppUser.fromServerJson(userJson);
   }
 
@@ -190,6 +192,7 @@ class AuthService {
           'Unexpected auth response: missing user object.');
     }
     final userJson = Map<String, dynamic>.from(rawUser);
+    AvatarDiagnostics.log('login response avatar', userJson['avatar']);
 
     final rawToken = body['token'];
     if (rawToken == null || rawToken.toString().isEmpty) {

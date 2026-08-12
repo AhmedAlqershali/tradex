@@ -2,6 +2,7 @@ import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/services/user_service.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/models/store_model.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -99,6 +100,22 @@ void main() {
           isTrue);
       expect(AppUser.isServerPhotoPath('/storage/avatars/a.jpg'), isTrue);
       expect(AppUser.isServerPhotoPath('/data/user/0/cache/a.jpg'), isFalse);
+    });
+
+    test('does not let the follow-up profile response erase an uploaded avatar',
+        () {
+      final profileResponse = AppUser.fromServerJson({
+        'id': 4,
+        'role': 'client',
+        'avatar': 'https://cdn.example/old-avatar.jpg',
+      });
+
+      final merged = UserController.mergeProfileMutationResults(
+        profileUpdated: profileResponse,
+        uploadedPhotoPath: 'https://cdn.example/new-avatar.jpg',
+      );
+
+      expect(merged.photoPath, 'https://cdn.example/new-avatar.jpg');
     });
 
     test('maps the Laravel store_name and logo contract', () {

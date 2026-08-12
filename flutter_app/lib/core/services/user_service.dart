@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/shared/users/avatar_diagnostics.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 
 // ─── UserService ──────────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ class UserService {
     final userJson = raw['data'] is Map
         ? Map<String, dynamic>.from(raw['data'] as Map)
         : raw;
+    AvatarDiagnostics.log('profile response avatar', userJson['avatar']);
     return AppUser.fromServerJson(userJson);
   }
 

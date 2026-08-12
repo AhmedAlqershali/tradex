@@ -1,5 +1,6 @@
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/core/api/app_config.dart';
+import 'avatar_diagnostics.dart';
 
 // ─── AppUser ──────────────────────────────────────────────────────────────────
 //
@@ -157,6 +158,14 @@ class AppUser {
       orElse: () => AppType.client,
     );
 
+    final photoPath = _resolvePhotoPath(
+      _stringValue(json['avatar']) ??
+          _stringValue(json['photo_url']) ??
+          _stringValue(json['avatar_url']) ??
+          _stringValue(json['photoPath']),
+    );
+    AvatarDiagnostics.log('UserModel.fromJson stored photoPath', photoPath);
+
     return AppUser(
       id: json['id']?.toString() ?? '',
       name: _stringValue(json['name']) ?? '',
@@ -176,12 +185,7 @@ class AppUser {
           _stringValue(json['locationName']),
       latitude: _numberValue(json['latitude']),
       longitude: _numberValue(json['longitude']),
-      photoPath: _resolvePhotoPath(
-        _stringValue(json['avatar']) ??
-            _stringValue(json['photo_url']) ??
-            _stringValue(json['avatar_url']) ??
-            _stringValue(json['photoPath']),
-      ),
+      photoPath: photoPath,
       createdAt: _parseDate(
         _stringValue(json['created_at']) ?? _stringValue(json['createdAt']),
       ),

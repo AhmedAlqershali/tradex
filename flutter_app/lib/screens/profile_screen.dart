@@ -6,6 +6,7 @@ import 'package:ai_saas/screens/product_details_screen.dart';
 import 'package:ai_saas/screens/notifications_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
+import 'package:ai_saas/shared/users/avatar_diagnostics.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/localization/app_locale_controller.dart';
@@ -44,19 +45,42 @@ class ProfileAvatar extends StatelessWidget {
 
   Widget _buildImage() {
     if (photoPath == null || photoPath!.trim().isEmpty) {
+      AvatarDiagnostics.log(
+        'ProfileAvatar ImageProvider',
+        photoPath,
+        provider: 'AssetImage(local-placeholder)',
+      );
       return _placeholder();
     }
 
     if (!AppUser.isServerPhotoPath(photoPath!)) {
+      AvatarDiagnostics.log(
+        'ProfileAvatar ImageProvider',
+        photoPath,
+        provider: 'AssetImage(local-placeholder)',
+      );
       return _placeholder();
     }
 
     final resolvedUrl = AppConfig.resolveMediaUrl(photoPath!);
+    AvatarDiagnostics.log(
+      'ProfileAvatar ImageProvider',
+      resolvedUrl,
+      provider: 'NetworkImage',
+    );
     return Image.network(
       resolvedUrl,
       key: ValueKey<String>('profile-avatar-network:$resolvedUrl'),
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _placeholder(),
+      errorBuilder: (_, __, error) {
+        AvatarDiagnostics.log(
+          'ProfileAvatar network failure',
+          resolvedUrl,
+          provider: 'AssetImage(local-placeholder)',
+          error: error.runtimeType.toString(),
+        );
+        return _placeholder();
+      },
     );
   }
 
@@ -101,6 +125,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: ValueListenableBuilder<AppUser?>(
             valueListenable: UserController.instance.currentUserNotifier,
             builder: (context, user, _) {
+              AvatarDiagnostics.log(
+                'Profile rebuild',
+                user?.photoPath,
+                widgetReceivesUser: user != null,
+              );
               final displayName = user?.displayName ?? l10n.defaultUser;
               final region = user?.region ?? '';
               final photoPath = user?.photoPath;

@@ -7,6 +7,7 @@ import 'package:ai_saas/core/services/auth_service.dart';
 import 'package:ai_saas/core/services/store_service.dart';
 import 'package:ai_saas/core/services/user_service.dart';
 import 'package:ai_saas/core/storage/secure_storage_service.dart';
+import 'avatar_diagnostics.dart';
 import 'user_model.dart';
 
 // ─── UserController ───────────────────────────────────────────────────────────
@@ -75,6 +76,7 @@ class UserController {
         final user =
             await (fetchCurrentUser ?? AuthService.instance.getCurrentUser)();
         currentUserNotifier.value = user;
+        AvatarDiagnostics.log('currentUserNotifier session restore', user.photoPath);
         return user;
       }
     } on ApiException {
@@ -123,6 +125,7 @@ class UserController {
       );
       await _storeTokens(result.tokens);
       currentUserNotifier.value = result.user;
+      AvatarDiagnostics.log('currentUserNotifier login', result.user.photoPath);
       await _clearLegacySession();
       return result.user;
     } on ApiException catch (e) {
@@ -280,6 +283,7 @@ class UserController {
   /// Stores an already-constructed [AppUser] directly.
   Future<void> setUser(AppUser user) async {
     currentUserNotifier.value = user;
+    AvatarDiagnostics.log('currentUserNotifier setUser', user.photoPath);
   }
 
   /// Refreshes the authenticated profile from Laravel.
@@ -290,6 +294,7 @@ class UserController {
   Future<void> refreshProfile() async {
     final user = await UserService.instance.getMe();
     currentUserNotifier.value = user;
+    AvatarDiagnostics.log('currentUserNotifier refreshProfile', user.photoPath);
   }
 
   /// Updates mutable profile fields via PUT /profile.
@@ -309,25 +314,39 @@ class UserController {
       // Upload avatar first if a new local file path was provided. The upload
       // response contains the complete authoritative user, not just a URL.
       AppUser? updated;
+      String? uploadedPhotoPath;
       if (photoPath != null &&
           !AppUser.isServerPhotoPath(photoPath)) {
         updated = await UserService.instance.uploadAvatar(filePath: photoPath);
+        uploadedPhotoPath = updated.photoPath;
+        AvatarDiagnostics.log('avatar upload response', uploadedPhotoPath);
       }
 
       // Update text fields on the server when at least one is provided.
       if (name != null || email != null || phone != null || region != null) {
-        updated = await UserService.instance.updateMe(
+        final profileUpdated = await UserService.instance.updateMe(
           name: name,
           email: email,
           phone: phone,
           region: region,
         );
+        // The upload response is authoritative for this mutation. Do not let
+        // a concurrent or stale second response erase the fresh avatar URL.
+        updated = mergeProfileMutationResults(
+          profileUpdated: profileUpdated,
+          uploadedPhotoPath: uploadedPhotoPath,
+        );
+        AvatarDiagnostics.log('profile update response', profileUpdated.photoPath);
       }
 
       final current = currentUserNotifier.value;
       if (updated != null) {
         currentUserNotifier.value =
             updated.copyWith(region: region ?? current?.region);
+        AvatarDiagnostics.log(
+          'currentUserNotifier profile mutation',
+          currentUserNotifier.value?.photoPath,
+        );
       } else if (current != null) {
         currentUserNotifier.value = current.copyWith(
           email: email,
@@ -340,6 +359,17 @@ class UserController {
     } finally {
       _end();
     }
+  }
+
+  /// Keeps the avatar returned by the upload call when a follow-up profile
+  /// response does not contain the just-uploaded value.
+  @visibleForTesting
+  static AppUser mergeProfileMutationResults({
+    required AppUser profileUpdated,
+    required String? uploadedPhotoPath,
+  }) {
+    if (uploadedPhotoPath == null) return profileUpdated;
+    return profileUpdated.copyWith(photoPath: uploadedPhotoPath);
   }
 
   /// Persists a GPS-resolved or manually selected location through Laravel.
