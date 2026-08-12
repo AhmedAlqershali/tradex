@@ -123,7 +123,7 @@
         </article>
     </section>
 
-    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+    <section id="subscriptions" class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
         <div class="border-b border-slate-100 px-6 py-5">
             <h2 class="font-semibold text-slate-900">Subscription requests</h2>
             <p class="mt-1 text-xs leading-5 text-slate-400">Payment is verified outside Tradex. Approve only after the external confirmation is complete.</p>

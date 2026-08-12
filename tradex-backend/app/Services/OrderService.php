@@ -174,6 +174,33 @@ class OrderService implements OrderServiceInterface
         return $order;
     }
 
+    public function listForAdmin(array $filters): LengthAwarePaginator
+    {
+        return $this->orderRepository->listForAdmin($filters);
+    }
+
+    public function findForAdmin(int $orderId): Order
+    {
+        $order = $this->orderRepository->findForAdmin($orderId);
+
+        if (! $order) {
+            throw new ModelNotFoundException("Order #{$orderId} not found.");
+        }
+
+        return $order;
+    }
+
+    public function updateStatusForAdmin(int $orderId, string $newStatus): Order
+    {
+        $order = $this->findForAdmin($orderId);
+
+        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)) {
+            throw OrderException::invalidStatusTransition($order->status, $newStatus);
+        }
+
+        return $this->updateStatusForOrder($order, $newStatus);
+    }
+
     public function updateStatus(User $merchant, int $orderId, string $newStatus): Order
     {
         $order = $this->findForMerchant($orderId, $merchant);
@@ -182,6 +209,11 @@ class OrderService implements OrderServiceInterface
             throw OrderException::invalidStatusTransition($order->status, $newStatus);
         }
 
+        return $this->updateStatusForOrder($order, $newStatus);
+    }
+
+    private function updateStatusForOrder(Order $order, string $newStatus): Order
+    {
         $updated = $this->orderRepository->updateStatus($order, $newStatus);
 
         if ($updated->client) {

@@ -167,6 +167,28 @@ class OrderRepository implements OrderRepositoryInterface
             ->first();
     }
 
+    public function listForAdmin(array $filters): LengthAwarePaginator
+    {
+        $perPage = min((int) ($filters['per_page'] ?? 15), 100);
+        $query = Order::with(['client:id,name,email,phone', 'store:id,store_name', 'items']);
+
+        $this->applyCommonFilters($query, $filters);
+
+        return $query->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function findForAdmin(int $id): ?Order
+    {
+        return Order::with([
+            'client:id,name,email,phone',
+            'store:id,store_name,user_id',
+            'store.owner:id,name,email,phone',
+            'items.product:id,name,image',
+        ])->find($id);
+    }
+
     /**
      * Update the status of an order (merchant action).
      *

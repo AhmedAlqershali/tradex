@@ -53,6 +53,21 @@ interface OrderServiceInterface
     public function findForMerchant(int $orderId, User $merchant): Order;
 
     /**
+     * Paginated order list for the admin dashboard.
+     * Supports the same status/date filters as merchant order management.
+     */
+    public function listForAdmin(array $filters): LengthAwarePaginator;
+
+    /** Single order for the admin dashboard. */
+    public function findForAdmin(int $orderId): Order;
+
+    /**
+     * Update an order from the admin dashboard using the existing order
+     * status rules and notification behavior.
+     */
+    public function updateStatusForAdmin(int $orderId, string $newStatus): Order;
+
+    /**
      * Update order status (merchant only).
      *
      * @throws \App\Exceptions\OrderException  if status transition is invalid

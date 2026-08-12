@@ -36,6 +36,15 @@ interface OrderRepositoryInterface
     /** Single order, verified to contain products from this merchant's store. */
     public function findForMerchant(int $orderId, User $merchant): ?Order;
 
+    /**
+     * Paginated order list for the admin dashboard.
+     * Supports the same status/date filters as merchant order management.
+     */
+    public function listForAdmin(array $filters): LengthAwarePaginator;
+
+    /** Single order for the admin dashboard. */
+    public function findForAdmin(int $orderId): ?Order;
+
     /** Update the status of an order. */
     public function updateStatus(Order $order, string $status): Order;
 
