@@ -50,4 +50,4 @@ RUN mkdir -p \
 EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public public/index.php"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public docker/router.php"]

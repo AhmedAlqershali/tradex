@@ -19,8 +19,11 @@ frontend dependencies, and runs the Vite production build. The container start
 command is:
 
 ```sh
-php -S 0.0.0.0:${PORT:-8000} -t public public/index.php
+php -S 0.0.0.0:${PORT:-8000} -t public docker/router.php
 ```
+
+The Docker image uses `docker/router.php` as the PHP built-in server router so
+existing files under `public/` (including Vite assets) are served directly.
 
 The entrypoint creates writable Laravel directories, runs `storage:link`, and
 runs `php artisan optimize` before starting that one Laravel web server with
