@@ -73,6 +73,25 @@ class DashboardTest extends TestCase
             ->assertSee('1 active trials');
     }
 
+    public function test_admin_navigation_links_to_each_dashboard_module(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'web')
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('href="'.route('admin.dashboard').'"', false)
+            ->assertSee('href="'.route('admin.merchants.index').'"', false)
+            ->assertSee('href="'.route('admin.merchants.index').'#subscriptions"', false)
+            ->assertSee('href="'.route('admin.orders.index').'"', false)
+            ->assertSee('href="'.route('admin.products.index').'"', false)
+            ->assertSee('href="'.route('admin.categories.index').'"', false)
+            ->assertSee('href="'.route('admin.stores.index').'"', false)
+            ->assertSee('>Merchants<', false)
+            ->assertSee('>Subscriptions<', false)
+            ->assertSee('>Stores<', false);
+    }
+
     public function test_inactive_admin_cannot_login(): void
     {
         $admin = User::factory()->admin()->create([
