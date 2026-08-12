@@ -58,13 +58,24 @@ class AvatarUploadTest extends TestCase
 
         $response = $this->postJson('/api/v1/profile/avatar', [
             'avatar' => UploadedFile::fake()->image('photo.jpg'),
-        ], $this->headers($token));
+        ], $this->headers($token) + [
+            'X-Forwarded-Proto' => 'https',
+            'X-Forwarded-Host' => 'api.tradex.test',
+        ]);
 
         $response->assertOk();
         $avatar = $response->json('data.avatar');
         $this->assertIsString($avatar);
         $this->assertNotFalse(filter_var($avatar, FILTER_VALIDATE_URL));
+        $this->assertSame('https', parse_url($avatar, PHP_URL_SCHEME));
+        $this->assertSame('api.tradex.test', parse_url($avatar, PHP_URL_HOST));
         $this->assertStringContainsString('/storage/avatars/', parse_url($avatar, PHP_URL_PATH));
+
+        // The API exposes a URL, but persistence remains a relative storage key.
+        $storedAvatar = $user->fresh()->avatar;
+        $this->assertIsString($storedAvatar);
+        $this->assertMatchesRegularExpression('/^avatars\/[^\/]+$/', $storedAvatar);
+        $this->assertStringNotContainsString('://', $storedAvatar);
     }
 
     public function test_avatar_is_returned_by_profile_after_upload(): void
@@ -165,6 +176,22 @@ class AvatarUploadTest extends TestCase
 
         $this->assertNull($user->fresh()->avatar);
         $this->assertEmpty(Storage::disk('public')->allFiles('avatars'));
+    }
+
+    public function test_failed_avatar_upload_preserves_existing_valid_avatar_state(): void
+    {
+        Storage::disk('public')->put('avatars/existing.jpg', 'existing avatar');
+        $user = User::factory()->create(['avatar' => 'avatars/existing.jpg']);
+        $token = $user->createToken('test')->plainTextToken;
+
+        $this->postJson('/api/v1/profile/avatar', [
+            'avatar' => UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
+        ], $this->headers($token))
+            ->assertStatus(422);
+
+        $this->assertSame('avatars/existing.jpg', $user->fresh()->avatar);
+        Storage::disk('public')->assertExists('avatars/existing.jpg');
+        $this->assertCount(1, Storage::disk('public')->allFiles('avatars'));
     }
 
     public function test_avatar_must_not_exceed_2mb(): void

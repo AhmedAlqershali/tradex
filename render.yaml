@@ -18,6 +18,8 @@ services:
       - key: APP_KEY
         sync: false
       - key: APP_URL
+        # Set this to the deployed public HTTPS origin, for example
+        # https://tradex-backend.onrender.com. Never use the internal HTTP URL.
         sync: false
       - key: DB_CONNECTION
         value: pgsql

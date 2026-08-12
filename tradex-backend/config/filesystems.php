@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // APP_URL is the public HTTPS origin in production. Keep uploaded
+            // values relative; this URL is only used when serializing them.
+            'url' => rtrim((string) config('app.url', 'https://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

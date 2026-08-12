@@ -52,7 +52,9 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    // Production APP_URL must be the public HTTPS origin. The HTTPS fallback
+    // prevents generated public URLs from defaulting to an insecure scheme.
+    'url' => env('APP_URL', 'https://localhost'),
 
     /*
     |--------------------------------------------------------------------------

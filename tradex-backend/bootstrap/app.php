@@ -15,6 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Replit/Render terminate TLS before forwarding requests to PHP. Trust
+        // the proxy's forwarded scheme and host so Laravel generates canonical
+        // public URLs from the original HTTPS request.
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR |
+                Request::HEADER_X_FORWARDED_HOST |
+                Request::HEADER_X_FORWARDED_PORT |
+                Request::HEADER_X_FORWARDED_PROTO |
+                Request::HEADER_X_FORWARDED_PREFIX,
+        );
+
         // Security headers on every response, including unmatched-route 404s.
         // Registering globally (prepend) ensures the header is set even when no
         // API route matches, which would otherwise bypass the `api` group stack.

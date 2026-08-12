@@ -201,6 +201,31 @@ class AuthTest extends TestCase
         );
     }
 
+    public function test_auth_me_returns_https_avatar_url_behind_https_proxy(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/me-avatar.jpg', 'avatar bytes');
+
+        $user = User::factory()->create([
+            'avatar' => 'avatars/me-avatar.jpg',
+        ]);
+        $token = $user->createToken('test')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => "Bearer {$token}",
+            'Accept' => 'application/json',
+            'X-Forwarded-Proto' => 'https',
+            'X-Forwarded-Host' => 'api.tradex.test',
+        ])->getJson('/api/v1/auth/me')->assertOk();
+
+        $avatar = $response->json('data.avatar');
+        $this->assertSame(
+            'https://api.tradex.test/storage/avatars/me-avatar.jpg',
+            $avatar,
+        );
+        $this->assertSame('avatars/me-avatar.jpg', $user->fresh()->avatar);
+    }
+
     public function test_login_fails_with_wrong_password(): void
     {
         User::factory()->create(['email' => 'user@example.com', 'password' => bcrypt('correct')]);
