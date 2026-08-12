@@ -38,7 +38,7 @@
         </form>
     </section>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+    <section id="subscriptions" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
             <div>
                 <h2 class="font-semibold text-slate-900">All merchants</h2>

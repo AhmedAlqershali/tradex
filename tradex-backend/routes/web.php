@@ -24,6 +24,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/merchants', [AdminMerchantController::class, 'index'])->name('merchants.index');
         Route::get('/merchants/{merchant}', [AdminMerchantController::class, 'show'])->name('merchants.show');
+        Route::get('/subscriptions', fn () => redirect()->to(route('admin.merchants.index').'#subscriptions'))
+            ->name('subscriptions.index');
         Route::post('/merchants/{merchant}/subscription-requests/{subscriptionRequest}/approve', [AdminMerchantController::class, 'approveSubscription'])
             ->name('merchants.subscription-requests.approve');
         Route::post('/merchants/{merchant}/subscription-requests/{subscriptionRequest}/reject', [AdminMerchantController::class, 'rejectSubscription'])

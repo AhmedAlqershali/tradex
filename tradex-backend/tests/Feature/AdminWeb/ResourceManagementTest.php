@@ -22,9 +22,24 @@ class ResourceManagementTest extends TestCase
             '/admin/products',
             '/admin/categories',
             '/admin/stores',
+            '/admin/subscriptions',
         ] as $path) {
             $this->get($path)->assertRedirect(route('admin.login'));
         }
+    }
+
+    public function test_admin_subscriptions_url_redirects_to_the_existing_subscription_section(): void
+    {
+        $this->actingAs(User::factory()->admin()->create(), 'web')
+            ->get('/admin/subscriptions')
+            ->assertRedirect(route('admin.merchants.index').'#subscriptions');
+
+        $this->followingRedirects()
+            ->get('/admin/subscriptions')
+            ->assertOk()
+            ->assertSee('All merchants')
+            ->assertSee('Subscription status reflects the latest entitlement period.')
+            ->assertSee('id="subscriptions"', false);
     }
 
     public function test_non_admin_users_cannot_view_resource_pages(): void
@@ -32,7 +47,7 @@ class ResourceManagementTest extends TestCase
         foreach (['client', 'merchant'] as $role) {
             $user = User::factory()->state(['role' => $role])->create();
 
-            foreach (['/admin/orders', '/admin/products', '/admin/categories', '/admin/stores'] as $path) {
+            foreach (['/admin/orders', '/admin/products', '/admin/categories', '/admin/stores', '/admin/subscriptions'] as $path) {
                 $this->actingAs($user, 'web')->get($path)->assertForbidden();
             }
         }
