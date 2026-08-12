@@ -201,10 +201,13 @@ class UserController {
   // ── Logout ────────────────────────────────────────────────────────────────────
 
   /// POST /auth/logout (best-effort) then clears all local state.
-  Future<void> logout() async {
+  ///
+  /// [performLogout] is a test seam for verifying session isolation without
+  /// making a network request. Production callers use AuthService by default.
+  Future<void> logout({Future<void> Function()? performLogout}) async {
     _begin();
     try {
-      await AuthService.instance.logout();
+      await (performLogout ?? AuthService.instance.logout)();
     } catch (_) {
       // Always clear local state even when the server call fails.
     } finally {

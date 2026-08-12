@@ -43,7 +43,9 @@ class MyApp extends StatelessWidget {
           create: (_) => MerchantDashboardBloc(),
         ),
         BlocProvider<MerchantSubscriptionBloc>(
-          create: (_) => MerchantSubscriptionBloc(),
+          create: (_) => MerchantSubscriptionBloc(
+            refreshCurrentUser: UserController.instance.refreshProfile,
+          ),
         ),
         BlocProvider<AdminDashboardBloc>(create: (_) => AdminDashboardBloc()),
         BlocProvider<AdminAnalyticsBloc>(create: (_) => AdminAnalyticsBloc()),

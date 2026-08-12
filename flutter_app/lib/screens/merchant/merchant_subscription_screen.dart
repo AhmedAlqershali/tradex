@@ -100,7 +100,7 @@ class _MerchantSubscriptionScreenState
               return RefreshIndicator(
                 onRefresh: () async => context
                     .read<MerchantSubscriptionBloc>()
-                    .add(const MerchantSubscriptionRequestsLoadRequested()),
+                    .add(const MerchantSubscriptionRefreshRequested()),
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding:

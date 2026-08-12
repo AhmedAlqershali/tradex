@@ -87,6 +87,52 @@ void main() {
     await bloc.close();
   });
 
+  test('refreshes expired state to active after a server-side renewal',
+      () async {
+    var renewed = false;
+    var entitlementRefreshes = 0;
+    final bloc = MerchantSubscriptionBloc(
+      loadSubscription: () async => AdminSubscription.fromJson({
+        'id': 7,
+        'plan': {'display_name': 'Pro'},
+        'billing_cycle': 'monthly',
+        'type': renewed ? 'paid' : 'trial',
+        'is_trial': !renewed,
+        'status': renewed ? 'active' : 'expired',
+        'is_entitled': renewed,
+        'ends_at': renewed ? '2026-09-20T00:00:00Z' : '2026-08-01T00:00:00Z',
+      }),
+      loadRequests: () async => const [],
+      refreshCurrentUser: () async {
+        entitlementRefreshes++;
+      },
+    );
+
+    bloc.add(const MerchantSubscriptionLoadRequested());
+    await expectLater(
+      bloc.stream,
+      emitsThrough(isA<MerchantSubscriptionLoaded>().having(
+        (state) => state.subscription?.isEntitled,
+        'expired entitlement',
+        false,
+      )),
+    );
+
+    renewed = true;
+    bloc.add(const MerchantSubscriptionRefreshRequested());
+    await expectLater(
+      bloc.stream,
+      emitsThrough(isA<MerchantSubscriptionLoaded>().having(
+        (state) => state.subscription?.isEntitled,
+        'renewed entitlement',
+        true,
+      )),
+    );
+
+    expect(entitlementRefreshes, 2);
+    await bloc.close();
+  });
+
   test('loads the merchant subscription request history', () async {
     final request = _request();
     final bloc = MerchantSubscriptionBloc(

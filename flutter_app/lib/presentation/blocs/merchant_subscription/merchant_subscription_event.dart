@@ -11,8 +11,15 @@ class MerchantSubscriptionLoadRequested extends MerchantSubscriptionEvent {
   const MerchantSubscriptionLoadRequested();
 }
 
-class MerchantSubscriptionPlansLoadRequested
-    extends MerchantSubscriptionEvent {
+/// Re-reads the current subscription and request history from Laravel.
+///
+/// This is intentionally a server refresh rather than a local date check:
+/// an admin may approve a renewal while this screen is open.
+class MerchantSubscriptionRefreshRequested extends MerchantSubscriptionEvent {
+  const MerchantSubscriptionRefreshRequested();
+}
+
+class MerchantSubscriptionPlansLoadRequested extends MerchantSubscriptionEvent {
   const MerchantSubscriptionPlansLoadRequested();
 }
 

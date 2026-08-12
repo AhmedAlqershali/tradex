@@ -36,4 +36,29 @@ void main() {
     expect(exception, isA<ForbiddenException>());
     expect(exception.message, 'Forbidden. You do not have permission.');
   });
+
+  test('preserves Laravel subscription denial as a typed 403', () {
+    final exception = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/ai/product-description'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/ai/product-description'),
+          statusCode: 403,
+          data: <String, dynamic>{
+            'success': false,
+            'message':
+                'An active trial or paid subscription is required to access merchant business features.',
+            'data': null,
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+
+    expect(exception, isA<ForbiddenException>());
+    expect(
+      exception.message,
+      contains('active trial or paid subscription'),
+    );
+  });
 }
