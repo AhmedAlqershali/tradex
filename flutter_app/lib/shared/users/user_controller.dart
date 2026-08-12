@@ -61,16 +61,19 @@ class UserController {
   /// Called at app start (SplashScreen).
   ///
   /// Priority:
-  ///   1. SecureStorage token → GET /profile (Phase B live path)
+  ///   1. SecureStorage token → GET /auth/me (server-authoritative path)
   ///   2. null → navigate to onboarding
   ///
   /// Session validation failures fail closed rather than restoring a local
   /// identity without server confirmation.
-  Future<AppUser?> loadSession() async {
+  Future<AppUser?> loadSession({
+    Future<AppUser> Function()? fetchCurrentUser,
+  }) async {
     try {
       final token = await SecureStorageService.instance.readAccessToken();
       if (token != null && token.isNotEmpty) {
-        final user = await AuthService.instance.getCurrentUser();
+        final user =
+            await (fetchCurrentUser ?? AuthService.instance.getCurrentUser)();
         currentUserNotifier.value = user;
         return user;
       }

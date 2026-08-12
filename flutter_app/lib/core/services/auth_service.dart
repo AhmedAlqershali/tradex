@@ -115,10 +115,10 @@ class AuthService {
   }
 
   // ── Get current user ──────────────────────────────────────────────────────────
-  /// GET /profile
+  /// GET /auth/me
   Future<AppUser> getCurrentUser() async {
     final response =
-        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.me);
+        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.authMe);
     final raw = response.data!;
     // Handle both wrapped { data: {...} } and flat responses.
     final userJson =
@@ -181,13 +181,13 @@ class AuthService {
     // JSON so AppUser.fromServerJson (which reads store_id/store_name off
     // the user object) picks them up immediately, without waiting for the
     // next GET /profile.
-    final body =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    final body = raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
 
     // Defensive parse: user must be a Map, token must be a String.
     final rawUser = body['user'];
     if (rawUser is! Map) {
-      throw const UnknownException('Unexpected auth response: missing user object.');
+      throw const UnknownException(
+          'Unexpected auth response: missing user object.');
     }
     final userJson = Map<String, dynamic>.from(rawUser);
 
@@ -199,7 +199,8 @@ class AuthService {
     final storeJson = body['store'];
     if (storeJson is Map) {
       userJson['store_id'] = storeJson['id']?.toString();
-      userJson['store_name'] = (storeJson['store_name'] ?? storeJson['name'])?.toString();
+      userJson['store_name'] =
+          (storeJson['store_name'] ?? storeJson['name'])?.toString();
     }
     return AuthResult(
       user: AppUser.fromServerJson(userJson),

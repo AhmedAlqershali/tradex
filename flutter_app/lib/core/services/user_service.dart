@@ -9,7 +9,7 @@ import 'package:ai_saas/shared/users/user_model.dart';
 // Handles user profile API calls.
 //
 // Endpoints:
-//   GET  /profile
+//   GET  /auth/me
 //   PUT  /profile
 //   POST /profile/avatar
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,10 +19,10 @@ class UserService {
   static final UserService instance = UserService._();
 
   // ── Get profile ───────────────────────────────────────────────────────────────
-  /// GET /profile
+  /// GET /auth/me
   Future<AppUser> getMe() async {
     final response =
-        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.me);
+        await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.authMe);
     return parseProfileResponse(response.data!);
   }
 

@@ -44,9 +44,10 @@ class ApiConstants {
   static const String resendVerification = '/auth/email/resend';
 
   // ── Profile ───────────────────────────────────────────────────────────────────
-  // Backend route is /profile (all authenticated roles), not /users/me — there
-  // is no /users/* route outside the admin namespace. `me` is kept as the
-  // constant name for readability at call sites (it means "the current user").
+  // `/auth/me` is the authenticated-user read endpoint and includes the
+  // merchant-only current_subscription entitlement snapshot. `/profile`
+  // remains the mutation endpoint for profile fields.
+  static const String authMe = '/auth/me';
   static const String me = '/profile';
   static const String meAvatar = '/profile/avatar';
   static const String mePassword = '/profile/password';

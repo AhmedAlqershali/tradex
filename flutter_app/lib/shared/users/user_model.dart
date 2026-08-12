@@ -4,7 +4,7 @@ import 'package:ai_saas/core/api/app_config.dart';
 // ─── AppUser ──────────────────────────────────────────────────────────────────
 //
 // User identity model. Populated from the server via [AppUser.fromServerJson]
-// (GET /profile, POST /auth/login, POST /auth/register/*). Also persisted
+// (GET /auth/me, POST /auth/login, POST /auth/register/*). Also persisted
 // locally via shared_preferences for cold-start session restore.
 //
 // Server fields:
@@ -53,6 +53,11 @@ class AppUser {
 
   final DateTime createdAt;
 
+  /// The server-authoritative merchant trial/paid entitlement snapshot from
+  /// `/auth/me`. This is intentionally not written to local session JSON:
+  /// authorization and freshness always come from Laravel.
+  final UserEntitlement? currentSubscription;
+
   const AppUser({
     required this.id,
     required this.name,
@@ -67,6 +72,7 @@ class AppUser {
     this.latitude,
     this.longitude,
     this.photoPath,
+    this.currentSubscription,
     required this.createdAt,
   });
 
@@ -120,6 +126,8 @@ class AppUser {
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       photoPath: json['photoPath'] as String?,
+      // Deliberately ignore any locally cached subscription/trial fields.
+      // Laravel `/auth/me` is the only authority for entitlement state.
       createdAt: _parseDate(json['createdAt'] as String?),
     );
   }
@@ -139,16 +147,17 @@ class AppUser {
     if (stores is List && stores.isNotEmpty && stores.first is Map) {
       firstStore = Map<String, dynamic>.from(stores.first as Map);
     }
+    final userRole = AppType.values.firstWhere(
+      (e) => e.name == (_stringValue(json['role']) ?? 'client'),
+      orElse: () => AppType.client,
+    );
 
     return AppUser(
       id: json['id']?.toString() ?? '',
       name: _stringValue(json['name']) ?? '',
       email: _stringValue(json['email']) ?? '',
       phone: _stringValue(json['phone']) ?? '',
-      role: AppType.values.firstWhere(
-        (e) => e.name == (_stringValue(json['role']) ?? 'client'),
-        orElse: () => AppType.client,
-      ),
+      role: userRole,
       storeId: _stringValue(json['store_id']) ??
           _stringValue(json['storeId']) ??
           firstStore?['id']?.toString(),
@@ -171,6 +180,7 @@ class AppUser {
       createdAt: _parseDate(
         _stringValue(json['created_at']) ?? _stringValue(json['createdAt']),
       ),
+      currentSubscription: _parseEntitlement(json, userRole),
     );
   }
 
@@ -206,6 +216,19 @@ class AppUser {
     return double.tryParse(value?.toString() ?? '');
   }
 
+  static UserEntitlement? _parseEntitlement(
+    Map<String, dynamic> json,
+    AppType role,
+  ) {
+    // Laravel only exposes current_subscription for merchants. Ignore an
+    // unexpected client/admin field rather than leaking merchant UI/state into
+    // those roles.
+    if (role != AppType.merchant) return null;
+    final raw = json['current_subscription'];
+    if (raw is! Map) return null;
+    return UserEntitlement.fromServerJson(Map<String, dynamic>.from(raw));
+  }
+
   // ── Immutable update ─────────────────────────────────────────────────────────
 
   // Sentinel used to distinguish "pass null explicitly" from "omitted".
@@ -225,6 +248,7 @@ class AppUser {
     Object? latitude = _absent,
     Object? longitude = _absent,
     Object? photoPath = _absent,
+    Object? currentSubscription = _absent,
     DateTime? createdAt,
   }) {
     return AppUser(
@@ -244,7 +268,55 @@ class AppUser {
       latitude: latitude == _absent ? this.latitude : latitude as double?,
       longitude: longitude == _absent ? this.longitude : longitude as double?,
       photoPath: photoPath == _absent ? this.photoPath : photoPath as String?,
+      currentSubscription: currentSubscription == _absent
+          ? this.currentSubscription
+          : currentSubscription as UserEntitlement?,
       createdAt: createdAt ?? this.createdAt,
     );
+  }
+}
+
+/// Minimal entitlement snapshot embedded in the authenticated merchant user
+/// payload. It is not an authorization mechanism; Laravel remains authoritative.
+class UserEntitlement {
+  const UserEntitlement({
+    required this.type,
+    required this.status,
+    required this.isTrial,
+    required this.isEntitled,
+    this.startsAt,
+    this.endsAt,
+  });
+
+  final String type;
+  final String status;
+  final bool isTrial;
+  final bool isEntitled;
+  final DateTime? startsAt;
+  final DateTime? endsAt;
+
+  bool get isPaid => type == 'paid' && !isTrial;
+
+  /// Expiry is a server state, not a client-side date calculation. A future
+  /// dated subscription can be non-entitled without being expired.
+  bool get isExpired => status == 'expired';
+
+  factory UserEntitlement.fromServerJson(Map<String, dynamic> json) {
+    return UserEntitlement(
+      type: _text(json['type']),
+      status: _text(json['status']),
+      isTrial: json['is_trial'] == true,
+      isEntitled: json['is_entitled'] == true,
+      startsAt: _date(json['starts_at']),
+      endsAt: _date(json['ends_at']),
+    );
+  }
+
+  static String _text(Object? value) => value?.toString().trim() ?? '';
+
+  static DateTime? _date(Object? value) {
+    final text = value?.toString().trim() ?? '';
+    if (text.isEmpty || text == 'null') return null;
+    return DateTime.tryParse(text);
   }
 }
