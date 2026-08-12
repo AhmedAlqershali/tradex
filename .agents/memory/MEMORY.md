@@ -15,3 +15,4 @@
 - [Laravel test encryption key](laravel-test-encryption-key.md) — full feature tests need a process-only APP_KEY when the imported environment does not provide one.
 - [Product nullable updates](product-null-update.md) — preserve explicit nulls through service and repository updates so nullable merchant fields can be cleared.
 - [Flutter localization](flutter-localization.md) — extend the single app-level locale delegate/controller for Arabic and English; do not add screen-specific systems.
+- [Admin web CSP](admin-web-csp.md) — keep API CSP restrictive while allowing same-origin assets for browser-facing admin pages.

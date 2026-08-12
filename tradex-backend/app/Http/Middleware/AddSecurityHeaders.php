@@ -34,9 +34,10 @@ use Symfony\Component\HttpFoundation\Response;
  *   Only added in production to instruct clients to use HTTPS exclusively.
  *   Skipped in local/testing environments to avoid breaking HTTP dev servers.
  *
- * Content-Security-Policy: default-src 'none'
- *   Tells browsers that no sub-resources are expected from this API.
- *   This API serves only JSON; browsers should never render it as HTML.
+ * Content-Security-Policy:
+ *   API responses keep a restrictive `default-src 'none'` policy because the
+ *   API serves JSON only. Browser-facing admin pages allow only same-origin
+ *   assets so the dashboard's compiled CSS and JavaScript can load.
  *
  * Cache-Control: no-store
  *   Prevents sensitive API responses from being cached in shared proxies
@@ -54,7 +55,11 @@ class AddSecurityHeaders
         $response->headers->set('X-XSS-Protection', '0');
         $response->headers->set('Referrer-Policy', 'no-referrer');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-        $response->headers->set('Content-Security-Policy', "default-src 'none'");
+        $contentSecurityPolicy = $request->is('api/*')
+            ? "default-src 'none'"
+            : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:";
+
+        $response->headers->set('Content-Security-Policy', $contentSecurityPolicy);
         $response->headers->set('Cache-Control', 'no-store, private');
 
         // HSTS — only in production; prevents accidental lock-out during development
