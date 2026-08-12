@@ -11,6 +11,7 @@
         "equatable",
         "flutter",
         "flutter_bloc",
+        "flutter_localizations",
         "flutter_screenutil",
         "flutter_secure_storage",
         "geocoding",
@@ -189,6 +190,21 @@
         "material_color_utilities",
         "meta",
         "sky_engine",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "characters",
+        "clock",
+        "collection",
+        "flutter",
+        "intl",
+        "material_color_utilities",
+        "meta",
+        "path",
         "vector_math"
       ]
     },
@@ -765,6 +781,15 @@
       "version": "0.6.7",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.20.2",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
       ]
     },
     {

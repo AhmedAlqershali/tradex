@@ -10,10 +10,64 @@ import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+/// Displays the authenticated user's server-backed avatar.
+///
+/// A native picker path is intentionally not accepted here. Picker paths are
+/// transient upload input and [AppUser.fromServerJson] only promotes a server
+/// URL (or `/storage/...`) into [AppUser.photoPath].
+class ProfileAvatar extends StatelessWidget {
+  const ProfileAvatar({
+    super.key,
+    required this.photoPath,
+    this.size = 100,
+  });
+
+  static const _placeholderKey = ValueKey<String>('profile-avatar-placeholder');
+
+  final String? photoPath;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipOval(child: _buildImage()),
+    );
+  }
+
+  Widget _buildImage() {
+    if (photoPath == null || photoPath!.trim().isEmpty) {
+      return _placeholder();
+    }
+
+    if (!AppUser.isServerPhotoPath(photoPath!)) {
+      return _placeholder();
+    }
+
+    final resolvedUrl = AppConfig.resolveMediaUrl(photoPath!);
+    return Image.network(
+      resolvedUrl,
+      key: ValueKey<String>('profile-avatar-network:$resolvedUrl'),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _placeholder(),
+    );
+  }
+
+  Widget _placeholder() {
+    return Image.asset(
+      'assets/images/client.png',
+      key: _placeholderKey,
+      fit: BoxFit.cover,
+    );
+  }
+}
 
 // ─── ProfileScreen ────────────────────────────────────────────────────────────
 class ProfileScreen extends StatefulWidget {
@@ -44,12 +98,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Directionality(
           textDirection: l10n.textDirection,
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, userState) {
-              AppUser? user;
-              if (userState is UserLoaded) user = userState.user;
-              if (userState is UserUpdating) user = userState.user;
-
+          child: ValueListenableBuilder<AppUser?>(
+            valueListenable: UserController.instance.currentUserNotifier,
+            builder: (context, user, _) {
               final displayName = user?.displayName ?? l10n.defaultUser;
               final region = user?.region ?? '';
               final photoPath = user?.photoPath;
@@ -81,8 +132,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                               color: Colors.white,
                             ),
-                            child: ClipOval(
-                              child: _buildAvatarImage(photoPath),
+                            child: ProfileAvatar(
+                              photoPath: photoPath,
+                              size: 100.w,
                             ),
                           ),
                           SizedBox(height: 16.h),
@@ -192,21 +244,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildAvatarImage(String? photoPath) {
-    if (photoPath == null || photoPath.isEmpty) {
-      return Image.asset('assets/images/client.png', fit: BoxFit.cover);
-    }
-    if (AppUser.isServerPhotoPath(photoPath)) {
-      return Image.network(
-        AppConfig.resolveMediaUrl(photoPath),
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
-            Image.asset('assets/images/client.png', fit: BoxFit.cover),
-      );
-    }
-    return Image.asset('assets/images/client.png', fit: BoxFit.cover);
   }
 
   Future<void> _showLanguagePicker(BuildContext context) async {
