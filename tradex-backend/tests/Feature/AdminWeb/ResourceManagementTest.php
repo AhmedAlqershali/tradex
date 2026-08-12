@@ -32,7 +32,7 @@ class ResourceManagementTest extends TestCase
     {
         $this->actingAs(User::factory()->admin()->create(), 'web')
             ->get('/admin/subscriptions')
-            ->assertRedirect(route('admin.merchants.index').'#subscriptions');
+            ->assertRedirect(route('admin.merchants.index', ['section' => 'subscriptions']).'#subscriptions');
 
         $this->followingRedirects()
             ->get('/admin/subscriptions')

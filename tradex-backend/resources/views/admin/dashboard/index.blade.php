@@ -18,26 +18,34 @@
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform statistics">
         @php
             $cards = [
-                ['label' => 'Total users', 'value' => $overview['users']['total'], 'detail' => $overview['users']['clients'] . ' clients', 'icon_bg' => 'bg-indigo-50', 'icon_text' => 'text-indigo-600', 'icon' => '◎'],
-                ['label' => 'Total merchants', 'value' => $overview['users']['merchants'], 'detail' => $overview['users']['active_merchants'] . ' active accounts', 'icon_bg' => 'bg-violet-50', 'icon_text' => 'text-violet-600', 'icon' => '◈'],
-                ['label' => 'Active merchants', 'value' => $overview['users']['active_merchants'], 'detail' => $overview['subscriptions']['trials'] . ' active trials', 'icon_bg' => 'bg-emerald-50', 'icon_text' => 'text-emerald-600', 'icon' => '↗'],
-                ['label' => 'Active subscriptions', 'value' => $overview['subscriptions']['active'], 'detail' => 'Includes active trials', 'icon_bg' => 'bg-amber-50', 'icon_text' => 'text-amber-600', 'icon' => '◇'],
-                ['label' => 'Products', 'value' => $overview['products']['total'], 'detail' => $overview['products']['active'] . ' active listings', 'icon_bg' => 'bg-sky-50', 'icon_text' => 'text-sky-600', 'icon' => '□'],
-                ['label' => 'Orders', 'value' => $overview['orders']['total'], 'detail' => $overview['orders']['pending'] . ' pending', 'icon_bg' => 'bg-rose-50', 'icon_text' => 'text-rose-600', 'icon' => '▤'],
-                ['label' => 'Active stores', 'value' => $overview['stores']['active'], 'detail' => $overview['stores']['total'] . ' total stores', 'icon_bg' => 'bg-teal-50', 'icon_text' => 'text-teal-600', 'icon' => '⌂'],
-                ['label' => 'Completed sales', 'value' => number_format($overview['total_sales'], 2), 'detail' => 'Marketplace revenue', 'icon_bg' => 'bg-orange-50', 'icon_text' => 'text-orange-600', 'icon' => '$'],
+                ['label' => 'Total users', 'value' => $overview['users']['total'], 'detail' => $overview['users']['clients'] . ' clients', 'icon_bg' => 'bg-indigo-50', 'icon_text' => 'text-indigo-600', 'icon' => '◎', 'url' => null],
+                ['label' => 'Total merchants', 'value' => $overview['users']['merchants'], 'detail' => $overview['users']['active_merchants'] . ' active accounts', 'icon_bg' => 'bg-violet-50', 'icon_text' => 'text-violet-600', 'icon' => '◈', 'url' => route('admin.merchants.index')],
+                ['label' => 'Active merchants', 'value' => $overview['users']['active_merchants'], 'detail' => $overview['subscriptions']['trials'] . ' active trials', 'icon_bg' => 'bg-emerald-50', 'icon_text' => 'text-emerald-600', 'icon' => '↗', 'url' => route('admin.merchants.index')],
+                ['label' => 'Active subscriptions', 'value' => $overview['subscriptions']['active'], 'detail' => 'Includes active trials', 'icon_bg' => 'bg-amber-50', 'icon_text' => 'text-amber-600', 'icon' => '◇', 'url' => route('admin.subscriptions.index')],
+                ['label' => 'Products', 'value' => $overview['products']['total'], 'detail' => $overview['products']['active'] . ' active listings', 'icon_bg' => 'bg-sky-50', 'icon_text' => 'text-sky-600', 'icon' => '□', 'url' => route('admin.products.index')],
+                ['label' => 'Orders', 'value' => $overview['orders']['total'], 'detail' => $overview['orders']['pending'] . ' pending', 'icon_bg' => 'bg-rose-50', 'icon_text' => 'text-rose-600', 'icon' => '▤', 'url' => route('admin.orders.index')],
+                ['label' => 'Active stores', 'value' => $overview['stores']['active'], 'detail' => $overview['stores']['total'] . ' total stores', 'icon_bg' => 'bg-teal-50', 'icon_text' => 'text-teal-600', 'icon' => '⌂', 'url' => route('admin.stores.index')],
+                ['label' => 'Completed sales', 'value' => number_format($overview['total_sales'], 2), 'detail' => 'Marketplace revenue', 'icon_bg' => 'bg-orange-50', 'icon_text' => 'text-orange-600', 'icon' => '$', 'url' => route('admin.orders.index', ['status' => \App\Models\Order::STATUS_COMPLETED])],
             ];
         @endphp
 
         @foreach ($cards as $card)
-            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
+            @if ($card['url'])
+                <a href="{{ $card['url'] }}" aria-label="View {{ $card['label'] }}" class="block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md">
+            @else
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
+            @endif
                 <div class="flex items-start justify-between gap-3">
                     <p class="text-sm font-medium text-slate-500">{{ $card['label'] }}</p>
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl {{ $card['icon_bg'] }} text-lg font-semibold {{ $card['icon_text'] }}">{{ $card['icon'] }}</span>
                 </div>
                 <p class="mt-5 text-3xl font-semibold tracking-tight text-slate-900">{{ $card['value'] }}</p>
                 <p class="mt-2 text-xs text-slate-400">{{ $card['detail'] }}</p>
-            </article>
+            @if ($card['url'])
+                </a>
+            @else
+                </article>
+            @endif
         @endforeach
     </section>
 

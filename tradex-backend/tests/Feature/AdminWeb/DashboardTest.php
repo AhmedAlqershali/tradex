@@ -82,7 +82,7 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertSee('href="'.route('admin.dashboard').'"', false)
             ->assertSee('href="'.route('admin.merchants.index').'"', false)
-            ->assertSee('href="'.route('admin.merchants.index').'#subscriptions"', false)
+            ->assertSee('href="'.route('admin.subscriptions.index').'"', false)
             ->assertSee('href="'.route('admin.orders.index').'"', false)
             ->assertSee('href="'.route('admin.products.index').'"', false)
             ->assertSee('href="'.route('admin.categories.index').'"', false)
@@ -90,6 +90,30 @@ class DashboardTest extends TestCase
             ->assertSee('>Merchants<', false)
             ->assertSee('>Subscriptions<', false)
             ->assertSee('>Stores<', false);
+    }
+
+    public function test_dashboard_module_cards_link_to_existing_admin_modules(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'web')
+            ->get('/admin/dashboard')
+            ->assertSee('href="'.route('admin.merchants.index').'"', false)
+            ->assertSee('href="'.route('admin.subscriptions.index').'"', false)
+            ->assertSee('href="'.route('admin.products.index').'"', false)
+            ->assertSee('href="'.route('admin.orders.index').'"', false)
+            ->assertSee('href="'.route('admin.orders.index', ['status' => 'completed']).'"', false)
+            ->assertSee('href="'.route('admin.stores.index').'"', false);
+    }
+
+    public function test_mobile_navigation_marks_the_current_module_active(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'web')
+            ->get('/admin/orders')
+            ->assertSee('href="'.route('admin.orders.index').'" class="rounded-lg px-3 py-2 text-sm font-semibold bg-indigo-100 text-indigo-700"', false)
+            ->assertSee('href="'.route('admin.products.index').'" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"', false);
     }
 
     public function test_inactive_admin_cannot_login(): void
