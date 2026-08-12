@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'                 => \App\Http\Middleware\EnsureRole::class,
             'user.active'          => \App\Http\Middleware\EnsureUserIsActive::class,
             'merchant.subscription' => \App\Http\Middleware\EnsureMerchantHasSubscription::class,
+            'admin.web'            => \App\Http\Middleware\EnsureAdminWeb::class,
         ]);
 
         // EnsureUserIsActive is NOT appended to the 'api' group here because the

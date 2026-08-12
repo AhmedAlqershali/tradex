@@ -24,6 +24,7 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                 COUNT(*) as total,
                 SUM(CASE WHEN role = 'client'   THEN 1 ELSE 0 END) as clients,
                 SUM(CASE WHEN role = 'merchant' THEN 1 ELSE 0 END) as merchants,
+                SUM(CASE WHEN role = 'merchant' AND status = 'active' THEN 1 ELSE 0 END) as active_merchants,
                 SUM(CASE WHEN role = 'admin'    THEN 1 ELSE 0 END) as admins
             ")->first();
 
@@ -54,6 +55,21 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                 SUM(CASE WHEN status = 'completed'  THEN total_amount ELSE 0 END) as total_sales
             ")->first();
 
+        $activeSubscriptionQuery = DB::table('subscriptions')
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            });
+
+        $subscriptionStats = [
+            'active' => (clone $activeSubscriptionQuery)->count(),
+            'trials' => (clone $activeSubscriptionQuery)
+                ->where('type', 'trial')
+                ->distinct('user_id')
+                ->count('user_id'),
+        ];
+
         // ── Marketplace activity snapshots ─────────────────────────────────────
         $newestUsers = User::orderByDesc('created_at')->limit(5)->get(['id', 'name', 'email', 'role', 'status', 'created_at']);
 
@@ -75,10 +91,11 @@ class AdminDashboardService implements AdminDashboardServiceInterface
         return [
             'system_overview' => [
                 'users' => [
-                    'total'     => (int) ($userStats->total     ?? 0),
-                    'clients'   => (int) ($userStats->clients   ?? 0),
-                    'merchants' => (int) ($userStats->merchants ?? 0),
-                    'admins'    => (int) ($userStats->admins    ?? 0),
+                    'total'            => (int) ($userStats->total            ?? 0),
+                    'clients'          => (int) ($userStats->clients          ?? 0),
+                    'merchants'        => (int) ($userStats->merchants        ?? 0),
+                    'active_merchants' => (int) ($userStats->active_merchants ?? 0),
+                    'admins'           => (int) ($userStats->admins           ?? 0),
                 ],
                 'stores' => [
                     'total'     => (int) ($storeStats->total     ?? 0),
@@ -101,6 +118,10 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                     'cancelled'  => (int) ($orderStats->cancelled  ?? 0),
                 ],
                 'total_sales' => round((float) ($orderStats->total_sales ?? 0), 2),
+                'subscriptions' => [
+                    'active' => (int) $subscriptionStats['active'],
+                    'trials' => (int) $subscriptionStats['trials'],
+                ],
             ],
             'marketplace' => [
                 'newest_users'    => $newestUsers,
