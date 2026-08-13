@@ -18,3 +18,4 @@
 - [Admin web CSP](admin-web-csp.md) — keep API CSP restrictive while allowing same-origin assets for browser-facing admin pages.
 - [Flutter profile avatar state](flutter-profile-avatar-state.md) — Profile avatar rendering must follow the canonical authenticated-user notifier, not a potentially stale bloc snapshot.
 - [Portable npm lockfiles](npm-lock-registry.md) — imported lockfiles can embed Replit's private tarball host; external builds need normalization or regeneration.
+- [Avatar runtime verification](avatar-runtime-verification.md) — source tests cannot prove the real APK upload URL or hosted file response; capture one redacted device trace.
