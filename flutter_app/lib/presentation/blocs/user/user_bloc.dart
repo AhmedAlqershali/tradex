@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
-import 'package:ai_saas/core/services/user_service.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'user_event.dart';
 import 'user_state.dart';
@@ -32,9 +31,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     try {
       // Profile is server-authoritative. Refresh it so avatar state always
       // comes from Laravel rather than a stale/local client value.
-      final user = await UserService.instance.getMe();
-      await UserController.instance.setUser(user);
-      if (!isClosed) emit(UserLoaded(user: user));
+      final user = await UserController.instance.refreshProfileIfCurrent();
+      if (user != null && !isClosed) emit(UserLoaded(user: user));
     } on ApiException catch (e) {
       if (!isClosed) emit(UserFailure(message: e.message));
     } catch (e) {

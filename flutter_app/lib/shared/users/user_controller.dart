@@ -38,6 +38,11 @@ class UserController {
   /// The currently signed-in user. Null when no session exists.
   final ValueNotifier<AppUser?> currentUserNotifier = ValueNotifier(null);
 
+  // Incremented when a profile mutation starts. A refresh captures the
+  // current value before awaiting /auth/me and only publishes its result when
+  // the value is unchanged.
+  int _profileGeneration = 0;
+
   /// True while any auth operation is in progress.
   final ValueNotifier<bool> isLoadingNotifier = ValueNotifier(false);
 
@@ -292,9 +297,26 @@ class UserController {
   /// used by screens that need to reflect profile changes made outside the
   /// current Flutter process.
   Future<void> refreshProfile() async {
-    final user = await UserService.instance.getMe();
+    await refreshProfileIfCurrent();
+  }
+
+  /// Refreshes the authenticated profile and ignores a response made stale by
+  /// a profile mutation that started while the request was in flight.
+  ///
+  /// A nullable result distinguishes an intentionally ignored response from a
+  /// successfully applied profile. The optional fetcher keeps this
+  /// synchronization boundary straightforward to test without changing the
+  /// production service path.
+  Future<AppUser?> refreshProfileIfCurrent({
+    Future<AppUser> Function()? fetchCurrentUser,
+  }) async {
+    final generation = _profileGeneration;
+    final user =
+        await (fetchCurrentUser ?? UserService.instance.getMe)();
+    if (generation != _profileGeneration) return null;
     currentUserNotifier.value = user;
     AvatarDiagnostics.log('currentUserNotifier refreshProfile', user.photoPath);
+    return user;
   }
 
   /// Updates mutable profile fields via PUT /profile.
@@ -310,6 +332,7 @@ class UserController {
     String? photoPath,
   }) async {
     _begin();
+    _invalidateProfileRefreshes();
     try {
       // Upload avatar first if a new local file path was provided. The upload
       // response contains the complete authoritative user, not just a URL.
@@ -389,6 +412,7 @@ class UserController {
     required double? longitude,
   }) async {
     _begin();
+    _invalidateProfileRefreshes();
     try {
       final updated = await UserService.instance.updateLocation(
         region: region,
@@ -420,6 +444,7 @@ class UserController {
     String? logoPath,
   }) async {
     _begin();
+    _invalidateProfileRefreshes();
     try {
       final storeId = currentUserNotifier.value?.storeId;
       if (storeId == null || storeId.isEmpty) {
@@ -487,6 +512,10 @@ class UserController {
   void _begin() {
     isLoadingNotifier.value = true;
     authErrorNotifier.value = null;
+  }
+
+  void _invalidateProfileRefreshes() {
+    _profileGeneration++;
   }
 
   void _end() {
