@@ -320,6 +320,10 @@ class UserController {
         updated = await UserService.instance.uploadAvatar(filePath: photoPath);
         uploadedPhotoPath = updated.photoPath;
         AvatarDiagnostics.log('avatar upload response', uploadedPhotoPath);
+        AvatarDiagnostics.logState(
+          'immediately_after_upload',
+          updated.photoPath,
+        );
       }
 
       // Update text fields on the server when at least one is provided.
@@ -345,6 +349,10 @@ class UserController {
             updated.copyWith(region: region ?? current?.region);
         AvatarDiagnostics.log(
           'currentUserNotifier profile mutation',
+          currentUserNotifier.value?.photoPath,
+        );
+        AvatarDiagnostics.logState(
+          'after_profile_mutation',
           currentUserNotifier.value?.photoPath,
         );
       } else if (current != null) {

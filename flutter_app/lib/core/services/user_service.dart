@@ -77,8 +77,39 @@ class UserService {
     final formData = FormData.fromMap({
       'avatar': await MultipartFile.fromFile(filePath),
     });
-    final response = await ApiClient.instance
-        .postFormData<Map<String, dynamic>>(ApiConstants.meAvatar, formData);
+    AvatarDiagnostics.logUploadRequest(
+      endpoint: '/api/v1/profile/avatar',
+      fieldName: 'avatar',
+    );
+
+    late final Response<Map<String, dynamic>> response;
+    try {
+      response = await ApiClient.instance
+          .postFormData<Map<String, dynamic>>(ApiConstants.meAvatar, formData);
+    } on ServerException catch (exception) {
+      AvatarDiagnostics.logUploadResult(
+        success: false,
+        status: exception.statusCode,
+      );
+      rethrow;
+    } catch (_) {
+      AvatarDiagnostics.logUploadResult(
+        success: false,
+        status: null,
+      );
+      rethrow;
+    }
+
+    final rawResponse = response.data;
+    final rawData = rawResponse?['data'];
+    final rawAvatar =
+        rawData is Map ? rawData['avatar']?.toString() : null;
+    AvatarDiagnostics.logUploadResult(
+      success: rawResponse?['success'] == true,
+      status: response.statusCode,
+      avatar: rawAvatar,
+    );
+
     final user = parseProfileResponse(response.data!);
     final avatarUrl = user.photoPath;
     if (avatarUrl == null ||
@@ -98,7 +129,9 @@ class UserService {
         ? Map<String, dynamic>.from(raw['data'] as Map)
         : raw;
     AvatarDiagnostics.log('profile response avatar', userJson['avatar']);
-    return AppUser.fromServerJson(userJson);
+    final user = AppUser.fromServerJson(userJson);
+    AvatarDiagnostics.logModelPhotoPath(user.photoPath);
+    return user;
   }
 
   /// Exposed for contract tests without making a network request.

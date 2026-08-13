@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Contracts\Services\ProfileServiceInterface;
 use App\Http\Requests\Profile\ChangePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Support\AvatarTrace;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,12 +70,28 @@ class ProfileController extends BaseApiController
 
     public function updateAvatar(Request $request): JsonResponse
     {
-        $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-        ]);
+        AvatarTrace::begin();
 
-        $profile = $this->profileService->updateAvatar($request->user(), $request->file('avatar'));
+        try {
+            try {
+                $request->validate([
+                    'avatar' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+                ]);
+                AvatarTrace::validation(true);
+            } catch (ValidationException $exception) {
+                AvatarTrace::validation(false);
+                throw $exception;
+            }
 
-        return $this->success($profile, 'Avatar updated successfully.');
+            $profile = $this->profileService->updateAvatar(
+                $request->user(),
+                $request->file('avatar'),
+            );
+            AvatarTrace::response($profile['avatar'] ?? null);
+
+            return $this->success($profile, 'Avatar updated successfully.');
+        } finally {
+            AvatarTrace::end();
+        }
     }
 }

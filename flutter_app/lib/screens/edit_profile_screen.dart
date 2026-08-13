@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
+import 'package:ai_saas/shared/users/avatar_diagnostics.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/location_service.dart';
@@ -51,7 +52,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       final XFile? file = await _picker.pickImage(
           source: ImageSource.gallery, imageQuality: 80);
-      if (file != null) setState(() => _pickedPhoto = File(file.path));
+      if (file != null) {
+        AvatarDiagnostics.begin();
+        await AvatarDiagnostics.logSelectedFile(
+          path: file.path,
+          name: file.name,
+          size: await file.length(),
+          mimeType: file.mimeType,
+          readBytes: file.readAsBytes,
+        );
+        if (mounted) setState(() => _pickedPhoto = File(file.path));
+      }
     } catch (e) {
       debugPrint('Photo pick error: $e');
     }

@@ -50,6 +50,10 @@ class ProfileAvatar extends StatelessWidget {
         photoPath,
         provider: 'AssetImage(local-placeholder)',
       );
+      AvatarDiagnostics.logProfileProvider(
+        provider: 'AssetImage(client.png)',
+      );
+      AvatarDiagnostics.end();
       return _placeholder();
     }
 
@@ -59,6 +63,10 @@ class ProfileAvatar extends StatelessWidget {
         photoPath,
         provider: 'AssetImage(local-placeholder)',
       );
+      AvatarDiagnostics.logProfileProvider(
+        provider: 'AssetImage(client.png)',
+      );
+      AvatarDiagnostics.end();
       return _placeholder();
     }
 
@@ -68,6 +76,11 @@ class ProfileAvatar extends StatelessWidget {
       resolvedUrl,
       provider: 'NetworkImage',
     );
+    AvatarDiagnostics.logProfileProvider(
+      provider: 'NetworkImage',
+      resolvedUrl: resolvedUrl,
+    );
+    AvatarDiagnostics.probeDownload(resolvedUrl);
     return Image.network(
       resolvedUrl,
       key: ValueKey<String>('profile-avatar-network:$resolvedUrl'),
@@ -79,7 +92,18 @@ class ProfileAvatar extends StatelessWidget {
           provider: 'AssetImage(local-placeholder)',
           error: error.runtimeType.toString(),
         );
+        AvatarDiagnostics.logProfileProvider(
+          provider: 'AssetImage(client.png)',
+          resolvedUrl: resolvedUrl,
+        );
+        AvatarDiagnostics.end();
         return _placeholder();
+      },
+      loadingBuilder: (_, child, loadingProgress) {
+        if (loadingProgress == null) {
+          AvatarDiagnostics.end();
+        }
+        return child;
       },
     );
   }

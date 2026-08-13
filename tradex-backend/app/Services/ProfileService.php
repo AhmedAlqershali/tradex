@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Services\ProfileServiceInterface;
 use App\Models\Store;
 use App\Models\User;
+use App\Support\AvatarTrace;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -72,6 +73,8 @@ class ProfileService implements ProfileServiceInterface
     public function updateAvatar(User $user, UploadedFile $file): array
     {
         $oldPath = $user->avatar;
+        AvatarTrace::database('before_upload', $oldPath);
+        AvatarTrace::received($file);
         $path = $file->store('avatars', 'public');
 
         try {
@@ -89,7 +92,13 @@ class ProfileService implements ProfileServiceInterface
             Storage::disk('public')->delete($oldPath);
         }
 
-        return $this->userPayload($user->fresh(['stores']));
+        AvatarTrace::stored($path);
+        $freshUser = $user->fresh(['stores']);
+        AvatarTrace::database('after_upload', $freshUser->avatar);
+        $payload = $this->userPayload($freshUser);
+        AvatarTrace::response($payload['avatar'] ?? null);
+
+        return $payload;
     }
 
     // ── Payload helpers ───────────────────────────────────────────────────────
