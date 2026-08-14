@@ -84,19 +84,27 @@ class UserController {
         AvatarDiagnostics.log('currentUserNotifier session restore', user.photoPath);
         return user;
       }
-    } on ApiException {
-      // A stored token is authoritative only after the server validates it.
-      // Never fall back to the legacy local session after a failed validation:
-      // that would keep the UI authenticated without a valid Sanctum token.
+    } on AuthException {
+      // A 401 is the one restoration failure that proves the stored Sanctum
+      // credential is no longer valid. ApiClient also clears the token for
+      // real HTTP 401 responses; keep this branch explicit for the injected
+      // restoration seam and for direct callers.
       await SecureStorageService.instance.clearAll();
       await _clearLegacySession();
       currentUserNotifier.value = null;
+      authErrorNotifier.value = 'انتهت جلستك. يرجى تسجيل الدخول مجدداً.';
+      return null;
+    } on ApiException catch (e) {
+      // A server, authorization, validation, network, or timeout failure does
+      // not prove that the stored credential is invalid. Preserve it so a
+      // later request or app restart can retry /auth/me.
+      await _clearLegacySession();
+      currentUserNotifier.value = null;
+      authErrorNotifier.value = _localiseError(e);
       return null;
     } catch (e) {
-      // Storage/parsing failures must also fail closed. Do not restore a
-      // locally cached identity when a stored server session could not be
-      // validated.
-      await SecureStorageService.instance.clearAll();
+      // Do not discard a credential merely because this restoration attempt
+      // failed outside the typed API error hierarchy.
       await _clearLegacySession();
       currentUserNotifier.value = null;
       debugPrint('UserController.loadSession failed closed: $e');
