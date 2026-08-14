@@ -24,6 +24,12 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     return e.toString();
   }
 
+  OrderFailure _failure(Object e) {
+    return e is ApiException
+        ? OrderFailure(e.message, error: e)
+        : OrderFailure(_errorMessage(e));
+  }
+
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
   Future<void> _onClientOrdersLoadRequested(
@@ -38,7 +44,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       OrderController.instance.setOrders(orders);
       emit(ClientOrdersLoaded(orders));
     } catch (e) {
-      emit(OrderFailure(_errorMessage(e)));
+      emit(_failure(e));
     }
   }
 
@@ -55,7 +61,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       OrderController.instance.setOrders(orders);
       emit(MerchantOrdersLoaded(orders));
     } catch (e) {
-      emit(OrderFailure(_errorMessage(e)));
+      emit(_failure(e));
     }
   }
 
@@ -68,7 +74,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       final order = await OrderService.instance.getOrderByRef(event.ref);
       emit(OrderDetailLoaded(order));
     } catch (e) {
-      emit(OrderFailure(_errorMessage(e)));
+      emit(_failure(e));
     }
   }
 
@@ -110,7 +116,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       ]);
       emit(OrderCreated(orders.first));
     } catch (e) {
-      emit(OrderFailure(_errorMessage(e)));
+      emit(_failure(e));
     }
   }
 
@@ -134,7 +140,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       ]);
       emit(OrderStatusUpdated(updatedOrder));
     } catch (e) {
-      emit(OrderFailure(_errorMessage(e)));
+      emit(_failure(e));
     }
   }
 }

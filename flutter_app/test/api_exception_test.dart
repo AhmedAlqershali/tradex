@@ -88,4 +88,64 @@ void main() {
       contains('The avatar must be an image.'),
     );
   });
+
+  test('preserves merchant order not found as a typed 404 exception', () {
+    final exception = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/merchant/orders/99999'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/merchant/orders/99999'),
+          statusCode: 404,
+          data: <String, dynamic>{
+            'success': false,
+            'message': 'Order not found.',
+            'data': null,
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+
+    expect(exception, isA<ServerException>());
+    expect((exception as ServerException).statusCode, 404);
+    expect(exception.message, 'Order not found.');
+  });
+
+  test('keeps merchant order auth, server, and network failures distinct', () {
+    final unauthorized = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/merchant/orders/1'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/merchant/orders/1'),
+          statusCode: 401,
+          data: <String, dynamic>{'message': 'Unauthenticated.'},
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+    final server = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/merchant/orders/1'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/merchant/orders/1'),
+          statusCode: 500,
+          data: <String, dynamic>{
+            'message': 'Server failure.',
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+    final network = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/merchant/orders/1'),
+        type: DioExceptionType.connectionError,
+      ),
+    );
+
+    expect(unauthorized, isA<AuthException>());
+    expect(server, isA<ServerException>());
+    expect((server as ServerException).statusCode, 500);
+    expect(network, isA<NetworkException>());
+  });
 }

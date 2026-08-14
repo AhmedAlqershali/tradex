@@ -1,4 +1,5 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
@@ -24,10 +25,10 @@ class MerchantOrderDetailsScreen extends StatefulWidget {
 
 class _MerchantOrderDetailsScreenState
     extends State<MerchantOrderDetailsScreen> {
-  static const Color _primary    = Color(0xff4D41DF);
+  static const Color _primary = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
-  static const Color _textDark   = Color(0xff1A1A1A);
-  static const Color _textGray   = Color(0xff888888);
+  static const Color _textDark = Color(0xff1A1A1A);
+  static const Color _textGray = Color(0xff888888);
 
   @override
   void initState() {
@@ -48,22 +49,117 @@ class _MerchantOrderDetailsScreenState
         if (state is OrderDetailLoaded) order = state.order;
         if (state is OrderStatusUpdated) order = state.order;
 
+        if (state is OrderFailure) {
+          return _buildFailureScaffold(context, state);
+        }
+
+        // The shared OrderBloc may still contain the merchant list state for
+        // one frame before this screen's request emits OrderLoading. That is
+        // not a missing order; keep showing a loading state until the detail
+        // request resolves.
         if (order == null) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('تفاصيل الطلب',
-                  style: GoogleFonts.ibmPlexSans()),
-            ),
-            body: Center(
-              child: Text('الطلب غير موجود',
-                  style: GoogleFonts.ibmPlexSans()),
-            ),
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         return _buildScaffold(context, order);
       },
     );
+  }
+
+  Widget _buildFailureScaffold(BuildContext context, OrderFailure state) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: _scaffoldBg,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0.5,
+          title: Text(
+            'تفاصيل الطلب',
+            style: GoogleFonts.ibmPlexSans(
+              color: _textDark,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _errorIcon(state.error),
+                  size: 56.sp,
+                  color: Colors.grey.shade400,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  _errorTitle(state.error),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.bold,
+                    color: _textDark,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp,
+                    color: _textGray,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                OutlinedButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  child: Text(
+                    'العودة إلى الطلبات',
+                    style: GoogleFonts.ibmPlexSans(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _errorIcon(ApiException? error) {
+    if (error is NetworkException || error is TimeoutException) {
+      return Icons.wifi_off_rounded;
+    }
+    if (error is AuthException || error is ForbiddenException) {
+      return Icons.lock_outline_rounded;
+    }
+    if (error is ServerException && error.statusCode == 404) {
+      return Icons.receipt_long_outlined;
+    }
+    if (error is ServerException && error.statusCode >= 500) {
+      return Icons.cloud_off_rounded;
+    }
+    return Icons.error_outline_rounded;
+  }
+
+  String _errorTitle(ApiException? error) {
+    if (error is NetworkException) return 'تعذر الاتصال بالشبكة';
+    if (error is TimeoutException) return 'انتهت مهلة الطلب';
+    if (error is AuthException) return 'انتهت جلسة الدخول';
+    if (error is ForbiddenException) return 'غير مصرح بالوصول';
+    if (error is ValidationException) return 'بيانات الطلب غير صالحة';
+    if (error is ServerException && error.statusCode == 404) {
+      return 'الطلب غير موجود';
+    }
+    if (error is ServerException && error.statusCode >= 500) {
+      return 'خطأ في الخادم';
+    }
+    return 'تعذر تحميل تفاصيل الطلب';
   }
 
   Widget _buildScaffold(BuildContext context, AppOrder order) {
@@ -86,7 +182,8 @@ class _MerchantOrderDetailsScreenState
               SizedBox(height: 16.h),
               OrderCustomerInfoCard(order: order),
               SizedBox(height: 16.h),
-              if (_getActions(order).isNotEmpty) _buildActionButtons(context, order),
+              if (_getActions(order).isNotEmpty)
+                _buildActionButtons(context, order),
               SizedBox(height: 30.h),
             ],
           ),

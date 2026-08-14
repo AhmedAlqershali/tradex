@@ -42,6 +42,11 @@ class OrderTest extends TestCase
         $this->getJson('/api/v1/merchant/orders')->assertStatus(401);
     }
 
+    public function test_unauthenticated_cannot_access_merchant_order_detail(): void
+    {
+        $this->getJson('/api/v1/merchant/orders/1')->assertStatus(401);
+    }
+
     public function test_client_cannot_access_merchant_orders(): void
     {
         $client = User::factory()->client()->create();

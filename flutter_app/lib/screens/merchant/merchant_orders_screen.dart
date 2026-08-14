@@ -15,10 +15,10 @@ class MerchantOrdersScreen extends StatefulWidget {
 }
 
 class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
-  static const Color _primary    = Color(0xff4D41DF);
+  static const Color _primary = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
-  static const Color _textDark   = Color(0xff1A1A1A);
-  static const Color _textGray   = Color(0xff888888);
+  static const Color _textDark = Color(0xff1A1A1A);
+  static const Color _textGray = Color(0xff888888);
 
   @override
   void initState() {
@@ -69,27 +69,27 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
         ),
       ),
       centerTitle: true,
-       actions: [
-         PopupMenuButton<String>(
-           tooltip: 'تصفية الحالة',
-           icon: const Icon(Icons.filter_list_rounded, color: _textDark),
-           onSelected: (value) {
-             context.read<OrderBloc>().add(
-                   MerchantOrdersLoadRequested(
-                     status: value == 'all' ? null : value,
-                   ),
-                 );
-           },
-           itemBuilder: (_) => const [
-             PopupMenuItem(value: 'all', child: Text('كل الطلبات')),
-             PopupMenuItem(value: 'pending', child: Text('قيد المراجعة')),
-             PopupMenuItem(value: 'confirmed', child: Text('تم التأكيد')),
-             PopupMenuItem(value: 'processing', child: Text('قيد التجهيز')),
-             PopupMenuItem(value: 'completed', child: Text('مكتمل')),
-             PopupMenuItem(value: 'cancelled', child: Text('ملغي')),
-           ],
-         ),
-       ],
+      actions: [
+        PopupMenuButton<String>(
+          tooltip: 'تصفية الحالة',
+          icon: const Icon(Icons.filter_list_rounded, color: _textDark),
+          onSelected: (value) {
+            context.read<OrderBloc>().add(
+                  MerchantOrdersLoadRequested(
+                    status: value == 'all' ? null : value,
+                  ),
+                );
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'all', child: Text('كل الطلبات')),
+            PopupMenuItem(value: 'pending', child: Text('قيد المراجعة')),
+            PopupMenuItem(value: 'confirmed', child: Text('تم التأكيد')),
+            PopupMenuItem(value: 'processing', child: Text('قيد التجهيز')),
+            PopupMenuItem(value: 'completed', child: Text('مكتمل')),
+            PopupMenuItem(value: 'cancelled', child: Text('ملغي')),
+          ],
+        ),
+      ],
     );
   }
 
@@ -102,9 +102,8 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
     final sorted = [...pending, ...others];
 
     return RefreshIndicator(
-      onRefresh: () async => context
-          .read<OrderBloc>()
-          .add(const MerchantOrdersLoadRequested()),
+      onRefresh: () async =>
+          context.read<OrderBloc>().add(const MerchantOrdersLoadRequested()),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -120,20 +119,14 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
     final bool isPending = order.status == OrderStatus.pendingReview;
 
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MerchantOrderDetailsScreen(orderRef: order.ref),
-        ),
-      ),
+      onTap: () => _openOrder(context, order.ref),
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: isPending
-              ? Border.all(
-                  color: _primary.withValues(alpha: 0.25), width: 1.5)
+              ? Border.all(color: _primary.withValues(alpha: 0.25), width: 1.5)
               : null,
           boxShadow: [
             BoxShadow(
@@ -214,6 +207,22 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
     );
   }
 
+  Future<void> _openOrder(BuildContext context, String orderRef) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MerchantOrderDetailsScreen(orderRef: orderRef),
+      ),
+    );
+
+    // The detail screen shares this bloc and may leave it in a detail/error
+    // state. Reload on return so the list does not render that transient state
+    // as its own failure, and so status changes are reflected.
+    if (context.mounted) {
+      context.read<OrderBloc>().add(const MerchantOrdersLoadRequested());
+    }
+  }
+
   Widget _buildStatusBadge(OrderStatus status) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -237,12 +246,13 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.wifi_off_rounded, size: 60.sp, color: Colors.grey.shade300),
+          Icon(Icons.wifi_off_rounded,
+              size: 60.sp, color: Colors.grey.shade300),
           SizedBox(height: 16.h),
           Text(message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.ibmPlexSans(
-                  fontSize: 13.sp, color: _textGray)),
+              style:
+                  GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textGray)),
           SizedBox(height: 20.h),
           ElevatedButton(
             onPressed: () => context
@@ -279,8 +289,8 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
             SizedBox(height: 8.h),
             Text('ستظهر هنا طلبات العملاء فور وصولها',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.ibmPlexSans(
-                    fontSize: 13.sp, color: _textGray)),
+                style:
+                    GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textGray)),
           ],
         ),
       ),

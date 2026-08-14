@@ -69,10 +69,11 @@ class OrderStatusUpdated extends OrderState {
 
 /// An order operation failed.
 class OrderFailure extends OrderState {
-  const OrderFailure(this.message);
+  const OrderFailure(this.message, {this.error});
 
   final String message;
+  final ApiException? error;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, error];
 }
