@@ -16,6 +16,9 @@ class CartItem {
   /// Optional network image URL. Falls back to a generic icon when null.
   final String? imageUrl;
 
+  /// Server-provided line total from the authoritative cart response.
+  final double? serverLineTotal;
+
   /// Server-assigned cart-item row ID.
   /// Null until the item has been synced with the backend via [CartService].
   /// Use this value for update/remove API calls.
@@ -29,11 +32,12 @@ class CartItem {
     required this.storeName,
     required this.price,
     this.imageUrl,
+    this.serverLineTotal,
     this.serverItemId,
     this.quantity = 1,
   });
 
-  double get lineTotal => price * quantity;
+  double get lineTotal => serverLineTotal ?? price * quantity;
 
   CartItem copyWith({int? quantity, String? serverItemId}) => CartItem(
         id: id,
@@ -41,6 +45,7 @@ class CartItem {
         storeName: storeName,
         price: price,
         imageUrl: imageUrl,
+        serverLineTotal: serverLineTotal,
         serverItemId: serverItemId ?? this.serverItemId,
         quantity: quantity ?? this.quantity,
       );
@@ -63,6 +68,7 @@ class CartItem {
         storeName: json['storeName'] as String,
         price: (json['price'] as num).toDouble(),
         imageUrl: json['imageUrl'] as String?,
+        serverLineTotal: (json['lineTotal'] as num?)?.toDouble(),
         serverItemId: json['serverItemId'] as String?,
         quantity: (json['quantity'] as num?)?.toInt() ?? 1,
       );
@@ -120,6 +126,7 @@ class CartItem {
       storeName: storeName,
       price: price,
       imageUrl: imageUrl,
+      serverLineTotal: (json['line_total'] as num?)?.toDouble(),
       serverItemId: serverItemId,
       quantity: quantity,
     );
@@ -144,17 +151,28 @@ class CartController {
 
   List<CartItem> get items => itemsNotifier.value;
 
-  double get total => items.fold(0.0, (sum, item) => sum + item.lineTotal);
+    int? _serverItemCount;
+    double? _serverSubtotal;
 
-  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+    double get total => _serverSubtotal ??
+      items.fold(0.0, (sum, item) => sum + item.lineTotal);
+
+    int get itemCount => _serverItemCount ??
+      items.fold(0, (sum, item) => sum + item.quantity);
 
   bool get isEmpty => items.isEmpty;
 
   /// Replaces the entire cart with [items] fetched from the server.
   /// Call this after a successful [CartService.getCart] response so the
   /// controller's in-memory list stays in sync with backend data.
-  void setItems(List<CartItem> items) {
+  void setItems(
+    List<CartItem> items, {
+    int? itemCount,
+    double? subtotal,
+  }) {
     itemsNotifier.value = List<CartItem>.from(items);
+    _serverItemCount = itemCount;
+    _serverSubtotal = subtotal;
   }
 
 }

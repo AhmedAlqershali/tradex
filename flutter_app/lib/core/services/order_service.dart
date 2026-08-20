@@ -97,18 +97,6 @@ class OrderService {
     return AppOrder.fromServerJson(_normaliseStatus(orderJson));
   }
 
-  /// Backwards-compatible helper for client/public order refs.
-  Future<AppOrder> getOrderByRef(String ref, {bool asMerchant = true}) async {
-    final path = asMerchant
-        ? ApiConstants.merchantOrderById(ref)
-        : ApiConstants.orderByRef(ref);
-    final response = await ApiClient.instance.get<Map<String, dynamic>>(path);
-    final raw = response.data!;
-    final orderJson =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
-  }
-
   // ── Status update (merchant only) ─────────────────────────────────────────────
   /// PUT /merchant/orders/:ref/status
   /// [status] is one of the app's UI-vocabulary strings (pending_review,

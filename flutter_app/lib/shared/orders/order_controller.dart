@@ -98,13 +98,12 @@ class AppOrder {
   OrderStatus status;
 
   final List<AppOrderProduct> products;
+  final double? serverTotal;
 
   // ── Customer snapshot (captured from checkout form) ────────────────────────
   final String customerName;
   final String customerPhone;
-  final String customerEmail;
   final String customerCity;
-  final String customerArea;
   final String? notes;
 
   AppOrder({
@@ -113,18 +112,18 @@ class AppOrder {
     required this.createdAt,
     required this.status,
     required this.products,
+    this.serverTotal,
     required this.customerName,
     required this.customerPhone,
-    required this.customerEmail,
     required this.customerCity,
-    required this.customerArea,
     this.merchantId,
     this.notes,
   });
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
-  double get total => products.fold(0.0, (s, p) => s + p.lineTotal);
+  double get total => serverTotal ??
+      products.fold(0.0, (s, p) => s + p.lineTotal);
   int get itemCount => products.length;
 
   // ── JSON serialisation ─────────────────────────────────────────────────────
@@ -136,11 +135,10 @@ class AppOrder {
         'merchantId': merchantId,
         'status': _statusToString(status),
         'products': products.map((p) => p.toJson()).toList(),
+        'totalAmount': serverTotal,
         'customerName': customerName,
         'customerPhone': customerPhone,
-        'customerEmail': customerEmail,
         'customerCity': customerCity,
-        'customerArea': customerArea,
         'notes': notes,
       };
 
@@ -151,14 +149,13 @@ class AppOrder {
         merchantId: json['merchantId'] as String?,
         status:
             _statusFromString(json['status'] as String? ?? 'pending_review'),
+        serverTotal: (json['totalAmount'] as num?)?.toDouble(),
         products: (json['products'] as List<dynamic>)
             .map((e) => AppOrderProduct.fromJson(e as Map<String, dynamic>))
             .toList(),
         customerName: json['customerName'] as String,
         customerPhone: json['customerPhone'] as String,
-        customerEmail: json['customerEmail'] as String? ?? '',
         customerCity: json['customerCity'] as String,
-        customerArea: json['customerArea'] as String? ?? '',
         notes: json['notes'] as String?,
       );
 
@@ -179,15 +176,23 @@ class AppOrder {
     final storeName = json['store'] is Map
         ? json['store']['store_name'] as String? ?? ''
         : '';
-    final products = (rawItems as List<dynamic>).map((e) {
-      final item = Map<String, dynamic>.from(e as Map);
-      if (storeName.isNotEmpty &&
-          item['store_name'] == null &&
-          item['storeName'] == null) {
-        item['store_name'] = storeName;
+    final products = <AppOrderProduct>[];
+    if (rawItems is List) {
+      for (final rawItem in rawItems) {
+        if (rawItem is! Map) continue;
+        try {
+          final item = Map<String, dynamic>.from(rawItem);
+          if (storeName.isNotEmpty &&
+              item['store_name'] == null &&
+              item['storeName'] == null) {
+            item['store_name'] = storeName;
+          }
+          products.add(AppOrderProduct.fromServerJson(item));
+        } catch (_) {
+          // Ignore one malformed item while preserving valid order items.
+        }
       }
-      return AppOrderProduct.fromServerJson(item);
-    }).toList();
+    }
 
     return AppOrder(
       ref: ref,
@@ -201,20 +206,16 @@ class AppOrder {
         json['status'] as String? ?? 'pending_review',
       ),
       products: products,
+      serverTotal: (json['total_amount'] as num?)?.toDouble() ??
+          (json['totalAmount'] as num?)?.toDouble(),
       customerName: json['customer_name'] as String? ??
           json['customerName'] as String? ??
           '',
       customerPhone: json['customer_phone'] as String? ??
           json['customerPhone'] as String? ??
           '',
-      customerEmail: json['customer_email'] as String? ??
-          json['customerEmail'] as String? ??
-          '',
       customerCity: json['customer_city'] as String? ??
           json['customerCity'] as String? ??
-          '',
-      customerArea: json['customer_area'] as String? ??
-          json['customerArea'] as String? ??
           '',
       notes: json['notes'] as String?,
     );

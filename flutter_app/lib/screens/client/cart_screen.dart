@@ -60,6 +60,12 @@ class _CartScreenState extends State<CartScreen> {
         }
 
         final showRetry = state is CartFailure;
+        final total = state is CartLoaded
+          ? state.total
+          : CartController.instance.total;
+        final itemCount = state is CartLoaded
+          ? state.itemCount
+          : CartController.instance.itemCount;
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
@@ -75,7 +81,7 @@ class _CartScreenState extends State<CartScreen> {
                       Expanded(
                         child: items.isEmpty
                             ? _buildEmptyState(context)
-                            : _buildBody(context, items),
+                          : _buildBody(context, items, total, itemCount),
                       ),
                     ],
                   ),
@@ -124,9 +130,12 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   // ── Body ───────────────────────────────────────────────────────────────────
-  Widget _buildBody(BuildContext context, List<CartItem> items) {
-    final double total =
-        items.fold(0, (sum, item) => sum + item.lineTotal);
+  Widget _buildBody(
+    BuildContext context,
+    List<CartItem> items,
+    double total,
+    int itemCount,
+  ) {
 
     return Column(
       children: [
@@ -136,7 +145,7 @@ class _CartScreenState extends State<CartScreen> {
           child: Row(
             children: [
               Text(
-                '${items.length} منتجات في السلة',
+                '$itemCount منتجات في السلة',
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 13.sp,
                   color: _textGray,

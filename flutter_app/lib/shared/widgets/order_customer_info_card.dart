@@ -31,11 +31,7 @@ class OrderCustomerInfoCard extends StatelessWidget {
           SizedBox(height: 10.h),
           _row(Icons.phone_outlined, 'الجوال', order.customerPhone),
           SizedBox(height: 10.h),
-          _row(Icons.email_outlined, 'البريد', order.customerEmail),
-          SizedBox(height: 10.h),
           _row(Icons.location_city_outlined, 'المدينة', order.customerCity),
-          SizedBox(height: 10.h),
-          _row(Icons.map_outlined, 'المنطقة', order.customerArea),
           if (order.notes != null && order.notes!.isNotEmpty) ...[
             SizedBox(height: 12.h),
             Divider(height: 1.h, color: const Color(0xffF0F0F0)),

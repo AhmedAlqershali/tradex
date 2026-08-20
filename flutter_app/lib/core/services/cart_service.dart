@@ -20,7 +20,7 @@ class CartService {
 
   /// GET /cart
   /// Returns the current user's cart items from the server.
-  Future<List<CartItem>> getCart() async {
+  Future<CartResponse> getCart() async {
     final response =
         await ApiClient.instance.get<Map<String, dynamic>>(ApiConstants.cart);
     final raw = response.data!;
@@ -29,7 +29,7 @@ class CartService {
 
   /// POST /cart/items
   /// Adds a product to the server cart. Returns the updated cart items.
-  Future<List<CartItem>> addItem({
+  Future<CartResponse> addItem({
     required String productId,
     required int quantity,
   }) async {
@@ -43,7 +43,7 @@ class CartService {
 
   /// PUT /cart/items/:itemId
   /// Updates the quantity of an existing cart item on the server.
-  Future<List<CartItem>> updateItem({
+  Future<CartResponse> updateItem({
     required String itemId,
     required int quantity,
   }) async {
@@ -56,14 +56,14 @@ class CartService {
   }
 
   /// DELETE /cart/items/:itemId. Returns the authoritative cart response.
-  Future<List<CartItem>> removeItem(String itemId) async {
+  Future<CartResponse> removeItem(String itemId) async {
     final response = await ApiClient.instance
         .delete<Map<String, dynamic>>(ApiConstants.cartItem(itemId));
     return _extractCartItems(response.data!);
   }
 
   /// DELETE /cart. Returns the authoritative empty cart response.
-  Future<List<CartItem>> clearCart() async {
+  Future<CartResponse> clearCart() async {
     final response = await ApiClient.instance
         .delete<Map<String, dynamic>>(ApiConstants.cart);
     return _extractCartItems(response.data!);
@@ -71,7 +71,7 @@ class CartService {
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
-  List<CartItem> _extractCartItems(Map<String, dynamic> raw) {
+  CartResponse _extractCartItems(Map<String, dynamic> raw) {
     // Server may return { data: { items: [...] } } or { data: [...] }.
     final data = raw['data'];
     List<dynamic> list = [];
@@ -82,10 +82,29 @@ class CartService {
       list = data;
     }
 
-    return list
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .map(CartItem.fromServerJson)
-        .toList();
+    final items = <CartItem>[];
+    for (final item in list) {
+      if (item is! Map) continue;
+      try {
+        items.add(CartItem.fromServerJson(Map<String, dynamic>.from(item)));
+      } catch (_) {
+        // Ignore one malformed item while preserving valid entries.
+      }
+    }
+
+    final metadata = data is Map ? data : const <String, dynamic>{};
+    return CartResponse(
+      items: items,
+      itemCount: (metadata['item_count'] as num?)?.toInt(),
+      subtotal: (metadata['subtotal'] as num?)?.toDouble(),
+    );
   }
+}
+
+class CartResponse {
+  const CartResponse({required this.items, this.itemCount, this.subtotal});
+
+  final List<CartItem> items;
+  final int? itemCount;
+  final double? subtotal;
 }

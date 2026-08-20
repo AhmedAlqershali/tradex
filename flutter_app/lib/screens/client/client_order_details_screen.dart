@@ -1,4 +1,5 @@
-import 'package:ai_saas/shared/orders/order_controller.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
 import 'package:ai_saas/shared/widgets/info_row.dart';
 import 'package:ai_saas/shared/widgets/order_customer_info_card.dart';
@@ -6,32 +7,106 @@ import 'package:ai_saas/shared/widgets/order_product_line.dart';
 import 'package:ai_saas/shared/widgets/order_status_badge.dart';
 import 'package:ai_saas/shared/widgets/order_status_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ClientOrderDetailsScreen extends StatelessWidget {
-  /// The order is passed for initial display, but the screen always reads the
-  /// latest copy from [OrderController] so merchant status updates are
-  /// reflected immediately without re-navigation.
+class ClientOrderDetailsScreen extends StatefulWidget {
   final AppOrder order;
 
   const ClientOrderDetailsScreen({super.key, required this.order});
+
+  @override
+  State<ClientOrderDetailsScreen> createState() =>
+      _ClientOrderDetailsScreenState();
+}
+
+class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
 
   static const Color _scaffoldBg = Color(0xffF8F9FD);
   static const Color _textDark   = Color(0xff1A1A1A);
   static const Color _textGray   = Color(0xff888888);
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<AppOrder>>(
-      valueListenable: OrderController.instance.ordersNotifier,
-      builder: (context, orders, _) {
-        final current = orders.firstWhere(
-          (o) => o.ref == order.ref,
-          orElse: () => order,
+  void initState() {
+    super.initState();
+    _loadOrder();
+  }
+
+  void _loadOrder() {
+    final orderId = widget.order.serverId ?? widget.order.ref;
+    context.read<OrderBloc>().add(
+          OrderByIdRequested(orderId, asMerchant: false),
         );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<OrderBloc, OrderState>(
+      builder: (context, state) {
+        if (state is OrderLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (state is OrderFailure) {
+          return _buildErrorScaffold(state);
+        }
+
+        AppOrder? current;
+        if (state is OrderDetailLoaded) current = state.order;
+        if (state is OrderStatusUpdated) current = state.order;
+        if (current == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
         return _buildContent(context, current);
       },
+    );
+  }
+
+  Widget _buildErrorScaffold(OrderFailure state) {
+    final error = state.error;
+    final title = error is AuthException
+        ? 'انتهت جلسة الدخول'
+        : error is ForbiddenException
+            ? 'غير مصرح بالوصول'
+            : error is ServerException && error.statusCode == 404
+                ? 'الطلب غير موجود'
+                : error is NetworkException
+                    ? 'تعذر الاتصال بالشبكة'
+                    : error is TimeoutException
+                        ? 'انتهت مهلة الطلب'
+                        : 'تعذر تحميل تفاصيل الطلب';
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: _scaffoldBg,
+        appBar: AppBar(
+          title: const Text('تفاصيل الطلب'),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(title, textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                Text(state.message, textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  onPressed: _loadOrder,
+                  child: const Text('إعادة المحاولة'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

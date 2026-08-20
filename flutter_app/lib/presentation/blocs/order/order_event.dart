@@ -25,12 +25,13 @@ class MerchantOrdersLoadRequested extends OrderEvent {
 
 /// Requests loading a single order by its numeric server id.
 class OrderByIdRequested extends OrderEvent {
-  const OrderByIdRequested(this.id);
+  const OrderByIdRequested(this.id, {this.asMerchant = true});
 
   final String id;
+  final bool asMerchant;
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [id, asMerchant];
 }
 
 /// Requests creating a new order from checkout data.

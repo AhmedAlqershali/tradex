@@ -62,8 +62,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       // Fetch cart from the server and sync the local controller so that
       // ValueListenableBuilder widgets and _loadedFromController() see the
       // same authoritative data.
-      final items = await CartService.instance.getCart();
-      CartController.instance.setItems(items);
+        final response = await CartService.instance.getCart();
+        CartController.instance.setItems(response.items,
+          itemCount: response.itemCount, subtotal: response.subtotal);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(
@@ -80,11 +81,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final previousItems = _currentItems();
     _emitUpdating(emit, previousItems);
     try {
-      final items = await CartService.instance.addItem(
+      final response = await CartService.instance.addItem(
         productId: event.productId,
         quantity: event.quantity,
       );
-      CartController.instance.setItems(items);
+        CartController.instance.setItems(response.items,
+          itemCount: response.itemCount, subtotal: response.subtotal);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
@@ -98,11 +100,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final previousItems = _currentItems();
     _emitUpdating(emit, previousItems);
     try {
-      final items = await CartService.instance.updateItem(
+      final response = await CartService.instance.updateItem(
         itemId: event.itemId,
         quantity: event.quantity,
       );
-      CartController.instance.setItems(items);
+        CartController.instance.setItems(response.items,
+          itemCount: response.itemCount, subtotal: response.subtotal);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
@@ -116,8 +119,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final previousItems = _currentItems();
     _emitUpdating(emit, previousItems);
     try {
-      final items = await CartService.instance.removeItem(event.itemId);
-      CartController.instance.setItems(items);
+        final response = await CartService.instance.removeItem(event.itemId);
+        CartController.instance.setItems(response.items,
+          itemCount: response.itemCount, subtotal: response.subtotal);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
@@ -131,8 +135,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final previousItems = _currentItems();
     _emitUpdating(emit, previousItems);
     try {
-      final items = await CartService.instance.clearCart();
-      CartController.instance.setItems(items);
+        final response = await CartService.instance.clearCart();
+        CartController.instance.setItems(response.items,
+          itemCount: response.itemCount, subtotal: response.subtotal);
       emit(_loadedFromController());
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));

@@ -71,7 +71,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(const OrderLoading());
     try {
-      final order = await OrderService.instance.getOrderById(event.id);
+      final order = await OrderService.instance.getOrderById(
+        event.id,
+        asMerchant: event.asMerchant,
+      );
       emit(OrderDetailLoaded(order));
     } catch (e) {
       emit(_failure(e));
