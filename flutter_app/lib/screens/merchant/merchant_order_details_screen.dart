@@ -14,9 +14,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MerchantOrderDetailsScreen extends StatefulWidget {
-  final String orderRef;
+  final String orderId;
 
-  const MerchantOrderDetailsScreen({super.key, required this.orderRef});
+  const MerchantOrderDetailsScreen({super.key, required this.orderId});
 
   @override
   State<MerchantOrderDetailsScreen> createState() =>
@@ -33,7 +33,7 @@ class _MerchantOrderDetailsScreenState
   @override
   void initState() {
     super.initState();
-    context.read<OrderBloc>().add(OrderByRefRequested(widget.orderRef));
+    context.read<OrderBloc>().add(OrderByIdRequested(widget.orderId));
   }
 
   @override
@@ -117,9 +117,11 @@ class _MerchantOrderDetailsScreenState
                 ),
                 SizedBox(height: 20.h),
                 OutlinedButton(
-                  onPressed: () => Navigator.maybePop(context),
+                  onPressed: () => context.read<OrderBloc>().add(
+                        OrderByIdRequested(widget.orderId),
+                      ),
                   child: Text(
-                    'العودة إلى الطلبات',
+                    'إعادة المحاولة',
                     style: GoogleFonts.ibmPlexSans(),
                   ),
                 ),

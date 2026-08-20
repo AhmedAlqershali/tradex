@@ -49,12 +49,12 @@ class OrderDetailLoaded extends OrderState {
 
 /// A new order was successfully created.
 class OrderCreated extends OrderState {
-  const OrderCreated(this.order);
+  const OrderCreated(this.orders);
 
-  final AppOrder order;
+  final List<AppOrder> orders;
 
   @override
-  List<Object?> get props => [order];
+  List<Object?> get props => [orders];
 }
 
 /// An order's status was successfully updated.

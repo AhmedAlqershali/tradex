@@ -23,14 +23,14 @@ class MerchantOrdersLoadRequested extends OrderEvent {
   List<Object?> get props => [status];
 }
 
-/// Requests loading a single order by its reference code.
-class OrderByRefRequested extends OrderEvent {
-  const OrderByRefRequested(this.ref);
+/// Requests loading a single order by its numeric server id.
+class OrderByIdRequested extends OrderEvent {
+  const OrderByIdRequested(this.id);
 
-  final String ref;
+  final String id;
 
   @override
-  List<Object?> get props => [ref];
+  List<Object?> get props => [id];
 }
 
 /// Requests creating a new order from checkout data.
@@ -38,18 +38,14 @@ class OrderCreateRequested extends OrderEvent {
   const OrderCreateRequested({
     required this.customerName,
     required this.customerPhone,
-    required this.customerEmail,
     required this.customerCity,
-    required this.customerArea,
     this.notes,
     required this.products,
   });
 
   final String customerName;
   final String customerPhone;
-  final String customerEmail;
   final String customerCity;
-  final String customerArea;
   final String? notes;
   final List<AppOrderProduct> products;
 
@@ -57,9 +53,7 @@ class OrderCreateRequested extends OrderEvent {
   List<Object?> get props => [
         customerName,
         customerPhone,
-        customerEmail,
         customerCity,
-        customerArea,
         notes,
         products,
       ];

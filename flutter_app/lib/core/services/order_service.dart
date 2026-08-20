@@ -89,6 +89,18 @@ class OrderService {
   /// GET /orders/:id or GET /merchant/orders/:id depending on [asMerchant].
   /// The two roles hit different route namespaces on this backend — there is
   /// no single generic "order by ref" endpoint usable by both.
+  Future<AppOrder> getOrderById(String id, {bool asMerchant = true}) async {
+    final path = asMerchant
+        ? ApiConstants.merchantOrderById(id)
+        : ApiConstants.orderByRef(id);
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(path);
+    final raw = response.data!;
+    final orderJson =
+        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+  }
+
+  /// Backwards-compatible helper for client/public order refs.
   Future<AppOrder> getOrderByRef(String ref, {bool asMerchant = true}) async {
     final path = asMerchant
         ? ApiConstants.merchantOrderById(ref)

@@ -1,13 +1,14 @@
 import 'package:ai_saas/screens/client/client_orders_screen.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/models/app_type.dart';
+import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
-  final String orderRef;
-  const OrderConfirmationScreen({super.key, required this.orderRef});
+  final List<AppOrder> orders;
+  const OrderConfirmationScreen({super.key, required this.orders});
 
   static const Color _primary    = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
@@ -81,31 +82,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
 
-                // ── Order reference ──────────────────────────────────────
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 20.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: _primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(50.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.receipt_outlined,
-                          size: 16.sp, color: _primary),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'رقم الطلب: #$orderRef',
-                        style: GoogleFonts.ibmPlexSans(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // ── Order references ─────────────────────────────────────
+                ...orders.map(_buildOrderReference),
                 SizedBox(height: 48.h),
 
                 // ── Back to home ─────────────────────────────────────────
@@ -165,6 +143,20 @@ class OrderConfirmationScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderReference(AppOrder order) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(
+        'رقم الطلب: #${order.ref}',
+        style: GoogleFonts.ibmPlexSans(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w600,
+          color: _primary,
         ),
       ),
     );

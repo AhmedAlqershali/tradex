@@ -87,6 +87,7 @@ class AppOrderProduct {
 /// can filter orders per merchant without changing any screen code.
 class AppOrder {
   final String ref;
+  final String? serverId;
   final DateTime createdAt;
 
   /// Reserved for per-merchant filtering. Null for client-placed orders
@@ -108,6 +109,7 @@ class AppOrder {
 
   AppOrder({
     required this.ref,
+    this.serverId,
     required this.createdAt,
     required this.status,
     required this.products,
@@ -129,6 +131,7 @@ class AppOrder {
 
   Map<String, dynamic> toJson() => {
         'ref': ref,
+      'serverId': serverId,
         'createdAt': createdAt.toIso8601String(),
         'merchantId': merchantId,
         'status': _statusToString(status),
@@ -143,6 +146,7 @@ class AppOrder {
 
   factory AppOrder.fromJson(Map<String, dynamic> json) => AppOrder(
         ref: json['ref'] as String,
+      serverId: json['serverId'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
         merchantId: json['merchantId'] as String?,
         status:
@@ -164,8 +168,11 @@ class AppOrder {
   ///     customer_name, customer_phone, customer_email, customer_city,
   ///     customer_area, notes }
   factory AppOrder.fromServerJson(Map<String, dynamic> json) {
-    // Server may use `ref` or `id` as the order identifier.
-    final ref = json['ref'] as String? ?? json['id']?.toString() ?? '';
+    // Keep both the client-facing public ref and the numeric server id used by
+    // merchant detail routes. Some payloads expose the server id as `id` while
+    // others use a public reference string in `ref`.
+    final serverId = json['id']?.toString();
+    final ref = json['ref'] as String? ?? serverId ?? '';
 
     // Items may be in `items` or `products` key.
     final rawItems = json['items'] ?? json['products'] ?? <dynamic>[];
@@ -184,6 +191,7 @@ class AppOrder {
 
     return AppOrder(
       ref: ref,
+      serverId: serverId,
       createdAt: _parseDate(
         json['created_at'] as String? ?? json['createdAt'] as String?,
       ),

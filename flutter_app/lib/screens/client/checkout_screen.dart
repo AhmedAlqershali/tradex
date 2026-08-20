@@ -61,9 +61,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     context.read<OrderBloc>().add(OrderCreateRequested(
           customerName: _nameCtrl.text.trim(),
           customerPhone: _phoneCtrl.text.trim(),
-          customerEmail: _emailCtrl.text.trim(),
           customerCity: _cityCtrl.text.trim(),
-          customerArea: _areaCtrl.text.trim(),
           notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
           products: products,
         ));
@@ -81,8 +79,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) =>
-                  OrderConfirmationScreen(orderRef: state.order.ref),
+              builder: (_) => OrderConfirmationScreen(orders: state.orders),
             ),
           );
         } else if (state is OrderFailure) {
