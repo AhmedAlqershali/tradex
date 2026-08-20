@@ -84,22 +84,11 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(const OrderLoading());
     try {
-      // Build the items snapshot expected by the service.
-      final items = event.products
-          .map((p) => <String, dynamic>{
-                'product_id': p.id,
-                'product_name': p.name,
-                'price': p.price,
-                'quantity': p.quantity,
-              })
-          .toList();
-
       final serverOrders = await OrderService.instance.createOrder(
         customerName: event.customerName,
         customerPhone: event.customerPhone,
         customerCity: event.customerCity,
         notes: event.notes,
-        items: items,
       );
 
       // A successful checkout must always contain server-created orders. Never

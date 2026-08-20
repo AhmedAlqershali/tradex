@@ -48,34 +48,3 @@ class CartItemRemoved extends CartEvent {
 class CartCleared extends CartEvent {
   const CartCleared();
 }
-
-/// Optimistically adds a [CartItem] to the local cart (no server round-trip).
-class CartLocalItemAdded extends CartEvent {
-  const CartLocalItemAdded(this.item);
-
-  final CartItem item;
-
-  @override
-  List<Object?> get props => [item];
-}
-
-/// Optimistically decrements the quantity of a local cart item.
-/// Removes the item if quantity reaches zero.
-class CartLocalItemDecremented extends CartEvent {
-  const CartLocalItemDecremented(this.itemId);
-
-  final String itemId;
-
-  @override
-  List<Object?> get props => [itemId];
-}
-
-/// Optimistically increments the quantity of a local cart item.
-class CartLocalItemIncremented extends CartEvent {
-  const CartLocalItemIncremented(this.itemId);
-
-  final String itemId;
-
-  @override
-  List<Object?> get props => [itemId];
-}

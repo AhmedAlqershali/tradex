@@ -131,10 +131,6 @@ class CartItem {
 /// Exposes a [ValueNotifier] so [ValueListenableBuilder] widgets rebuild
 /// automatically without any external state-management package.
 ///
-/// Migration path to a real backend:
-///   - Replace each mutation method body with an API call.
-///   - Keep [itemsNotifier] as the local cache / optimistic-update layer.
-///   - Add an `isLoading` / `error` notifier alongside when needed.
 class CartController {
   CartController._internal();
 
@@ -154,49 +150,6 @@ class CartController {
 
   bool get isEmpty => items.isEmpty;
 
-  // ── Mutations ───────────────────────────────────────────────────────────────
-
-  /// Adds [item] to the cart.
-  /// If the product already exists (matched by [CartItem.id]), its quantity
-  /// is incremented rather than creating a duplicate entry.
-  void addItem(CartItem item) {
-    final list = List<CartItem>.from(items);
-    final index = list.indexWhere((e) => e.id == item.id);
-    if (index >= 0) {
-      list[index] = list[index].copyWith(
-        quantity: list[index].quantity + item.quantity,
-      );
-    } else {
-      list.add(item);
-    }
-    itemsNotifier.value = list;
-  }
-
-  void increment(String id) {
-    final list = List<CartItem>.from(items);
-    final index = list.indexWhere((e) => e.id == id);
-    if (index < 0) return;
-    list[index] = list[index].copyWith(quantity: list[index].quantity + 1);
-    itemsNotifier.value = list;
-  }
-
-  void decrement(String id) {
-    final list = List<CartItem>.from(items);
-    final index = list.indexWhere((e) => e.id == id);
-    if (index < 0) return;
-    if (list[index].quantity > 1) {
-      list[index] = list[index].copyWith(quantity: list[index].quantity - 1);
-    } else {
-      list.removeAt(index);
-    }
-    itemsNotifier.value = list;
-  }
-
-  void remove(String id) {
-    itemsNotifier.value = List<CartItem>.from(items)
-      ..removeWhere((e) => e.id == id);
-  }
-
   /// Replaces the entire cart with [items] fetched from the server.
   /// Call this after a successful [CartService.getCart] response so the
   /// controller's in-memory list stays in sync with backend data.
@@ -204,8 +157,4 @@ class CartController {
     itemsNotifier.value = List<CartItem>.from(items);
   }
 
-  /// Empties the cart — call this after an order is confirmed.
-  void clear() {
-    itemsNotifier.value = [];
-  }
 }

@@ -27,15 +27,13 @@ class OrderService {
 
   // ── Submit order ──────────────────────────────────────────────────────────────
   /// POST /orders
-  /// [items] — list of { product_id, product_name, price, quantity }.
-  /// Items are a price snapshot captured at checkout time.
-  /// Returns the server-created [AppOrder] with a server-assigned ref.
+  /// The backend reads the authenticated user's server cart and creates one
+  /// order per store. Returns every server-created order.
   Future<List<AppOrder>> createOrder({
     required String customerName,
     required String customerPhone,
     required String customerCity,
     String? notes,
-    required List<Map<String, dynamic>> items,
   }) async {
     final response = await ApiClient.instance.post<Map<String, dynamic>>(
       ApiConstants.orders,
@@ -44,7 +42,6 @@ class OrderService {
         'customer_phone': customerPhone,
         'customer_city': customerCity,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
-        'items': items,
       },
     );
     final raw = response.data!;

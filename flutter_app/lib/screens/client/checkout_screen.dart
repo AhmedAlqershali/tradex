@@ -1,7 +1,6 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/client/order_confirmation_screen.dart';
 import 'package:ai_saas/shared/cart/cart_controller.dart';
-import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,28 +16,24 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  static const Color _primary = Color(0xff4D41DF);
+  static const Color _primary    = Color(0xff4D41DF);
   static const Color _scaffoldBg = Color(0xffF8F9FD);
-  static const Color _textDark = Color(0xff1A1A1A);
-  static const Color _textGray = Color(0xff888888);
-  static const Color _cardBg = Colors.white;
-  static const Color _fieldFill = Color(0xffF3F3F8);
+  static const Color _textDark   = Color(0xff1A1A1A);
+  static const Color _textGray   = Color(0xff888888);
+  static const Color _cardBg     = Colors.white;
+  static const Color _fieldFill  = Color(0xffF3F3F8);
 
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController(text: '');
+  final _formKey   = GlobalKey<FormState>();
+  final _nameCtrl  = TextEditingController(text: '');
   final _phoneCtrl = TextEditingController(text: '');
-  final _emailCtrl = TextEditingController(text: '');
-  final _cityCtrl = TextEditingController(text: '');
-  final _areaCtrl = TextEditingController(text: '');
+  final _cityCtrl  = TextEditingController(text: '');
   final _notesCtrl = TextEditingController();
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
-    _emailCtrl.dispose();
     _cityCtrl.dispose();
-    _areaCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -46,24 +41,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _confirmOrder(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
 
-    final cartItems = CartController.instance.items;
-    final products = cartItems
-        .map((item) => AppOrderProduct(
-              id: item.id,
-              name: item.name,
-              storeName: item.storeName,
-              price: item.price,
-              quantity: item.quantity,
-              imageUrl: item.imageUrl,
-            ))
-        .toList();
-
     context.read<OrderBloc>().add(OrderCreateRequested(
           customerName: _nameCtrl.text.trim(),
           customerPhone: _phoneCtrl.text.trim(),
           customerCity: _cityCtrl.text.trim(),
           notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-          products: products,
         ));
   }
 
@@ -72,14 +54,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return BlocConsumer<OrderBloc, OrderState>(
       listener: (context, state) {
         if (state is OrderCreated) {
-          // The backend clears the cart inside the checkout transaction.
-          // Refresh to reflect that authoritative result; do not clear local
-          // state independently.
-          context.read<CartBloc>().add(const CartLoadRequested());
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => OrderConfirmationScreen(orders: state.orders),
+              builder: (_) =>
+                  OrderConfirmationScreen(orders: state.orders),
             ),
           );
         } else if (state is OrderFailure) {
@@ -134,14 +113,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ],
                                 isRequired: true,
                               ),
-                              SizedBox(height: 14.h),
-                              _buildField(
-                                label: 'البريد الإلكتروني',
-                                hint: 'example@email.com',
-                                icon: Icons.email_outlined,
-                                controller: _emailCtrl,
-                                keyboardType: TextInputType.emailAddress,
-                              ),
                             ],
                           ),
                           SizedBox(height: 20.h),
@@ -155,13 +126,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 icon: Icons.location_city_outlined,
                                 controller: _cityCtrl,
                                 isRequired: true,
-                              ),
-                              SizedBox(height: 14.h),
-                              _buildField(
-                                label: 'الحي / المنطقة',
-                                hint: 'الرمال',
-                                icon: Icons.map_outlined,
-                                controller: _areaCtrl,
                               ),
                             ],
                           ),
@@ -206,8 +170,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       width: double.infinity,
                       height: 52.h,
                       child: ElevatedButton(
-                        onPressed:
-                            isLoading ? null : () => _confirmOrder(context),
+                        onPressed: isLoading
+                            ? null
+                            : () => _confirmOrder(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _primary,
                           foregroundColor: Colors.white,
@@ -312,7 +277,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Text(
         'ملخص الطلب',
         style: GoogleFonts.ibmPlexSans(
-            fontSize: 15.sp, fontWeight: FontWeight.bold, color: _textDark),
+            fontSize: 15.sp,
+            fontWeight: FontWeight.bold,
+            color: _textDark),
       ),
       SizedBox(height: 12.h),
       ...items.map(
@@ -393,15 +360,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           maxLines: maxLines,
           textDirection: TextDirection.rtl,
           validator: isRequired
-              ? (v) =>
-                  (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
+              ? (v) => (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
               : null,
           style: GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textDark),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.ibmPlexSans(
                 fontSize: 12.sp, color: const Color(0xffBBBBBB)),
-            prefixIcon: Icon(icon, size: 18.sp, color: const Color(0xffBBBBBB)),
+            prefixIcon:
+                Icon(icon, size: 18.sp, color: const Color(0xffBBBBBB)),
             filled: true,
             fillColor: _fieldFill,
             contentPadding:
@@ -421,11 +388,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+              borderSide:
+                  const BorderSide(color: Colors.redAccent, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+              borderSide:
+                  const BorderSide(color: Colors.redAccent, width: 1.5),
             ),
           ),
         ),

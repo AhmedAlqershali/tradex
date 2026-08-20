@@ -1,8 +1,9 @@
 import 'package:ai_saas/screens/product_details_screen.dart';
-import 'package:ai_saas/shared/cart/cart_controller.dart';
+import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ─── FeaturedProductCard ──────────────────────────────────────────────────────
@@ -78,13 +79,10 @@ class FeaturedProductCard extends StatelessWidget {
                 height: 45.h,
                 child: ElevatedButton(
                   onPressed: () {
-                    CartController.instance.addItem(CartItem(
-                      id: product.id,
-                      name: product.name,
-                      storeName: product.storeName,
-                      price: product.price,
-                      imageUrl: product.imageUrl,
-                    ));
+                    context.read<CartBloc>().add(CartItemAdded(
+                          productId: product.id,
+                          quantity: 1,
+                        ));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text('تمت الإضافة إلى السلة'),

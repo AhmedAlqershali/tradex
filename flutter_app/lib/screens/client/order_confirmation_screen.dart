@@ -82,7 +82,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
 
-                // ── Order references ─────────────────────────────────────
+                // ── Order reference ──────────────────────────────────────
                 ...orders.map(_buildOrderReference),
                 SizedBox(height: 48.h),
 

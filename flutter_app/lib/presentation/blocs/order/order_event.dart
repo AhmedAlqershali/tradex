@@ -40,14 +40,12 @@ class OrderCreateRequested extends OrderEvent {
     required this.customerPhone,
     required this.customerCity,
     this.notes,
-    required this.products,
   });
 
   final String customerName;
   final String customerPhone;
   final String customerCity;
   final String? notes;
-  final List<AppOrderProduct> products;
 
   @override
   List<Object?> get props => [
@@ -55,7 +53,6 @@ class OrderCreateRequested extends OrderEvent {
         customerPhone,
         customerCity,
         notes,
-        products,
       ];
 }
 

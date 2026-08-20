@@ -15,9 +15,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemQuantityUpdated>(_onCartItemQuantityUpdated);
     on<CartItemRemoved>(_onCartItemRemoved);
     on<CartCleared>(_onCartCleared);
-    on<CartLocalItemAdded>(_onCartLocalItemAdded);
-    on<CartLocalItemDecremented>(_onCartLocalItemDecremented);
-    on<CartLocalItemIncremented>(_onCartLocalItemIncremented);
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -44,6 +41,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   String _errorMessage(Object e) {
     if (e is ApiException) return e.message;
     return e.toString();
+  }
+
+  void _emitUpdating(Emitter<CartState> emit, List<CartItem> items) {
+    emit(CartUpdating(
+      items: items,
+      total: items.fold(0.0, (sum, item) => sum + item.lineTotal),
+      itemCount: items.fold(0, (sum, item) => sum + item.quantity),
+    ));
   }
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
@@ -73,6 +78,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     final previousItems = _currentItems();
+    _emitUpdating(emit, previousItems);
     try {
       final items = await CartService.instance.addItem(
         productId: event.productId,
@@ -90,6 +96,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     final previousItems = _currentItems();
+    _emitUpdating(emit, previousItems);
     try {
       final items = await CartService.instance.updateItem(
         itemId: event.itemId,
@@ -107,6 +114,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     final previousItems = _currentItems();
+    _emitUpdating(emit, previousItems);
     try {
       final items = await CartService.instance.removeItem(event.itemId);
       CartController.instance.setItems(items);
@@ -121,6 +129,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     final previousItems = _currentItems();
+    _emitUpdating(emit, previousItems);
     try {
       final items = await CartService.instance.clearCart();
       CartController.instance.setItems(items);
@@ -128,28 +137,5 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     } catch (e) {
       emit(CartFailure(message: _errorMessage(e), items: previousItems));
     }
-  }
-
-  Future<void> _onCartLocalItemAdded(
-    CartLocalItemAdded event,
-    Emitter<CartState> emit,
-  ) async {
-    // Cart persistence is server-owned. Keep this legacy event as a refresh
-    // rather than allowing a local-only cart mutation.
-    add(const CartLoadRequested());
-  }
-
-  Future<void> _onCartLocalItemDecremented(
-    CartLocalItemDecremented event,
-    Emitter<CartState> emit,
-  ) async {
-    add(const CartLoadRequested());
-  }
-
-  Future<void> _onCartLocalItemIncremented(
-    CartLocalItemIncremented event,
-    Emitter<CartState> emit,
-  ) async {
-    add(const CartLoadRequested());
   }
 }
