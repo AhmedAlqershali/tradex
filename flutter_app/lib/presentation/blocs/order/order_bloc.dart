@@ -70,9 +70,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     OrderByIdRequested event,
     Emitter<OrderState> emit,
   ) async {
-  final previousOrder =
-    _currentOrder?.serverId == event.id ? _currentOrder : null;
-  emit(OrderLoading(previousOrder));
+    final previousOrder =
+        _currentOrder?.serverId == event.id ? _currentOrder : null;
+    emit(OrderLoading(previousOrder));
     try {
       final order = await OrderService.instance.getOrderById(
         event.id,

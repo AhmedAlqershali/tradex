@@ -163,18 +163,30 @@ class OrderTest extends TestCase
     public function test_merchant_cannot_skip_contacted_status(): void
     {
         ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
-        $order = Order::factory()->forStore($store)->pending()->create();
 
-        $this->putJson(
-            "/api/v1/merchant/orders/{$order->id}/status",
-            ['status' => 'processing'],
-            $this->headers($token),
-        )->assertStatus(422);
+        $skippedTransitions = [
+            ['pending', 'confirmed'],
+            ['pending', 'processing'],
+            ['pending', 'completed'],
+            ['contacted', 'processing'],
+            ['contacted', 'completed'],
+            ['confirmed', 'completed'],
+        ];
 
-        $this->assertDatabaseHas('orders', [
-            'id' => $order->id,
-            'status' => Order::STATUS_PENDING,
-        ]);
+        foreach ($skippedTransitions as [$from, $to]) {
+            $order = Order::factory()->forStore($store)->create(['status' => $from]);
+
+            $this->putJson(
+                "/api/v1/merchant/orders/{$order->id}/status",
+                ['status' => $to],
+                $this->headers($token),
+            )->assertStatus(422);
+
+            $this->assertDatabaseHas('orders', [
+                'id' => $order->id,
+                'status' => $from,
+            ]);
+        }
     }
 
     public function test_merchant_can_cancel_order(): void
@@ -275,6 +287,8 @@ class OrderTest extends TestCase
                      'client' => ['id', 'name', 'phone'],
                      'items'  => [['id', 'product_name', 'unit_price', 'quantity', 'subtotal']],
                  ],
-             ]);
+             ])
+             ->assertJsonPath('data.customer_phone', $order->customer_phone)
+             ->assertJsonPath('data.client.phone', $order->client->phone);
     }
 }

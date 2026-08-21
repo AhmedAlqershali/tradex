@@ -41,6 +41,27 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
+  test('uses a different WhatsApp destination for each customer phone', () async {
+    final channel = const MethodChannel('ps.tradex.app/whatsapp_support');
+    final openedUrls = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      openedUrls.add((call.arguments as Map)['url'] as String);
+      return true;
+    });
+
+    await WhatsAppSupportService.openCustomerChat('0591234567');
+    await WhatsAppSupportService.openCustomerChat('0567654321');
+
+    expect(openedUrls, [
+      'https://wa.me/972591234567',
+      'https://wa.me/972567654321',
+    ]);
+    expect(openedUrls, isNot(anyElement(contains('972597668446'))));
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
+  });
+
   test('reports a failed customer chat launch', () async {
     final channel = const MethodChannel('ps.tradex.app/whatsapp_support');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
