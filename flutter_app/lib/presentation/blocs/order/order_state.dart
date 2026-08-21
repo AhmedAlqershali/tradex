@@ -14,9 +14,13 @@ class OrderInitial extends OrderState {
 
 /// An order operation is in progress.
 class OrderLoading extends OrderState {
-  const OrderLoading([this.order]);
+  const OrderLoading([this.order, this.orderId]);
 
   final AppOrder? order;
+  final String? orderId;
+
+  @override
+  List<Object?> get props => [order, orderId];
 }
 
 /// The client's order list has been successfully loaded.
@@ -61,22 +65,24 @@ class OrderCreated extends OrderState {
 
 /// An order's status was successfully updated.
 class OrderStatusUpdated extends OrderState {
-  const OrderStatusUpdated(this.order);
+  const OrderStatusUpdated(this.order, {this.orderId});
 
   final AppOrder order;
+  final String? orderId;
 
   @override
-  List<Object?> get props => [order];
+  List<Object?> get props => [order, orderId];
 }
 
 /// An order operation failed.
 class OrderFailure extends OrderState {
-  const OrderFailure(this.message, {this.error, this.order});
+  const OrderFailure(this.message, {this.error, this.order, this.orderId});
 
   final String message;
   final ApiException? error;
   final AppOrder? order;
+  final String? orderId;
 
   @override
-  List<Object?> get props => [message, error, order];
+  List<Object?> get props => [message, error, order, orderId];
 }

@@ -30,6 +30,7 @@ class _MerchantOrderDetailsScreenState
   static const Color _scaffoldBg = Color(0xffF8F9FD);
   static const Color _textDark = Color(0xff1A1A1A);
   static const Color _textGray = Color(0xff888888);
+  AppOrder? _displayedOrder;
 
   @override
   void initState() {
@@ -41,21 +42,29 @@ class _MerchantOrderDetailsScreenState
   Widget build(BuildContext context) {
     return BlocListener<OrderBloc, OrderState>(
       listenWhen: (previous, current) =>
-          current is OrderFailure && current.order != null,
+          (current is OrderFailure && current.orderId == widget.orderId) ||
+          (current is OrderStatusUpdated &&
+              current.orderId == widget.orderId),
       listener: (context, state) {
         if (state is OrderFailure) {
           _showMessage(context, state.message);
+        } else if (state is OrderStatusUpdated) {
+          _showMessage(context, 'تم التواصل');
         }
       },
       child: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
-        if (state is OrderLoading && state.order == null) {
+        if (state is OrderLoading &&
+          state.order == null &&
+          _displayedOrder == null) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
 
         AppOrder? order;
-        if (state is OrderLoading && state.order?.serverId == widget.orderId) {
+        if (state is OrderLoading &&
+            (state.orderId == widget.orderId ||
+                state.order?.serverId == widget.orderId)) {
           order = state.order;
         }
         if (state is OrderDetailLoaded &&
@@ -63,11 +72,20 @@ class _MerchantOrderDetailsScreenState
           order = state.order;
         }
         if (state is OrderStatusUpdated &&
-            state.order.serverId == widget.orderId) {
+            (state.orderId == widget.orderId ||
+                state.order.serverId == widget.orderId)) {
           order = state.order;
         }
-        if (state is OrderFailure && state.order?.serverId == widget.orderId) {
+        if (state is OrderFailure &&
+            (state.orderId == widget.orderId ||
+                state.order?.serverId == widget.orderId)) {
           order = state.order;
+        }
+
+        if (order != null) {
+          _displayedOrder = order;
+        } else if (state is! OrderFailure || state.orderId != widget.orderId) {
+          order = _displayedOrder;
         }
 
         if (state is OrderFailure && order == null) {
@@ -337,31 +355,43 @@ class _MerchantOrderDetailsScreenState
     final actions = _getActions(order);
     return Column(
       children: actions.map((action) {
+        final isUpdating = _isUpdating(order);
         return Padding(
           padding: EdgeInsets.only(bottom: 10.h),
           child: SizedBox(
             width: double.infinity,
             height: 50.h,
             child: ElevatedButton.icon(
-              onPressed: () async {
-                if (action.isContact) {
-                  await _contactCustomer(context, order);
-                  return;
-                }
-                final serverId = order.serverId;
-                if (serverId == null || int.tryParse(serverId) == null) {
-                  _showMessage(context, 'معرف الطلب غير صالح');
-                  return;
-                }
-                context.read<OrderBloc>().add(OrderStatusUpdateRequested(
-                      id: serverId,
-                      status: action.nextStatus.name,
-                    ));
-              },
+              onPressed: isUpdating ? null : () async {
+                      if (action.isContact) {
+                        await _contactCustomer(context, order);
+                        return;
+                      }
+                      final serverId = order.serverId;
+                      if (serverId == null || int.tryParse(serverId) == null) {
+                        _showMessage(context, 'معرف الطلب غير صالح');
+                        return;
+                      }
+                      context.read<OrderBloc>().add(
+                            OrderStatusUpdateRequested(
+                              id: serverId,
+                              status: action.nextStatus.name,
+                            ),
+                          );
+                    },
               icon: Icon(action.icon, size: 18.sp),
-              label: Text(action.label,
-                  style: GoogleFonts.ibmPlexSans(
-                      fontSize: 14.sp, fontWeight: FontWeight.bold)),
+              label: isUpdating
+                  ? SizedBox(
+                      width: 18.sp,
+                      height: 18.sp,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(action.label,
+                      style: GoogleFonts.ibmPlexSans(
+                          fontSize: 14.sp, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: action.color,
                 foregroundColor: Colors.white,
@@ -374,6 +404,11 @@ class _MerchantOrderDetailsScreenState
         );
       }).toList(),
     );
+  }
+
+  bool _isUpdating(AppOrder order) {
+    final state = context.read<OrderBloc>().state;
+    return state is OrderLoading && state.orderId == order.serverId;
   }
 
   List<_OrderAction> _getActions(AppOrder order) {

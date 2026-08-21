@@ -96,6 +96,13 @@ class ApiClient {
     try {
       return await call();
     } on DioException catch (e) {
+      if (kDebugMode && e.response != null) {
+        debugPrint('[ApiClient] HTTP failure: status=${e.response?.statusCode} '
+            'body=${e.response?.data}');
+      } else if (kDebugMode) {
+        debugPrint('[ApiClient] network failure: type=${e.type} '
+            'message=${e.message}');
+      }
       throw _mapDioException(e);
     } catch (e) {
       throw const UnknownException();

@@ -4,6 +4,7 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
+import 'package:flutter/foundation.dart';
 
 // ─── OrderService ─────────────────────────────────────────────────────────────
 //
@@ -109,10 +110,16 @@ class OrderService {
     required String id,
     required String status,
   }) async {
+    final endpoint = ApiConstants.merchantOrderStatus(id);
+    final payload = {'status': _toBackendStatus(status)};
+    debugPrint('[OrderService] PUT $endpoint serverId=$id '
+        'targetStatus=${payload['status']} payload=$payload');
     final response = await ApiClient.instance.put<Map<String, dynamic>>(
-      ApiConstants.merchantOrderStatus(id),
-      data: {'status': _toBackendStatus(status)},
+      endpoint,
+      data: payload,
     );
+    debugPrint('[OrderService] response status=${response.statusCode} '
+        'body=${response.data}');
     final raw = response.data!;
     final orderJson =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
