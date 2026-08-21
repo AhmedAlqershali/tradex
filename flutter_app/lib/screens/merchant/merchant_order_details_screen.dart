@@ -39,8 +39,16 @@ class _MerchantOrderDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OrderBloc, OrderState>(
-      builder: (context, state) {
+    return BlocListener<OrderBloc, OrderState>(
+      listenWhen: (previous, current) =>
+          current is OrderFailure && current.order != null,
+      listener: (context, state) {
+        if (state is OrderFailure) {
+          _showMessage(context, state.message);
+        }
+      },
+      child: BlocBuilder<OrderBloc, OrderState>(
+        builder: (context, state) {
         if (state is OrderLoading && state.order == null) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
@@ -76,8 +84,9 @@ class _MerchantOrderDetailsScreenState
           );
         }
 
-        return _buildScaffold(context, order);
-      },
+          return _buildScaffold(context, order);
+        },
+      ),
     );
   }
 
