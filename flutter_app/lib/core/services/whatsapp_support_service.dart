@@ -34,6 +34,7 @@ class WhatsAppSupportService {
             return digits;
         }
         return null;
+    }
 
   static Future<bool> openChat() =>
       launcher.openWhatsAppChat(chatUri.toString());
