@@ -32,7 +32,7 @@ class WhatsAppSupportService {
                 return null;
             }
             return digits;
-    }
+        }
         return null;
 
   static Future<bool> openChat() =>
