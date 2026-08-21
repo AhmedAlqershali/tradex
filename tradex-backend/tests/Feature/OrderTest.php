@@ -189,11 +189,11 @@ class OrderTest extends TestCase
         $token    = $merchant->createToken('test')->plainTextToken;
         $order    = Order::factory()->forStore($store)->pending()->create();
 
-        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'confirmed'], $this->headers($token))
+        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'contacted'], $this->headers($token))
             ->assertOk()
             ->assertJson(['success' => true]);
 
-        $this->assertSame('confirmed', $order->fresh()->status);
+        $this->assertSame('contacted', $order->fresh()->status);
         $this->assertDatabaseHas('user_notifications', [
             'user_id' => $order->client_id,
             'type'    => 'order_status_updated',
@@ -217,6 +217,7 @@ class OrderTest extends TestCase
     public function test_order_statuses_are_correct(): void
     {
         $this->assertSame('pending',    Order::STATUS_PENDING);
+        $this->assertSame('contacted',  Order::STATUS_CONTACTED);
         $this->assertSame('confirmed',  Order::STATUS_CONFIRMED);
         $this->assertSame('processing', Order::STATUS_PROCESSING);
         $this->assertSame('completed',  Order::STATUS_COMPLETED);

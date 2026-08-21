@@ -61,7 +61,7 @@ The previous implementation had a critical disconnect: service calls returned or
 |---|---|---|
 | `_onClientOrdersLoadRequested` | Called service, ignored result, read empty controller | Uses `await service.getClientOrders()` directly; syncs controller via `setOrders()` |
 | `_onMerchantOrdersLoadRequested` | Called service, ignored result, read empty controller | Uses `await service.getMerchantOrders()` directly; syncs controller via `setOrders()` |
-| `_onOrderByRefRequested` | Called service, ignored result, searched empty controller | Uses `await service.getOrderByRef(ref)` directly |
+| `_onOrderByIdRequested` | Called service, ignored result, searched empty controller | Uses `await service.getOrderById(id)` directly |
 | `_onOrderCreateRequested` | Created local-only `AppOrder`; service result ignored | Uses server-assigned order (falls back to locally-generated ref if server returns minimal response) |
 | `_onOrderStatusUpdateRequested` | Constructed a full `AppOrder` just to parse a status string | Uses `OrderController.parseStatus(event.status)` — no unnecessary object creation |
 

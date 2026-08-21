@@ -138,12 +138,26 @@ class OrderTest extends TestCase
 
         $order = Order::factory()->forStore($store)->pending()->create();
 
-        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'confirmed'], $this->headers($token))
+        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'contacted'], $this->headers($token))
              ->assertOk()
              ->assertJsonPath('success', true)
-             ->assertJsonPath('data.status', 'confirmed');
+             ->assertJsonPath('data.status', 'contacted');
 
-        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'confirmed']);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'contacted']);
+    }
+
+    public function test_merchant_can_progress_order_through_required_lifecycle(): void
+    {
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $order = Order::factory()->forStore($store)->pending()->create();
+
+        foreach (['contacted', 'confirmed', 'processing', 'completed'] as $status) {
+            $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => $status], $this->headers($token))
+                ->assertOk()
+                ->assertJsonPath('data.status', $status);
+        }
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'completed']);
     }
 
     public function test_merchant_can_cancel_order(): void

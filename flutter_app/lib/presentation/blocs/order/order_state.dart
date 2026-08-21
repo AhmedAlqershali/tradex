@@ -14,7 +14,9 @@ class OrderInitial extends OrderState {
 
 /// An order operation is in progress.
 class OrderLoading extends OrderState {
-  const OrderLoading();
+  const OrderLoading([this.order]);
+
+  final AppOrder? order;
 }
 
 /// The client's order list has been successfully loaded.
@@ -69,11 +71,12 @@ class OrderStatusUpdated extends OrderState {
 
 /// An order operation failed.
 class OrderFailure extends OrderState {
-  const OrderFailure(this.message, {this.error});
+  const OrderFailure(this.message, {this.error, this.order});
 
   final String message;
   final ApiException? error;
+  final AppOrder? order;
 
   @override
-  List<Object?> get props => [message, error];
+  List<Object?> get props => [message, error, order];
 }

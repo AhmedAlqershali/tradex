@@ -14,7 +14,7 @@ import 'package:ai_saas/shared/orders/order_controller.dart';
 //   GET  /merchant/orders/:id           (merchant — order detail)
 //   PUT  /merchant/orders/:id/status    { status }  (merchant only)
 //
-// The backend's order-status enum (pending/confirmed/processing/completed/
+// The backend's order-status enum (pending/contacted/confirmed/processing/completed/
 // cancelled) is coarser than the app's 6-value UI vocabulary
 // (pending_review/merchant_contacted/order_confirmed/preparing/completed/
 // cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this
@@ -98,7 +98,7 @@ class OrderService {
   }
 
   // ── Status update (merchant only) ─────────────────────────────────────────────
-  /// PUT /merchant/orders/:ref/status
+  /// PUT /merchant/orders/:id/status
   /// [status] is one of the app's UI-vocabulary strings (pending_review,
   /// merchant_contacted, order_confirmed, preparing, completed, cancelled) —
   /// translated to the backend's enum before sending.
@@ -124,7 +124,10 @@ class OrderService {
   static String _toBackendStatus(String appStatus) {
     switch (appStatus) {
       case 'merchant_contacted':
+      case 'merchantContacted':
+        return 'contacted';
       case 'order_confirmed':
+      case 'orderConfirmed':
         return 'confirmed';
       case 'preparing':
         return 'processing';
@@ -144,6 +147,8 @@ class OrderService {
     switch (backendStatus) {
       case 'pending':
         return 'pending_review';
+      case 'contacted':
+        return 'merchant_contacted';
       case 'confirmed':
         return 'order_confirmed';
       case 'processing':

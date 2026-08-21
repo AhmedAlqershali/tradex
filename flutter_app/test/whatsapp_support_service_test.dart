@@ -13,4 +13,11 @@ void main() {
       'https://wa.me/972597668446',
     );
   });
+
+  test('normalizes local, international, and formatted customer phones', () {
+    expect(WhatsAppSupportService.normalizePhone('059 123 4567'), '972591234567');
+    expect(WhatsAppSupportService.normalizePhone('+972 59 123 4567'), '972591234567');
+    expect(WhatsAppSupportService.normalizePhone('0059 123 4567'), '591234567');
+    expect(WhatsAppSupportService.normalizePhone(''), isNull);
+  });
 }

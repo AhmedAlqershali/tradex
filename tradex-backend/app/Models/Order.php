@@ -40,6 +40,7 @@ class Order extends Model
 
     // Status constants
     const STATUS_PENDING    = 'pending';
+    const STATUS_CONTACTED  = 'contacted';
     const STATUS_CONFIRMED  = 'confirmed';
     const STATUS_PROCESSING = 'processing';
     const STATUS_COMPLETED  = 'completed';
@@ -47,11 +48,27 @@ class Order extends Model
 
     /** Statuses a merchant may transition to. */
     const MERCHANT_ALLOWED_STATUSES = [
+        self::STATUS_CONTACTED,
         self::STATUS_CONFIRMED,
         self::STATUS_PROCESSING,
         self::STATUS_COMPLETED,
         self::STATUS_CANCELLED,
     ];
+
+    public static function merchantCanTransition(string $from, string $to): bool
+    {
+        if ($to === self::STATUS_CANCELLED) {
+            return $from !== self::STATUS_COMPLETED && $from !== self::STATUS_CANCELLED;
+        }
+
+        return match ($from) {
+            self::STATUS_PENDING => $to === self::STATUS_CONTACTED,
+            self::STATUS_CONTACTED => $to === self::STATUS_CONFIRMED,
+            self::STATUS_CONFIRMED => $to === self::STATUS_PROCESSING,
+            self::STATUS_PROCESSING => $to === self::STATUS_COMPLETED,
+            default => false,
+        };
+    }
 
     // -------------------------------------------------------------------------
     // Relationships

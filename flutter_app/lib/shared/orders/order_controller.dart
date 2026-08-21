@@ -161,9 +161,8 @@ class AppOrder {
 
   /// Constructs an [AppOrder] from a server API response (snake_case keys).
   /// Server shape:
-  ///   { ref (or id), created_at, merchant_id, status, items (or products),
-  ///     customer_name, customer_phone, customer_email, customer_city,
-  ///     customer_area, notes }
+  ///   { id, created_at, merchant_id, status, items (or products),
+  ///     customer_name, customer_phone, customer_city, notes }
   factory AppOrder.fromServerJson(Map<String, dynamic> json) {
     // Keep both the client-facing public ref and the numeric server id used by
     // merchant detail routes. Some payloads expose the server id as `id` while
@@ -336,11 +335,11 @@ class OrderController {
     ordersNotifier.value = [order, ...orders];
   }
 
-  /// Updates the [status] of the order identified by [ref] and notifies all
+  /// Updates the [status] of the order identified by server [id] and notifies all
   /// listeners. Uses a list copy so [ValueListenableBuilder] detects the change.
-  void updateOrderStatus(String ref, OrderStatus newStatus) {
+  void updateOrderStatus(String id, OrderStatus newStatus) {
     final list = List<AppOrder>.from(orders);
-    final index = list.indexWhere((o) => o.ref == ref);
+    final index = list.indexWhere((o) => o.serverId == id);
     if (index < 0) return;
     list[index].status = newStatus;
     ordersNotifier.value = List<AppOrder>.from(list);

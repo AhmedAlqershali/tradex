@@ -9,6 +9,7 @@ part 'order_event.dart';
 part 'order_state.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
+  AppOrder? _currentOrder;
   OrderBloc() : super(const OrderInitial()) {
     on<ClientOrdersLoadRequested>(_onClientOrdersLoadRequested);
     on<MerchantOrdersLoadRequested>(_onMerchantOrdersLoadRequested);
@@ -24,10 +25,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     return e.toString();
   }
 
-  OrderFailure _failure(Object e) {
+  OrderFailure _failure(Object e, {AppOrder? order}) {
     return e is ApiException
-        ? OrderFailure(e.message, error: e)
-        : OrderFailure(_errorMessage(e));
+        ? OrderFailure(e.message, error: e, order: order)
+        : OrderFailure(_errorMessage(e), order: order);
   }
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
@@ -69,15 +70,18 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     OrderByIdRequested event,
     Emitter<OrderState> emit,
   ) async {
-    emit(const OrderLoading());
+  final previousOrder =
+    _currentOrder?.serverId == event.id ? _currentOrder : null;
+  emit(OrderLoading(previousOrder));
     try {
       final order = await OrderService.instance.getOrderById(
         event.id,
         asMerchant: event.asMerchant,
       );
+      _currentOrder = order;
       emit(OrderDetailLoaded(order));
     } catch (e) {
-      emit(_failure(e));
+      emit(_failure(e, order: previousOrder));
     }
   }
 
@@ -116,23 +120,24 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     OrderStatusUpdateRequested event,
     Emitter<OrderState> emit,
   ) async {
-    emit(const OrderLoading());
+    emit(OrderLoading(_currentOrder));
     try {
       final updatedOrder = await OrderService.instance.patchStatus(
         id: event.id,
         status: event.status,
       );
+      _currentOrder = updatedOrder;
 
       // Update the local controller cache so all ValueListenableBuilder
       // widgets reflect the new status immediately.
       OrderController.instance.setOrders([
         ...OrderController.instance.orders
-            .where((order) => order.ref != updatedOrder.ref),
+            .where((order) => order.serverId != updatedOrder.serverId),
         updatedOrder,
       ]);
       emit(OrderStatusUpdated(updatedOrder));
     } catch (e) {
-      emit(_failure(e));
+      emit(_failure(e, order: _currentOrder));
     }
   }
 }

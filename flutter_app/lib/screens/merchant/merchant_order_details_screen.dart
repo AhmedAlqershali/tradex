@@ -1,5 +1,6 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/services/whatsapp_support_service.dart';
 import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
@@ -40,16 +41,18 @@ class _MerchantOrderDetailsScreenState
   Widget build(BuildContext context) {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (context, state) {
-        if (state is OrderLoading) {
+        if (state is OrderLoading && state.order == null) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
 
         AppOrder? order;
+        if (state is OrderLoading) order = state.order;
         if (state is OrderDetailLoaded) order = state.order;
         if (state is OrderStatusUpdated) order = state.order;
+        if (state is OrderFailure) order = state.order;
 
-        if (state is OrderFailure) {
+        if (state is OrderFailure && order == null) {
           return _buildFailureScaffold(context, state);
         }
 
@@ -321,13 +324,20 @@ class _MerchantOrderDetailsScreenState
             width: double.infinity,
             height: 50.h,
             child: ElevatedButton.icon(
-              onPressed: () {
-                context.read<OrderBloc>().add(
-                      OrderStatusUpdateRequested(
-                        id: order.serverId!,
-                        status: action.nextStatus.name,
-                      ),
-                    );
+              onPressed: () async {
+                if (action.isContact) {
+                  await _contactCustomer(context, order);
+                  return;
+                }
+                final serverId = order.serverId;
+                if (serverId == null || int.tryParse(serverId) == null) {
+                  _showMessage(context, 'معرف الطلب غير صالح');
+                  return;
+                }
+                context.read<OrderBloc>().add(OrderStatusUpdateRequested(
+                      id: serverId,
+                      status: action.nextStatus.name,
+                    ));
               },
               icon: Icon(action.icon, size: 18.sp),
               label: Text(action.label,
@@ -357,6 +367,13 @@ class _MerchantOrderDetailsScreenState
             icon: Icons.phone_in_talk_outlined,
             color: _primary,
             nextStatus: OrderStatus.merchantContacted,
+            isContact: true,
+          ),
+          _OrderAction(
+            label: 'تأكيد التواصل',
+            icon: Icons.check_circle_outline_rounded,
+            color: const Color(0xff0891B2),
+            nextStatus: OrderStatus.merchantContacted,
           ),
           _OrderAction(
             label: 'إلغاء الطلب',
@@ -366,6 +383,20 @@ class _MerchantOrderDetailsScreenState
           ),
         ];
       case OrderStatus.merchantContacted:
+        return [
+          _OrderAction(
+            label: 'تأكيد الطلب',
+            icon: Icons.check_circle_outline_rounded,
+            color: const Color(0xff0891B2),
+            nextStatus: OrderStatus.orderConfirmed,
+          ),
+          _OrderAction(
+            label: 'إلغاء الطلب',
+            icon: Icons.cancel_outlined,
+            color: const Color(0xffE53E3E),
+            nextStatus: OrderStatus.cancelled,
+          ),
+        ];
       case OrderStatus.orderConfirmed:
         return [
           _OrderAction(
@@ -395,6 +426,30 @@ class _MerchantOrderDetailsScreenState
         return [];
     }
   }
+
+  Future<void> _contactCustomer(BuildContext context, AppOrder order) async {
+    if (order.serverId == null || int.tryParse(order.serverId!) == null) {
+      _showMessage(context, 'معرف الطلب غير صالح');
+      return;
+    }
+    if (WhatsAppSupportService.normalizePhone(order.customerPhone) == null) {
+      _showMessage(context, 'رقم هاتف العميل غير متوفر أو غير صالح');
+      return;
+    }
+    final opened = await WhatsAppSupportService.openCustomerChat(
+      order.customerPhone,
+    );
+    if (!context.mounted) return;
+    _showMessage(
+      context,
+      opened ? 'تم فتح محادثة العميل' : 'تعذر فتح واتساب للعميل',
+    );
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 }
 
 class _OrderAction {
@@ -402,11 +457,13 @@ class _OrderAction {
   final IconData icon;
   final Color color;
   final OrderStatus nextStatus;
+  final bool isContact;
 
   const _OrderAction({
     required this.label,
     required this.icon,
     required this.color,
     required this.nextStatus,
+    this.isContact = false,
   });
 }

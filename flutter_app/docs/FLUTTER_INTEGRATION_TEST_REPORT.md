@@ -31,7 +31,7 @@ A matching `setItems()` method was added to `CartController` (parallel to `Order
 
 ### 2. `ProductDetailsScreen._addToCart` — local-only add, never sent to server (**critical**)
 
-**Before:** The "Add to cart" button dispatched `CartLocalItemAdded` — an optimistic local update with **no API call**. The item was never `POST`-ed to `/cart/items`, so the backend cart was always empty.
+**Before:** The "Add to cart" button dispatched a local-only event, so the item was never `POST`-ed to `/cart/items` and the backend cart was always empty.
 
 **Fix applied:**
 ```dart
@@ -41,7 +41,7 @@ context.read<CartBloc>().add(CartItemAdded(
   quantity: _quantity,
 ));
 ```
-`CartItemAdded` calls `CartService.addItem()` → `POST /cart/items`. `CartLocalItemAdded` is still correct for the in-cart quantity stepper (increment/decrement without re-hitting the server).
+`CartItemAdded` calls `CartService.addItem()` → `POST /cart/items`. In-cart quantity changes use the server cart-item ID through `CartItemQuantityUpdated`; no local-only cart mutation events remain.
 
 ---
 
@@ -106,11 +106,9 @@ Replaced with a no-op placeholder test. Real BLoC unit tests belong in Task #4 w
 |-------|-------------|
 | `CartLoadRequested` | `GET /cart` → syncs `CartController` *(fixed)* |
 | `CartItemAdded` | `POST /cart/items` |
-| `CartItemQuantityUpdated` | `PUT /cart/items/:itemId` |
+| `CartItemQuantityUpdated` | `PUT /cart/items/{itemId}` using the server cart-item ID |
 | `CartItemRemoved` | `DELETE /cart/items/:itemId` |
 | `CartCleared` | `DELETE /cart` |
-| `CartLocalItemIncremented` | Local only (in-cart stepper) |
-| `CartLocalItemDecremented` | Local only (in-cart stepper) |
 
 `CartItem.fromServerJson()` handles nested product objects and multiple server field aliases.
 
@@ -122,15 +120,15 @@ Replaced with a no-op placeholder test. Real BLoC unit tests belong in Task #4 w
 | Form validation | `GlobalKey<FormState>` with client-side rules |
 | `OrderCreateRequested` | `OrderService.createOrder()` → `POST /orders` |
 | `OrderCreated` emitted | Screen pushes `OrderConfirmationScreen(orderRef:)` |
-| Cart cleared | `CartBloc.add(CartCleared())` → `DELETE /cart` |
+| Cart cleared | Laravel clears the authenticated server cart transactionally during checkout |
 
 ---
 
 ### Client Orders ✅
 | Event | Service call |
 |-------|-------------|
-| `ClientOrdersLoadRequested` | `GET /orders?role=client` |
-| `OrderByRefRequested` | `GET /orders/:ref` |
+| `ClientOrdersLoadRequested` | `GET /orders` |
+| `OrderByIdRequested` | `GET /orders/:id` |
 
 ---
 
@@ -168,8 +166,8 @@ Replaced with a no-op placeholder test. Real BLoC unit tests belong in Task #4 w
 ### Merchant — Orders ✅
 | Event | Service call |
 |-------|-------------|
-| `MerchantOrdersLoadRequested` | `GET /orders?role=merchant` |
-| `OrderStatusUpdateRequested` | `PATCH /orders/:ref/status` |
+| `MerchantOrdersLoadRequested` | `GET /merchant/orders` |
+| `OrderStatusUpdateRequested` | `PUT /merchant/orders/:id/status` |
 
 ---
 

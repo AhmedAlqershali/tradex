@@ -32,7 +32,7 @@ class OrderController extends BaseApiController
      * List orders for the merchant's stores with optional filters.
      *
      * Query parameters:
-     *   status    string — pending | confirmed | processing | completed | cancelled
+    *   status    string — pending | contacted | confirmed | processing | completed | cancelled
      *   date_from string — Y-m-d (inclusive)
      *   date_to   string — Y-m-d (inclusive)
      *   per_page  int    — 1-100 (default: 15)

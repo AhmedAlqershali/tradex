@@ -194,7 +194,8 @@ class OrderService implements OrderServiceInterface
     {
         $order = $this->findForAdmin($orderId);
 
-        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)) {
+        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)
+            || ! Order::merchantCanTransition($order->status, $newStatus)) {
             throw OrderException::invalidStatusTransition($order->status, $newStatus);
         }
 
@@ -205,7 +206,8 @@ class OrderService implements OrderServiceInterface
     {
         $order = $this->findForMerchant($orderId, $merchant);
 
-        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)) {
+        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)
+            || ! Order::merchantCanTransition($order->status, $newStatus)) {
             throw OrderException::invalidStatusTransition($order->status, $newStatus);
         }
 

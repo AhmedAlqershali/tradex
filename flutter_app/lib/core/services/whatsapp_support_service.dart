@@ -13,6 +13,21 @@ class WhatsAppSupportService {
 
   static Uri get chatUri => Uri.parse('https://wa.me/$_waPhoneNumber');
 
+    static Future<bool> openCustomerChat(String phone) async {
+        final normalized = normalizePhone(phone);
+        if (normalized == null) return false;
+        return launcher.openWhatsAppChat('https://wa.me/$normalized');
+    }
+
+    static String? normalizePhone(String value) {
+        var digits = value.replaceAll(RegExp(r'[^0-9+]'), '');
+        if (digits.startsWith('+')) digits = digits.substring(1);
+        if (digits.startsWith('00')) digits = digits.substring(2);
+        if (digits.startsWith('0')) digits = '972${digits.substring(1)}';
+        if (digits.length < 8 || digits.length > 15) return null;
+        return digits;
+    }
+
   static Future<bool> openChat() =>
       launcher.openWhatsAppChat(chatUri.toString());
 }
