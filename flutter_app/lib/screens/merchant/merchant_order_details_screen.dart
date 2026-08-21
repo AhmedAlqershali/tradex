@@ -324,7 +324,7 @@ class _MerchantOrderDetailsScreenState
               onPressed: () {
                 context.read<OrderBloc>().add(
                       OrderStatusUpdateRequested(
-                        ref: order.ref,
+                        id: order.serverId!,
                         status: action.nextStatus.name,
                       ),
                     );

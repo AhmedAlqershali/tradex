@@ -9,6 +9,20 @@ workflows:
         - tradex-upload-key.jks
 
     scripts:
+      - name: Validate release environment
+        script: |
+          if [[ -z "${TRADEX_BASE_URL:-}" ]]; then
+            echo "TRADEX_BASE_URL must be configured in Codemagic."
+            exit 1
+          fi
+          case "$TRADEX_BASE_URL" in
+            */api/v1) ;;
+            *)
+              echo "TRADEX_BASE_URL must end with /api/v1."
+              exit 1
+              ;;
+          esac
+
       - name: Get Flutter packages
         script: cd flutter_app && flutter pub get
 

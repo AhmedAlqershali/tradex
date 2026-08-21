@@ -59,11 +59,11 @@ class OrderCreateRequested extends OrderEvent {
 
 /// Requests updating the status of an existing order (merchant action).
 class OrderStatusUpdateRequested extends OrderEvent {
-  const OrderStatusUpdateRequested({required this.ref, required this.status});
+  const OrderStatusUpdateRequested({required this.id, required this.status});
 
-  final String ref;
+  final String id;
   final String status;
 
   @override
-  List<Object?> get props => [ref, status];
+  List<Object?> get props => [id, status];
 }

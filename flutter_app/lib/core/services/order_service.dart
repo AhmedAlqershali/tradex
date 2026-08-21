@@ -89,7 +89,7 @@ class OrderService {
   Future<AppOrder> getOrderById(String id, {bool asMerchant = true}) async {
     final path = asMerchant
         ? ApiConstants.merchantOrderById(id)
-        : ApiConstants.orderByRef(id);
+        : ApiConstants.orderById(id);
     final response = await ApiClient.instance.get<Map<String, dynamic>>(path);
     final raw = response.data!;
     final orderJson =
@@ -103,11 +103,11 @@ class OrderService {
   /// merchant_contacted, order_confirmed, preparing, completed, cancelled) —
   /// translated to the backend's enum before sending.
   Future<AppOrder> patchStatus({
-    required String ref,
+    required String id,
     required String status,
   }) async {
     final response = await ApiClient.instance.put<Map<String, dynamic>>(
-      ApiConstants.merchantOrderStatus(ref),
+      ApiConstants.merchantOrderStatus(id),
       data: {'status': _toBackendStatus(status)},
     );
     final raw = response.data!;

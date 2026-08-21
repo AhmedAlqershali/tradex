@@ -6,6 +6,7 @@ import 'package:ai_saas/shared/widgets/order_customer_info_card.dart';
 import 'package:ai_saas/shared/widgets/order_product_line.dart';
 import 'package:ai_saas/shared/widgets/order_status_badge.dart';
 import 'package:ai_saas/shared/widgets/order_status_timeline.dart';
+import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,7 +35,8 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
   }
 
   void _loadOrder() {
-    final orderId = widget.order.serverId ?? widget.order.ref;
+    final orderId = widget.order.serverId;
+    if (orderId == null || orderId.isEmpty) return;
     context.read<OrderBloc>().add(
           OrderByIdRequested(orderId, asMerchant: false),
         );

@@ -91,7 +91,7 @@ class ApiConstants {
   // ── Orders ───────────────────────────────────────────────────────────────────
   // Client (own orders only).
   static const String orders = '/orders';
-  static String orderByRef(String ref) => '/orders/$ref';
+    static String orderById(String id) => '/orders/$id';
 
   // Merchant order management — separate namespace; status updates are PUT,
   // not PATCH.

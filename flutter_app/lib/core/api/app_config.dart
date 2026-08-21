@@ -4,7 +4,7 @@
 //
 // Usage:
 //   flutter run  --dart-define=TRADEX_BASE_URL=http://192.168.1.100/api/v1
-//   flutter build apk --dart-define=TRADEX_BASE_URL=https://api.tradex.ps/v1
+//   flutter build apk --dart-define=TRADEX_BASE_URL=https://api.tradex.ps/api/v1
 //
 // When no --dart-define is passed, the production URL is used as the default
 // so the release build is always production-ready without extra steps.

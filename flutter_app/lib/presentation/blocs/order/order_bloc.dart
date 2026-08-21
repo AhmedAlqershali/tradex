@@ -119,7 +119,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     emit(const OrderLoading());
     try {
       final updatedOrder = await OrderService.instance.patchStatus(
-        ref: event.ref,
+        id: event.id,
         status: event.status,
       );
 

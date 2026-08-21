@@ -90,12 +90,14 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
   // ── Order card ─────────────────────────────────────────────────────────────
   Widget _buildOrderCard(BuildContext context, AppOrder order) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ClientOrderDetailsScreen(order: order),
-        ),
-      ),
+      onTap: order.serverId == null
+          ? null
+          : () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ClientOrderDetailsScreen(order: order),
+                ),
+              ),
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(

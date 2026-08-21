@@ -117,10 +117,10 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
   // ── Order card ─────────────────────────────────────────────────────────────
   Widget _buildOrderCard(BuildContext context, AppOrder order) {
     final bool isPending = order.status == OrderStatus.pendingReview;
-    final String orderId = order.serverId ?? order.ref;
+    final String? orderId = order.serverId;
 
     return GestureDetector(
-      onTap: () => _openOrder(context, orderId),
+      onTap: orderId == null ? null : () => _openOrder(context, orderId),
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
