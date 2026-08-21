@@ -28,6 +28,7 @@ class OrderController extends Controller
             'orders' => $orders,
             'statuses' => [
                 Order::STATUS_PENDING,
+                Order::STATUS_CONTACTED,
                 Order::STATUS_CONFIRMED,
                 Order::STATUS_PROCESSING,
                 Order::STATUS_COMPLETED,

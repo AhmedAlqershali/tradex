@@ -1,3 +1,6 @@
+  /// cancelled) is coarser than the app's 6-value UI vocabulary
+  /// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
+  /// cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this boundary.
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
@@ -118,18 +121,20 @@ class OrderService {
 
   // ── Status vocabulary translation ─────────────────────────────────────────────
 
-  /// App UI status → backend enum. The backend only recognises pending,
-  /// confirmed, processing, completed, cancelled — the two "in-progress
-  /// before confirmation" UI states collapse onto 'confirmed'.
+  /// App UI status → backend enum. The backend recognises pending, contacted,
+  /// confirmed, processing, completed, and cancelled.
   static String _toBackendStatus(String appStatus) {
     switch (appStatus) {
       case 'merchant_contacted':
       case 'merchantContacted':
+      case 'contacted':
         return 'contacted';
       case 'order_confirmed':
       case 'orderConfirmed':
+      case 'confirmed':
         return 'confirmed';
       case 'preparing':
+      case 'processing':
         return 'processing';
       case 'completed':
         return 'completed';

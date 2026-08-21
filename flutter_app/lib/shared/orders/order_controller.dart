@@ -245,6 +245,7 @@ class AppOrder {
   static OrderStatus _statusFromString(String value) {
     switch (value) {
       case 'merchant_contacted':
+      case 'contacted':
         return OrderStatus.merchantContacted;
       case 'order_confirmed':
         return OrderStatus.orderConfirmed;
@@ -352,6 +353,7 @@ class OrderController {
   static OrderStatus parseStatus(String value) {
     switch (value) {
       case 'merchant_contacted':
+      case 'contacted':
         return OrderStatus.merchantContacted;
       case 'order_confirmed':
         return OrderStatus.orderConfirmed;

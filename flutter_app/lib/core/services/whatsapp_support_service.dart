@@ -20,12 +20,20 @@ class WhatsAppSupportService {
     }
 
     static String? normalizePhone(String value) {
-        var digits = value.replaceAll(RegExp(r'[^0-9+]'), '');
-        if (digits.startsWith('+')) digits = digits.substring(1);
+        var digits = value.replaceAll(RegExp(r'[^0-9]'), '');
         if (digits.startsWith('00')) digits = digits.substring(2);
-        if (digits.startsWith('0')) digits = '972${digits.substring(1)}';
-        if (digits.length < 8 || digits.length > 15) return null;
-        return digits;
+        if (digits.startsWith('05')) {
+            if (digits.length != 10) return null;
+            return '972${digits.substring(1)}';
+        }
+        if (digits.startsWith('972')) {
+            if (digits.length != 12 ||
+                    !(digits.startsWith('9725') || digits.startsWith('9726'))) {
+                return null;
+            }
+            return digits;
+        }
+        return null;
     }
 
   static Future<bool> openChat() =>

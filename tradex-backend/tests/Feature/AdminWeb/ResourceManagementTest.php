@@ -80,6 +80,8 @@ class ResourceManagementTest extends TestCase
             ->assertRedirect(route('admin.orders.show', $order))
             ->assertSessionHas('status');
 
+        // Admins retain their existing ability to set an allowed status
+        // directly; merchant-only sequencing must not restrict this path.
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
             'status' => Order::STATUS_CONFIRMED,

@@ -160,6 +160,23 @@ class OrderTest extends TestCase
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'completed']);
     }
 
+    public function test_merchant_cannot_skip_contacted_status(): void
+    {
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $order = Order::factory()->forStore($store)->pending()->create();
+
+        $this->putJson(
+            "/api/v1/merchant/orders/{$order->id}/status",
+            ['status' => 'processing'],
+            $this->headers($token),
+        )->assertStatus(422);
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => Order::STATUS_PENDING,
+        ]);
+    }
+
     public function test_merchant_can_cancel_order(): void
     {
         ['store' => $store, 'token' => $token] = $this->actingAsMerchant();

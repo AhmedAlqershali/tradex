@@ -47,10 +47,20 @@ class _MerchantOrderDetailsScreenState
         }
 
         AppOrder? order;
-        if (state is OrderLoading) order = state.order;
-        if (state is OrderDetailLoaded) order = state.order;
-        if (state is OrderStatusUpdated) order = state.order;
-        if (state is OrderFailure) order = state.order;
+        if (state is OrderLoading && state.order?.serverId == widget.orderId) {
+          order = state.order;
+        }
+        if (state is OrderDetailLoaded &&
+            state.order.serverId == widget.orderId) {
+          order = state.order;
+        }
+        if (state is OrderStatusUpdated &&
+            state.order.serverId == widget.orderId) {
+          order = state.order;
+        }
+        if (state is OrderFailure && state.order?.serverId == widget.orderId) {
+          order = state.order;
+        }
 
         if (state is OrderFailure && order == null) {
           return _buildFailureScaffold(context, state);
