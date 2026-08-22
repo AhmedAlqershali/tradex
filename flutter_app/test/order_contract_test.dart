@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/services/order_service.dart';
 import 'package:ai_saas/presentation/blocs/order/order_bloc.dart';
 import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
@@ -77,5 +78,33 @@ void main() {
     );
     expect(OrderFailure(server.message, error: server).error, same(server));
     expect(OrderFailure(network.message, error: network).error, same(network));
+  });
+
+  test('merchant status update uses the backend numeric server id path', () {
+    final order = AppOrder.fromServerJson({
+      'id': 42,
+      'ref': 'TRX-42',
+      'status': 'pending',
+      'created_at': '2026-08-14T10:00:00Z',
+      'customer_name': 'Customer',
+      'customer_phone': '000',
+      'customer_city': 'City',
+    });
+
+    expect(order.serverId, '42');
+    expect(
+      ApiConstants.merchantOrderStatus(order.serverId!),
+      '/merchant/orders/42/status',
+    );
+  });
+
+  test('merchant status update rejects a display reference as the server id', () async {
+    expect(
+      () => OrderService.instance.patchStatus(
+        id: 'TRX-42',
+        status: 'merchantContacted',
+      ),
+      throwsA(isA<ValidationException>()),
+    );
   });
 }

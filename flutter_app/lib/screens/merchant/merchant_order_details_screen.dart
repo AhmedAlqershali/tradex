@@ -49,7 +49,7 @@ class _MerchantOrderDetailsScreenState
         if (state is OrderFailure) {
           _showMessage(context, state.message);
         } else if (state is OrderStatusUpdated) {
-          _showMessage(context, 'تم التواصل');
+          _showMessage(context, state.order.status.label);
         }
       },
       child: BlocBuilder<OrderBloc, OrderState>(

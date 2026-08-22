@@ -3,6 +3,7 @@
   /// cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this boundary.
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
 import 'package:flutter/foundation.dart';
 
@@ -110,6 +111,9 @@ class OrderService {
     required String id,
     required String status,
   }) async {
+    if (id.isEmpty || int.tryParse(id) == null) {
+      throw const ValidationException('معرف الطلب غير صالح.');
+    }
     final endpoint = ApiConstants.merchantOrderStatus(id);
     final payload = {'status': _toBackendStatus(status)};
     debugPrint('[OrderService] PUT $endpoint serverId=$id '

@@ -89,6 +89,30 @@ void main() {
     );
   });
 
+  test('includes Laravel validation fields in the user-facing message', () {
+    final exception = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/merchant/orders/1/status'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/merchant/orders/1/status'),
+          statusCode: 422,
+          data: <String, dynamic>{
+            'success': false,
+            'message': 'Validation failed.',
+            'errors': <String, dynamic>{
+              'status': <String>['The status is invalid.'],
+            },
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+
+    expect(exception, isA<ValidationException>());
+    expect(exception.message, contains('Validation failed.'));
+    expect(exception.message, contains('status: The status is invalid.'));
+  });
+
   test('preserves merchant order not found as a typed 404 exception', () {
     final exception = ApiClient.mapDioExceptionForTesting(
       DioException(

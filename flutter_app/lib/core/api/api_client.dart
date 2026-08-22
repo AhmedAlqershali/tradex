@@ -135,12 +135,15 @@ class ApiClient {
           return ForbiddenException(message);
         }
         final body = e.response?.data;
-        final message = (body is Map ? body['message'] as String? : null) ??
-            'خطأ في الخادم ($status)';
         if (status == 422) {
           final errors = _parseValidationErrors(body);
-          return ValidationException(message, errors: errors);
+          return ValidationException(
+            _validationMessage(body, errors),
+            errors: errors,
+          );
         }
+        final message = (body is Map ? body['message'] as String? : null) ??
+            'خطأ في الخادم ($status)';
         return ServerException(message, statusCode: status);
 
       default:
@@ -158,6 +161,21 @@ class ApiClient {
         (v is List ? v : [v]).map((e) => e.toString()).toList(),
       ),
     );
+  }
+
+  static String _validationMessage(
+    dynamic body,
+    Map<String, List<String>> errors,
+  ) {
+    final message = body is Map && body['message'] is String
+        ? body['message'] as String
+        : 'Validation failed.';
+    if (errors.isEmpty) return message;
+
+    final details = errors.entries
+        .expand((entry) => entry.value.map((error) => '${entry.key}: $error'))
+        .join('\n');
+    return '$message\n$details';
   }
 
   // ── Auth interceptor ──────────────────────────────────────────────────────────
