@@ -367,17 +367,7 @@ class _MerchantOrderDetailsScreenState
                         await _contactCustomer(context, order);
                         return;
                       }
-                      final serverId = order.serverId;
-                      if (serverId == null || int.tryParse(serverId) == null) {
-                        _showMessage(context, 'معرف الطلب غير صالح');
-                        return;
-                      }
-                      context.read<OrderBloc>().add(
-                            OrderStatusUpdateRequested(
-                              id: serverId,
-                              status: action.nextStatus.name,
-                            ),
-                          );
+                      _updateOrderStatus(context, order, action.nextStatus);
                     },
               icon: Icon(action.icon, size: 18.sp),
               label: isUpdating
@@ -409,6 +399,24 @@ class _MerchantOrderDetailsScreenState
   bool _isUpdating(AppOrder order) {
     final state = context.read<OrderBloc>().state;
     return state is OrderLoading && state.orderId == order.serverId;
+  }
+
+  void _updateOrderStatus(
+    BuildContext context,
+    AppOrder order,
+    OrderStatus status,
+  ) {
+    final serverId = order.serverId;
+    if (serverId == null || int.tryParse(serverId) == null) {
+      _showMessage(context, 'معرف الطلب غير صالح');
+      return;
+    }
+    context.read<OrderBloc>().add(
+          OrderStatusUpdateRequested(
+            id: serverId,
+            status: status.name,
+          ),
+        );
   }
 
   List<_OrderAction> _getActions(AppOrder order) {

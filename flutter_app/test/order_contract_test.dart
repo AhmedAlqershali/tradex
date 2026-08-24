@@ -98,6 +98,29 @@ void main() {
     );
   });
 
+  test('confirm contact uses the contacted backend status and preserves server id', () {
+    final order = AppOrder.fromServerJson({
+      'id': 42,
+      'ref': 'TRX-42',
+      'status': 'pending',
+      'created_at': '2026-08-14T10:00:00Z',
+      'customer_name': 'Customer',
+      'customer_phone': '0591234567',
+      'customer_city': 'City',
+    });
+
+    expect(order.serverId, '42');
+    expect(OrderStatus.merchantContacted.name, 'merchantContacted');
+    expect(
+      OrderController.parseStatus('contacted'),
+      OrderStatus.merchantContacted,
+    );
+    expect(
+      ApiConstants.merchantOrderStatus(order.serverId!),
+      '/merchant/orders/42/status',
+    );
+  });
+
   test('merchant status update rejects a display reference as the server id', () async {
     expect(
       () => OrderService.instance.patchStatus(
