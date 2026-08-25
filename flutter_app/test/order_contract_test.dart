@@ -121,6 +121,38 @@ void main() {
     );
   });
 
+  test('Laravel status response unwraps and maps contacted to the UI status', () {
+    final order = AppOrder.fromServerJson({
+      'id': 42,
+      'status': 'contacted',
+      'created_at': '2026-08-14T10:00:00Z',
+      'customer_name': 'Customer',
+      'customer_phone': '0591234567',
+      'customer_city': 'City',
+      'items': [],
+    });
+
+    final response = {
+      'success': true,
+      'message': 'Order status updated.',
+      'data': {
+        'id': 42,
+        'status': 'contacted',
+        'created_at': '2026-08-14T10:00:00Z',
+        'customer_name': 'Customer',
+        'customer_phone': '0591234567',
+        'customer_city': 'City',
+        'items': [],
+      },
+    };
+    final data = response['data']! as Map<String, dynamic>;
+    final parsed = AppOrder.fromServerJson(data);
+
+    expect(order.serverId, '42');
+    expect(parsed.serverId, '42');
+    expect(parsed.status, OrderStatus.merchantContacted);
+  });
+
   test('merchant status update rejects a display reference as the server id', () async {
     expect(
       () => OrderService.instance.patchStatus(

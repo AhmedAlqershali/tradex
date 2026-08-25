@@ -5,6 +5,8 @@ workflows:
 
     environment:
       flutter: stable
+      vars:
+        TRADEX_BASE_URL: https://tradex-v2us.onrender.com/api/v1
       android_signing:
         - tradex-upload-key.jks
 
@@ -16,9 +18,9 @@ workflows:
             exit 1
           fi
           case "$TRADEX_BASE_URL" in
-            */api/v1) ;;
+            https://tradex-v2us.onrender.com/api/v1) ;;
             *)
-              echo "TRADEX_BASE_URL must end with /api/v1."
+              echo "TRADEX_BASE_URL must be the production API URL."
               exit 1
               ;;
           esac
