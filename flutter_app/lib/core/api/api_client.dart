@@ -104,8 +104,13 @@ class ApiClient {
             'message=${e.message}');
       }
       throw _mapDioException(e);
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw const UnknownException();
+      final message = e.toString();
+      throw UnknownException(
+        message.isEmpty ? 'حدث خطأ غير متوقع. حاول مجدداً.' : message,
+      );
     }
   }
 
