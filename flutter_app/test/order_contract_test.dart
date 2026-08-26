@@ -37,7 +37,7 @@ void main() {
   test('all backend lifecycle statuses parse to distinct UI statuses', () {
     final statuses = {
       'pending_review': OrderStatus.pendingReview,
-      'confirmed': OrderStatus.orderConfirmed,
+      'confirmed': OrderStatus.confirmed,
       'completed': OrderStatus.completed,
       'cancelled': OrderStatus.cancelled,
     };
@@ -115,6 +115,10 @@ void main() {
       actions.where((action) => action.isContact).single.nextStatus,
       isNull,
     );
+    expect(
+      actions.where((action) => action.isContact).single.label,
+      'تواصل',
+    );
     expect(OrderController.parseStatus('pending_review'), order.status);
   });
 
@@ -148,7 +152,7 @@ void main() {
 
     expect(order.serverId, '42');
     expect(parsed.serverId, '42');
-    expect(parsed.status, OrderStatus.orderConfirmed);
+    expect(parsed.status, OrderStatus.confirmed);
   });
 
   test('unknown backend status fails explicitly instead of becoming pending',
@@ -167,7 +171,13 @@ void main() {
   });
 
   test('legacy contacted and processing statuses are rejected explicitly', () {
-    for (final status in ['contacted', 'merchant_contacted', 'processing']) {
+    for (final status in [
+      'contacted',
+      'merchant_contacted',
+      'processing',
+      'preparing',
+      'order_confirmed',
+    ]) {
       expect(
         () => OrderController.parseStatus(status),
         throwsA(isA<FormatException>()),
@@ -180,7 +190,7 @@ void main() {
     expect(
       () => OrderService.instance.patchStatus(
         id: 'TRX-42',
-        status: 'merchantContacted',
+       status: 'contacted',
       ),
       throwsA(isA<ValidationException>()),
     );

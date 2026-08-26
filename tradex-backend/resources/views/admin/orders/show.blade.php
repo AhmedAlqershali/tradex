@@ -23,7 +23,7 @@
             <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="mt-5 space-y-4">@csrf @method('PUT')
                 <label for="status" class="block text-xs font-semibold uppercase tracking-wider text-slate-500">New status</label>
                 <select id="status" name="status" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-500/10">
-                    @foreach ([\App\Models\Order::STATUS_CONFIRMED, \App\Models\Order::STATUS_PROCESSING, \App\Models\Order::STATUS_COMPLETED, \App\Models\Order::STATUS_CANCELLED] as $status)<option value="{{ $status }}" @selected($order->status === $status)>{{ ucfirst($status) }}</option>@endforeach
+                    @foreach ([\App\Models\Order::STATUS_CONFIRMED, \App\Models\Order::STATUS_COMPLETED, \App\Models\Order::STATUS_CANCELLED] as $status)<option value="{{ $status }}" @selected($order->status === $status)>{{ ucfirst($status) }}</option>@endforeach
                 </select>
                 <button type="submit" class="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">Update order status</button>
             </form>

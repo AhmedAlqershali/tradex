@@ -1,5 +1,5 @@
 // cancelled) matches the app's four persisted order states
-// (pending_review/order_confirmed/completed/cancelled). Contact is an
+// (pending_review/confirmed/completed/cancelled). Contact is an
 // interaction and is not serialized as an order status.
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
@@ -125,8 +125,6 @@ class OrderService {
   /// silently converted into a pending order.
   static String _toBackendStatus(String appStatus) {
     switch (appStatus) {
-      case 'order_confirmed':
-      case 'orderConfirmed':
       case 'confirmed':
         return 'confirmed';
       case 'completed':

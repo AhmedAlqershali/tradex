@@ -10,9 +10,8 @@ AdminAnalyticsModel _analytics(int completedOrders) {
     sales: const AdminSalesStatistics(monthlySales: []),
     orders: AdminOrderStatistics(
       byStatus: AdminOrderStatusCounts(
-        pending: 0,
+        pendingReview: 0,
         confirmed: 0,
-        processing: 0,
         completed: completedOrders,
         cancelled: 0,
       ),

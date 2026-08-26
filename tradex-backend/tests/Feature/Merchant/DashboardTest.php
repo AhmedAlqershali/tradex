@@ -125,6 +125,7 @@ class DashboardTest extends TestCase
         $client = User::factory()->client()->create();
 
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'pending_review', 'total_amount' => 100]);
+        Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'confirmed', 'total_amount' => 150]);
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'completed', 'total_amount' => 200]);
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'cancelled', 'total_amount' => 50]);
 
@@ -134,8 +135,9 @@ class DashboardTest extends TestCase
         $response = $this->getJson('/api/v1/merchant/dashboard', $this->headers($token));
 
         $response->assertOk()
-            ->assertJsonPath('data.orders.total',     3)
+             ->assertJsonPath('data.orders.total',     4)
             ->assertJsonPath('data.orders.pending_review', 1)
+             ->assertJsonPath('data.orders.confirmed', 1)
             ->assertJsonPath('data.orders.completed', 1)
             ->assertJsonPath('data.orders.cancelled', 1)
             ->assertJsonPath('data.total_sales',      200);  // only completed orders; 200.00 encodes as integer 200

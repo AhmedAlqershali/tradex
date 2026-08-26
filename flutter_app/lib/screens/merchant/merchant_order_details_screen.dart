@@ -224,9 +224,6 @@ class _MerchantOrderDetailsScreenState
               SizedBox(height: 16.h),
               OrderCustomerInfoCard(order: order),
               SizedBox(height: 16.h),
-              if (order.status != OrderStatus.pendingReview &&
-                  order.status != OrderStatus.cancelled)
-                _buildConversationButton(context, order),
               if (_getActions(order).isNotEmpty)
                 _buildActionButtons(context, order),
               SizedBox(height: 30.h),
@@ -495,7 +492,7 @@ class MerchantOrderAction {
     required this.label,
     required this.icon,
     required this.color,
-    required this.nextStatus,
+    this.nextStatus,
     this.isContact = false,
   });
 }
@@ -505,7 +502,7 @@ List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
     case OrderStatus.pendingReview:
       return [
         const MerchantOrderAction(
-          label: 'تواصل مع العميل',
+          label: 'تواصل',
           icon: Icons.phone_in_talk_outlined,
           color: Color(0xff4D41DF),
           isContact: true,
@@ -514,7 +511,7 @@ List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
           label: 'تأكيد الطلب',
           icon: Icons.check_circle_outline_rounded,
           color: Color(0xff0891B2),
-          nextStatus: OrderStatus.orderConfirmed,
+          nextStatus: OrderStatus.confirmed,
         ),
         const MerchantOrderAction(
           label: 'إلغاء الطلب',
@@ -523,8 +520,14 @@ List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
           nextStatus: OrderStatus.cancelled,
         ),
       ];
-    case OrderStatus.orderConfirmed:
+    case OrderStatus.confirmed:
       return [
+        const MerchantOrderAction(
+          label: 'تواصل',
+          icon: Icons.phone_in_talk_outlined,
+          color: Color(0xff4D41DF),
+          isContact: true,
+        ),
         const MerchantOrderAction(
           label: 'تأكيد التسليم',
           icon: Icons.done_all_rounded,

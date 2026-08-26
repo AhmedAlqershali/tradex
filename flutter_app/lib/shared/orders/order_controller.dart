@@ -232,8 +232,8 @@ class AppOrder {
     switch (s) {
       case OrderStatus.pendingReview:
         return 'pending_review';
-      case OrderStatus.orderConfirmed:
-        return 'order_confirmed';
+      case OrderStatus.confirmed:
+        return 'confirmed';
       case OrderStatus.completed:
         return 'completed';
       case OrderStatus.cancelled:
@@ -244,12 +244,9 @@ class AppOrder {
   static OrderStatus parseStatus(String value) {
     switch (value) {
       case 'pending_review':
-      case 'pendingReview':
         return OrderStatus.pendingReview;
-      case 'order_confirmed':
       case 'confirmed':
-      case 'orderConfirmed':
-        return OrderStatus.orderConfirmed;
+        return OrderStatus.confirmed;
       case 'completed':
         return OrderStatus.completed;
       case 'cancelled':

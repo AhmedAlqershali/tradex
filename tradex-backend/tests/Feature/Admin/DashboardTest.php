@@ -79,7 +79,7 @@ class DashboardTest extends TestCase
                         'users'       => ['total', 'clients', 'merchants', 'admins'],
                         'stores'      => ['total', 'active', 'inactive', 'suspended'],
                         'products'    => ['total', 'active', 'inactive', 'out_of_stock'],
-                        'orders'      => ['total', 'pending', 'confirmed', 'processing', 'completed', 'cancelled'],
+                        'orders'      => ['total', 'pending_review', 'confirmed', 'completed', 'cancelled'],
                         'total_sales',
                     ],
                     'marketplace' => [
@@ -139,7 +139,7 @@ class DashboardTest extends TestCase
 
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'completed', 'total_amount' => 300]);
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'completed', 'total_amount' => 200]);
-        Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'pending',   'total_amount' => 999]); // should not be counted
+        Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'pending_review', 'total_amount' => 999]); // should not be counted
 
         $response = $this->getJson('/api/v1/admin/dashboard', $this->headers($token));
 

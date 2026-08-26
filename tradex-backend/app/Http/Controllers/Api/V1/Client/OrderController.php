@@ -56,15 +56,19 @@ class OrderController extends BaseApiController
      * Paginated order history with optional filters.
      *
      * Query parameters:
-     *   status    string — pending | confirmed | processing | completed | cancelled
+     *   status    string — pending_review | confirmed | completed | cancelled
      *   date_from string — Y-m-d (inclusive)
      *   date_to   string — Y-m-d (inclusive)
      *   per_page  int    — 1-100 (default: 15)
      */
     public function index(Request $request): JsonResponse
     {
-        $filters    = $request->only(['status', 'date_from', 'date_to', 'per_page']);
-        $paginator  = $this->orderService->listForClient($request->user(), $filters);
+        $filters = $request->only(['status', 'date_from', 'date_to', 'per_page']);
+        try {
+            $paginator = $this->orderService->listForClient($request->user(), $filters);
+        } catch (OrderException $e) {
+            return $this->error($e->getMessage(), 422);
+        }
         $collection = new OrderCollection($paginator);
 
         return $this->success($collection->toArray($request), 'Orders retrieved successfully.');
@@ -89,7 +93,7 @@ class OrderController extends BaseApiController
      * Cancel a pending order.
      *
      * Business rules enforced in OrderService:
-     * - Only orders in 'pending' status can be cancelled by the client.
+     * - Only orders in 'pending_review' status can be cancelled by the client.
      * - Returns 422 if the order has already been confirmed or is in a later stage.
      */
     public function cancel(Request $request, int $id): JsonResponse

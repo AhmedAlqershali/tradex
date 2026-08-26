@@ -18,22 +18,19 @@ class OrderController extends Controller
         private readonly OrderServiceInterface $orderService,
     ) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $orders = $this->orderService->listForAdmin(
-            $request->only(['status', 'date_from', 'date_to', 'per_page']),
-        );
+        try {
+            $orders = $this->orderService->listForAdmin(
+                $request->only(['status', 'date_from', 'date_to', 'per_page']),
+            );
+        } catch (OrderException $exception) {
+            return back()->withErrors(['status' => $exception->getMessage()])->withInput();
+        }
 
         return view('admin.orders.index', [
             'orders' => $orders,
-            'statuses' => [
-                Order::STATUS_PENDING,
-                Order::STATUS_CONTACTED,
-                Order::STATUS_CONFIRMED,
-                Order::STATUS_PROCESSING,
-                Order::STATUS_COMPLETED,
-                Order::STATUS_CANCELLED,
-            ],
+            'statuses' => Order::PERSISTED_STATUSES,
         ]);
     }
 

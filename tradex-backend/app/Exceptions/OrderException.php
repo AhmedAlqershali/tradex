@@ -11,6 +11,11 @@ class OrderException extends RuntimeException
         return new self("Cannot transition order from '{$from}' to '{$to}'.");
     }
 
+    public static function invalidStatusFilter(string $status): self
+    {
+        return new self("Unknown order status filter: '{$status}'.");
+    }
+
     /**
      * Thrown when a client tries to cancel an order that is no longer
      * in a cancellable state (i.e., status is not 'pending_review').

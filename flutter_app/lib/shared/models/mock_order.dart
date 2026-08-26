@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 
 enum OrderStatus {
   pendingReview,
-  orderConfirmed,
+  confirmed,
   completed,
   cancelled,
 }
@@ -20,7 +20,7 @@ extension OrderStatusX on OrderStatus {
   String get label {
     switch (this) {
       case OrderStatus.pendingReview:     return 'قيد المراجعة';
-      case OrderStatus.orderConfirmed:    return 'تم تأكيد الطلب';
+      case OrderStatus.confirmed:         return 'تم تأكيد الطلب';
       case OrderStatus.completed:         return 'مكتمل';
       case OrderStatus.cancelled:         return 'ملغي';
     }
@@ -29,7 +29,7 @@ extension OrderStatusX on OrderStatus {
   Color get color {
     switch (this) {
       case OrderStatus.pendingReview:     return const Color(0xffF59E0B);
-      case OrderStatus.orderConfirmed:    return const Color(0xff0891B2);
+      case OrderStatus.confirmed:         return const Color(0xff0891B2);
       case OrderStatus.completed:         return const Color(0xff00C896);
       case OrderStatus.cancelled:         return const Color(0xffE53E3E);
     }
@@ -40,7 +40,7 @@ extension OrderStatusX on OrderStatus {
   IconData get icon {
     switch (this) {
       case OrderStatus.pendingReview:     return Icons.hourglass_top_rounded;
-      case OrderStatus.orderConfirmed:    return Icons.check_circle_outline_rounded;
+      case OrderStatus.confirmed:         return Icons.check_circle_outline_rounded;
       case OrderStatus.completed:         return Icons.done_all_rounded;
       case OrderStatus.cancelled:         return Icons.cancel_outlined;
     }
@@ -50,7 +50,7 @@ extension OrderStatusX on OrderStatus {
   int get timelineStep {
     switch (this) {
       case OrderStatus.pendingReview:     return 0;
-      case OrderStatus.orderConfirmed:    return 1;
+      case OrderStatus.confirmed:         return 1;
       case OrderStatus.completed:         return 2;
       case OrderStatus.cancelled:         return -1;
     }

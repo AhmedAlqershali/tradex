@@ -47,12 +47,11 @@ class AdminDashboardService implements AdminDashboardServiceInterface
         $orderStats = DB::table('orders')
             ->selectRaw("
                 COUNT(*) as total,
-                SUM(CASE WHEN status = 'pending'    THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = 'confirmed'  THEN 1 ELSE 0 END) as confirmed,
-                SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
-                SUM(CASE WHEN status = 'completed'  THEN 1 ELSE 0 END) as completed,
-                SUM(CASE WHEN status = 'cancelled'  THEN 1 ELSE 0 END) as cancelled,
-                SUM(CASE WHEN status = 'completed'  THEN total_amount ELSE 0 END) as total_sales
+                SUM(CASE WHEN status = 'pending_review' THEN 1 ELSE 0 END) as pending_review,
+                SUM(CASE WHEN status = 'confirmed'      THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = 'completed'      THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = 'cancelled'      THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = 'completed'      THEN total_amount ELSE 0 END) as total_sales
             ")->first();
 
         $activeSubscriptionQuery = DB::table('subscriptions')
@@ -111,11 +110,10 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                 ],
                 'orders' => [
                     'total'      => (int) ($orderStats->total      ?? 0),
-                    'pending'    => (int) ($orderStats->pending    ?? 0),
-                    'confirmed'  => (int) ($orderStats->confirmed  ?? 0),
-                    'processing' => (int) ($orderStats->processing ?? 0),
-                    'completed'  => (int) ($orderStats->completed  ?? 0),
-                    'cancelled'  => (int) ($orderStats->cancelled  ?? 0),
+                    'pending_review' => (int) ($orderStats->pending_review ?? 0),
+                    'confirmed'      => (int) ($orderStats->confirmed      ?? 0),
+                    'completed'      => (int) ($orderStats->completed      ?? 0),
+                    'cancelled'      => (int) ($orderStats->cancelled      ?? 0),
                 ],
                 'total_sales' => round((float) ($orderStats->total_sales ?? 0), 2),
                 'subscriptions' => [
@@ -213,11 +211,10 @@ class AdminDashboardService implements AdminDashboardServiceInterface
             ],
             'order_statistics' => [
                 'by_status' => [
-                    'pending'    => (int) ($orderStats['pending']    ?? 0),
-                    'confirmed'  => (int) ($orderStats['confirmed']  ?? 0),
-                    'processing' => (int) ($orderStats['processing'] ?? 0),
-                    'completed'  => (int) ($orderStats['completed']  ?? 0),
-                    'cancelled'  => (int) ($orderStats['cancelled']  ?? 0),
+                    'pending_review' => (int) ($orderStats['pending_review'] ?? 0),
+                    'confirmed'      => (int) ($orderStats['confirmed']      ?? 0),
+                    'completed'      => (int) ($orderStats['completed']      ?? 0),
+                    'cancelled'      => (int) ($orderStats['cancelled']      ?? 0),
                 ],
             ],
             'user_growth'     => $userGrowth,

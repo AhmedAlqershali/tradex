@@ -71,7 +71,7 @@ class OrderCancellationTest extends TestCase
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'confirmed']);
     }
 
-    public function test_client_cannot_cancel_a_processing_order(): void
+    public function test_client_cannot_cancel_a_confirmed_order_after_delivery_started(): void
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 

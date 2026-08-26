@@ -7,6 +7,7 @@
       "name": "ai_saas",
       "version": "1.0.0+1",
       "dependencies": [
+        "crypto",
         "dio",
         "equatable",
         "flutter",
@@ -103,6 +104,13 @@
       ]
     },
     {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
       "name": "dio",
       "version": "5.10.0",
       "dependencies": [
@@ -182,18 +190,6 @@
       ]
     },
     {
-      "name": "flutter",
-      "version": "0.0.0",
-      "dependencies": [
-        "characters",
-        "collection",
-        "material_color_utilities",
-        "meta",
-        "sky_engine",
-        "vector_math"
-      ]
-    },
-    {
       "name": "flutter_localizations",
       "version": "0.0.0",
       "dependencies": [
@@ -205,6 +201,18 @@
         "material_color_utilities",
         "meta",
         "path",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "flutter",
+      "version": "0.0.0",
+      "dependencies": [
+        "characters",
+        "collection",
+        "material_color_utilities",
+        "meta",
+        "sky_engine",
         "vector_math"
       ]
     },
@@ -470,6 +478,13 @@
       ]
     },
     {
+      "name": "typed_data",
+      "version": "1.4.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
       "name": "dio_web_adapter",
       "version": "2.2.0",
       "dependencies": [
@@ -714,10 +729,12 @@
       ]
     },
     {
-      "name": "crypto",
-      "version": "3.0.7",
+      "name": "intl",
+      "version": "0.20.2",
       "dependencies": [
-        "typed_data"
+        "clock",
+        "meta",
+        "path"
       ]
     },
     {
@@ -781,22 +798,6 @@
       "version": "0.6.7",
       "dependencies": [
         "meta"
-      ]
-    },
-    {
-      "name": "intl",
-      "version": "0.20.2",
-      "dependencies": [
-        "clock",
-        "meta",
-        "path"
-      ]
-    },
-    {
-      "name": "typed_data",
-      "version": "1.4.0",
-      "dependencies": [
-        "collection"
       ]
     },
     {

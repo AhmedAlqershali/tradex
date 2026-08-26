@@ -144,6 +144,10 @@ class OrderTest extends TestCase
              ->assertJsonPath('data.status', 'confirmed');
 
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'confirmed']);
+
+        $this->getJson("/api/v1/merchant/orders/{$order->id}", $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.status', 'confirmed');
     }
 
     public function test_merchant_can_progress_order_through_required_lifecycle(): void
@@ -228,7 +232,8 @@ class OrderTest extends TestCase
 
         // Second cancellation — order is already cancelled; stock must NOT be restored again
         $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'cancelled'], $this->headers($token))
-             ->assertOk();
+             ->assertStatus(422)
+             ->assertJsonPath('success', false);
 
         $this->assertEquals(10, $product->fresh()->quantity, 'Cancelling an already-cancelled order must not restore stock a second time.');
     }
@@ -252,6 +257,34 @@ class OrderTest extends TestCase
         $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'pending_review'], $this->headers($token))
              ->assertStatus(422)
              ->assertJsonPath('success', false);
+    }
+
+    public function test_legacy_statuses_are_rejected_and_order_stays_pending(): void
+    {
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $order = Order::factory()->forStore($store)->pending()->create();
+
+        foreach (['contacted', 'merchant_contacted', 'processing', 'preparing'] as $status) {
+            $this->putJson(
+                "/api/v1/merchant/orders/{$order->id}/status",
+                ['status' => $status],
+                $this->headers($token),
+            )->assertStatus(422);
+        }
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => Order::STATUS_PENDING,
+        ]);
+    }
+
+    public function test_unknown_merchant_status_filter_is_rejected_explicitly(): void
+    {
+        ['token' => $token] = $this->actingAsMerchant();
+
+        $this->getJson('/api/v1/merchant/orders?status=processing', $this->headers($token))
+            ->assertStatus(422)
+            ->assertJsonPath('success', false);
     }
 
     public function test_status_update_validates_required_field(): void

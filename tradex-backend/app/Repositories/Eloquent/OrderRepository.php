@@ -93,29 +93,16 @@ class OrderRepository implements OrderRepositoryInterface
      * Paginated order list for a specific client.
      *
      * Supports optional filters: status, date_from (Y-m-d), date_to (Y-m-d), per_page.
-     * An invalid status value is silently ignored (returns all statuses) to avoid
-     * leaking the list of valid statuses in error responses and to keep UX smooth
-     * when clients pass stale or unknown status strings.
+     * Invalid status values are rejected by OrderService before this repository
+     * is called, so stale clients cannot silently receive an unfiltered list.
      */
     public function listForClient(User $client, array $filters): LengthAwarePaginator
     {
         $perPage = min((int) ($filters['per_page'] ?? 15), 100);
 
-        // Only apply status filter when the value is a known valid status.
-        $validStatuses = [
-            Order::STATUS_PENDING,
-            Order::STATUS_CONFIRMED,
-            Order::STATUS_COMPLETED,
-            Order::STATUS_CANCELLED,
-        ];
-
-        $statusFilter = isset($filters['status']) && in_array($filters['status'], $validStatuses, true)
-            ? $filters['status']
-            : null;
-
         return Order::with(['store:id,store_name', 'items'])
             ->forClient($client->id)
-            ->when($statusFilter, fn ($q) => $q->where('status', $statusFilter))
+            ->when(! empty($filters['status']), fn ($q) => $q->where('status', $filters['status']))
             ->when(! empty($filters['date_from']), fn ($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
             ->when(! empty($filters['date_to']),   fn ($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
             ->orderByDesc('created_at')

@@ -9,12 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Existing contacted orders have not been confirmed. Existing
-        // processing orders have already passed confirmation.
-        DB::table('orders')->whereIn('status', ['pending', 'contacted'])->update([
+        // Convert every status used by the former merchant workflow without
+        // deleting orders. Contact-related values never represented delivery
+        // progress, while preparation values had already passed confirmation.
+        DB::table('orders')->whereIn('status', ['pending', 'contacted', 'merchant_contacted'])->update([
             'status' => 'pending_review',
         ]);
-        DB::table('orders')->where('status', 'processing')->update([
+        DB::table('orders')->whereIn('status', ['processing', 'preparing'])->update([
             'status' => 'confirmed',
         ]);
 

@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:ai_saas/core/services/whatsapp_support_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('uses the configured WhatsApp support number and chat URL', () {
     expect(
       WhatsAppSupportService.supportPhoneNumber,

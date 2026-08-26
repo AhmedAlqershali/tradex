@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Requests\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\Order\OrderCollection;
 use App\Http\Resources\Order\OrderResource;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,15 +33,19 @@ class OrderController extends BaseApiController
      * List orders for the merchant's stores with optional filters.
      *
      * Query parameters:
-     *   status    string — confirmed | completed | cancelled
+     *   status    string — pending_review | confirmed | completed | cancelled
      *   date_from string — Y-m-d (inclusive)
      *   date_to   string — Y-m-d (inclusive)
      *   per_page  int    — 1-100 (default: 15)
      */
     public function index(Request $request): JsonResponse
     {
-        $filters    = $request->only(['status', 'date_from', 'date_to', 'per_page']);
-        $paginator  = $this->orderService->listForMerchant($request->user(), $filters);
+        $filters = $request->only(['status', 'date_from', 'date_to', 'per_page']);
+        try {
+            $paginator = $this->orderService->listForMerchant($request->user(), $filters);
+        } catch (OrderException $e) {
+            return $this->error($e->getMessage(), 422);
+        }
         $collection = new OrderCollection($paginator);
 
         return $this->success($collection->toArray($request), 'Orders retrieved successfully.');

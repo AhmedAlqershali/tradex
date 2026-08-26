@@ -109,6 +109,7 @@ class OrderService implements OrderServiceInterface
 
     public function listForClient(User $client, array $filters): LengthAwarePaginator
     {
+        $this->validateStatusFilter($filters);
         return $this->orderRepository->listForClient($client, $filters);
     }
 
@@ -128,8 +129,8 @@ class OrderService implements OrderServiceInterface
      *
      * Business rules:
      * - Only orders in 'pending_review' status can be cancelled by the client.
-     * - Once the merchant has confirmed/started processing, the client can
-     *   no longer cancel (they must contact the merchant directly).
+     * - Once the merchant has confirmed the order, the client can no longer
+     *   cancel (they must contact the merchant directly).
      *
      * @throws ModelNotFoundException  if the order does not belong to this client
      * @throws OrderException          if the order is not in a cancellable state
@@ -160,6 +161,7 @@ class OrderService implements OrderServiceInterface
 
     public function listForMerchant(User $merchant, array $filters): LengthAwarePaginator
     {
+        $this->validateStatusFilter($filters);
         return $this->orderRepository->listForMerchant($merchant, $filters);
     }
 
@@ -176,6 +178,7 @@ class OrderService implements OrderServiceInterface
 
     public function listForAdmin(array $filters): LengthAwarePaginator
     {
+        $this->validateStatusFilter($filters);
         return $this->orderRepository->listForAdmin($filters);
     }
 
@@ -194,7 +197,8 @@ class OrderService implements OrderServiceInterface
     {
         $order = $this->findForAdmin($orderId);
 
-        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)) {
+        if (! in_array($newStatus, Order::MERCHANT_ALLOWED_STATUSES, true)
+            || ! Order::merchantCanTransition($order->status, $newStatus)) {
             throw OrderException::invalidStatusTransition($order->status, $newStatus);
         }
 
@@ -228,5 +232,14 @@ class OrderService implements OrderServiceInterface
         }
 
         return $updated;
+    }
+
+    private function validateStatusFilter(array $filters): void
+    {
+        $status = $filters['status'] ?? null;
+
+        if ($status !== null && $status !== '' && ! Order::isValidStatus((string) $status)) {
+            throw OrderException::invalidStatusFilter((string) $status);
+        }
     }
 }

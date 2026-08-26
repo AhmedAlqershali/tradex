@@ -14,9 +14,8 @@ AdminDashboardModel _dashboard() => AdminDashboardModel.fromJson({
         },
         'orders': {
           'total': 5,
-          'pending': 2,
+          'pending_review': 2,
           'confirmed': 1,
-          'processing': 1,
           'completed': 1,
           'cancelled': 0,
         },

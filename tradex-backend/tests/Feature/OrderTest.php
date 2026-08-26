@@ -76,7 +76,7 @@ class OrderTest extends TestCase
 
         $this->assertDatabaseHas('orders', [
             'client_id' => $client->id,
-            'status'    => 'pending',
+            'status'    => 'pending_review',
         ]);
         $this->assertDatabaseHas('user_notifications', [
             'user_id' => $client->id,
@@ -181,7 +181,7 @@ class OrderTest extends TestCase
             ->assertJsonPath('data.pagination.total', 3);
     }
 
-    public function test_merchant_can_update_order_status(): void
+    public function test_merchant_can_confirm_order_without_contact_transition(): void
     {
         $merchant = User::factory()->merchant()->create();
         $this->entitleMerchant($merchant);
@@ -190,14 +190,10 @@ class OrderTest extends TestCase
         $order    = Order::factory()->forStore($store)->pending()->create();
 
         $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'contacted'], $this->headers($token))
-            ->assertOk()
-            ->assertJson(['success' => true]);
+            ->assertStatus(422)
+            ->assertJsonPath('success', false);
 
-        $this->assertSame('contacted', $order->fresh()->status);
-        $this->assertDatabaseHas('user_notifications', [
-            'user_id' => $order->client_id,
-            'type'    => 'order_status_updated',
-        ]);
+        $this->assertSame('pending_review', $order->fresh()->status);
     }
 
     public function test_merchant_cannot_set_invalid_order_status(): void
@@ -216,11 +212,15 @@ class OrderTest extends TestCase
 
     public function test_order_statuses_are_correct(): void
     {
-        $this->assertSame('pending',    Order::STATUS_PENDING);
-        $this->assertSame('contacted',  Order::STATUS_CONTACTED);
-        $this->assertSame('confirmed',  Order::STATUS_CONFIRMED);
-        $this->assertSame('processing', Order::STATUS_PROCESSING);
-        $this->assertSame('completed',  Order::STATUS_COMPLETED);
-        $this->assertSame('cancelled',  Order::STATUS_CANCELLED);
+        $this->assertSame('pending_review', Order::STATUS_PENDING);
+        $this->assertSame('confirmed',      Order::STATUS_CONFIRMED);
+        $this->assertSame('completed',      Order::STATUS_COMPLETED);
+        $this->assertSame('cancelled',      Order::STATUS_CANCELLED);
+        $this->assertSame([
+            'pending_review',
+            'confirmed',
+            'completed',
+            'cancelled',
+        ], Order::PERSISTED_STATUSES);
     }
 }

@@ -65,7 +65,7 @@ class ResourceManagementTest extends TestCase
         ]);
 
         $this->actingAs($admin, 'web')
-            ->get('/admin/orders?status=pending')
+            ->get('/admin/orders?status=pending_review')
             ->assertOk()
             ->assertSee('#'.$order->id)
             ->assertSee('Order Customer')
@@ -80,8 +80,8 @@ class ResourceManagementTest extends TestCase
             ->assertRedirect(route('admin.orders.show', $order))
             ->assertSessionHas('status');
 
-        // Admins retain their existing ability to set an allowed status
-        // directly; merchant-only sequencing must not restrict this path.
+        // Admin order actions use the same canonical transition rules as the
+        // merchant workflow.
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
             'status' => Order::STATUS_CONFIRMED,

@@ -89,26 +89,23 @@ class AdminOrderStatistics {
 
 class AdminOrderStatusCounts {
   const AdminOrderStatusCounts({
-    required this.pending,
+    required this.pendingReview,
     required this.confirmed,
-    required this.processing,
     required this.completed,
     required this.cancelled,
   });
 
-  final int pending;
+  final int pendingReview;
   final int confirmed;
-  final int processing;
   final int completed;
   final int cancelled;
 
-  int get total => pending + confirmed + processing + completed + cancelled;
+  int get total => pendingReview + confirmed + completed + cancelled;
 
   factory AdminOrderStatusCounts.fromJson(Map<String, dynamic> json) {
     return AdminOrderStatusCounts(
-      pending: _integer(json['pending']),
+      pendingReview: _integer(json['pending_review']),
       confirmed: _integer(json['confirmed']),
-      processing: _integer(json['processing']),
       completed: _integer(json['completed']),
       cancelled: _integer(json['cancelled']),
     );

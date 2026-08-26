@@ -67,16 +67,16 @@ class OrderFilterTest extends TestCase
              ->assertJsonPath('data.pagination.total', 2);
     }
 
-    public function test_invalid_status_filter_is_ignored_returns_all(): void
+    public function test_invalid_status_filter_is_rejected_explicitly(): void
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
         Order::factory()->forClient($client)->count(3)->create();
 
-        // Invalid status — should be silently ignored, returning all orders
+        // Unknown status filters must not silently turn into an unfiltered list.
         $this->getJson('/api/v1/orders?status=invalid_status', $this->headers($token))
-             ->assertOk()
-             ->assertJsonPath('data.pagination.total', 3);
+             ->assertStatus(422)
+             ->assertJsonPath('success', false);
     }
 
     // =========================================================================

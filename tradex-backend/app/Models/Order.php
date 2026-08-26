@@ -39,14 +39,18 @@ class Order extends Model
     }
 
     // Status constants
-    const STATUS_PENDING    = 'pending_review';
-    // Legacy constants are retained for non-merchant integrations that still
-    // reference the old labels; neither is a valid persisted merchant state.
-    const STATUS_CONTACTED  = 'contacted';
-    const STATUS_CONFIRMED  = 'confirmed';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_COMPLETED  = 'completed';
-    const STATUS_CANCELLED  = 'cancelled';
+    public const STATUS_PENDING   = 'pending_review';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    /** Every value allowed in the persisted orders.status column. */
+    public const PERSISTED_STATUSES = [
+        self::STATUS_PENDING,
+        self::STATUS_CONFIRMED,
+        self::STATUS_COMPLETED,
+        self::STATUS_CANCELLED,
+    ];
 
     /** Statuses a merchant may transition to. */
     const MERCHANT_ALLOWED_STATUSES = [
@@ -55,10 +59,19 @@ class Order extends Model
         self::STATUS_CANCELLED,
     ];
 
+    public static function isValidStatus(string $status): bool
+    {
+        return in_array($status, self::PERSISTED_STATUSES, true);
+    }
+
     public static function merchantCanTransition(string $from, string $to): bool
     {
+        if (! self::isValidStatus($from) || ! self::isValidStatus($to)) {
+            return false;
+        }
+
         if ($to === self::STATUS_CANCELLED) {
-            return $from !== self::STATUS_COMPLETED && $from !== self::STATUS_CANCELLED;
+            return in_array($from, [self::STATUS_PENDING, self::STATUS_CONFIRMED], true);
         }
 
         return match ($from) {

@@ -11,9 +11,8 @@ void main() {
       },
       'order_statistics': {
         'by_status': {
-          'pending': 1,
+          'pending_review': 1,
           'confirmed': 2,
-          'processing': 3,
           'completed': 4,
           'cancelled': 0,
         },
@@ -34,7 +33,7 @@ void main() {
 
     expect(analytics.sales.monthlySales.single.revenue, 1250.50);
     expect(analytics.sales.monthlySales.single.orderCount, 4);
-    expect(analytics.orders.byStatus.total, 10);
+    expect(analytics.orders.byStatus.total, 7);
     expect(analytics.userGrowth.single.count, 7);
     expect(analytics.merchantGrowth.single.count, 2);
     expect(analytics.products.byCategory.single.category, 'Shoes');

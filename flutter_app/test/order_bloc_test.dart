@@ -30,7 +30,7 @@ void main() {
   test('successful status update uses the canonical server order', () async {
     final updated = _order(
       id: '42',
-      status: OrderStatus.orderConfirmed,
+       status: OrderStatus.confirmed,
     );
     String? requestedId;
     String? requestedStatus;
@@ -49,16 +49,16 @@ void main() {
         .first;
     bloc.add(const OrderStatusUpdateRequested(
       id: '42',
-      status: 'orderConfirmed',
+       status: 'confirmed',
     ));
 
     final state = await stateFuture;
 
     expect(requestedId, '42');
-    expect(requestedStatus, 'merchantContacted');
+    expect(requestedStatus, 'confirmed');
     expect(state.order, same(updated));
     expect(state.orderId, '42');
-    expect(state.order.status, OrderStatus.orderConfirmed);
+    expect(state.order.status, OrderStatus.confirmed);
     expect(OrderController.instance.orders, [same(updated)]);
 
     await bloc.close();
@@ -112,7 +112,7 @@ void main() {
   test('reloading after update keeps the persisted server status', () async {
     final updated = _order(
       id: '42',
-      status: OrderStatus.orderConfirmed,
+       status: OrderStatus.confirmed,
     );
 
     final bloc = OrderBloc(
@@ -126,7 +126,7 @@ void main() {
         .first;
     bloc.add(const OrderStatusUpdateRequested(
       id: '42',
-      status: 'orderConfirmed',
+       status: 'confirmed',
     ));
     await updatedFuture;
 
@@ -138,7 +138,7 @@ void main() {
     final reloaded = await reloadFuture;
 
     expect(reloaded.order.serverId, '42');
-    expect(reloaded.order.status, OrderStatus.orderConfirmed);
+    expect(reloaded.order.status, OrderStatus.confirmed);
 
     await bloc.close();
   });
