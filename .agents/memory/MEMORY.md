@@ -21,3 +21,4 @@
 - [Portable npm lockfiles](npm-lock-registry.md) — imported lockfiles can embed Replit's private tarball host; external builds need normalization or regeneration.
 - [Avatar runtime verification](avatar-runtime-verification.md) — source tests cannot prove the real APK upload URL or hosted file response; capture one redacted device trace.
 - [Render static storage boundary](render-static-storage-boundary.md) — Docker must include public-disk files and the PHP router must allow the public/storage symlink target.
+- [SQLite migration query builders](sqlite-migration-query-builders.md) — clone mutable builders before validation queries so later counts are not filtered unexpectedly.

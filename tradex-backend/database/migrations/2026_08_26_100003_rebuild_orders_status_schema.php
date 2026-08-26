@@ -45,7 +45,7 @@ return new class extends Migration
     {
         $orders = DB::table('orders');
         $knownStatuses = array_merge(self::CANONICAL_STATUSES, self::LEGACY_STATUSES);
-        $unexpectedStatuses = $orders
+        $unexpectedStatuses = (clone $orders)
             ->whereNotIn('status', $knownStatuses)
             ->distinct()
             ->pluck('status')
@@ -54,7 +54,7 @@ return new class extends Migration
         if ($unexpectedStatuses !== []) {
             throw new RuntimeException(
                 'Cannot rebuild orders table with unknown statuses: '
-                . implode(', ', $unexpectedStatuses)
+                .implode(', ', $unexpectedStatuses)
             );
         }
 
