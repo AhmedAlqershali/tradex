@@ -98,7 +98,9 @@ void main() {
     );
   });
 
-  test('confirm contact uses the contacted backend status and preserves server id', () {
+  test(
+      'confirm contact uses the contacted backend status and preserves server id',
+      () {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'ref': 'TRX-42',
@@ -121,7 +123,8 @@ void main() {
     );
   });
 
-  test('Laravel status response unwraps and maps contacted to the UI status', () {
+  test('Laravel status response unwraps and maps contacted to the UI status',
+      () {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'status': 'contacted',
@@ -153,7 +156,23 @@ void main() {
     expect(parsed.status, OrderStatus.merchantContacted);
   });
 
-  test('merchant status update rejects a display reference as the server id', () async {
+  test('unknown backend status fails explicitly instead of becoming pending',
+      () {
+    expect(
+      () => AppOrder.fromServerJson({
+        'id': 42,
+        'status': 'unexpected_status',
+        'created_at': '2026-08-14T10:00:00Z',
+        'customer_name': 'Customer',
+        'customer_phone': '000',
+        'customer_city': 'City',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('merchant status update rejects a display reference as the server id',
+      () async {
     expect(
       () => OrderService.instance.patchStatus(
         id: 'TRX-42',

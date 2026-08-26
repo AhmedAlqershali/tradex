@@ -122,15 +122,15 @@ class AppOrder {
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
-  double get total => serverTotal ??
-      products.fold(0.0, (s, p) => s + p.lineTotal);
+  double get total =>
+      serverTotal ?? products.fold(0.0, (s, p) => s + p.lineTotal);
   int get itemCount => products.length;
 
   // ── JSON serialisation ─────────────────────────────────────────────────────
 
   Map<String, dynamic> toJson() => {
         'ref': ref,
-      'serverId': serverId,
+        'serverId': serverId,
         'createdAt': createdAt.toIso8601String(),
         'merchantId': merchantId,
         'status': _statusToString(status),
@@ -144,11 +144,11 @@ class AppOrder {
 
   factory AppOrder.fromJson(Map<String, dynamic> json) => AppOrder(
         ref: json['ref'] as String,
-      serverId: json['serverId'] as String?,
+        serverId: json['serverId'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
         merchantId: json['merchantId'] as String?,
-        status:
-            _statusFromString(json['status'] as String? ?? 'pending_review'),
+        status: OrderController.parseStatus(
+            json['status'] as String? ?? 'pending_review'),
         serverTotal: (json['totalAmount'] as num?)?.toDouble(),
         products: (json['products'] as List<dynamic>)
             .map((e) => AppOrderProduct.fromJson(e as Map<String, dynamic>))
@@ -193,6 +193,11 @@ class AppOrder {
       }
     }
 
+    final rawStatus = json['status'];
+    if (rawStatus is! String || rawStatus.isEmpty) {
+      throw const FormatException('Order response is missing a valid status.');
+    }
+
     return AppOrder(
       ref: ref,
       serverId: serverId,
@@ -201,9 +206,7 @@ class AppOrder {
       ),
       merchantId:
           json['merchant_id'] as String? ?? json['merchantId'] as String?,
-      status: _statusFromString(
-        json['status'] as String? ?? 'pending_review',
-      ),
+      status: OrderController.parseStatus(rawStatus),
       products: products,
       serverTotal: (json['total_amount'] as num?)?.toDouble() ??
           (json['totalAmount'] as num?)?.toDouble(),
@@ -242,21 +245,29 @@ class AppOrder {
     }
   }
 
-  static OrderStatus _statusFromString(String value) {
+  static OrderStatus parseStatus(String value) {
     switch (value) {
+      case 'pending':
+      case 'pending_review':
+      case 'pendingReview':
+        return OrderStatus.pendingReview;
       case 'merchant_contacted':
       case 'contacted':
+      case 'merchantContacted':
         return OrderStatus.merchantContacted;
       case 'order_confirmed':
+      case 'confirmed':
+      case 'orderConfirmed':
         return OrderStatus.orderConfirmed;
       case 'preparing':
+      case 'processing':
         return OrderStatus.preparing;
       case 'completed':
         return OrderStatus.completed;
       case 'cancelled':
         return OrderStatus.cancelled;
       default:
-        return OrderStatus.pendingReview;
+        throw FormatException('Unknown order status: $value');
     }
   }
 
@@ -304,6 +315,8 @@ class OrderController {
   OrderController._internal();
   static final OrderController instance = OrderController._internal();
 
+  static OrderStatus parseStatus(String value) => AppOrder.parseStatus(value);
+
   final ValueNotifier<List<AppOrder>> ordersNotifier =
       ValueNotifier<List<AppOrder>>([]);
 
@@ -347,26 +360,6 @@ class OrderController {
   }
 
   // ── Status parsing ────────────────────────────────────────────────────────
-
-  /// Converts a server status string into an [OrderStatus] enum value.
-  /// Used by [OrderBloc] when patching a single order status.
-  static OrderStatus parseStatus(String value) {
-    switch (value) {
-      case 'merchant_contacted':
-      case 'contacted':
-        return OrderStatus.merchantContacted;
-      case 'order_confirmed':
-        return OrderStatus.orderConfirmed;
-      case 'preparing':
-        return OrderStatus.preparing;
-      case 'completed':
-        return OrderStatus.completed;
-      case 'cancelled':
-        return OrderStatus.cancelled;
-      default:
-        return OrderStatus.pendingReview;
-    }
-  }
 }
 
 // ─── Ref generator ────────────────────────────────────────────────────────────

@@ -1,11 +1,10 @@
-  /// cancelled) is coarser than the app's 6-value UI vocabulary
-  /// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
-  /// cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this boundary.
+// cancelled) is coarser than the app's 6-value UI vocabulary
+// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
+// cancelled) — [_toBackendStatus] translates at this boundary.
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
-import 'package:flutter/foundation.dart';
 
 // ─── OrderService ─────────────────────────────────────────────────────────────
 //
@@ -60,9 +59,7 @@ class OrderService {
                 : const [];
     return list
         .whereType<Map>()
-        .map((item) => AppOrder.fromServerJson(
-              _normaliseStatus(Map<String, dynamic>.from(item)),
-            ))
+        .map((item) => AppOrder.fromServerJson(Map<String, dynamic>.from(item)))
         .toList();
   }
 
@@ -77,13 +74,12 @@ class OrderService {
 
   /// GET /merchant/orders — all orders for the authenticated merchant's store.
   Future<List<AppOrder>> getMerchantOrders({String? status}) async {
-    final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(
-          ApiConstants.merchantOrders,
-          queryParameters: {
-            if (status != null && status.isNotEmpty) 'status': status,
-          },
-        );
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(
+      ApiConstants.merchantOrders,
+      queryParameters: {
+        if (status != null && status.isNotEmpty) 'status': status,
+      },
+    );
     final raw = response.data!;
     return _extractOrderList(raw);
   }
@@ -99,7 +95,7 @@ class OrderService {
     final raw = response.data!;
     final orderJson =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+    return AppOrder.fromServerJson(orderJson);
   }
 
   // ── Status update (merchant only) ─────────────────────────────────────────────
@@ -116,18 +112,14 @@ class OrderService {
     }
     final endpoint = ApiConstants.merchantOrderStatus(id);
     final payload = {'status': _toBackendStatus(status)};
-    debugPrint('[OrderService] PUT $endpoint serverId=$id '
-        'targetStatus=${payload['status']} payload=$payload');
     final response = await ApiClient.instance.put<Map<String, dynamic>>(
       endpoint,
       data: payload,
     );
-    debugPrint('[OrderService] response status=${response.statusCode} '
-        'body=${response.data}');
     final raw = response.data!;
     final orderJson =
         raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    return AppOrder.fromServerJson(_normaliseStatus(orderJson));
+    return AppOrder.fromServerJson(orderJson);
   }
 
   // ── Status vocabulary translation ─────────────────────────────────────────────
@@ -157,35 +149,6 @@ class OrderService {
     }
   }
 
-  /// Backend enum → app UI status, for order JSON coming back from the
-  /// server (list/detail responses).
-  static String _fromBackendStatus(String backendStatus) {
-    switch (backendStatus) {
-      case 'pending':
-        return 'pending_review';
-      case 'contacted':
-        return 'merchant_contacted';
-      case 'confirmed':
-        return 'order_confirmed';
-      case 'processing':
-        return 'preparing';
-      case 'completed':
-        return 'completed';
-      case 'cancelled':
-        return 'cancelled';
-      default:
-        return 'pending_review';
-    }
-  }
-
-  Map<String, dynamic> _normaliseStatus(Map<String, dynamic> orderJson) {
-    final status = orderJson['status'];
-    if (status is String) {
-      return {...orderJson, 'status': _fromBackendStatus(status)};
-    }
-    return orderJson;
-  }
-
   // ── Helpers ───────────────────────────────────────────────────────────────────
 
   List<AppOrder> _extractOrderList(Map<String, dynamic> raw) {
@@ -199,7 +162,6 @@ class OrderService {
       return list
           .whereType<Map>()
           .map((item) => Map<String, dynamic>.from(item))
-          .map(_normaliseStatus)
           .map(AppOrder.fromServerJson)
           .toList();
     }
