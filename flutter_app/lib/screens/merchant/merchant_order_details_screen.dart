@@ -43,8 +43,7 @@ class _MerchantOrderDetailsScreenState
     return BlocListener<OrderBloc, OrderState>(
       listenWhen: (previous, current) =>
           (current is OrderFailure && current.orderId == widget.orderId) ||
-          (current is OrderStatusUpdated &&
-              current.orderId == widget.orderId),
+          (current is OrderStatusUpdated && current.orderId == widget.orderId),
       listener: (context, state) {
         if (state is OrderFailure) {
           _showMessage(context, state.message);
@@ -54,53 +53,54 @@ class _MerchantOrderDetailsScreenState
       },
       child: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
-        if (state is OrderLoading &&
-          state.order == null &&
-          _displayedOrder == null) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
-        }
+          if (state is OrderLoading &&
+              state.order == null &&
+              _displayedOrder == null) {
+            return const Scaffold(
+                body: Center(child: CircularProgressIndicator()));
+          }
 
-        AppOrder? order;
-        if (state is OrderLoading &&
-            (state.orderId == widget.orderId ||
-                state.order?.serverId == widget.orderId)) {
-          order = state.order;
-        }
-        if (state is OrderDetailLoaded &&
-            state.order.serverId == widget.orderId) {
-          order = state.order;
-        }
-        if (state is OrderStatusUpdated &&
-            (state.orderId == widget.orderId ||
-                state.order.serverId == widget.orderId)) {
-          order = state.order;
-        }
-        if (state is OrderFailure &&
-            (state.orderId == widget.orderId ||
-                state.order?.serverId == widget.orderId)) {
-          order = state.order;
-        }
+          AppOrder? order;
+          if (state is OrderLoading &&
+              (state.orderId == widget.orderId ||
+                  state.order?.serverId == widget.orderId)) {
+            order = state.order;
+          }
+          if (state is OrderDetailLoaded &&
+              state.order.serverId == widget.orderId) {
+            order = state.order;
+          }
+          if (state is OrderStatusUpdated &&
+              (state.orderId == widget.orderId ||
+                  state.order.serverId == widget.orderId)) {
+            order = state.order;
+          }
+          if (state is OrderFailure &&
+              (state.orderId == widget.orderId ||
+                  state.order?.serverId == widget.orderId)) {
+            order = state.order;
+          }
 
-        if (order != null) {
-          _displayedOrder = order;
-        } else if (state is! OrderFailure || state.orderId != widget.orderId) {
-          order = _displayedOrder;
-        }
+          if (order != null) {
+            _displayedOrder = order;
+          } else if (state is! OrderFailure ||
+              state.orderId != widget.orderId) {
+            order = _displayedOrder;
+          }
 
-        if (state is OrderFailure && order == null) {
-          return _buildFailureScaffold(context, state);
-        }
+          if (state is OrderFailure && order == null) {
+            return _buildFailureScaffold(context, state);
+          }
 
-        // The shared OrderBloc may still contain the merchant list state for
-        // one frame before this screen's request emits OrderLoading. That is
-        // not a missing order; keep showing a loading state until the detail
-        // request resolves.
-        if (order == null) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+          // The shared OrderBloc may still contain the merchant list state for
+          // one frame before this screen's request emits OrderLoading. That is
+          // not a missing order; keep showing a loading state until the detail
+          // request resolves.
+          if (order == null) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
 
           return _buildScaffold(context, order);
         },
@@ -362,7 +362,9 @@ class _MerchantOrderDetailsScreenState
             width: double.infinity,
             height: 50.h,
             child: ElevatedButton.icon(
-              onPressed: isUpdating ? null : () async {
+              onPressed: isUpdating
+                  ? null
+                  : () async {
                       if (action.isContact) {
                         await _contactCustomer(context, order);
                         return;
