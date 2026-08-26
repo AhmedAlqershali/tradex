@@ -176,7 +176,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   Expanded(
                     child: _SummaryCard(
                       label: 'طلبات جديدة',
-                      value: dashboard.orders.pending.toString(),
+                      value: dashboard.orders.pendingReview.toString(),
                       icon: Icons.receipt_long_outlined,
                       color: _primary,
                     ),

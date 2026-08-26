@@ -31,14 +31,14 @@ class OrderFilterTest extends TestCase
     // GET /api/v1/orders?status=... — Status Filtering
     // =========================================================================
 
-    public function test_client_can_filter_orders_by_status_pending(): void
+    public function test_client_can_filter_orders_by_status_pending_review(): void
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
-        Order::factory()->forClient($client)->count(3)->create(['status' => 'pending']);
+        Order::factory()->forClient($client)->count(3)->create(['status' => 'pending_review']);
         Order::factory()->forClient($client)->count(2)->create(['status' => 'completed']);
 
-        $this->getJson('/api/v1/orders?status=pending', $this->headers($token))
+        $this->getJson('/api/v1/orders?status=pending_review', $this->headers($token))
              ->assertOk()
              ->assertJsonPath('data.pagination.total', 3);
     }
@@ -47,7 +47,7 @@ class OrderFilterTest extends TestCase
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
-        Order::factory()->forClient($client)->count(2)->create(['status' => 'pending']);
+        Order::factory()->forClient($client)->count(2)->create(['status' => 'pending_review']);
         Order::factory()->forClient($client)->count(4)->create(['status' => 'completed']);
 
         $this->getJson('/api/v1/orders?status=completed', $this->headers($token))
@@ -60,7 +60,7 @@ class OrderFilterTest extends TestCase
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
         Order::factory()->forClient($client)->count(2)->create(['status' => 'cancelled']);
-        Order::factory()->forClient($client)->count(3)->create(['status' => 'pending']);
+        Order::factory()->forClient($client)->count(3)->create(['status' => 'pending_review']);
 
         $this->getJson('/api/v1/orders?status=cancelled', $this->headers($token))
              ->assertOk()
@@ -148,7 +148,7 @@ class OrderFilterTest extends TestCase
 
         // Pending orders in range
         Order::factory()->forClient($client)->create([
-            'status'     => 'pending',
+            'status'     => 'pending_review',
             'created_at' => now()->subDays(5),
         ]);
 
@@ -160,13 +160,13 @@ class OrderFilterTest extends TestCase
 
         // Pending but out of range
         Order::factory()->forClient($client)->create([
-            'status'     => 'pending',
+            'status'     => 'pending_review',
             'created_at' => now()->subDays(20),
         ]);
 
         $dateFrom = now()->subDays(10)->format('Y-m-d');
 
-        $this->getJson("/api/v1/orders?status=pending&date_from={$dateFrom}", $this->headers($token))
+        $this->getJson("/api/v1/orders?status=pending_review&date_from={$dateFrom}", $this->headers($token))
              ->assertOk()
              ->assertJsonPath('data.pagination.total', 1);
     }
@@ -175,11 +175,11 @@ class OrderFilterTest extends TestCase
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
-        Order::factory()->forClient($client)->count(2)->create(['status' => 'pending']);
+        Order::factory()->forClient($client)->count(2)->create(['status' => 'pending_review']);
         // Another client's orders — must not appear
-        Order::factory()->count(5)->create(['status' => 'pending']);
+        Order::factory()->count(5)->create(['status' => 'pending_review']);
 
-        $this->getJson('/api/v1/orders?status=pending', $this->headers($token))
+        $this->getJson('/api/v1/orders?status=pending_review', $this->headers($token))
              ->assertOk()
              ->assertJsonPath('data.pagination.total', 2);
     }

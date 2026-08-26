@@ -1,6 +1,6 @@
-// cancelled) is coarser than the app's 6-value UI vocabulary
-// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
-// cancelled) — [_toBackendStatus] translates at this boundary.
+// cancelled) matches the app's four persisted order states
+// (pending_review/order_confirmed/completed/cancelled). Contact is an
+// interaction and is not serialized as an order status.
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
@@ -18,11 +18,9 @@ import 'package:ai_saas/shared/orders/order_controller.dart';
 //   GET  /merchant/orders/:id           (merchant — order detail)
 //   PUT  /merchant/orders/:id/status    { status }  (merchant only)
 //
-// The backend's order-status enum (pending/contacted/confirmed/processing/completed/
-// cancelled) is coarser than the app's 6-value UI vocabulary
-// (pending_review/merchant_contacted/order_confirmed/preparing/completed/
-// cancelled) — [_toBackendStatus]/[_fromBackendStatus] translate at this
-// boundary so OrderController/OrderBloc/the screens don't need to change.
+// The backend's order-status enum is the persisted source of truth. The client
+// only translates the confirmed UI enum name to the backend's `confirmed`
+// value; contact remains an interaction rather than a persisted state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class OrderService {
@@ -100,9 +98,8 @@ class OrderService {
 
   // ── Status update (merchant only) ─────────────────────────────────────────────
   /// PUT /merchant/orders/:id/status
-  /// [status] is one of the app's UI-vocabulary strings (pending_review,
-  /// merchant_contacted, order_confirmed, preparing, completed, cancelled) —
-  /// translated to the backend's enum before sending.
+  /// [status] is one of the merchant transition statuses (confirmed,
+  /// completed, or cancelled).
   Future<AppOrder> patchStatus({
     required String id,
     required String status,
@@ -124,28 +121,20 @@ class OrderService {
 
   // ── Status vocabulary translation ─────────────────────────────────────────────
 
-  /// App UI status → backend enum. The backend recognises pending, contacted,
-  /// confirmed, processing, completed, and cancelled.
+  /// App UI status → backend enum. Unknown statuses fail instead of being
+  /// silently converted into a pending order.
   static String _toBackendStatus(String appStatus) {
     switch (appStatus) {
-      case 'merchant_contacted':
-      case 'merchantContacted':
-      case 'contacted':
-        return 'contacted';
       case 'order_confirmed':
       case 'orderConfirmed':
       case 'confirmed':
         return 'confirmed';
-      case 'preparing':
-      case 'processing':
-        return 'processing';
       case 'completed':
         return 'completed';
       case 'cancelled':
         return 'cancelled';
-      case 'pending_review':
       default:
-        return 'pending';
+        throw FormatException('Unknown merchant order status: $appStatus');
     }
   }
 

@@ -1,3 +1,6 @@
+import 'package:ai_saas/shared/models/mock_order.dart';
+import 'package:ai_saas/shared/orders/order_controller.dart';
+
 class MerchantDashboardModel {
   const MerchantDashboardModel({
     required this.products,
@@ -67,26 +70,23 @@ class MerchantProductStats {
 class MerchantOrderStats {
   const MerchantOrderStats({
     required this.total,
-    required this.pending,
+    required this.pendingReview,
     required this.confirmed,
-    required this.processing,
     required this.completed,
     required this.cancelled,
   });
 
   final int total;
-  final int pending;
+  final int pendingReview;
   final int confirmed;
-  final int processing;
   final int completed;
   final int cancelled;
 
   factory MerchantOrderStats.fromJson(Map<String, dynamic> json) {
     return MerchantOrderStats(
       total: _integer(json['total']),
-      pending: _integer(json['pending']),
+      pendingReview: _integer(json['pending_review']),
       confirmed: _integer(json['confirmed']),
-      processing: _integer(json['processing']),
       completed: _integer(json['completed']),
       cancelled: _integer(json['cancelled']),
     );
@@ -102,14 +102,14 @@ class MerchantDashboardOrder {
   });
 
   final String id;
-  final String status;
+  final OrderStatus status;
   final String customerName;
   final double totalAmount;
 
   factory MerchantDashboardOrder.fromJson(Map<String, dynamic> json) {
     return MerchantDashboardOrder(
       id: _text(json['id'], fallback: '—'),
-      status: _text(json['status']),
+      status: OrderController.parseStatus(_text(json['status'])),
       customerName: _text(json['customer_name'], fallback: 'عميل'),
       totalAmount: _number(json['total_amount']),
     );

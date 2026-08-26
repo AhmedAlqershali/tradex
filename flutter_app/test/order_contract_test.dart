@@ -4,6 +4,7 @@ import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/order_service.dart';
 import 'package:ai_saas/presentation/blocs/order/order_bloc.dart';
+import 'package:ai_saas/screens/merchant/merchant_order_details_screen.dart';
 import 'package:ai_saas/shared/models/mock_order.dart';
 import 'package:ai_saas/shared/orders/order_controller.dart';
 
@@ -11,7 +12,7 @@ void main() {
   test('merchant list order id is carried unchanged into detail path', () {
     final order = AppOrder.fromServerJson({
       'id': 42,
-      'status': 'pending',
+        'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '000',
@@ -35,10 +36,8 @@ void main() {
 
   test('all backend lifecycle statuses parse to distinct UI statuses', () {
     final statuses = {
-      'pending': OrderStatus.pendingReview,
-      'contacted': OrderStatus.merchantContacted,
+      'pending_review': OrderStatus.pendingReview,
       'confirmed': OrderStatus.orderConfirmed,
-      'processing': OrderStatus.preparing,
       'completed': OrderStatus.completed,
       'cancelled': OrderStatus.cancelled,
     };
@@ -84,7 +83,7 @@ void main() {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'ref': 'TRX-42',
-      'status': 'pending',
+        'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '000',
@@ -98,13 +97,11 @@ void main() {
     );
   });
 
-  test(
-      'confirm contact uses the contacted backend status and preserves server id',
-      () {
+  test('contact is an action and does not create a persisted status', () {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'ref': 'TRX-42',
-      'status': 'pending',
+      'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '0591234567',
@@ -112,22 +109,20 @@ void main() {
     });
 
     expect(order.serverId, '42');
-    expect(OrderStatus.merchantContacted.name, 'merchantContacted');
+    final actions = merchantOrderActionsFor(order.status);
+    expect(actions.any((action) => action.isContact), isTrue);
     expect(
-      OrderController.parseStatus('contacted'),
-      OrderStatus.merchantContacted,
+      actions.where((action) => action.isContact).single.nextStatus,
+      isNull,
     );
-    expect(
-      ApiConstants.merchantOrderStatus(order.serverId!),
-      '/merchant/orders/42/status',
-    );
+    expect(OrderController.parseStatus('pending_review'), order.status);
   });
 
-  test('Laravel status response unwraps and maps contacted to the UI status',
+  test('Laravel confirmed response unwraps to the canonical UI status',
       () {
     final order = AppOrder.fromServerJson({
       'id': 42,
-      'status': 'contacted',
+      'status': 'confirmed',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '0591234567',
@@ -140,7 +135,7 @@ void main() {
       'message': 'Order status updated.',
       'data': {
         'id': 42,
-        'status': 'contacted',
+        'status': 'confirmed',
         'created_at': '2026-08-14T10:00:00Z',
         'customer_name': 'Customer',
         'customer_phone': '0591234567',
@@ -153,7 +148,7 @@ void main() {
 
     expect(order.serverId, '42');
     expect(parsed.serverId, '42');
-    expect(parsed.status, OrderStatus.merchantContacted);
+    expect(parsed.status, OrderStatus.orderConfirmed);
   });
 
   test('unknown backend status fails explicitly instead of becoming pending',
@@ -169,6 +164,15 @@ void main() {
       }),
       throwsA(isA<FormatException>()),
     );
+  });
+
+  test('legacy contacted and processing statuses are rejected explicitly', () {
+    for (final status in ['contacted', 'merchant_contacted', 'processing']) {
+      expect(
+        () => OrderController.parseStatus(status),
+        throwsA(isA<FormatException>()),
+      );
+    }
   });
 
   test('merchant status update rejects a display reference as the server id',

@@ -80,7 +80,7 @@ class DashboardTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'products' => ['total', 'active', 'out_of_stock', 'low_stock'],
-                    'orders'   => ['total', 'pending', 'confirmed', 'processing', 'completed', 'cancelled'],
+                    'orders'   => ['total', 'pending_review', 'confirmed', 'completed', 'cancelled'],
                     'total_sales',
                     'recent_orders',
                     'top_products',
@@ -124,7 +124,7 @@ class DashboardTest extends TestCase
 
         $client = User::factory()->client()->create();
 
-        Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'pending',   'total_amount' => 100]);
+        Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'pending_review', 'total_amount' => 100]);
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'completed', 'total_amount' => 200]);
         Order::factory()->create(['store_id' => $store->id, 'client_id' => $client->id, 'status' => 'cancelled', 'total_amount' => 50]);
 
@@ -135,7 +135,7 @@ class DashboardTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('data.orders.total',     3)
-            ->assertJsonPath('data.orders.pending',   1)
+            ->assertJsonPath('data.orders.pending_review', 1)
             ->assertJsonPath('data.orders.completed', 1)
             ->assertJsonPath('data.orders.cancelled', 1)
             ->assertJsonPath('data.total_sales',      200);  // only completed orders; 200.00 encodes as integer 200
@@ -155,7 +155,7 @@ class DashboardTest extends TestCase
         Order::factory()->count(2)->create([
             'store_id'  => $store->id,
             'client_id' => $client->id,
-            'status'    => 'pending',
+            'status'    => 'pending_review',
         ]);
 
         // Another merchant's order

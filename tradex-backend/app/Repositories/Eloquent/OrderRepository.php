@@ -104,9 +104,7 @@ class OrderRepository implements OrderRepositoryInterface
         // Only apply status filter when the value is a known valid status.
         $validStatuses = [
             Order::STATUS_PENDING,
-            Order::STATUS_CONTACTED,
             Order::STATUS_CONFIRMED,
-            Order::STATUS_PROCESSING,
             Order::STATUS_COMPLETED,
             Order::STATUS_CANCELLED,
         ];
@@ -240,7 +238,7 @@ class OrderRepository implements OrderRepositoryInterface
      * Cancel an order on behalf of a client (sets status to cancelled).
      *
      * ATOMICITY: Identical concurrency guarantee to updateStatus().
-     * The conditional UPDATE (`WHERE status = 'pending'`) acts as an atomic
+     * The conditional UPDATE (`WHERE status = 'pending_review'`) acts as an atomic
      * compare-and-swap: only the first concurrent request wins and restores
      * stock; subsequent identical requests are no-ops.
      *
@@ -252,7 +250,8 @@ class OrderRepository implements OrderRepositoryInterface
             // Lock this order row for the duration of the transaction.
             Order::lockForUpdate()->find($order->id);
 
-            // Conditional update: only a 'pending' order can be client-cancelled.
+            // Conditional update: only a 'pending_review' order can be
+            // client-cancelled.
             // This is the atomic gate — if two requests race, only one will
             // match the WHERE clause and trigger stock restoration.
             $affected = DB::table('orders')

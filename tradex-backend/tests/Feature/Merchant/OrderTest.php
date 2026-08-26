@@ -132,18 +132,18 @@ class OrderTest extends TestCase
     // PUT /api/v1/merchant/orders/{id}/status
     // =========================================================================
 
-    public function test_merchant_can_update_order_status(): void
+    public function test_merchant_can_confirm_order_without_a_contacted_state(): void
     {
         ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
 
         $order = Order::factory()->forStore($store)->pending()->create();
 
-        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'contacted'], $this->headers($token))
+        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'confirmed'], $this->headers($token))
              ->assertOk()
              ->assertJsonPath('success', true)
-             ->assertJsonPath('data.status', 'contacted');
+             ->assertJsonPath('data.status', 'confirmed');
 
-        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'contacted']);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'confirmed']);
     }
 
     public function test_merchant_can_progress_order_through_required_lifecycle(): void
@@ -151,7 +151,7 @@ class OrderTest extends TestCase
         ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
         $order = Order::factory()->forStore($store)->pending()->create();
 
-        foreach (['contacted', 'confirmed', 'processing', 'completed'] as $status) {
+        foreach (['confirmed', 'completed'] as $status) {
             $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => $status], $this->headers($token))
                 ->assertOk()
                 ->assertJsonPath('data.status', $status);
@@ -160,17 +160,15 @@ class OrderTest extends TestCase
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'completed']);
     }
 
-    public function test_merchant_cannot_skip_contacted_status(): void
+    public function test_merchant_cannot_skip_confirmation_before_completion(): void
     {
         ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
 
         $skippedTransitions = [
-            ['pending', 'confirmed'],
-            ['pending', 'processing'],
-            ['pending', 'completed'],
-            ['contacted', 'processing'],
-            ['contacted', 'completed'],
-            ['confirmed', 'completed'],
+            ['pending_review', 'completed'],
+            ['completed', 'confirmed'],
+            ['completed', 'completed'],
+            ['cancelled', 'confirmed'],
         ];
 
         foreach ($skippedTransitions as [$from, $to]) {
@@ -251,7 +249,7 @@ class OrderTest extends TestCase
 
         $order = Order::factory()->forStore($store)->create();
 
-        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'pending'], $this->headers($token))
+        $this->putJson("/api/v1/merchant/orders/{$order->id}/status", ['status' => 'pending_review'], $this->headers($token))
              ->assertStatus(422)
              ->assertJsonPath('success', false);
     }

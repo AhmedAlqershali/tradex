@@ -28,9 +28,7 @@ class OrderStatusTimeline extends StatelessWidget {
 
   static const List<String> _labels = [
     'قيد المراجعة',
-    'تم التواصل',
     'تم تأكيد الطلب',
-    'جاري تجهيز الطلب',
     'مكتمل',
   ];
 

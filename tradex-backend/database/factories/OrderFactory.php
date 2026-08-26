@@ -23,7 +23,7 @@ class OrderFactory extends Factory
             'customer_phone'  => fake()->phoneNumber(),
             'customer_city'   => fake()->city(),
             'total_amount'    => fake()->randomFloat(2, 10, 500),
-            'status'          => 'pending',
+            'status'          => Order::STATUS_PENDING,
             'notes'           => fake()->optional()->sentence(),
         ];
     }
@@ -40,7 +40,7 @@ class OrderFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn () => ['status' => 'pending']);
+        return $this->state(fn () => ['status' => Order::STATUS_PENDING]);
     }
 
     public function confirmed(): static

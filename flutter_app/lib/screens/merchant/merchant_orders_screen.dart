@@ -82,10 +82,8 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
           },
           itemBuilder: (_) => const [
             PopupMenuItem(value: 'all', child: Text('كل الطلبات')),
-            PopupMenuItem(value: 'pending', child: Text('قيد المراجعة')),
-            PopupMenuItem(value: 'contacted', child: Text('تم التواصل')),
-            PopupMenuItem(value: 'confirmed', child: Text('تم التأكيد')),
-            PopupMenuItem(value: 'processing', child: Text('قيد التجهيز')),
+            PopupMenuItem(value: 'pending_review', child: Text('قيد المراجعة')),
+            PopupMenuItem(value: 'confirmed', child: Text('تم تأكيد الطلب')),
             PopupMenuItem(value: 'completed', child: Text('مكتمل')),
             PopupMenuItem(value: 'cancelled', child: Text('ملغي')),
           ],

@@ -5,7 +5,7 @@ import 'package:ai_saas/shared/models/merchant_dashboard_model.dart';
 MerchantDashboardModel _dashboard() {
   return MerchantDashboardModel.fromJson({
     'products': {'total': 2, 'active': 2},
-    'orders': {'total': 1, 'pending': 1},
+    'orders': {'total': 1, 'pending_review': 1},
     'total_sales': 50,
   });
 }
@@ -20,7 +20,7 @@ void main() {
       emitsInOrder([
         isA<MerchantDashboardLoading>(),
         isA<MerchantDashboardLoaded>().having(
-          (state) => state.dashboard.orders.pending,
+          (state) => state.dashboard.orders.pendingReview,
           'pending orders',
           1,
         ),

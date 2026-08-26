@@ -12,17 +12,16 @@ void main() {
       },
       'orders': {
         'total': 8,
-        'pending': 3,
+        'pending_review': 3,
         'confirmed': 1,
-        'processing': 2,
-        'completed': 2,
+        'completed': 4,
         'cancelled': 0,
       },
       'total_sales': 1250.5,
       'recent_orders': [
         {
           'id': 42,
-          'status': 'pending',
+          'status': 'pending_review',
           'customer_name': 'Client',
           'total_amount': 100,
         },
@@ -40,7 +39,9 @@ void main() {
     });
 
     expect(dashboard.products.total, 12);
-    expect(dashboard.orders.pending, 3);
+    expect(dashboard.orders.pendingReview, 3);
+    expect(dashboard.orders.confirmed, 1);
+    expect(dashboard.orders.completed, 4);
     expect(dashboard.totalSales, 1250.5);
     expect(dashboard.recentOrders.single.customerName, 'Client');
     expect(dashboard.topProducts.single.price, 25.5);

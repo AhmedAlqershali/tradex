@@ -232,12 +232,8 @@ class AppOrder {
     switch (s) {
       case OrderStatus.pendingReview:
         return 'pending_review';
-      case OrderStatus.merchantContacted:
-        return 'merchant_contacted';
       case OrderStatus.orderConfirmed:
         return 'order_confirmed';
-      case OrderStatus.preparing:
-        return 'preparing';
       case OrderStatus.completed:
         return 'completed';
       case OrderStatus.cancelled:
@@ -247,21 +243,13 @@ class AppOrder {
 
   static OrderStatus parseStatus(String value) {
     switch (value) {
-      case 'pending':
       case 'pending_review':
       case 'pendingReview':
         return OrderStatus.pendingReview;
-      case 'merchant_contacted':
-      case 'contacted':
-      case 'merchantContacted':
-        return OrderStatus.merchantContacted;
       case 'order_confirmed':
       case 'confirmed':
       case 'orderConfirmed':
         return OrderStatus.orderConfirmed;
-      case 'preparing':
-      case 'processing':
-        return OrderStatus.preparing;
       case 'completed':
         return OrderStatus.completed;
       case 'cancelled':

@@ -13,12 +13,12 @@ class OrderException extends RuntimeException
 
     /**
      * Thrown when a client tries to cancel an order that is no longer
-     * in a cancellable state (i.e., status is not 'pending').
+     * in a cancellable state (i.e., status is not 'pending_review').
      */
     public static function notCancellableByClient(string $currentStatus): self
     {
         return new self(
-            "Order cannot be cancelled. Only pending orders may be cancelled by the client. Current status: '{$currentStatus}'."
+            "Order cannot be cancelled. Only pending-review orders may be cancelled by the client. Current status: '{$currentStatus}'."
         );
     }
 

@@ -30,7 +30,7 @@ void main() {
   test('successful status update uses the canonical server order', () async {
     final updated = _order(
       id: '42',
-      status: OrderStatus.merchantContacted,
+      status: OrderStatus.orderConfirmed,
     );
     String? requestedId;
     String? requestedStatus;
@@ -49,7 +49,7 @@ void main() {
         .first;
     bloc.add(const OrderStatusUpdateRequested(
       id: '42',
-      status: 'merchantContacted',
+      status: 'orderConfirmed',
     ));
 
     final state = await stateFuture;
@@ -58,7 +58,7 @@ void main() {
     expect(requestedStatus, 'merchantContacted');
     expect(state.order, same(updated));
     expect(state.orderId, '42');
-    expect(state.order.status, OrderStatus.merchantContacted);
+    expect(state.order.status, OrderStatus.orderConfirmed);
     expect(OrderController.instance.orders, [same(updated)]);
 
     await bloc.close();
@@ -90,7 +90,7 @@ void main() {
     expect(loadCount, 2);
     secondResponse.complete(_order(
       id: '42',
-      status: OrderStatus.merchantContacted,
+      status: OrderStatus.completed,
     ));
     await Future<void>.delayed(Duration.zero);
     await Future<void>.delayed(Duration.zero);
@@ -103,7 +103,7 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     expect(detailStates, hasLength(1));
-    expect(detailStates.single.order.status, OrderStatus.merchantContacted);
+    expect(detailStates.single.order.status, OrderStatus.completed);
 
     await subscription.cancel();
     await bloc.close();
@@ -112,7 +112,7 @@ void main() {
   test('reloading after update keeps the persisted server status', () async {
     final updated = _order(
       id: '42',
-      status: OrderStatus.merchantContacted,
+      status: OrderStatus.orderConfirmed,
     );
 
     final bloc = OrderBloc(
@@ -126,7 +126,7 @@ void main() {
         .first;
     bloc.add(const OrderStatusUpdateRequested(
       id: '42',
-      status: 'merchantContacted',
+      status: 'orderConfirmed',
     ));
     await updatedFuture;
 
@@ -138,7 +138,7 @@ void main() {
     final reloaded = await reloadFuture;
 
     expect(reloaded.order.serverId, '42');
-    expect(reloaded.order.status, OrderStatus.merchantContacted);
+    expect(reloaded.order.status, OrderStatus.orderConfirmed);
 
     await bloc.close();
   });

@@ -50,7 +50,7 @@ interface OrderRepositoryInterface
 
     /**
      * Cancel a pending order for a client (client-initiated cancellation).
-     * Only orders in 'pending' status may be cancelled by the client.
+     * Only orders in 'pending_review' status may be cancelled by the client.
      */
     public function cancelForClient(Order $order): Order;
 }

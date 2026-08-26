@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('customer_city');
 
             $table->decimal('total_amount', 10, 2)->default(0);
-            $table->enum('status', ['pending', 'contacted', 'confirmed', 'processing', 'completed', 'cancelled'])
-                  ->default('pending');
+            $table->enum('status', ['pending_review', 'confirmed', 'completed', 'cancelled'])
+                  ->default('pending_review');
             $table->text('notes')->nullable();
             $table->timestamps();
 

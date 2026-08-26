@@ -127,7 +127,7 @@ class OrderService implements OrderServiceInterface
      * Cancel a pending order on behalf of the client.
      *
      * Business rules:
-     * - Only orders in 'pending' status can be cancelled by the client.
+     * - Only orders in 'pending_review' status can be cancelled by the client.
      * - Once the merchant has confirmed/started processing, the client can
      *   no longer cancel (they must contact the merchant directly).
      *

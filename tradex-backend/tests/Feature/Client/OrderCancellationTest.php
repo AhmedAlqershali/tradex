@@ -45,7 +45,7 @@ class OrderCancellationTest extends TestCase
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
-        $order = Order::factory()->forClient($client)->create(['status' => 'pending']);
+        $order = Order::factory()->forClient($client)->create(['status' => 'pending_review']);
 
         $this->deleteJson("/api/v1/orders/{$order->id}", [], $this->headers($token))
              ->assertOk()
@@ -75,7 +75,7 @@ class OrderCancellationTest extends TestCase
     {
         ['client' => $client, 'token' => $token] = $this->actingAsClient();
 
-        $order = Order::factory()->forClient($client)->create(['status' => 'processing']);
+        $order = Order::factory()->forClient($client)->create(['status' => 'confirmed']);
 
         $this->deleteJson("/api/v1/orders/{$order->id}", [], $this->headers($token))
              ->assertStatus(422)
@@ -108,7 +108,7 @@ class OrderCancellationTest extends TestCase
     {
         ['token' => $token] = $this->actingAsClient();
 
-        $otherOrder = Order::factory()->create(['status' => 'pending']);
+        $otherOrder = Order::factory()->create(['status' => 'pending_review']);
 
         $this->deleteJson("/api/v1/orders/{$otherOrder->id}", [], $this->headers($token))
              ->assertStatus(404);
@@ -116,7 +116,7 @@ class OrderCancellationTest extends TestCase
 
     public function test_unauthenticated_cannot_cancel_order(): void
     {
-        $order = Order::factory()->create(['status' => 'pending']);
+        $order = Order::factory()->create(['status' => 'pending_review']);
 
         $this->deleteJson("/api/v1/orders/{$order->id}")
              ->assertStatus(401);
@@ -127,7 +127,7 @@ class OrderCancellationTest extends TestCase
         $merchant = User::factory()->merchant()->create();
         $token    = $merchant->createToken('test')->plainTextToken;
 
-        $order = Order::factory()->create(['status' => 'pending']);
+        $order = Order::factory()->create(['status' => 'pending_review']);
 
         $this->deleteJson("/api/v1/orders/{$order->id}", [], $this->headers($token))
              ->assertStatus(403);

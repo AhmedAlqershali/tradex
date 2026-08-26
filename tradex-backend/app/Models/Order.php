@@ -39,7 +39,9 @@ class Order extends Model
     }
 
     // Status constants
-    const STATUS_PENDING    = 'pending';
+    const STATUS_PENDING    = 'pending_review';
+    // Legacy constants are retained for non-merchant integrations that still
+    // reference the old labels; neither is a valid persisted merchant state.
     const STATUS_CONTACTED  = 'contacted';
     const STATUS_CONFIRMED  = 'confirmed';
     const STATUS_PROCESSING = 'processing';
@@ -48,9 +50,7 @@ class Order extends Model
 
     /** Statuses a merchant may transition to. */
     const MERCHANT_ALLOWED_STATUSES = [
-        self::STATUS_CONTACTED,
         self::STATUS_CONFIRMED,
-        self::STATUS_PROCESSING,
         self::STATUS_COMPLETED,
         self::STATUS_CANCELLED,
     ];
@@ -62,10 +62,8 @@ class Order extends Model
         }
 
         return match ($from) {
-            self::STATUS_PENDING => $to === self::STATUS_CONTACTED,
-            self::STATUS_CONTACTED => $to === self::STATUS_CONFIRMED,
-            self::STATUS_CONFIRMED => $to === self::STATUS_PROCESSING,
-            self::STATUS_PROCESSING => $to === self::STATUS_COMPLETED,
+            self::STATUS_PENDING => $to === self::STATUS_CONFIRMED,
+            self::STATUS_CONFIRMED => $to === self::STATUS_COMPLETED,
             default => false,
         };
     }

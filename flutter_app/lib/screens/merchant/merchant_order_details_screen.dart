@@ -224,6 +224,9 @@ class _MerchantOrderDetailsScreenState
               SizedBox(height: 16.h),
               OrderCustomerInfoCard(order: order),
               SizedBox(height: 16.h),
+              if (order.status != OrderStatus.pendingReview &&
+                  order.status != OrderStatus.cancelled)
+                _buildConversationButton(context, order),
               if (_getActions(order).isNotEmpty)
                 _buildActionButtons(context, order),
               SizedBox(height: 30.h),
@@ -369,7 +372,10 @@ class _MerchantOrderDetailsScreenState
                         await _contactCustomer(context, order);
                         return;
                       }
-                      _updateOrderStatus(context, order, action.nextStatus);
+                      final nextStatus = action.nextStatus;
+                      if (nextStatus != null) {
+                        _updateOrderStatus(context, order, nextStatus);
+                      }
                     },
               icon: Icon(action.icon, size: 18.sp),
               label: isUpdating
@@ -398,6 +404,34 @@ class _MerchantOrderDetailsScreenState
     );
   }
 
+  Widget _buildConversationButton(BuildContext context, AppOrder order) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.h),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50.h,
+        child: OutlinedButton.icon(
+          onPressed: () => _contactCustomer(context, order),
+          icon: Icon(Icons.phone_in_talk_outlined, size: 18.sp),
+          label: Text(
+            'محادثة العميل',
+            style: GoogleFonts.ibmPlexSans(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _primary,
+            side: BorderSide(color: _primary.withValues(alpha: 0.35)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   bool _isUpdating(AppOrder order) {
     final state = context.read<OrderBloc>().state;
     return state is OrderLoading && state.orderId == order.serverId;
@@ -421,74 +455,8 @@ class _MerchantOrderDetailsScreenState
         );
   }
 
-  List<_OrderAction> _getActions(AppOrder order) {
-    // ignore: exhaustive_cases — default handles any future enum additions
-    switch (order.status) {
-      case OrderStatus.pendingReview:
-        return [
-          _OrderAction(
-            label: 'تواصل مع العميل',
-            icon: Icons.phone_in_talk_outlined,
-            color: _primary,
-            nextStatus: OrderStatus.merchantContacted,
-            isContact: true,
-          ),
-          _OrderAction(
-            label: 'تأكيد التواصل',
-            icon: Icons.check_circle_outline_rounded,
-            color: const Color(0xff0891B2),
-            nextStatus: OrderStatus.merchantContacted,
-          ),
-          _OrderAction(
-            label: 'إلغاء الطلب',
-            icon: Icons.cancel_outlined,
-            color: const Color(0xffE53E3E),
-            nextStatus: OrderStatus.cancelled,
-          ),
-        ];
-      case OrderStatus.merchantContacted:
-        return [
-          _OrderAction(
-            label: 'تأكيد الطلب',
-            icon: Icons.check_circle_outline_rounded,
-            color: const Color(0xff0891B2),
-            nextStatus: OrderStatus.orderConfirmed,
-          ),
-          _OrderAction(
-            label: 'إلغاء الطلب',
-            icon: Icons.cancel_outlined,
-            color: const Color(0xffE53E3E),
-            nextStatus: OrderStatus.cancelled,
-          ),
-        ];
-      case OrderStatus.orderConfirmed:
-        return [
-          _OrderAction(
-            label: 'بدء التحضير',
-            icon: Icons.inventory_2_outlined,
-            color: const Color(0xffEA580C),
-            nextStatus: OrderStatus.preparing,
-          ),
-          _OrderAction(
-            label: 'إلغاء الطلب',
-            icon: Icons.cancel_outlined,
-            color: const Color(0xffE53E3E),
-            nextStatus: OrderStatus.cancelled,
-          ),
-        ];
-      case OrderStatus.preparing:
-        return [
-          _OrderAction(
-            label: 'تم التسليم',
-            icon: Icons.done_all_rounded,
-            color: const Color(0xff00C896),
-            nextStatus: OrderStatus.completed,
-          ),
-        ];
-      case OrderStatus.completed:
-      case OrderStatus.cancelled:
-        return [];
-    }
+  List<MerchantOrderAction> _getActions(AppOrder order) {
+    return merchantOrderActionsFor(order.status);
   }
 
   Future<void> _contactCustomer(BuildContext context, AppOrder order) async {
@@ -516,18 +484,62 @@ class _MerchantOrderDetailsScreenState
   }
 }
 
-class _OrderAction {
+class MerchantOrderAction {
   final String label;
   final IconData icon;
   final Color color;
-  final OrderStatus nextStatus;
+  final OrderStatus? nextStatus;
   final bool isContact;
 
-  const _OrderAction({
+  const MerchantOrderAction({
     required this.label,
     required this.icon,
     required this.color,
     required this.nextStatus,
     this.isContact = false,
   });
+}
+
+List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
+  switch (status) {
+    case OrderStatus.pendingReview:
+      return [
+        const MerchantOrderAction(
+          label: 'تواصل مع العميل',
+          icon: Icons.phone_in_talk_outlined,
+          color: Color(0xff4D41DF),
+          isContact: true,
+        ),
+        const MerchantOrderAction(
+          label: 'تأكيد الطلب',
+          icon: Icons.check_circle_outline_rounded,
+          color: Color(0xff0891B2),
+          nextStatus: OrderStatus.orderConfirmed,
+        ),
+        const MerchantOrderAction(
+          label: 'إلغاء الطلب',
+          icon: Icons.cancel_outlined,
+          color: Color(0xffE53E3E),
+          nextStatus: OrderStatus.cancelled,
+        ),
+      ];
+    case OrderStatus.orderConfirmed:
+      return [
+        const MerchantOrderAction(
+          label: 'تأكيد التسليم',
+          icon: Icons.done_all_rounded,
+          color: Color(0xff00C896),
+          nextStatus: OrderStatus.completed,
+        ),
+        const MerchantOrderAction(
+          label: 'إلغاء الطلب',
+          icon: Icons.cancel_outlined,
+          color: Color(0xffE53E3E),
+          nextStatus: OrderStatus.cancelled,
+        ),
+      ];
+    case OrderStatus.completed:
+    case OrderStatus.cancelled:
+      return [];
+  }
 }

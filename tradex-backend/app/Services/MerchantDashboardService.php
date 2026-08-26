@@ -38,9 +38,8 @@ class MerchantDashboardService implements MerchantDashboardServiceInterface
             ->whereIn('store_id', $storeIds)
             ->selectRaw("
                 COUNT(*) as total,
-                SUM(CASE WHEN status = 'pending'    THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'pending_review' THEN 1 ELSE 0 END) as pending_review,
                 SUM(CASE WHEN status = 'confirmed'  THEN 1 ELSE 0 END) as confirmed,
-                SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
                 SUM(CASE WHEN status = 'completed'  THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = 'cancelled'  THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = 'completed'  THEN total_amount ELSE 0 END) as total_sales
@@ -79,11 +78,10 @@ class MerchantDashboardService implements MerchantDashboardServiceInterface
             ],
             'orders' => [
                 'total'      => (int) ($orderStats->total      ?? 0),
-                'pending'    => (int) ($orderStats->pending    ?? 0),
-                'confirmed'  => (int) ($orderStats->confirmed  ?? 0),
-                'processing' => (int) ($orderStats->processing ?? 0),
-                'completed'  => (int) ($orderStats->completed  ?? 0),
-                'cancelled'  => (int) ($orderStats->cancelled  ?? 0),
+                'pending_review' => (int) ($orderStats->pending_review ?? 0),
+                'confirmed'      => (int) ($orderStats->confirmed      ?? 0),
+                'completed'      => (int) ($orderStats->completed      ?? 0),
+                'cancelled'      => (int) ($orderStats->cancelled      ?? 0),
             ],
             'total_sales'    => round((float) ($orderStats->total_sales ?? 0), 2),
             'recent_orders'  => $recentOrders,
@@ -188,11 +186,10 @@ class MerchantDashboardService implements MerchantDashboardServiceInterface
             ],
             'order_statistics' => [
                 'by_status' => [
-                    'pending'    => (int) ($orderStatusCounts['pending']    ?? 0),
-                    'confirmed'  => (int) ($orderStatusCounts['confirmed']  ?? 0),
-                    'processing' => (int) ($orderStatusCounts['processing'] ?? 0),
-                    'completed'  => (int) ($orderStatusCounts['completed']  ?? 0),
-                    'cancelled'  => (int) ($orderStatusCounts['cancelled']  ?? 0),
+                    'pending_review' => (int) ($orderStatusCounts['pending_review'] ?? 0),
+                    'confirmed'      => (int) ($orderStatusCounts['confirmed']      ?? 0),
+                    'completed'      => (int) ($orderStatusCounts['completed']      ?? 0),
+                    'cancelled'      => (int) ($orderStatusCounts['cancelled']      ?? 0),
                 ],
             ],
             'monthly_sales'    => $monthlySales,

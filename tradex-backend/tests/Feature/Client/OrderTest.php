@@ -273,7 +273,7 @@ class OrderTest extends TestCase
 
         $this->postJson('/api/v1/orders', $this->contactPayload(), $this->headers($token));
 
-        $this->assertDatabaseHas('orders', ['status' => 'pending']);
+        $this->assertDatabaseHas('orders', ['status' => 'pending_review']);
     }
 
     public function test_checkout_rejects_a_product_that_became_unavailable(): void
