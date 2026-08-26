@@ -9,6 +9,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check');
+        }
+
         // Convert every status used by the former merchant workflow without
         // deleting orders. Contact-related values never represented delivery
         // progress, while preparation values had already passed confirmation.
@@ -18,8 +24,6 @@ return new class extends Migration
         DB::table('orders')->whereIn('status', ['processing', 'preparing'])->update([
             'status' => 'confirmed',
         ]);
-
-        $driver = DB::getDriverName();
 
         if ($driver === 'mysql') {
             DB::statement(
@@ -53,18 +57,21 @@ return new class extends Migration
 
     public function down(): void
     {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check');
+        }
+
         DB::table('orders')->where('status', 'pending_review')->update([
             'status' => 'pending',
         ]);
-
-        $driver = DB::getDriverName();
 
         if ($driver === 'mysql') {
             DB::statement(
                 "ALTER TABLE orders MODIFY status ENUM('pending', 'contacted', 'confirmed', 'processing', 'completed', 'cancelled') NOT NULL DEFAULT 'pending'"
             );
         } elseif ($driver === 'pgsql') {
-            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check');
             DB::statement(<<<'SQL'
                 ALTER TABLE orders
                 ADD CONSTRAINT orders_status_check
