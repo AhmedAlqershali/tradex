@@ -4,7 +4,6 @@ namespace App\Http\Resources\Order;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class OrderResource extends JsonResource
 {
@@ -26,7 +25,7 @@ class OrderResource extends JsonResource
                 'id'         => $this->store->id,
                 'store_name' => $this->store->store_name,
                 'logo'       => $this->store->logo
-                    ? Storage::disk('public')->url($this->store->logo)
+                    ? url('/storage/'.ltrim($this->store->logo, '/'))
                     : null,
             ]),
 

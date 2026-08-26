@@ -6,10 +6,12 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/health
+    disk:
+      name: tradex-storage
+      mountPath: /var/www/html/storage
+      sizeGB: 10
 
     # Render supplies PORT automatically. The Docker image reads it at startup.
-    # Do not add a disk here until choosing the paid persistent-disk option;
-    # see tradex-backend/RENDER_DEPLOYMENT.md.
     envVars:
       - key: APP_ENV
         value: production

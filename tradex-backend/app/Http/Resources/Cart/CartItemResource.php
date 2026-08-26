@@ -4,7 +4,6 @@ namespace App\Http\Resources\Cart;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class CartItemResource extends JsonResource
 {
@@ -22,7 +21,7 @@ class CartItemResource extends JsonResource
                 'name'   => $product->name,
                 'status' => $product->status,
                 'image'  => $product->image
-                    ? Storage::disk('public')->url($product->image)
+                    ? url('/storage/'.ltrim($product->image, '/'))
                     : null,
                 'store'  => $product->store ? [
                     'id'         => $product->store->id,

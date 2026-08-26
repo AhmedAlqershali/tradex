@@ -4,7 +4,6 @@ namespace App\Http\Resources\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImageResource extends JsonResource
 {
@@ -12,7 +11,7 @@ class ProductImageResource extends JsonResource
     {
         return [
             'id'         => $this->id,
-            'url'        => Storage::disk('public')->url($this->path),
+            'url'        => url('/storage/'.ltrim($this->path, '/')),
             'sort_order' => $this->sort_order,
         ];
     }

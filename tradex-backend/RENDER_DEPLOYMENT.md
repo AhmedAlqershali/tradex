@@ -30,6 +30,11 @@ pending schema-only migrations with `php artisan migrate --force`, and runs
 `php artisan optimize` before starting that one Laravel web server with `public`
 as its document root. It does not run seeders or create users.
 
+The Blueprint mounts the `tradex-storage` Persistent Disk at
+`/var/www/html/storage`. This keeps files on Laravel's `public` disk under
+`storage/app/public` across deploys and restarts while leaving
+`storage/app/private` outside the public web root.
+
 ## Required environment variable names
 
 Set these in Render. Never commit their values:
@@ -113,13 +118,10 @@ Avatars, store/category/product images, and private subscription proofs are
 stored through the existing Laravel filesystem architecture. The deployment
 does not replace that architecture.
 
-The current `public` disk and private `local` disk both write to the container
-filesystem. Choose one before accepting uploads in production:
-
-- attach a Render Persistent Disk and mount the Laravel storage directory for a
-  single-instance deployment, or
-- configure the existing S3 disk with an S3-compatible object store and migrate
-  existing files separately.
+The Blueprint attaches a Render Persistent Disk and mounts the Laravel storage
+directory for this single-instance deployment. The existing S3 disk remains an
+alternative if the service later needs external object storage; configure it
+and migrate existing files separately before changing `FILESYSTEM_DISK`.
 
 The database stores file paths, not file contents. Moving the database alone
 does not move avatars/images/proofs. Private subscription proofs must remain on

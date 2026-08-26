@@ -4,7 +4,6 @@ namespace App\Http\Resources\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class ProductResource extends JsonResource
 {
@@ -27,7 +26,7 @@ class ProductResource extends JsonResource
 
             // Primary image (quick access thumbnail)
             'image'  => $this->image
-                ? Storage::disk('public')->url($this->image)
+                ? url('/storage/'.ltrim($this->image, '/'))
                 : null,
 
             // Full image gallery

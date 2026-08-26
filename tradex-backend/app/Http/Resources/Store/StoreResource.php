@@ -4,7 +4,6 @@ namespace App\Http\Resources\Store;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class StoreResource extends JsonResource
 {
@@ -16,7 +15,7 @@ class StoreResource extends JsonResource
             'description' => $this->description,
             'region'     => $this->region,
             'logo'       => $this->logo
-                ? Storage::disk('public')->url($this->logo)
+                ? url('/storage/'.ltrim($this->logo, '/'))
                 : null,
             'status'         => $this->status,
             'products_count' => $this->products_count ?? 0,
