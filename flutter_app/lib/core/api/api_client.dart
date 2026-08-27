@@ -55,9 +55,23 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
-  }) =>
-      _wrap(() => _dio.post<T>(path,
-          data: data, queryParameters: queryParameters, options: options));
+  }) async {
+    if (kDebugMode) debugPrint('[AI_RUNTIME] ApiClient.post entered path=$path');
+    try {
+      return await _wrap(() async {
+        if (kDebugMode) debugPrint('[AI_RUNTIME] calling Dio.post path=$path');
+        final response = await _dio.post<T>(path,
+            data: data, queryParameters: queryParameters, options: options);
+        if (kDebugMode) {
+          debugPrint('[AI_RUNTIME] Dio response status=${response.statusCode}');
+        }
+        return response;
+      });
+    } catch (error) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] ApiClient.post error: ${error.runtimeType}: $error');
+      rethrow;
+    }
+  }
 
   Future<Response<T>> put<T>(
     String path, {
@@ -96,6 +110,7 @@ class ApiClient {
     try {
       return await call();
     } on DioException catch (e) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] ApiClient DioException: ${e.type}: ${e.message}');
       if (kDebugMode && e.response != null) {
         debugPrint('[ApiClient] HTTP failure: status=${e.response?.statusCode} '
             'body=${e.response?.data}');
@@ -104,9 +119,11 @@ class ApiClient {
             'message=${e.message}');
       }
       throw _mapDioException(e);
-    } on ApiException {
+    } on ApiException catch (e) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] ApiClient ApiException: ${e.runtimeType}: $e');
       rethrow;
     } catch (e) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] ApiClient error: ${e.runtimeType}: $e');
       final message = e.toString();
       throw UnknownException(
         message.isEmpty ? 'حدث خطأ غير متوقع. حاول مجدداً.' : message,

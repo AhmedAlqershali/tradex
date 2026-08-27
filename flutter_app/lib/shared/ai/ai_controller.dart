@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
@@ -60,7 +61,10 @@ class AiController {
     return _generate(
       tool: AiToolType.productDescription,
       prompt: context,
-      request: () => _post(ApiConstants.aiProductDescription, context),
+      request: () {
+        if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
+        return _post(ApiConstants.aiProductDescription, context);
+      },
     );
   }
 
@@ -76,8 +80,10 @@ class AiController {
     return _generate(
       tool: AiToolType.instagramPost,
       prompt: context,
-      request: () async =>
-          _extractCaption(await _post(ApiConstants.aiMarketingContent, context)),
+      request: () async {
+        if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
+        return _extractCaption(await _post(ApiConstants.aiMarketingContent, context));
+      },
     );
   }
 
@@ -93,8 +99,10 @@ class AiController {
     return _generate(
       tool: AiToolType.hashtags,
       prompt: context,
-      request: () async =>
-          _extractHashtags(await _post(ApiConstants.aiMarketingContent, context)),
+      request: () async {
+        if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
+        return _extractHashtags(await _post(ApiConstants.aiMarketingContent, context));
+      },
     );
   }
 
@@ -105,11 +113,14 @@ class AiController {
     return _generate(
       tool: AiToolType.customerReply,
       prompt: customerMessage,
-      request: () => _post(
-        ApiConstants.aiCustomerReply,
-        customerMessage,
-        storeName: UserController.instance.currentUser?.storeName,
-      ),
+      request: () {
+        if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
+        return _post(
+          ApiConstants.aiCustomerReply,
+          customerMessage,
+          storeName: UserController.instance.currentUser?.storeName,
+        );
+      },
     );
   }
 
@@ -126,6 +137,7 @@ class AiController {
     required String prompt,
     required Future<String> Function() request,
   }) async {
+    if (kDebugMode) debugPrint('[AI_RUNTIME] controller _generate entered');
     statusNotifier.value = AiStatus.loading;
     resultNotifier.value = null;
 
@@ -143,10 +155,12 @@ class AiController {
           [result, ...historyNotifier.value].take(20).toList();
       statusNotifier.value = AiStatus.success;
       return result;
-    } on ApiException {
+    } on ApiException catch (error) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] controller ApiException: ${error.runtimeType}: $error');
       statusNotifier.value = AiStatus.error;
       rethrow;
-    } catch (e) {
+    } catch (error) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] controller error: ${error.runtimeType}: $error');
       // Catch-all: ensures statusNotifier always reaches a terminal state even
       // for non-API errors (network timeout, type cast failures, etc.).
       // Without this, the AI tool sheet spinner hangs indefinitely.
@@ -167,8 +181,12 @@ class AiController {
     String context, {
     String? storeName,
   }) async {
+    if (kDebugMode) debugPrint('[AI_RUNTIME] _post entered path=$path');
     final trimmed = context.trim();
     final safeContext = trimmed.length >= 5 ? trimmed : '$trimmed منتج مميز';
+    if (kDebugMode) {
+      debugPrint('[AI_RUNTIME] calling ApiClient.post path=$path baseUrl=${ApiConstants.baseUrl}');
+    }
     final response = await ApiClient.instance.post<Map<String, dynamic>>(
       path,
       data: {

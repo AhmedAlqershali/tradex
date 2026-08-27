@@ -2,6 +2,7 @@ import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
 import 'package:ai_saas/shared/ai/ai_result_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -205,6 +206,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   bool get _workspaceCanGenerate => _promptController.text.trim().isNotEmpty && !_workspaceLoading;
 
   Future<void> _generateInWorkspace() async {
+    if (kDebugMode) debugPrint('[AI_RUNTIME] workspace generate entered');
     if (!_workspaceCanGenerate) return;
     final prompt = _promptController.text.trim();
     setState(() {
@@ -217,20 +219,25 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       late final AiResult result;
       switch (_selectedTool) {
         case AiToolType.productDescription:
+          if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateProductDescription');
           result = await ai.generateProductDescription(name: prompt);
           break;
         case AiToolType.instagramPost:
+          if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateInstagramPost');
           result = await ai.generateInstagramPost(productName: prompt);
           break;
         case AiToolType.hashtags:
+          if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateHashtags');
           result = await ai.generateHashtags(topic: prompt);
           break;
         case AiToolType.customerReply:
+          if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateCustomerReply');
           result = await ai.generateCustomerReply(customerMessage: prompt);
           break;
       }
       if (mounted) setState(() => _workspaceResult = result);
     } catch (error) {
+      if (kDebugMode) debugPrint('[AI_RUNTIME] workspace error: ${error.runtimeType}: $error');
       if (mounted) setState(() => _workspaceError = _friendlyAiError(error));
     } finally {
       if (mounted) setState(() => _workspaceLoading = false);
