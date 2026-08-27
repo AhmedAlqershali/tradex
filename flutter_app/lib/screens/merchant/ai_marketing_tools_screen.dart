@@ -1,4 +1,3 @@
-import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
 import 'package:ai_saas/shared/ai/ai_result_model.dart';
@@ -245,25 +244,12 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   String _friendlyAiError(Object error) {
-    final message = error.toString();
-    if (message.contains('Gemini API key is not configured') || message.contains('GEMINI_API_KEY')) {
-      return 'خدمة الذكاء الاصطناعي غير مهيأة حالياً على الخادم.';
+    final cause = error is AiRuntimeFailure ? error.cause : error;
+    final message = cause.toString();
+    if (error is AiRuntimeFailure) {
+      return 'المرحلة: ${error.stage}\nالخطأ: $message';
     }
-    if (message.contains('503')) return 'خدمة الذكاء الاصطناعي غير متاحة حالياً. حاول مرة أخرى.';
-    if (message.contains('401')) return 'انتهت جلسة الدخول. يرجى تسجيل الدخول مرة أخرى.';
-    if (error is ForbiddenException || message.contains('403')) {
-      if (message.contains('active trial or paid subscription')) {
-        return 'لاستخدام أدوات الذكاء الاصطناعي، فعّل التجربة المجانية أو اشترك في خطة مدفوعة.';
-      }
-      return 'ليس لديك صلاحية لاستخدام هذه الخدمة.';
-    }
-    if (message.contains('429')) return 'تم تجاوز الحد المسموح لطلبات الذكاء الاصطناعي. حاول لاحقاً.';
-    if (message.contains('500')) return 'حدث خطأ داخلي في الخادم. حاول مرة أخرى.';
-    if (message.contains('SocketException')) return 'تعذر الاتصال بالخادم. تأكد من اتصال الإنترنت.';
-    if (message.contains('TimeoutException') || message.contains('timeout') || message.contains('Timeout')) {
-      return 'انتهت مهلة الاتصال بالخادم. حاول مرة أخرى.';
-    }
-    return 'حدث خطأ أثناء توليد المحتوى. حاول مرة أخرى.';
+    return 'المرحلة: غير محددة\nالخطأ: $message';
   }
 
   Widget _buildWorkspaceFeedback() {
@@ -1125,54 +1111,12 @@ class _AiToolSheetState extends State<_AiToolSheet> {
 // ── FRIENDLY ERROR ───────────────────────────────────────────────────────────
 
   String _friendlyAiError(Object error) {
-    final message = error.toString();
-
-    if (message.contains('Gemini API key is not configured')) {
-      return 'خدمة الذكاء الاصطناعي غير مهيأة حالياً على الخادم.';
+    final cause = error is AiRuntimeFailure ? error.cause : error;
+    final message = cause.toString();
+    if (error is AiRuntimeFailure) {
+      return 'المرحلة: ${error.stage}\nالخطأ: $message';
     }
-
-    if (message.contains('GEMINI_API_KEY')) {
-      return 'مفتاح Gemini غير مهيأ على الخادم.';
-    }
-
-    if (message.contains('503')) {
-      return 'خدمة الذكاء الاصطناعي غير متاحة حالياً. حاول مرة أخرى.';
-    }
-
-    if (message.contains('401')) {
-      return 'انتهت جلسة الدخول. يرجى تسجيل الدخول مرة أخرى.';
-    }
-
-    if (error is ForbiddenException || message.contains('403')) {
-      if (message.contains('active trial or paid subscription')) {
-        return 'لاستخدام أدوات الذكاء الاصطناعي، فعّل التجربة المجانية أو اشترك في خطة مدفوعة.';
-      }
-      return 'ليس لديك صلاحية لاستخدام هذه الخدمة.';
-    }
-
-    if (message.contains('404')) {
-      return 'خدمة الذكاء الاصطناعي غير موجودة على الخادم.';
-    }
-
-    if (message.contains('429')) {
-      return 'تم تجاوز الحد المسموح لطلبات الذكاء الاصطناعي. حاول لاحقاً.';
-    }
-
-    if (message.contains('500')) {
-      return 'حدث خطأ داخلي في الخادم. حاول مرة أخرى.';
-    }
-
-    if (message.contains('SocketException')) {
-      return 'تعذر الاتصال بالخادم. تأكد من اتصال الإنترنت.';
-    }
-
-    if (message.contains('TimeoutException') ||
-        message.contains('timeout') ||
-        message.contains('Timeout')) {
-      return 'انتهت مهلة الاتصال بالخادم. حاول مرة أخرى.';
-    }
-
-    return 'حدث خطأ أثناء توليد المحتوى. حاول مرة أخرى.';
+    return 'المرحلة: غير محددة\nالخطأ: $message';
   }
 
   bool get _canGenerate {

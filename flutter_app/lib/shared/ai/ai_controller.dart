@@ -25,6 +25,16 @@ import 'ai_result_model.dart';
 // hashtags/caption pairs).
 // ─────────────────────────────────────────────────────────────────────────────
 
+class AiRuntimeFailure implements Exception {
+  const AiRuntimeFailure({required this.stage, required this.cause});
+
+  final String stage;
+  final Object cause;
+
+  @override
+  String toString() => cause.toString();
+}
+
 class AiController {
   AiController._();
   static final AiController instance = AiController._();
@@ -155,6 +165,9 @@ class AiController {
           [result, ...historyNotifier.value].take(20).toList();
       statusNotifier.value = AiStatus.success;
       return result;
+    } on AiRuntimeFailure {
+      statusNotifier.value = AiStatus.error;
+      rethrow;
     } on ApiException catch (error) {
       if (kDebugMode) debugPrint('[AI_RUNTIME] controller ApiException: ${error.runtimeType}: $error');
       statusNotifier.value = AiStatus.error;
@@ -165,7 +178,7 @@ class AiController {
       // for non-API errors (network timeout, type cast failures, etc.).
       // Without this, the AI tool sheet spinner hangs indefinitely.
       statusNotifier.value = AiStatus.error;
-      rethrow;
+      throw AiRuntimeFailure(stage: 'before ApiClient.post', cause: error);
     }
   }
 
@@ -184,32 +197,41 @@ class AiController {
     if (kDebugMode) debugPrint('[AI_RUNTIME] _post entered path=$path');
     final trimmed = context.trim();
     final safeContext = trimmed.length >= 5 ? trimmed : '$trimmed منتج مميز';
-    if (kDebugMode) {
-      debugPrint('[AI_RUNTIME] calling ApiClient.post path=$path baseUrl=${ApiConstants.baseUrl}');
-    }
-    final response = await ApiClient.instance.post<Map<String, dynamic>>(
-      path,
-      data: {
-        'context': safeContext,
-        'language': 'Arabic',
-        if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
-      },
-    );
-    final raw = response.data;
-    if (raw == null) {
-      throw const UnknownException(
-        'خادم الذكاء الاصطناعي أعاد استجابة غير صالحة. حاول مجدداً.',
+    var stage = 'before ApiClient.post';
+    try {
+      if (kDebugMode) {
+        debugPrint('[AI_RUNTIME] calling ApiClient.post path=$path baseUrl=${ApiConstants.baseUrl}');
+      }
+      stage = 'inside ApiClient/Dio';
+      final response = await ApiClient.instance.post<Map<String, dynamic>>(
+        path,
+        data: {
+          'context': safeContext,
+          'language': 'Arabic',
+          if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
+        },
       );
+      stage = 'after HTTP response';
+      final raw = response.data;
+      if (raw == null) {
+        throw const UnknownException(
+          'خادم الذكاء الاصطناعي أعاد استجابة غير صالحة. حاول مجدداً.',
+        );
+      }
+      final body =
+          raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+      final result = body['result'];
+      if (result is! String || result.trim().isEmpty) {
+        throw const UnknownException(
+          'خادم الذكاء الاصطناعي أعاد نتيجة فارغة أو غير صالحة. حاول مجدداً.',
+        );
+      }
+      return result.trim();
+    } on AiRuntimeFailure {
+      rethrow;
+    } catch (error) {
+      throw AiRuntimeFailure(stage: stage, cause: error);
     }
-    final body =
-        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
-    final result = body['result'];
-    if (result is! String || result.trim().isEmpty) {
-      throw const UnknownException(
-        'خادم الذكاء الاصطناعي أعاد نتيجة فارغة أو غير صالحة. حاول مجدداً.',
-      );
-    }
-    return result.trim();
   }
 
   // ── Marketing-content parsing ─────────────────────────────────────────────────
