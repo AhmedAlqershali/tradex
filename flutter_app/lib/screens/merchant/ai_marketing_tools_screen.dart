@@ -17,6 +17,10 @@ class AlMarketingToolsScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   final TextEditingController _promptController = TextEditingController();
+  AiToolType _selectedTool = AiToolType.productDescription;
+  AiResult? _workspaceResult;
+  bool _workspaceLoading = false;
+  String? _workspaceError;
 
   @override
   void dispose() {
@@ -39,6 +43,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                   _buildHeader(),
                   SizedBox(height: 24.h),
                   _buildAssistantCard(),
+                  if (_workspaceLoading || _workspaceResult != null || _workspaceError != null) ...[
+                    SizedBox(height: 16.h),
+                    _buildWorkspaceFeedback(),
+                  ],
                   SizedBox(height: 28.h),
                   _buildSectionHeading('أدواتك الذكية', 'كل ما تحتاجه لمتجرك'),
                   SizedBox(height: 12.h),
@@ -111,21 +119,26 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             SizedBox(height: 5.h),
             Text('اختر أداة أو ابدأ من فكرة منتجك.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.sp)),
             SizedBox(height: 18.h),
+            _buildToolSelector(),
+            SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
               child: TextField(
                 controller: _promptController,
                 textDirection: TextDirection.rtl,
-                minLines: 1,
-                maxLines: 3,
+                onChanged: (_) => setState(() {}),
+                minLines: 3,
+                maxLines: 5,
                 textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
                   hintText: 'كيف يمكنني مساعدتك؟',
                   hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13.sp),
-                  prefixIcon: IconButton(
-                    tooltip: 'بدء وصف منتج',
-                    onPressed: () => _openFromPrompt(AiToolType.productDescription),
-                    icon: Icon(Icons.arrow_upward_rounded, color: AppColors.primary, size: 22.sp),
+                  suffixIcon: IconButton(
+                    tooltip: 'توليد النتيجة',
+                    onPressed: _workspaceCanGenerate ? _generateInWorkspace : null,
+                    icon: _workspaceLoading
+                        ? SizedBox(width: 20.w, height: 20.h, child: const CircularProgressIndicator(strokeWidth: 2))
+                        : Icon(Icons.arrow_upward_rounded, color: _workspaceCanGenerate ? AppColors.primary : AppColors.textHint, size: 22.sp),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
                   filled: true,
@@ -134,10 +147,141 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 ),
               ),
             ),
+            SizedBox(height: 12.h),
+            SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: ElevatedButton.icon(
+                onPressed: _workspaceCanGenerate ? _generateInWorkspace : null,
+                icon: _workspaceLoading ? SizedBox(width: 17.w, height: 17.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.auto_awesome_rounded, size: 18),
+                label: Text(_workspaceLoading ? 'جارٍ التوليد...' : 'توليد باستخدام Tradex AI'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primaryDark,
+                  disabledBackgroundColor: Colors.white.withValues(alpha: 0.45),
+                  disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildToolSelector() {
+    const tools = [
+      (AiToolType.productDescription, 'وصف المنتج', Icons.description_outlined),
+      (AiToolType.instagramPost, 'محتوى تسويقي', Icons.campaign_outlined),
+      (AiToolType.hashtags, 'هاشتاقات', Icons.tag),
+      (AiToolType.customerReply, 'رد العميل', Icons.reply_rounded),
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      reverse: true,
+      child: Row(
+        children: tools.map((item) {
+          final selected = _selectedTool == item.$1;
+          return Padding(
+            padding: EdgeInsets.only(left: 8.w),
+            child: ChoiceChip(
+              selected: selected,
+              label: Text(item.$2),
+              avatar: Icon(item.$3, size: 16.sp, color: selected ? AppColors.primary : Colors.white70),
+              labelStyle: TextStyle(color: selected ? AppColors.primaryDark : Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w700),
+              selectedColor: Colors.white,
+              backgroundColor: Colors.white.withValues(alpha: 0.13),
+              side: BorderSide(color: selected ? Colors.white : Colors.white24),
+              onSelected: (_) => setState(() => _selectedTool = item.$1),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  bool get _workspaceCanGenerate => _promptController.text.trim().isNotEmpty && !_workspaceLoading;
+
+  Future<void> _generateInWorkspace() async {
+    if (!_workspaceCanGenerate) return;
+    final prompt = _promptController.text.trim();
+    setState(() {
+      _workspaceLoading = true;
+      _workspaceResult = null;
+      _workspaceError = null;
+    });
+    try {
+      final ai = AiController.instance;
+      late final AiResult result;
+      switch (_selectedTool) {
+        case AiToolType.productDescription:
+          result = await ai.generateProductDescription(name: prompt);
+          break;
+        case AiToolType.instagramPost:
+          result = await ai.generateInstagramPost(productName: prompt);
+          break;
+        case AiToolType.hashtags:
+          result = await ai.generateHashtags(topic: prompt);
+          break;
+        case AiToolType.customerReply:
+          result = await ai.generateCustomerReply(customerMessage: prompt);
+          break;
+      }
+      if (mounted) setState(() => _workspaceResult = result);
+    } catch (error) {
+      if (mounted) setState(() => _workspaceError = _friendlyAiError(error));
+    } finally {
+      if (mounted) setState(() => _workspaceLoading = false);
+    }
+  }
+
+  String _friendlyAiError(Object error) {
+    final message = error.toString();
+    if (message.contains('Gemini API key is not configured') || message.contains('GEMINI_API_KEY')) {
+      return 'خدمة الذكاء الاصطناعي غير مهيأة حالياً على الخادم.';
+    }
+    if (message.contains('503')) return 'خدمة الذكاء الاصطناعي غير متاحة حالياً. حاول مرة أخرى.';
+    if (message.contains('401')) return 'انتهت جلسة الدخول. يرجى تسجيل الدخول مرة أخرى.';
+    if (error is ForbiddenException || message.contains('403')) {
+      if (message.contains('active trial or paid subscription')) {
+        return 'لاستخدام أدوات الذكاء الاصطناعي، فعّل التجربة المجانية أو اشترك في خطة مدفوعة.';
+      }
+      return 'ليس لديك صلاحية لاستخدام هذه الخدمة.';
+    }
+    if (message.contains('429')) return 'تم تجاوز الحد المسموح لطلبات الذكاء الاصطناعي. حاول لاحقاً.';
+    if (message.contains('500')) return 'حدث خطأ داخلي في الخادم. حاول مرة أخرى.';
+    if (message.contains('SocketException')) return 'تعذر الاتصال بالخادم. تأكد من اتصال الإنترنت.';
+    if (message.contains('TimeoutException') || message.contains('timeout') || message.contains('Timeout')) {
+      return 'انتهت مهلة الاتصال بالخادم. حاول مرة أخرى.';
+    }
+    return 'حدث خطأ أثناء توليد المحتوى. حاول مرة أخرى.';
+  }
+
+  Widget _buildWorkspaceFeedback() {
+    if (_workspaceLoading) {
+      return _feedbackCard(const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator())));
+    }
+    if (_workspaceError != null) {
+      return _feedbackCard(Row(children: [Icon(Icons.error_outline, color: AppColors.red, size: 22.sp), SizedBox(width: 10.w), Expanded(child: Text(_workspaceError!, style: TextStyle(color: AppColors.textDark, fontSize: 13.sp, height: 1.4))), IconButton(tooltip: 'إغلاق', onPressed: () => setState(() => _workspaceError = null), icon: const Icon(Icons.close))]));
+    }
+    final result = _workspaceResult;
+    if (result == null) return const SizedBox.shrink();
+    return _feedbackCard(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), IconButton(tooltip: 'نسخ', onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
+      const Divider(),
+      ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: TextDirection.rtl, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
+      SizedBox(height: 8.h),
+      Align(alignment: AlignmentDirectional.centerEnd, child: TextButton.icon(onPressed: _generateInWorkspace, icon: const Icon(Icons.refresh_rounded, size: 18), label: const Text('إعادة التوليد'))),
+    ]));
+  }
+
+  Widget _feedbackCard(Widget child) => Container(width: double.infinity, padding: EdgeInsets.all(14.r), decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: AppColors.border)), child: child);
+
+  void _copyWorkspaceResult(String output) {
+    Clipboard.setData(ClipboardData(text: output));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ النتيجة')));
   }
 
   Widget _buildSectionHeading(String title, String subtitle) {
@@ -229,7 +373,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             if (recent.isEmpty)
               Container(width: double.infinity, padding: EdgeInsets.all(18.r), decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: AppColors.border)), child: Row(children: [Icon(Icons.history_rounded, color: AppColors.textLight, size: 23.sp), SizedBox(width: 12.w), Expanded(child: Text('ستظهر نتائجك هنا بعد أول استخدام لأدوات Tradex AI.', style: TextStyle(color: AppColors.textGray, fontSize: 12.sp, height: 1.5))) ]))
             else
-              ...recent.map((result) => Padding(padding: EdgeInsets.only(bottom: 9.h), child: _recentItem(icon: _iconForTool(result.tool), iconColor: _colorForTool(result.tool), title: '${result.tool.label}: ${result.prompt.split(' | ').first}', time: _formatTime(result.generatedAt)))),
+              ...recent.map((result) => Padding(padding: EdgeInsets.only(bottom: 9.h), child: _recentItem(icon: _iconForTool(result.tool), iconColor: _colorForTool(result.tool), title: '${result.tool.label}: ${result.prompt.split(' | ').first}', time: _formatTime(result.generatedAt), onTap: () => setState(() { _selectedTool = result.tool; _workspaceResult = result; _workspaceError = null; })))),
           ]),
         );
       },
@@ -748,62 +892,48 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     required Color iconColor,
     required String title,
     required String time,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: AppColors.cardWhite,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40.w,
-            height: 40.h,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10.r),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: AppColors.cardWhite,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8.r,
+              offset: Offset(0, 2.h),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20.sp,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40.w,
+              height: 40.h,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(icon, color: iconColor, size: 20.sp),
             ),
-          ),
-          SizedBox(width: 14.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 3.h),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: AppColors.textGray,
-                  ),
-                ),
-              ],
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textDark), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  SizedBox(height: 3.h),
+                  Text(time, style: TextStyle(fontSize: 11.sp, color: AppColors.textGray)),
+                ],
+              ),
             ),
+            if (onTap != null) Icon(Icons.chevron_left_rounded, color: AppColors.textLight, size: 20.sp),
           ),
-        ],
       ),
     );
   }
