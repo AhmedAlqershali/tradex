@@ -16,68 +16,234 @@ class AlMarketingToolsScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<AlMarketingToolsScreen> {
+  final TextEditingController _promptController = TextEditingController();
+
+  @override
+  void dispose() {
+    _promptController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightGray,
+      backgroundColor: AppColors.scaffold,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 20.h),
-          child: Column(
-            children: [
-              _buildTopBar(),
-              _buildHeroBanner(),
-              SizedBox(height: 24.h),
-              _buildToolCard(
-                tag: 'الأكثر استخداماً',
-                icon: Icons.description_outlined,
-                iconColor: AppColors.purple,
-                title: 'كتابة وصف منتج',
-                subtitle:
-                    'حوّل مواصفات منتجك إلى نصوص بيعية جذابة تقنع العميل بالشراء فوراً.',
-                buttonText: 'ابدأ الوصف ←',
-                buttonColor: AppColors.purple,
-                tool: AiToolType.productDescription,
+        child: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 28.h),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildHeader(),
+                  SizedBox(height: 24.h),
+                  _buildAssistantCard(),
+                  SizedBox(height: 28.h),
+                  _buildSectionHeading('أدواتك الذكية', 'كل ما تحتاجه لمتجرك'),
+                  SizedBox(height: 12.h),
+                  _buildQuickActions(),
+                  SizedBox(height: 28.h),
+                  _buildSectionHeading('مصمّم لمتجرك', 'أفكار تبدأ منها الآن'),
+                  SizedBox(height: 12.h),
+                  _buildContextActions(),
+                  SizedBox(height: 28.h),
+                  _buildRecentSection(),
+                ]),
               ),
-              _buildToolCard(
-                icon: Icons.camera_alt_outlined,
-                iconColor: AppColors.orange,
-                title: 'إنشاء بوست انستغرام',
-                subtitle:
-                    'احصل على أفكار لمحتوى الصور والتعليقات المناسبة لكل منصة اجتماعية.',
-                buttonText: 'صمم المنشور ←',
-                buttonColor: AppColors.orange,
-                tool: AiToolType.instagramPost,
-              ),
-              _buildToolCard(
-                icon: Icons.tag,
-                iconColor: AppColors.teal,
-                title: 'توليد هاشتاقات',
-                subtitle:
-                    'ارفع نسبة الوصول لمنشوراتك باستخدام هاشتاقات ذكية ومخصصة.',
-                buttonText: 'توليد الآن',
-                buttonColor: AppColors.teal,
-                tool: AiToolType.hashtags,
-              ),
-              _buildToolCard(
-                icon: Icons.chat_bubble_outline,
-                iconColor: AppColors.pink,
-                title: 'كتابة ردود للعملاء',
-                subtitle:
-                    'ردود سريعة واحترافية على استفسارات العملاء وشكاواهم بكل لباقة.',
-                buttonText: 'رد ذكي',
-                buttonColor: AppColors.pink,
-                tool: AiToolType.customerReply,
-              ),
-              SizedBox(height: 16.h),
-              _buildAccuracyCard(),
-              SizedBox(height: 24.h),
-              _buildRecentOperations(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildHeader() {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Row(
+        children: [
+          Container(
+            width: 46.w,
+            height: 46.h,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.primary, Color(0xff8B7CFF)],
+              ),
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            child: Icon(Icons.auto_awesome, color: Colors.white, size: 23.sp),
+          ),
+          SizedBox(width: 12.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+              SizedBox(height: 2.h),
+              Text('مساحتك الذكية لإدارة متجرك', style: TextStyle(fontSize: 12.sp, color: AppColors.textGray)),
+            ],
+          ),
+          const Spacer(),
+          Icon(Icons.tune_rounded, color: AppColors.textMid, size: 22.sp),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssistantCard() {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        padding: EdgeInsets.all(20.r),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xff27234F), Color(0xff4D41DF)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.2), blurRadius: 20.r, offset: Offset(0, 10.h))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('ما الذي تريد إنجازه اليوم؟', style: TextStyle(color: Colors.white, fontSize: 19.sp, fontWeight: FontWeight.w700)),
+            SizedBox(height: 5.h),
+            Text('اختر أداة أو ابدأ من فكرة منتجك.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.sp)),
+            SizedBox(height: 18.h),
+            Container(
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
+              child: TextField(
+                controller: _promptController,
+                textDirection: TextDirection.rtl,
+                minLines: 1,
+                maxLines: 3,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  hintText: 'كيف يمكنني مساعدتك؟',
+                  hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13.sp),
+                  prefixIcon: IconButton(
+                    tooltip: 'بدء وصف منتج',
+                    onPressed: () => _openFromPrompt(AiToolType.productDescription),
+                    icon: Icon(Icons.arrow_upward_rounded, color: AppColors.primary, size: 22.sp),
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeading(String title, String subtitle) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: AppColors.textDark))),
+          Text(subtitle, style: TextStyle(fontSize: 11.sp, color: AppColors.textGray)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    const tools = [
+      (AiToolType.productDescription, Icons.description_outlined, 'وصف منتج', AppColors.primary),
+      (AiToolType.instagramPost, Icons.camera_alt_outlined, 'منشور', AppColors.orange),
+      (AiToolType.hashtags, Icons.tag, 'هاشتاقات', AppColors.teal),
+      (AiToolType.customerReply, Icons.forum_outlined, 'رد عميل', AppColors.pink),
+    ];
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Wrap(
+        spacing: 10.w,
+        runSpacing: 10.h,
+        children: tools.map((item) => _quickAction(item.$1, item.$2, item.$3, item.$4)).toList(),
+      ),
+    );
+  }
+
+  Widget _quickAction(AiToolType tool, IconData icon, String label, Color color) {
+    return InkWell(
+      onTap: () => _openTool(tool),
+      borderRadius: BorderRadius.circular(15.r),
+      child: Container(
+        width: (MediaQuery.sizeOf(context).width - 60.w) / 2,
+        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 13.h),
+        decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(15.r), border: Border.all(color: AppColors.border)),
+        child: Row(children: [
+          Icon(icon, color: color, size: 21.sp),
+          SizedBox(width: 9.w),
+          Expanded(child: Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.textDark))),
+          Icon(Icons.chevron_left_rounded, color: AppColors.textLight, size: 19.sp),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildContextActions() {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        child: Row(children: [
+          _contextChip('اكتب وصفًا مقنعًا', Icons.edit_note_rounded, AiToolType.productDescription),
+          SizedBox(width: 10.w),
+          _contextChip('جهّز منشورًا', Icons.campaign_outlined, AiToolType.instagramPost),
+          SizedBox(width: 10.w),
+          _contextChip('رد على عميل', Icons.reply_rounded, AiToolType.customerReply),
+        ]),
+      ),
+    );
+  }
+
+  Widget _contextChip(String label, IconData icon, AiToolType tool) {
+    return InkWell(
+      onTap: () => _openTool(tool),
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
+        decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(14.r)),
+        child: Row(children: [Icon(icon, color: AppColors.primary, size: 19.sp), SizedBox(width: 7.w), Text(label, style: TextStyle(color: AppColors.primaryDark, fontSize: 12.sp, fontWeight: FontWeight.w700))]),
+      ),
+    );
+  }
+
+  Widget _buildRecentSection() {
+    return ValueListenableBuilder<List<AiResult>>(
+      valueListenable: AiController.instance.historyNotifier,
+      builder: (context, history, _) {
+        final recent = history.take(3).toList();
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _buildSectionHeading('النشاط الأخير', 'محفوظ في هذه الجلسة'),
+            SizedBox(height: 12.h),
+            if (recent.isEmpty)
+              Container(width: double.infinity, padding: EdgeInsets.all(18.r), decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: AppColors.border)), child: Row(children: [Icon(Icons.history_rounded, color: AppColors.textLight, size: 23.sp), SizedBox(width: 12.w), Expanded(child: Text('ستظهر نتائجك هنا بعد أول استخدام لأدوات Tradex AI.', style: TextStyle(color: AppColors.textGray, fontSize: 12.sp, height: 1.5))) ]))
+            else
+              ...recent.map((result) => Padding(padding: EdgeInsets.only(bottom: 9.h), child: _recentItem(icon: _iconForTool(result.tool), iconColor: _colorForTool(result.tool), title: '${result.tool.label}: ${result.prompt.split(' | ').first}', time: _formatTime(result.generatedAt)))),
+          ]),
+        );
+      },
+    );
+  }
+
+  void _openFromPrompt(AiToolType tool) {
+    final prompt = _promptController.text.trim();
+    _openTool(tool, initialName: prompt);
+  }
+
+  void _openTool(AiToolType tool, {String initialName = ''}) {
+    _promptController.clear();
+    _AiToolSheet.show(context, tool, initialName: initialName);
   }
 
 // ── TOP BAR ──────────────────────────────────────────────────────────────────
