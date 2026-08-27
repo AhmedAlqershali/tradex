@@ -934,6 +934,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             ),
             if (onTap != null) Icon(Icons.chevron_left_rounded, color: AppColors.textLight, size: 20.sp),
           ],
+        ),
       ),
     );
   }

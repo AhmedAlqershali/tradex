@@ -11,7 +11,7 @@ void main() {
   test('merchant list order id is carried unchanged into detail path', () {
     final order = AppOrder.fromServerJson({
       'id': 42,
-      'status': 'pending',
+      'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '000',
@@ -35,10 +35,8 @@ void main() {
 
   test('all backend lifecycle statuses parse to distinct UI statuses', () {
     final statuses = {
-      'pending': OrderStatus.pendingReview,
-      'contacted': OrderStatus.merchantContacted,
-      'confirmed': OrderStatus.orderConfirmed,
-      'processing': OrderStatus.preparing,
+      'pending_review': OrderStatus.pendingReview,
+      'confirmed': OrderStatus.confirmed,
       'completed': OrderStatus.completed,
       'cancelled': OrderStatus.cancelled,
     };
@@ -84,7 +82,7 @@ void main() {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'ref': 'TRX-42',
-      'status': 'pending',
+      'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '000',
@@ -98,11 +96,11 @@ void main() {
     );
   });
 
-  test('confirm contact uses the contacted backend status and preserves server id', () {
+  test('confirmed status preserves the server id', () {
     final order = AppOrder.fromServerJson({
       'id': 42,
       'ref': 'TRX-42',
-      'status': 'pending',
+      'status': 'pending_review',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '0591234567',
@@ -110,10 +108,10 @@ void main() {
     });
 
     expect(order.serverId, '42');
-    expect(OrderStatus.merchantContacted.name, 'merchantContacted');
+    expect(OrderStatus.confirmed.name, 'confirmed');
     expect(
-      OrderController.parseStatus('contacted'),
-      OrderStatus.merchantContacted,
+      OrderController.parseStatus('confirmed'),
+      OrderStatus.confirmed,
     );
     expect(
       ApiConstants.merchantOrderStatus(order.serverId!),
@@ -121,10 +119,10 @@ void main() {
     );
   });
 
-  test('Laravel status response unwraps and maps contacted to the UI status', () {
+  test('Laravel status response unwraps and maps confirmed to the UI status', () {
     final order = AppOrder.fromServerJson({
       'id': 42,
-      'status': 'contacted',
+      'status': 'confirmed',
       'created_at': '2026-08-14T10:00:00Z',
       'customer_name': 'Customer',
       'customer_phone': '0591234567',
@@ -137,7 +135,7 @@ void main() {
       'message': 'Order status updated.',
       'data': {
         'id': 42,
-        'status': 'contacted',
+        'status': 'confirmed',
         'created_at': '2026-08-14T10:00:00Z',
         'customer_name': 'Customer',
         'customer_phone': '0591234567',
@@ -150,14 +148,14 @@ void main() {
 
     expect(order.serverId, '42');
     expect(parsed.serverId, '42');
-    expect(parsed.status, OrderStatus.merchantContacted);
+    expect(parsed.status, OrderStatus.confirmed);
   });
 
   test('merchant status update rejects a display reference as the server id', () async {
     expect(
       () => OrderService.instance.patchStatus(
         id: 'TRX-42',
-        status: 'merchantContacted',
+        status: 'confirmed',
       ),
       throwsA(isA<ValidationException>()),
     );
