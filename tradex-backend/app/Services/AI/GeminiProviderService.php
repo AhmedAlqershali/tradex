@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Config keys (config/services.php → env):
  *   GEMINI_API_KEY    — required
- *   GEMINI_MODEL      — default: gemini-2.0-flash
+ *   GEMINI_MODEL      — default: gemini-3.6-flash
  *   GEMINI_BASE_URL   — default: https://generativelanguage.googleapis.com/v1beta
  *
  * To swap back to OpenAI: rebind AiProviderInterface → AiProviderService
@@ -30,7 +30,7 @@ class GeminiProviderService implements AiProviderInterface
     public function __construct()
     {
         $this->apiKey  = (string) config('services.gemini.key',     '');
-        $this->model   = (string) config('services.gemini.model',   'gemini-2.0-flash');
+        $this->model   = (string) config('services.gemini.model',   'gemini-3.6-flash');
         $this->baseUrl = rtrim((string) config('services.gemini.base_url',
             'https://generativelanguage.googleapis.com/v1beta'), '/');
     }

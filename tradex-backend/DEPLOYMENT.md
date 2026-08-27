@@ -75,7 +75,7 @@ CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
 
 # AI Provider (Google Gemini)
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-3.6-flash
 GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
 ```
 

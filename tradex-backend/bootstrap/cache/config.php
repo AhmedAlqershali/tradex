@@ -816,7 +816,7 @@
     'gemini' => 
     array (
       'key' => '',
-      'model' => 'gemini-2.0-flash',
+      'model' => 'gemini-3.6-flash',
       'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
     ),
     'google' => 

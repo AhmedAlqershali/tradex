@@ -25,7 +25,7 @@ class GeminiAiProvider implements AiProviderInterface
         $this->apiKey  = (string) config('services.gemini.key', '');
         $this->baseUrl = rtrim((string) config('services.gemini.base_url',
             'https://generativelanguage.googleapis.com/v1beta'), '/');
-        $this->model   = (string) config('services.gemini.model', 'gemini-2.0-flash');
+        $this->model   = (string) config('services.gemini.model', 'gemini-3.6-flash');
     }
 
     public function complete(string $systemPrompt, string $userPrompt, array $options = []): array

@@ -59,11 +59,11 @@ return [
     // Active AI provider. GeminiProviderService is bound to AiProviderInterface
     // in RepositoryServiceProvider.
     //   GEMINI_API_KEY   — required; obtain from https://aistudio.google.com/app/apikey
-    //   GEMINI_MODEL     — default: gemini-2.0-flash (fast, low-cost)
+    //   GEMINI_MODEL     — default: gemini-3.6-flash (fast, low-cost)
     //   GEMINI_BASE_URL  — Gemini REST base; change only if using a VPC proxy
     'gemini' => [
         'key'      => env('GEMINI_API_KEY',   ''),
-        'model'    => env('GEMINI_MODEL',     'gemini-2.0-flash'),
+        'model'    => env('GEMINI_MODEL',     'gemini-3.6-flash'),
         'base_url' => env('GEMINI_BASE_URL',  'https://generativelanguage.googleapis.com/v1beta'),
     ],
 
