@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676462022306",
+    "project_id": "trades-f4581",
+    "storage_bucket": "trades-f4581.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676462022306:android:0b7753bf286c6fc4ac51fb",
+        "android_client_info": {
+          "package_name": "ps.tradex.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATLA78UAQeRK6t9YLAybHl2lb8v1gTp80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
