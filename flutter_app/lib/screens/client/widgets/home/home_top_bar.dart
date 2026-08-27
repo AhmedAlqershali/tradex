@@ -4,6 +4,7 @@ import 'package:ai_saas/screens/notifications_screen.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
