@@ -31,7 +31,7 @@ class NotificationService {
       items: items,
       currentPage: _int(pagination['current_page'], page),
       lastPage: _int(pagination['last_page'], page),
-      unreadCount: items.where((item) => !item.isRead).length,
+      unreadCount: _int(payload is Map ? payload['unread_count'] : null, 0),
     );
   }
 

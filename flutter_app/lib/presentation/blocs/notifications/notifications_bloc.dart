@@ -32,6 +32,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   int _page = 1;
   List<AppNotification> _items = const [];
   int _lastPage = 1;
+  int _unreadCount = 0;
 
   /// Reloads from Laravel and completes only after the request has finished.
   ///
@@ -77,11 +78,13 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       final page = await _load(page: _page, perPage: 20);
       _lastPage = page.lastPage;
       _items = replace ? page.items : [..._items, ...page.items];
+      _unreadCount = page.unreadCount;
       if (!isClosed) {
         emit(NotificationsLoaded(
           _items,
           _lastPage,
           currentPage: _page,
+          unreadCount: _unreadCount,
         ));
       }
     } on ApiException catch (e) {
@@ -99,6 +102,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   ) async {
     final index = _items.indexWhere((item) => item.id == event.id);
     if (index == -1 || _items[index].isRead) return;
+    final wasUnread = !_items[index].isRead;
     final previous = List<AppNotification>.from(_items);
     // Do not present a successful local read before Laravel confirms it.
     // Otherwise a failed PATCH briefly looks successful and can be lost on
@@ -107,11 +111,15 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     try {
       final updated = await _markRead(event.id);
       _items = [..._items]..[index] = updated;
+      if (wasUnread && updated.isRead) {
+        _unreadCount = (_unreadCount - 1).clamp(0, _unreadCount);
+      }
       if (!isClosed) {
         emit(NotificationsLoaded(
           _items,
           _lastPage,
           currentPage: _page,
+          unreadCount: _unreadCount,
         ));
       }
     } on ApiException catch (e) {
@@ -134,11 +142,13 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     try {
       await _markAllRead();
       _items = _items.map((item) => item.copyWith(isRead: true)).toList();
+      _unreadCount = 0;
       if (!isClosed) {
         emit(NotificationsLoaded(
           _items,
           _lastPage,
           currentPage: _page,
+          unreadCount: _unreadCount,
         ));
       }
     } on ApiException catch (e) {

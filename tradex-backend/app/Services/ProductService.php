@@ -6,6 +6,8 @@ use App\Contracts\Repositories\ProductRepositoryInterface;
 use App\Contracts\Services\ProductServiceInterface;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\StoreFollow;
+use App\Contracts\Services\UserNotificationServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +17,7 @@ class ProductService implements ProductServiceInterface
 {
     public function __construct(
         private readonly ProductRepositoryInterface $productRepository,
+        private readonly UserNotificationServiceInterface $notificationService,
     ) {}
 
     // -------------------------------------------------------------------------
@@ -83,7 +86,36 @@ class ProductService implements ProductServiceInterface
             }
         }
 
-        return $product->load(['category', 'images']);
+        $product = $product->load(['category', 'images', 'store']);
+
+        try {
+            StoreFollow::query()
+                ->where('store_id', $product->store_id)
+                ->with('user')
+                ->get()
+                ->each(function (StoreFollow $follow) use ($product): void {
+                    if ($follow->user) {
+                        try {
+                            $this->notificationService->create(
+                                $follow->user,
+                                'new_product',
+                                'منتج جديد في متجر تتابعه',
+                                "أضاف متجر {$product->store->store_name} المنتج {$product->name}.",
+                                [
+                                    'store_id' => $product->store_id,
+                                    'product_id' => $product->id,
+                                ],
+                            );
+                        } catch (\Throwable) {
+                            // A single failed notification must not block other followers.
+                        }
+                    }
+                });
+        } catch (\Throwable) {
+            // Notification delivery must never roll back a valid product creation.
+        }
+
+        return $product;
     }
 
     public function update(Product $product, array $data, array $imageFiles = []): Product

@@ -66,4 +66,18 @@ class StoreController extends BaseApiController
 
         return $this->success(new StoreResource($store), 'Store retrieved successfully.');
     }
+
+    public function follow(Request $request, int $id): JsonResponse
+    {
+        $this->storeService->follow($request->user(), $id);
+
+        return $this->success(null, 'تمت متابعة المتجر.');
+    }
+
+    public function unfollow(Request $request, int $id): JsonResponse
+    {
+        $this->storeService->unfollow($request->user(), $id);
+
+        return $this->success(null, 'تم إلغاء متابعة المتجر.');
+    }
 }

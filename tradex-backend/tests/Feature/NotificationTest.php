@@ -43,6 +43,7 @@ class NotificationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.data.0.type', 'order_status_updated')
             ->assertJsonPath('data.data.0.is_read', false)
+            ->assertJsonPath('data.unread_count', 1)
             ->assertJsonPath('data.pagination.total', 1);
     }
 

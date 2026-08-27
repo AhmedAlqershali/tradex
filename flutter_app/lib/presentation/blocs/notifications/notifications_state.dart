@@ -25,17 +25,18 @@ class NotificationsLoaded extends NotificationsState {
     this.items,
     this.lastPage, {
     this.currentPage = 1,
+    this.unreadCount = 0,
   });
 
   final List<AppNotification> items;
   final int lastPage;
   final int currentPage;
+  final int unreadCount;
 
-  int get unreadCount => items.where((item) => !item.isRead).length;
   bool get hasNextPage => currentPage < lastPage;
 
   @override
-  List<Object?> get props => [items, lastPage, currentPage];
+  List<Object?> get props => [items, lastPage, currentPage, unreadCount];
 }
 
 class NotificationsFailure extends NotificationsState {

@@ -18,6 +18,14 @@ class UserNotificationRepository implements UserNotificationRepositoryInterface
             ->withQueryString();
     }
 
+    public function unreadCount(User $user): int
+    {
+        return UserNotification::query()
+            ->where('user_id', $user->id)
+            ->whereNull('read_at')
+            ->count();
+    }
+
     public function findForUser(User $user, int $id): ?UserNotification
     {
         return UserNotification::query()

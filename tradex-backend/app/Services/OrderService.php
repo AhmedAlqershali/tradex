@@ -222,11 +222,30 @@ class OrderService implements OrderServiceInterface
         $updated = $this->orderRepository->updateStatus($order, $newStatus);
 
         if ($updated->client) {
+            [$title, $message] = match ($updated->status) {
+                Order::STATUS_CONFIRMED => [
+                    'تم تأكيد طلبك',
+                    "تم تأكيد طلبك رقم #{$updated->id}.",
+                ],
+                Order::STATUS_COMPLETED => [
+                    'تم إكمال طلبك',
+                    "تم إكمال طلبك رقم #{$updated->id}.",
+                ],
+                Order::STATUS_CANCELLED => [
+                    'تم إلغاء طلبك',
+                    "تم إلغاء طلبك رقم #{$updated->id}.",
+                ],
+                default => [
+                    'تحديث حالة الطلب',
+                    "تم تحديث حالة طلبك رقم #{$updated->id}.",
+                ],
+            };
+
             $this->notificationService->create(
                 $updated->client,
                 'order_status_updated',
-                'تحديث حالة الطلب',
-                "تم تحديث حالة طلبك رقم #{$updated->id} إلى {$updated->status}.",
+                $title,
+                $message,
                 ['order_id' => $updated->id, 'status' => $updated->status],
             );
         }

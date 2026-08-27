@@ -31,6 +31,7 @@ class NotificationController extends BaseApiController
                 'from'         => $page->firstItem(),
                 'to'           => $page->lastItem(),
             ],
+            'unread_count' => $this->notificationService->unreadCount($request->user()),
         ], 'Notifications retrieved successfully.');
     }
 

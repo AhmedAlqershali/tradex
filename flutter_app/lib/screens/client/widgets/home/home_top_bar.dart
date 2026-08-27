@@ -1,6 +1,7 @@
 import 'package:ai_saas/screens/client/cart_screen.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:ai_saas/screens/notifications_screen.dart';
+import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,12 +62,21 @@ class HomeTopBar extends StatelessWidget {
             },
           ),
           SizedBox(width: 10.w),
-          _IconCircleButton(
-            icon: Icons.notifications_none_rounded,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-            ),
+          BlocBuilder<NotificationsBloc, NotificationsState>(
+            builder: (context, state) {
+              final unreadCount = state is NotificationsLoaded
+                  ? state.unreadCount
+                  : 0;
+              return _NotificationButton(
+                unreadCount: unreadCount,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                ),
+              );
+            },
           ),
           SizedBox(width: 8.w),
           _IconCircleButton(
@@ -146,6 +156,48 @@ class HomeTopBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _NotificationButton extends StatelessWidget {
+  const _NotificationButton({required this.unreadCount, required this.onTap});
+
+  final int unreadCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _IconCircleButton(
+          icon: Icons.notifications_none_rounded,
+          onTap: onTap,
+        ),
+        if (unreadCount > 0)
+          Positioned(
+            top: -4,
+            left: -4,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: const BoxDecoration(
+                color: Color(0xffD92D20),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                unreadCount > 99 ? '99+' : '$unreadCount',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

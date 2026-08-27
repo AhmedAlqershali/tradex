@@ -54,6 +54,17 @@ class StoreService implements StoreServiceInterface
             ->find($id);
     }
 
+    public function follow(User $client, int $storeId): void
+    {
+        $store = Store::active()->findOrFail($storeId);
+        $client->followedStores()->syncWithoutDetaching([$store->id]);
+    }
+
+    public function unfollow(User $client, int $storeId): void
+    {
+        $client->followedStores()->detach($storeId);
+    }
+
     // ── Merchant-facing ───────────────────────────────────────────────────────
 
     /**

@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Admin\SubscriptionRequestController as AdminSubs
 use App\Http\Controllers\Api\V1\Admin\SubscriptionProofController;
 use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\DeviceTokenController;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
@@ -114,11 +115,19 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             ->name('notifications.read');
         Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])
             ->name('notifications.read-all');
+        Route::post('device-tokens', [DeviceTokenController::class, 'store'])
+            ->name('device-tokens.store');
+        Route::delete('device-tokens', [DeviceTokenController::class, 'destroy'])
+            ->name('device-tokens.destroy');
 
         // ── Client (cart + orders + favorites + reviews) ──────────────────────
         Route::middleware('role:client')
             ->name('client.')
             ->group(function () {
+                Route::post('stores/{id}/follow', [Client\StoreController::class, 'follow'])
+                    ->name('stores.follow');
+                Route::delete('stores/{id}/follow', [Client\StoreController::class, 'unfollow'])
+                    ->name('stores.unfollow');
                 // Dashboard counters
                 Route::get('client/dashboard', [ClientDashboardController::class, 'dashboard'])
                     ->name('dashboard');

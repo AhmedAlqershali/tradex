@@ -10,6 +10,8 @@ interface UserNotificationServiceInterface
 {
     public function listForUser(User $user, int $perPage = 20): LengthAwarePaginator;
 
+    public function unreadCount(User $user): int;
+
     public function create(
         User $user,
         string $type,

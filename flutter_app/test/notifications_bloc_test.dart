@@ -21,7 +21,7 @@ void main() {
         items: [_notification('1'), _notification('2', isRead: true)],
         currentPage: page,
         lastPage: 1,
-        unreadCount: 1,
+        unreadCount: 7,
       ),
     );
 
@@ -30,7 +30,7 @@ void main() {
       emitsThrough(
         isA<NotificationsLoaded>()
             .having((state) => state.items.length, 'item count', 2)
-            .having((state) => state.unreadCount, 'unread count', 1),
+            .having((state) => state.unreadCount, 'unread count', 7),
       ),
     );
 

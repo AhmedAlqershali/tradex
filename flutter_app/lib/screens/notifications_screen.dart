@@ -1,4 +1,5 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
+import 'package:ai_saas/core/services/fcm_service.dart';
 import 'package:ai_saas/shared/models/notification_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,11 +16,29 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   static const _primary = Color(0xff4D41DF);
   static const _background = Color(0xffF8F9FD);
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_loadNextPageWhenNeeded);
     context.read<NotificationsBloc>().add(const NotificationsLoadRequested());
+  }
+
+  void _loadNextPageWhenNeeded() {
+    if (_scrollController.position.extentAfter < 240) {
+      context.read<NotificationsBloc>().add(
+            const NotificationsNextPageRequested(),
+          );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_loadNextPageWhenNeeded)
+      ..dispose();
+    super.dispose();
   }
 
   @override
@@ -91,15 +110,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               color: _primary,
               onRefresh: () => context.read<NotificationsBloc>().refresh(),
               child: ListView.separated(
+                controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(16.r),
                 itemCount: items.length,
                 separatorBuilder: (_, __) => SizedBox(height: 10.h),
                 itemBuilder: (_, index) => _NotificationTile(
                   notification: items[index],
-                  onTap: () => context.read<NotificationsBloc>().add(
-                        NotificationReadRequested(items[index].id),
-                      ),
+                  onTap: () {
+                    final notification = items[index];
+                    context.read<NotificationsBloc>().add(
+                          NotificationReadRequested(notification.id),
+                        );
+                    FcmService.instance.openData(notification.data);
+                  },
                 ),
               ),
             );

@@ -56,6 +56,7 @@ class ApiConstants {
   static const String notifications = '/notifications';
   static String notificationById(String id) => '/notifications/$id/read';
   static const String notificationsReadAll = '/notifications/read-all';
+    static const String deviceTokens = '/device-tokens';
 
   // ── Stores ───────────────────────────────────────────────────────────────────
   // Public/client browsing.

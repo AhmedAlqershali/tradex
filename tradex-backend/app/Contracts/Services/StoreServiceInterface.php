@@ -25,6 +25,10 @@ interface StoreServiceInterface
      */
     public function findActive(int $id): ?Store;
 
+    public function follow(User $client, int $storeId): void;
+
+    public function unfollow(User $client, int $storeId): void;
+
     // ── Merchant-facing ───────────────────────────────────────────────────────
 
     /**

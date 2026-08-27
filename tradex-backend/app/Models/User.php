@@ -115,6 +115,17 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
+    public function followedStores(): BelongsToMany
+    {
+        return $this->belongsToMany(Store::class, 'store_follows')
+            ->withTimestamps();
+    }
+
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(UserDeviceToken::class);
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------
