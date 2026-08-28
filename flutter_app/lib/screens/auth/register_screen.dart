@@ -4,7 +4,6 @@ import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
 import 'package:ai_saas/screens/auth/complete_registration_merchant_screen.dart';
 import 'package:ai_saas/screens/auth/login_screen.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
-import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -150,17 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          if (state.isGoogle) {
-            // Google auth is a login/link flow. The server is authoritative
-            // for the role; do not send a Google user through registration
-            // profile completion or infer a merchant role from this screen.
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BnScreen(type: state.user.role),
-              ),
-            );
-          } else if (widget.type == AppType.merchant) {
+          if (widget.type == AppType.merchant) {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -456,38 +445,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           const SizedBox(height: 22),
 
-// DIVIDER
-                          _buildSocialDivider(),
-
-                          const SizedBox(height: 20),
-
-// SOCIAL BUTTONS
-                          Row(
-                            children: [
-                              Expanded(
-                                child: socialButton(
-                                  label: 'Google',
-                                  icon: Icons.g_mobiledata_rounded,
-                                  onTap: isLoading
-                                      ? null
-                                      : () => context
-                                          .read<AuthBloc>()
-                                          .add(const AuthGoogleLoginRequested()),
-                                  loading: isLoading,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 12,
-                              ),
-                              Expanded(
-                                child: socialButton(
-                                  label: 'Apple',
-                                  icon: Icons.apple_rounded,
-                                ),
-                              ),
-                            ],
-                          ),
-
                           const SizedBox(height: 25),
 
 // LOGIN
@@ -559,88 +516,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildSocialDivider() {
-    return Row(
-      children: [
-        const Expanded(
-          child: Divider(
-            thickness: 1,
-            color: borderColor,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-          ),
-          child: Text(
-            'أو التسجيل عبر',
-            textDirection: TextDirection.rtl,
-            style: GoogleFonts.ibmPlexSans(
-              color: Colors.black38,
-              fontSize: 11,
-            ),
-          ),
-        ),
-        const Expanded(
-          child: Divider(
-            thickness: 1,
-            color: borderColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget socialButton({
-    required String label,
-    required IconData icon,
-    VoidCallback? onTap,
-    bool loading = false,
-  }) {
-    return SizedBox(
-      height: 50,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: borderColor,
-          ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: loading
-              ? null
-              : onTap ??
-                  () => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('التسجيل عبر $label غير متاح حالياً.'),
-                        ),
-                      ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (loading && label == 'Google')
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
-                Icon(icon, size: 22, color: Colors.black87),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.ibmPlexSans(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

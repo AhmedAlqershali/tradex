@@ -53,7 +53,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('/merchant', [AuthController::class, 'registerMerchant'])->name('merchant');
             });
             Route::post('/login', [AuthController::class, 'login'])->name('login');
-            Route::post('/google', [AuthController::class, 'google'])->name('google');
 
             // ── Password reset ────────────────────────────────────────────────
             Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])->name('password.forgot');

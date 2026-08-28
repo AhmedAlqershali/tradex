@@ -264,34 +264,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: isLoading ? null : () => _handleLogin(context),
                       ),
 
-                      SizedBox(height: 20.h),
-                      _buildDivider(),
-                      SizedBox(height: 20.h),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: socialButton(
-                              label: 'Google',
-                              icon: Icons.g_mobiledata_rounded,
-                              onTap: isLoading
-                                  ? null
-                                  : () => context
-                                      .read<AuthBloc>()
-                                      .add(const AuthGoogleLoginRequested()),
-                              loading: isLoading,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: socialButton(
-                              label: 'Apple',
-                              icon: Icons.apple_rounded,
-                            ),
-                          ),
-                        ],
-                      ),
-
                       SizedBox(height: 24.h),
                       Center(child: _buildFooter(primaryColor)),
                       SizedBox(height: 16.h),
@@ -303,21 +275,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        const Expanded(child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: Text('أو المتابعة عبر',
-              style: GoogleFonts.ibmPlexSans(
-                  color: Colors.black38, fontSize: 12.sp)),
-        ),
-        const Expanded(child: Divider(thickness: 1, color: Color(0xFFEFEFEF))),
-      ],
     );
   }
 
@@ -344,51 +301,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget socialButton({
-    required String label,
-    required IconData icon,
-    VoidCallback? onTap,
-    bool loading = false,
-  }) {
-    return Container(
-      height: 50.h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: const Color(0xFFEFEFEF)),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14.r),
-        onTap: loading
-            ? null
-            : onTap ??
-                () => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'تسجيل الدخول عبر $label غير متاح حالياً.',
-                        ),
-                      ),
-                    ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (loading && label == 'Google')
-              SizedBox(
-                width: 20.sp,
-                height: 20.sp,
-                child: const CircularProgressIndicator(strokeWidth: 2),
-              )
-            else
-              Icon(icon, size: 24.sp, color: Colors.black87),
-            SizedBox(width: 6.w),
-            Text(label,
-                style: GoogleFonts.ibmPlexSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                    color: Colors.black87)),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Contracts\Services\AuthServiceInterface;
 use App\Http\Requests\Auth\ClientRegisterRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
-use App\Http\Requests\Auth\GoogleAuthRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\MerchantRegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
-use App\Exceptions\GoogleAuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -70,25 +68,6 @@ class AuthController extends BaseApiController
             return $this->success($result, 'Login successful.');
         } catch (ValidationException $e) {
             return $this->validationError($e->errors(), 'Invalid credentials.');
-        }
-    }
-
-    /**
-     * POST /api/v1/auth/google
-     */
-    public function google(GoogleAuthRequest $request): JsonResponse
-    {
-        try {
-            $result = $this->authService->loginWithGoogle(
-                credential: $request->credential,
-                deviceName: $request->input('device_name', 'flutter_app'),
-            );
-
-            return $this->success($result, 'Login successful.');
-        } catch (GoogleAuthenticationException $e) {
-            return $this->error($e->getMessage(), $e->statusCode);
-        } catch (ValidationException $e) {
-            return $this->validationError($e->errors(), 'Google authentication failed.');
         }
     }
 

@@ -20,20 +20,12 @@ class AuthLoading extends AuthState {
 }
 
 class AuthAuthenticated extends AuthState {
-  const AuthAuthenticated({required this.user, this.isGoogle = false});
+  const AuthAuthenticated({required this.user});
 
   final AppUser user;
-  final bool isGoogle;
 
   @override
-  List<Object?> get props => [user, isGoogle];
-}
-
-class AuthGoogleSignInCancelled extends AuthState {
-  const AuthGoogleSignInCancelled();
-
-  @override
-  List<Object?> get props => [];
+  List<Object?> get props => [user];
 }
 
 class AuthUnauthenticated extends AuthState {

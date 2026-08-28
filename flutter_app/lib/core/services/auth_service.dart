@@ -46,23 +46,6 @@ class AuthService {
     return _parseAuthResult(response.data!);
   }
 
-  /// POST /auth/google
-  ///
-  /// [credential] is the Google OpenID Connect ID token. Laravel verifies
-  /// this token and returns the same Sanctum auth envelope as password login.
-  Future<AuthResult> loginWithGoogle({
-    required String credential,
-  }) async {
-    final response = await ApiClient.instance.post<Map<String, dynamic>>(
-      ApiConstants.googleLogin,
-      data: {
-        'credential': credential,
-        'device_name': 'flutter_app',
-      },
-    );
-    return _parseAuthResult(response.data!);
-  }
-
   // ── Register ──────────────────────────────────────────────────────────────────
   // Backend has two separate endpoints — client registration creates a user
   // only; merchant registration creates a user AND a store atomically, so it
