@@ -70,7 +70,7 @@ class AiController extends BaseApiController
     /**
      * Generate a marketing caption, hashtags, and tagline.
      *
-     * Body: { context: string, language?: string }
+        * Body: { context: string, language?: string, purpose?: instagram|hashtags }
      */
     public function marketingContent(MarketingContentRequest $request): JsonResponse
     {
@@ -79,6 +79,7 @@ class AiController extends BaseApiController
                 'user'     => $request->user(),
                 'context'  => $request->input('context'),
                 'language' => $request->input('language', 'English'),
+                'purpose'  => $request->input('purpose', 'instagram'),
             ]);
 
             return $this->success($result, 'Marketing content generated successfully.');

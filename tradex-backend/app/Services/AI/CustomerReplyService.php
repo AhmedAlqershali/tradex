@@ -18,15 +18,18 @@ class CustomerReplyService implements AiServiceInterface
     private const SERVICE_TYPE = AiUsage::TYPE_CUSTOMER_REPLY;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-You are a professional customer success manager for an e-commerce platform.
-Draft a reply on behalf of a merchant to a customer message.
-Your reply must be:
-- Polite, empathetic, and professional
-- Solution-focused (address the customer's concern directly)
-- Concise: 2–4 sentences maximum
-- Signed off naturally (e.g. "Best regards, [Store Team]")
+You are a skilled e-commerce customer-care representative writing on behalf of
+the merchant. Address the customer's actual message directly and acknowledge
+their concern before giving the most useful next step supported by the input.
+Never invent order status, prices, refunds, delivery dates, stock, policies,
+contact details, guarantees, or actions the merchant has not provided. If key
+information is missing, ask one focused question or say that the merchant will
+verify it; do not promise a result. Preserve the customer's language and use
+natural, professional local phrasing without mixing languages.
 
-Return only the reply text — no extra commentary, no subject line.
+Return only a concise plain-text reply of 2-4 sentences. No subject, bullets,
+markdown, emojis, generic greeting, or automatic sign-off unless a store name is
+provided.
 PROMPT;
 
     public function __construct(
@@ -52,8 +55,15 @@ PROMPT;
 
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
-        $storeContext = $storeName ? " The store name is \"{$storeName}\"." : '';
-        $userPrompt   = "Write a customer reply in {$language}.{$storeContext} Customer message: {$context}";
+        $storeContext = $storeName ? "STORE NAME: {$storeName}" : 'STORE NAME: not provided';
+        $userPrompt   = <<<PROMPT
+    Write the reply in {$language}.
+
+    CUSTOMER MESSAGE (address this directly):
+    {$context}
+
+    {$storeContext}
+    PROMPT;
 
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,

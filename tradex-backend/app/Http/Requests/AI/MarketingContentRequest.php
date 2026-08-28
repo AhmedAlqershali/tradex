@@ -16,6 +16,7 @@ class MarketingContentRequest extends FormRequest
         return [
             'context'  => ['required', 'string', 'min:5', 'max:500'],
             'language' => ['nullable', 'string', 'max:50'],
+            'purpose'  => ['nullable', 'string', 'in:instagram,hashtags'],
         ];
     }
 

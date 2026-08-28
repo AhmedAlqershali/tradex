@@ -11,9 +11,9 @@ import 'ai_result_model.dart';
 // Singleton controller for all AI generation features. Calls the real
 // backend AI endpoints:
 //   POST /ai/product-description  { context, language }
-//   POST /ai/marketing-content    { context, language }  — covers both the
-//                                    Instagram-post and hashtags tools; the
-//                                    backend returns one formatted block
+//   POST /ai/marketing-content    { context, language, purpose } — covers
+//                                    both the Instagram-post and hashtags tools;
+//                                    the backend returns one formatted block
 //                                    ("Caption: ...\nHashtags: ...\n
 //                                    Tagline: ..."), parsed client-side.
 //   POST /ai/customer-reply       { context, language, store_name }
@@ -92,7 +92,11 @@ class AiController {
       prompt: context,
       request: () async {
         if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
-        return _extractCaption(await _post(ApiConstants.aiMarketingContent, context));
+        return _extractCaption(await _post(
+          ApiConstants.aiMarketingContent,
+          context,
+          purpose: 'instagram',
+        ));
       },
     );
   }
@@ -111,7 +115,11 @@ class AiController {
       prompt: context,
       request: () async {
         if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
-        return _extractHashtags(await _post(ApiConstants.aiMarketingContent, context));
+        return _extractHashtags(await _post(
+          ApiConstants.aiMarketingContent,
+          context,
+          purpose: 'hashtags',
+        ));
       },
     );
   }
@@ -193,10 +201,11 @@ class AiController {
     String path,
     String context, {
     String? storeName,
+    String? purpose,
   }) async {
     if (kDebugMode) debugPrint('[AI_RUNTIME] _post entered path=$path');
     final trimmed = context.trim();
-    final safeContext = trimmed.length >= 5 ? trimmed : '$trimmed منتج مميز';
+    final safeContext = trimmed;
     var stage = 'before ApiClient.post';
     try {
       if (kDebugMode) {
@@ -208,6 +217,7 @@ class AiController {
         data: {
           'context': safeContext,
           'language': 'Arabic',
+          if (purpose != null) 'purpose': purpose,
           if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
         },
       );

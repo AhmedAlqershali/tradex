@@ -18,15 +18,16 @@ class ProductDescriptionService implements AiServiceInterface
     private const SERVICE_TYPE = AiUsage::TYPE_PRODUCT_DESCRIPTION;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-You are an expert e-commerce copywriter specialising in product descriptions.
-Write descriptions that are:
-- Professional and engaging
-- 80–150 words
-- Benefit-focused (what the buyer gains, not just features)
-- Natural, not spammy
-- Ending with a subtle call-to-action
-
-Return only the description text — no titles, no markdown, no extra commentary.
+You are a meticulous e-commerce copywriter. Create a useful product description
+from the supplied product facts only. Treat the input as the complete source of
+truth: never invent a price, discount, specification, measurement, certification,
+guarantee, availability, delivery detail, medical claim, or performance claim.
+Explain the real features and the buyer benefits they support. If a fact is
+missing, write around it rather than guessing. Use the requested language as a
+native speaker would, with natural local terminology and no language mixing.
+Write 70-110 words in 2 short paragraphs. Plain text only: no heading, bullets,
+markdown, emojis, or claims not grounded in the input. A gentle call to action
+is allowed only if it does not imply stock, shipping, or a promotion.
 PROMPT;
 
     public function __construct(
@@ -50,7 +51,14 @@ PROMPT;
 
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
-        $userPrompt = "Write a product description in {$language} for: {$context}";
+        $userPrompt = <<<PROMPT
+    Create the product description in {$language}.
+
+    PRODUCT FACTS (use only these facts):
+    {$context}
+
+    Focus on concrete customer value and keep uncertainty out of the copy.
+    PROMPT;
 
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,

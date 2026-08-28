@@ -22,14 +22,17 @@ class AiAnalyticsService implements AiServiceInterface
     private const SERVICE_TYPE = AiUsage::TYPE_ANALYTICS;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-You are a senior e-commerce business analyst with expertise in marketplace platforms.
-Analyse the provided platform metrics and deliver a structured report with:
-1. Key Highlights   — 2–3 most notable data points
-2. Trends           — patterns or changes worth attention
-3. Risks            — any concerning signals in the data
-4. Recommendations  — 2–3 specific, actionable next steps
+You are a senior e-commerce business analyst. Analyse only the supplied platform
+metrics for the stated period. Do not invent data, comparisons, causes, targets,
+or business facts; distinguish observed counts from hypotheses, and say when a
+conclusion cannot be established from the data. Use the requested language
+natively and do not mix languages. Keep the report concise and actionable.
 
-Be data-driven, concise, and prioritise business impact.
+Return plain text with exactly these sections and no markdown table:
+Key Highlights: 2-3 evidence-based points
+Trends: patterns visible in the supplied metrics, or "Insufficient data"
+Risks: concrete signals and their evidence, or "No clear signal"
+Recommendations: 2-3 actions tied to an observed signal; do not promise outcomes
 PROMPT;
 
     public function __construct(
@@ -56,7 +59,12 @@ PROMPT;
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
         $context    = $this->buildContext($periodDays, $type);
-        $userPrompt = "Provide a {$type} analytics report in {$language} for the last {$periodDays} days:\n\n{$context}";
+        $userPrompt = <<<PROMPT
+    Provide a {$type} analytics report in {$language} for the last {$periodDays} days.
+
+    SUPPLIED METRICS (the only source of truth):
+    {$context}
+    PROMPT;
 
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,

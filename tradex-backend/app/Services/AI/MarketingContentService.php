@@ -15,19 +15,30 @@ class MarketingContentService implements AiServiceInterface
 {
     private const SERVICE_TYPE = AiUsage::TYPE_MARKETING_CONTENT;
 
-    private const SYSTEM_PROMPT = <<<'PROMPT'
-You are an expert social media marketer and copywriter for e-commerce brands.
-Your output must include:
-1. A short, punchy marketing caption (1–2 sentences, high energy)
-2. 3–5 relevant hashtags
-3. A one-sentence promotional tagline
+    private const INSTAGRAM_PROMPT = <<<'PROMPT'
+You are an experienced social media editor for e-commerce brands. Create a
+publish-ready Instagram package from the supplied facts only. Open with a
+specific, natural hook, communicate the product's real value, and end with a
+clear but non-pushy call to action. Never invent prices, discounts, features,
+results, availability, shipping, policies, or guarantees. Use the requested
+language natively and do not mix languages. Avoid generic filler, hype cliches,
+and excessive emojis; use no emoji unless the facts and tone clearly support it.
 
-Format your response exactly as:
-Caption: <caption text>
-Hashtags: <hashtag1> <hashtag2> ...
-Tagline: <tagline text>
+Return exactly three plain-text lines and no markdown:
+Caption: one or two engaging sentences, 35-70 words
+Hashtags: 4-6 distinct, relevant hashtags based on the product/category/audience
+Tagline: one memorable sentence, without a fabricated offer
+PROMPT;
 
-Keep it concise, brand-appropriate, and scroll-stopping.
+    private const HASHTAGS_PROMPT = <<<'PROMPT'
+You are a precise social media strategist. Generate hashtags from the supplied
+product and category facts only. Return exactly one plain-text line beginning
+with "Hashtags:" followed by 5-8 distinct hashtags. Mix specific product,
+category, audience, and relevant context tags when supported by the input.
+Exclude unrelated or broad filler tags, repeated ideas, campaign claims, prices,
+discounts, locations, and unsupported audience or product attributes. Use the
+requested language natively; do not add a caption, tagline, explanation, emojis,
+or markdown. Do not invent facts to fill the list.
 PROMPT;
 
     public function __construct(
@@ -48,13 +59,22 @@ PROMPT;
         $user     = $payload['user'];
         $context  = $payload['context'];
         $language = $payload['language'] ?? 'English';
+        $purpose  = $payload['purpose'] ?? 'instagram';
 
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
-        $userPrompt = "Create marketing content in {$language} for: {$context}";
+        $systemPrompt = $purpose === 'hashtags'
+            ? self::HASHTAGS_PROMPT
+            : self::INSTAGRAM_PROMPT;
+        $userPrompt = <<<PROMPT
+    Generate the {$purpose} content in {$language}.
+
+    PRODUCT OR CAMPAIGN FACTS (use only these facts):
+    {$context}
+    PROMPT;
 
         $response = $this->provider->complete(
-            self::SYSTEM_PROMPT,
+            $systemPrompt,
             $userPrompt,
             ['max_tokens' => 400, 'temperature' => 0.80]
         );
@@ -66,7 +86,7 @@ PROMPT;
         $this->usageService->recordRequest(
             $user,
             self::SERVICE_TYPE,
-            ['context' => $context, 'language' => $language],
+            ['context' => $context, 'language' => $language, 'purpose' => $purpose],
             $response['result'],
             $tokensUsed,
             1,
