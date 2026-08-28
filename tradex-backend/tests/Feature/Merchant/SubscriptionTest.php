@@ -88,7 +88,8 @@ class SubscriptionTest extends TestCase
         ['token' => $token] = $this->actingAsMerchant();
         Plan::factory()->active()->create([
             'display_name' => 'Pro Plan',
-            'monthly_price' => 19.99,
+            'monthly_price' => 5.00,
+            'yearly_price' => 60.00,
         ]);
         Plan::factory()->create([
             'display_name' => 'Retired Plan',
@@ -177,7 +178,7 @@ class SubscriptionTest extends TestCase
             'full_name'          => 'Ahmed Ali',
             'phone'              => '0501234567',
             'payment_method'     => 'bank_transfer',
-            'payment_proof_image' => UploadedFile::fake()->image('proof.jpg'),
+            'payment_proof_image' => UploadedFile::fake()->image('proof.png'),
         ], $this->headers($token));
 
         $response->assertStatus(201)
@@ -209,7 +210,7 @@ class SubscriptionTest extends TestCase
             'full_name'          => 'Ahmed Ali',
             'phone'              => '0501234567',
             'payment_method'     => 'bank_transfer',
-            'payment_proof_image' => UploadedFile::fake()->image('proof.jpg'),
+            'payment_proof_image' => UploadedFile::fake()->image('proof.png'),
         ], $this->headers($token))
             ->assertStatus(422);
     }

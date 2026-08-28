@@ -12,7 +12,7 @@ class SubscriptionResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'plan'          => $this->whenLoaded('plan', fn () => new PlanResource($this->plan)),
+            'plan'          => $this->when($this->isTrial(), null, fn () => $this->whenLoaded('plan', fn () => new PlanResource($this->plan))),
             'billing_cycle' => $this->billing_cycle,
             'type'          => $this->type,
             'is_trial'      => $this->isTrial(),

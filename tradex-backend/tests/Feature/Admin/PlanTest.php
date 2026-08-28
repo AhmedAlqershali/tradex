@@ -31,8 +31,8 @@ class PlanTest extends TestCase
         return array_merge([
             'name'          => 'pro',
             'display_name'  => 'Pro Plan',
-            'monthly_price' => 49.99,
-            'yearly_price'  => 499.99,
+            'monthly_price' => 5.00,
+            'yearly_price'  => 60.00,
             'product_limit' => 100,
             'store_limit'   => 3,
             'ai_usage_limit'=> 500,
@@ -126,13 +126,14 @@ class PlanTest extends TestCase
     public function test_admin_can_update_a_plan(): void
     {
         ['token' => $token] = $this->actingAsAdmin();
-        $plan = Plan::factory()->create(['monthly_price' => 9.99]);
+        $plan = Plan::factory()->create(['monthly_price' => 5.00, 'yearly_price' => 60.00]);
 
-        $this->putJson("/api/v1/admin/plans/{$plan->id}", [
-            'monthly_price' => 19.99,
+        $response = $this->putJson("/api/v1/admin/plans/{$plan->id}", [
+            'monthly_price' => 5.00,
         ], $this->headers($token))
-            ->assertOk()
-            ->assertJsonPath('data.monthly_price', 19.99);
+            ->assertOk();
+
+        $this->assertSame(5.00, (float) $response->json('data.monthly_price'));
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────

@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
+    public const MONTHLY_PRICE = 5.00;
+    public const YEARLY_PRICE = 60.00;
+
     /** @use HasFactory<PlanFactory> */
     use HasFactory;
 

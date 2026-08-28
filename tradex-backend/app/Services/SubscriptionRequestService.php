@@ -147,7 +147,11 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
     {
         $plan = $this->planService->findById($data['plan_id']);
 
-        if (! $plan || $plan->status !== 'active') {
+        if (
+            ! $plan
+            || $plan->status !== 'active'
+            || in_array($plan->name, ['free', 'free_trial'], true)
+        ) {
             throw SubscriptionException::planInactive($plan->display_name ?? 'selected');
         }
 

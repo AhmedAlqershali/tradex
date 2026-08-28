@@ -63,7 +63,8 @@ class SubscriptionLifecycleTest extends TestCase
                 ->assertJsonPath('data.is_entitled', false);
 
             $paidPlan = Plan::factory()->active()->create([
-                'monthly_price' => 29.99,
+                'monthly_price' => 5.00,
+                'yearly_price' => 60.00,
             ]);
 
             $renewal = $this->postJson('/api/v1/merchant/subscription-requests', [
@@ -72,7 +73,7 @@ class SubscriptionLifecycleTest extends TestCase
                 'full_name'          => 'Lifecycle Merchant',
                 'phone'              => '0509876543',
                 'payment_method'     => 'bank_transfer',
-                'payment_proof_image' => UploadedFile::fake()->image('proof.jpg'),
+                'payment_proof_image' => UploadedFile::fake()->image('proof.png'),
             ], $merchantHeaders)
                 ->assertCreated()
                 ->assertJsonPath('data.status', 'pending');

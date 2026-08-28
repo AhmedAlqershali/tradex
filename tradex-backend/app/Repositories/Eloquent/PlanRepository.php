@@ -43,7 +43,12 @@ class PlanRepository implements PlanRepositoryInterface
      */
     public function listActive(): Collection
     {
-        return Plan::active()->orderBy('monthly_price')->get();
+        return Plan::active()
+            ->whereNotIn('name', ['free', 'free_trial'])
+            ->where('monthly_price', Plan::MONTHLY_PRICE)
+            ->where('yearly_price', Plan::YEARLY_PRICE)
+            ->orderBy('monthly_price')
+            ->get();
     }
 
     /**
