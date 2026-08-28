@@ -32,6 +32,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // API route matches, which would otherwise bypass the `api` group stack.
         $middleware->prepend(\App\Http\Middleware\AddSecurityHeaders::class);
 
+        // Provide $errors variable in Blade views used by web routes (e.g., login form).
+        // This middleware shares validation errors and old input from session to views.
+        $middleware->web(append: [
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        ]);
+
         // Security headers on every API response (also in api group for coverage)
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
