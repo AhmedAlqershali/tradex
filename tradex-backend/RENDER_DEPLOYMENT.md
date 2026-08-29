@@ -26,9 +26,11 @@ The Docker image uses `docker/router.php` as the PHP built-in server router so
 existing files under `public/` (including Vite assets) are served directly.
 
 The entrypoint creates writable Laravel directories, runs `storage:link`, applies
-pending schema-only migrations with `php artisan migrate --force`, and runs
-`php artisan optimize` before starting that one Laravel web server with `public`
-as its document root. It does not run seeders or create users.
+pending schema-only migrations with `php artisan migrate --force`, runs the
+idempotent paid-plan seeder with
+`php artisan db:seed --class=Database\\Seeders\\PlanSeeder --no-interaction`,
+and runs `php artisan optimize` before starting that one Laravel web server with
+`public` as its document root. It does not create users.
 
 The Blueprint mounts the `tradex-storage` Persistent Disk at
 `/var/www/html/storage`. This keeps files on Laravel's `public` disk under
@@ -102,8 +104,9 @@ PostgreSQL connection definition, and the Docker image now includes the
    retain it; do not point PostgreSQL at the SQLite file.
 4. The container entrypoint runs `php artisan migrate --force` against the
    configured PostgreSQL database before serving requests.
-5. Seed only through an explicit, reviewed data migration or import. The
-   deployment configuration does not run seeders.
+5. The container entrypoint runs the reviewed, idempotent `PlanSeeder` after
+   migrations. Other seeders still require an explicit, reviewed data migration
+   or import.
 
 The sessions migration is schema-only and is applied by the container entrypoint.
 It supports the configured database-backed Admin Dashboard sessions.
