@@ -1,11 +1,25 @@
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
+import 'package:ai_saas/core/api/app_config.dart';
 
 class CategoryOption {
-  const CategoryOption({required this.id, required this.name});
+  const CategoryOption({required this.id, required this.name, this.imageUrl});
 
   final String id;
   final String name;
+  final String? imageUrl;
+
+  factory CategoryOption.fromServerJson(Map<String, dynamic> json) {
+    final rawImage = json['image'];
+
+    return CategoryOption(
+      id: json['id'].toString(),
+      name: (json['name'] ?? json['label'] ?? json['value'] ?? '').toString(),
+      imageUrl: rawImage is String && rawImage.trim().isNotEmpty
+          ? AppConfig.resolveMediaUrl(rawImage)
+          : null,
+    );
+  }
 }
 
 // ─── CategoryService ──────────────────────────────────────────────────────────
@@ -53,13 +67,9 @@ class CategoryService {
 
     return data
         .whereType<Map>()
-        .map((item) {
-          return CategoryOption(
-            id: item['id'].toString(),
-            name: (item['name'] ?? item['label'] ?? item['value'] ?? '')
-                .toString(),
-          );
-        })
+        .map((item) => CategoryOption.fromServerJson(
+              Map<String, dynamic>.from(item),
+            ))
         .where((option) => option.name.isNotEmpty)
         .toList();
   }

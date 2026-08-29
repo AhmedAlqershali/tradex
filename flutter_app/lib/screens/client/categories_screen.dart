@@ -242,10 +242,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   color: Color(0xFFEDE7F6),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
-                                  _iconFor(name),
-                                  size: 30.sp,
-                                  color: const Color(0xFF5E35B1),
+                                child: CategoryImage(
+                                  imageUrl: option.imageUrl,
+                                  fallbackIcon: _iconFor(name),
                                 ),
                               ),
                               SizedBox(height: 15.h),
@@ -335,6 +334,38 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class CategoryImage extends StatelessWidget {
+  const CategoryImage({
+    super.key,
+    required this.imageUrl,
+    required this.fallbackIcon,
+  });
+
+  final String? imageUrl;
+  final IconData fallbackIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Icon(
+      fallbackIcon,
+      size: 30.sp,
+      color: const Color(0xFF5E35B1),
+    );
+
+    if (imageUrl == null || imageUrl!.isEmpty) return fallback;
+
+    return ClipOval(
+      child: Image.network(
+        imageUrl!,
+        fit: BoxFit.cover,
+        width: 60.r,
+        height: 60.r,
+        errorBuilder: (_, __, ___) => fallback,
       ),
     );
   }
