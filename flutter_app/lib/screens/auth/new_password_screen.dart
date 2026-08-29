@@ -13,14 +13,17 @@ class NewPasswordScreen extends StatefulWidget {
   /// Optional when navigating from the profile screen (already logged in).
   final String email;
 
-  /// The verified OTP code from [CodeRegister].
-  /// Optional when navigating from the profile screen (already logged in).
+  /// The reset token from the emailed password-reset link.
+  final String token;
+
+  /// Backward-compatible OTP field used by older flows.
   final String otp;
 
   const NewPasswordScreen({
     super.key,
     this.type = AppType.client,
     this.email = '',
+    this.token = '',
     this.otp = '',
   });
 
@@ -44,8 +47,9 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   }
 
   Future<void> _handleResetPassword() async {
-    final newPassword    = _newPasswordCtrl.text;
+    final newPassword = _newPasswordCtrl.text;
     final confirmPassword = _confirmPasswordCtrl.text;
+    final resetToken = widget.token.isNotEmpty ? widget.token : widget.otp;
 
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
       _showError('يرجى إدخال كلمة المرور الجديدة وتأكيدها.');
@@ -59,12 +63,16 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
       _showError('كلمتا المرور غير متطابقتين.');
       return;
     }
+    if (widget.email.isEmpty || resetToken.isEmpty) {
+      _showError('رابط إعادة التعيين غير صالح أو منتهي الصلاحية.');
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {
       await UserController.instance.resetPassword(
         email: widget.email,
-        otp: widget.otp,
+        otp: resetToken,
         newPassword: newPassword,
       );
       if (!mounted) return;

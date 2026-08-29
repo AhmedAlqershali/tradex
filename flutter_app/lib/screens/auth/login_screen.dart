@@ -18,14 +18,17 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
   bool _rememberMe = false;
+  bool _isForgotPasswordSubmitting = false;
 
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _forgotPasswordEmailCtrl = TextEditingController();
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _forgotPasswordEmailCtrl.dispose();
     super.dispose();
   }
 
@@ -67,6 +70,16 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => BnScreen(type: type)),
+          );
+        } else if (state is AuthOtpSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، فقد تم إرسال رابط إعادة تعيين كلمة المرور.',
+                style: GoogleFonts.ibmPlexSans(),
+              ),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is AuthFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -235,15 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                           GestureDetector(
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'استعادة كلمة المرور تتم عبر رابط البريد الإلكتروني. هذه الواجهة غير متاحة حالياً.',
-                                  ),
-                                ),
-                              );
-                            },
+                            onTap: _showForgotPasswordDialog,
                             child: Text(
                               'نسيت كلمة المرور؟',
                               style: GoogleFonts.ibmPlexSans(
@@ -273,6 +278,113 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(
+            'استعادة كلمة المرور',
+            style: GoogleFonts.ibmPlexSans(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة تعيين كلمة المرور.',
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp,
+                    color: const Color(0xff555555),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                TextField(
+                  controller: _forgotPasswordEmailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  style: GoogleFonts.ibmPlexSans(fontSize: 14.sp),
+                  decoration: InputDecoration(
+                    hintText: 'example@email.com',
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      size: 18.sp,
+                      color: const Color(0xffAAAAAA),
+                    ),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'إلغاء',
+                style: GoogleFonts.ibmPlexSans(),
+              ),
+            ),
+            FilledButton(
+              onPressed: _isForgotPasswordSubmitting ? null : () {
+                final email = _forgotPasswordEmailCtrl.text.trim();
+                if (email.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'يرجى إدخال البريد الإلكتروني.',
+                        style: GoogleFonts.ibmPlexSans(),
+                      ),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
+                }
+                if (!emailRegExp.hasMatch(email)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'يرجى إدخال بريد إلكتروني صحيح.',
+                        style: GoogleFonts.ibmPlexSans(),
+                      ),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                  return;
+                }
+
+                setState(() => _isForgotPasswordSubmitting = true);
+                _forgotPasswordEmailCtrl.clear();
+                context.read<AuthBloc>().add(
+                  AuthForgotPasswordRequested(email: email),
+                );
+
+                Future.microtask(() {
+                  if (!mounted) return;
+                  Navigator.of(dialogContext).pop();
+                });
+              },
+              child: _isForgotPasswordSubmitting
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      'إرسال رابط إعادة التعيين',
+                      style: GoogleFonts.ibmPlexSans(),
+                    ),
+            ),
+          ],
         );
       },
     );

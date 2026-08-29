@@ -32,5 +32,41 @@ class MainActivity : FlutterActivity() {
                 result.success(false)
             }
         }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "ps.tradex.app/deeplink",
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getInitialLink" -> result.success(intent?.dataString)
+                else -> result.notImplemented()
+            }
+        }
+
+        val initialLink = intent?.dataString
+        if (!initialLink.isNullOrBlank()) {
+            handleDeepLink(initialLink)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        handleDeepLink(intent?.dataString)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleDeepLink(intent.dataString)
+    }
+
+    private fun handleDeepLink(data: String?) {
+        if (data.isNullOrBlank()) return
+
+        val channel = MethodChannel(
+            flutterEngine?.dartExecutor?.binaryMessenger ?: return,
+            "ps.tradex.app/deeplink",
+        )
+        channel.invokeMethod("onLink", data)
     }
 }

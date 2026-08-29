@@ -3,6 +3,7 @@ import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/core/services/fcm_service.dart';
+import 'package:ai_saas/core/services/password_reset_link_service.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/splash_screen.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
@@ -16,6 +17,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLocaleController.instance.load();
   await FcmService.instance.initialize();
+  await DeepLinkService.instance.initialize();
 
   // When a 401 cannot be recovered via token refresh, notify UserController so
   // it can clear user state. Done via callback to avoid a circular import
