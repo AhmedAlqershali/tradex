@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/services/auth_service.dart';
 
 void main() {
   test('network logger never logs request or response bodies', () {
@@ -171,5 +172,50 @@ void main() {
     expect(server, isA<ServerException>());
     expect((server as ServerException).statusCode, 500);
     expect(network, isA<NetworkException>());
+  });
+
+  test('maps unverified-email validation as a typed validation failure', () {
+    final exception = ApiClient.mapDioExceptionForTesting(
+      DioException(
+        requestOptions: RequestOptions(path: '/auth/login'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          statusCode: 422,
+          data: <String, dynamic>{
+            'success': false,
+            'message': 'Invalid credentials.',
+            'errors': <String, dynamic>{
+              'email': <String>['يرجى تأكيد بريدك الإلكتروني أولًا.'],
+            },
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      ),
+    );
+
+    expect(exception, isA<ValidationException>());
+    expect(
+      exception.message,
+      'Invalid credentials.\nemail: يرجى تأكيد بريدك الإلكتروني أولًا.',
+    );
+  });
+
+  test('accepts registration responses without a token', () {
+    final result = AuthService.parseAuthResultForTesting({
+      'data': {
+        'user': {
+          'id': 1,
+          'name': 'Test User',
+          'email': 'user@example.com',
+          'phone': '0501234567',
+          'role': 'client',
+          'avatar': null,
+          'created_at': '2025-01-01T00:00:00.000Z',
+        },
+      },
+    });
+
+    expect(result.user.email, 'user@example.com');
+    expect(result.tokens.accessToken, isEmpty);
   });
 }

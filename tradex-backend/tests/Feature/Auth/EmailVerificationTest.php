@@ -116,6 +116,47 @@ class EmailVerificationTest extends TestCase
     // POST /api/v1/auth/email/resend
     // =========================================================================
 
+    public function test_verified_user_can_login(): void
+    {
+        $user = User::factory()->create([
+            'email'    => 'verified-login@example.com',
+            'password' => bcrypt('Password123!'),
+            'status'   => 'active',
+            'role'     => 'client',
+            'email_verified_at' => now(),
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email'    => 'verified-login@example.com',
+            'password' => 'Password123!',
+        ])->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.user.email', $user->email)
+            ->assertJsonPath('data.token', fn ($token) => ! empty($token));
+    }
+
+    public function test_unverified_user_cannot_login_and_no_token_is_issued(): void
+    {
+        User::factory()->create([
+            'email'    => 'unverified-login@example.com',
+            'password' => bcrypt('Password123!'),
+            'status'   => 'active',
+            'role'     => 'client',
+            'email_verified_at' => null,
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email'    => 'unverified-login@example.com',
+            'password' => 'Password123!',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('errors.email.0', 'يرجى تأكيد بريدك الإلكتروني أولًا.')
+            ->assertJsonMissingPath('data.token');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
     public function test_unverified_user_can_request_resend(): void
     {
         Notification::fake();

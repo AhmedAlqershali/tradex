@@ -178,10 +178,12 @@ class AuthService {
     AvatarDiagnostics.log('login response avatar', userJson['avatar']);
 
     final rawToken = body['token'];
-    if (rawToken == null || rawToken.toString().isEmpty) {
-      throw const UnknownException('Unexpected auth response: missing token.');
-    }
+    final tokenValue = rawToken == null ? '' : rawToken.toString();
 
+    // Registration intentionally does not issue an authenticated session until
+    // the user verifies their email. The client must accept a success payload
+    // without a token, but still persist a real token when the login endpoint
+    // returns one.
     final storeJson = body['store'];
     if (storeJson is Map) {
       userJson['store_id'] = storeJson['id']?.toString();
@@ -191,7 +193,7 @@ class AuthService {
     return AuthResult(
       user: AppUser.fromServerJson(userJson),
       tokens: AuthTokens(
-        accessToken: rawToken.toString(),
+        accessToken: tokenValue,
       ),
     );
   }

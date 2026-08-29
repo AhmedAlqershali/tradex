@@ -26,16 +26,17 @@ class AuthTest extends TestCase
     {
         Notification::fake();
 
-        $this->postJson('/api/v1/auth/register/client', [
+        $response = $this->postJson('/api/v1/auth/register/client', [
             'name'                  => 'Test Client',
             'email'                 => 'client@example.com',
             'phone'                 => '0501234567',
             'password'              => 'Password123!',
             'password_confirmation' => 'Password123!',
-        ])
-            ->assertStatus(201)
+        ]);
+
+        $response->assertStatus(201)
             ->assertJson(['success' => true])
-            ->assertJsonStructure(['data' => ['token', 'user']]);
+            ->assertJsonMissingPath('data.token');
 
         $this->assertDatabaseHas('users', ['email' => 'client@example.com', 'role' => 'client']);
         Notification::assertNotSentTo(
@@ -46,7 +47,7 @@ class AuthTest extends TestCase
         $this->postJson('/api/v1/auth/login', [
             'email'    => 'client@example.com',
             'password' => 'Password123!',
-        ])->assertOk();
+        ])->assertStatus(422);
     }
 
     public function test_registration_response_has_a_null_server_avatar_until_upload(): void
@@ -101,6 +102,7 @@ class AuthTest extends TestCase
         ])
             ->assertStatus(201)
             ->assertJson(['success' => true])
+            ->assertJsonMissingPath('data.token')
             ->assertJsonPath('data.user.current_subscription.type', 'trial')
             ->assertJsonPath('data.user.current_subscription.status', 'active')
             ->assertJsonPath('data.user.current_subscription.is_trial', true)
@@ -119,11 +121,6 @@ class AuthTest extends TestCase
             $merchant,
             VerifyEmail::class
         );
-
-        $this->getJson('/api/v1/auth/me', $this->headers($response->json('data.token')))
-            ->assertOk()
-            ->assertJsonPath('data.current_subscription.type', 'trial')
-            ->assertJsonPath('data.current_subscription.is_entitled', true);
     }
 
     public function test_client_and_admin_profiles_do_not_receive_merchant_trial_state(): void
@@ -156,14 +153,34 @@ class AuthTest extends TestCase
             ->assertJson(['success' => false]);
     }
 
+    public function test_client_registration_does_not_issue_authenticated_access_for_unverified_account(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register/client', [
+            'name'                  => 'Register No Token',
+            'email'                 => 'register-no-token@example.com',
+            'phone'                 => '0501234567',
+            'password'              => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonMissingPath('data.token')
+            ->assertJsonPath('data.user.email', 'register-no-token@example.com');
+
+        $this->assertDatabaseHas('users', ['email' => 'register-no-token@example.com']);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
     // ── Login ─────────────────────────────────────────────────────────────────
 
     public function test_user_can_login_with_correct_credentials(): void
     {
         User::factory()->create([
-            'email'    => 'user@example.com',
-            'password' => bcrypt('Password123!'),
-            'role'     => 'client',
+            'email'             => 'user@example.com',
+            'password'          => bcrypt('Password123!'),
+            'role'              => 'client',
+            'email_verified_at' => now(),
         ]);
 
         $this->postJson('/api/v1/auth/login', [
@@ -181,10 +198,11 @@ class AuthTest extends TestCase
         Storage::disk('public')->put('avatars/persisted-avatar.jpg', 'avatar bytes');
 
         User::factory()->create([
-            'email'    => 'avatar@example.com',
-            'password' => bcrypt('Password123!'),
-            'role'     => 'client',
-            'avatar'   => 'avatars/persisted-avatar.jpg',
+            'email'             => 'avatar@example.com',
+            'password'          => bcrypt('Password123!'),
+            'role'              => 'client',
+            'avatar'            => 'avatars/persisted-avatar.jpg',
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->postJson('/api/v1/auth/login', [

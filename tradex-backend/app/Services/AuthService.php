@@ -43,11 +43,8 @@ class AuthService implements AuthServiceInterface
         $user->status = 'active';
         $user->save();
 
-        $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
-
         return [
-            'user'  => $this->userPayload($user),
-            'token' => $token,
+            'user' => $this->userPayload($user),
         ];
     }
 
@@ -84,19 +81,15 @@ class AuthService implements AuthServiceInterface
 
             $this->subscriptionService->startTrial($user);
 
-            $token = $user->createToken($data['device_name'] ?? 'flutter_app')->plainTextToken;
-
             return [
                 'user'  => $user,
                 'store' => $store,
-                'token' => $token,
             ];
         });
 
         return [
             'user'  => $this->userPayload($registration['user']),
             'store' => $this->storePayload($registration['store']),
-            'token' => $registration['token'],
         ];
     }
 
@@ -133,6 +126,12 @@ class AuthService implements AuthServiceInterface
 
             throw ValidationException::withMessages([
                 'email' => [$message],
+            ]);
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => ['يرجى تأكيد بريدك الإلكتروني أولًا.'],
             ]);
         }
 

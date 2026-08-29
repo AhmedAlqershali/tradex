@@ -136,7 +136,9 @@ class UserController {
         email: email,
         password: password,
       );
-      await _storeTokens(result.tokens);
+      if (result.tokens.accessToken.isNotEmpty) {
+        await _storeTokens(result.tokens);
+      }
       currentUserNotifier.value = result.user;
       AvatarDiagnostics.log('currentUserNotifier login', result.user.photoPath);
       await _clearLegacySession();
@@ -182,7 +184,9 @@ class UserController {
               phone: phone,
               password: password,
             );
-      await _storeTokens(result.tokens);
+      if (result.tokens.accessToken.isNotEmpty) {
+        await _storeTokens(result.tokens);
+      }
       currentUserNotifier.value = result.user;
       await _clearLegacySession();
       return result.user;
