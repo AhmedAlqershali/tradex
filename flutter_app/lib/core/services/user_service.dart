@@ -138,6 +138,11 @@ class UserService {
   static AppUser parseProfileResponseForTesting(Map<String, dynamic> raw) =>
       parseProfileResponse(raw);
 
+  /// DELETE /profile
+  Future<void> deleteAccount() async {
+    await ApiClient.instance.delete<Map<String, dynamic>>(ApiConstants.deleteAccount);
+  }
+
   /// PUT /profile/password
   Future<void> changePassword({
     required String currentPassword,

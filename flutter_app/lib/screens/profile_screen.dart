@@ -130,6 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const Color _bg = Color(0xffF8F9FD);
   static const Color _textDark = Color(0xff1A1A1A);
   static const Color _textGray = Color(0xff707070);
+  bool _isDeletingAccount = false;
 
   @override
   void initState() {
@@ -231,6 +232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // ── Logout ─────────────────────────────────────────────
                     _buildLogoutButton(context),
+
+                    SizedBox(height: 12.h),
+                    _buildDeleteAccountButton(context),
 
                     SizedBox(height: 20.h),
                   ],
@@ -575,5 +579,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
+  }
+
+  Widget _buildDeleteAccountButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SizedBox(
+      width: double.infinity,
+      height: 52.h,
+      child: OutlinedButton.icon(
+        onPressed: _isDeletingAccount ? null : () => _confirmDeleteAccount(context),
+        icon: _isDeletingAccount
+            ? SizedBox(
+                width: 16.w,
+                height: 16.w,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(Icons.delete_outline_rounded, size: 18.sp),
+        label: Text(
+          _isDeletingAccount ? l10n.deletingAccount : l10n.deleteAccount,
+          style: GoogleFonts.ibmPlexSans(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.redAccent,
+          side: const BorderSide(color: Colors.redAccent),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteAccountConfirm),
+        content: Text(l10n.deleteAccountMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.passwordCancel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.deleteAccount),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isDeletingAccount = true);
+    try {
+      await UserController.instance.deleteAccount();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingAIPage()),
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.serverError)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDeletingAccount = false);
+      }
+    }
   }
 }

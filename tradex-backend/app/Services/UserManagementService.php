@@ -3,8 +3,15 @@
 namespace App\Services;
 
 use App\Contracts\Services\UserManagementServiceInterface;
+use App\Models\AiRequest;
+use App\Models\AiSetting;
+use App\Models\AiUsage;
 use App\Models\User;
+use App\Models\UserDeviceToken;
+use App\Models\UserNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserManagementService implements UserManagementServiceInterface
 {
@@ -101,13 +108,26 @@ class UserManagementService implements UserManagementServiceInterface
     /**
      * Permanently delete a user account and all associated data.
      *
-     * Cascading FK deletes handle: stores → products/images, orders,
-     * favorites, cart, subscriptions, tokens.
+     * The deletion is intentionally explicit so personal user-owned records are
+     * removed before the user row itself disappears, while preserving unrelated
+     * catalog/global data that is not owned by the user.
      */
     public function deleteUser(User $user): void
     {
-        // Revoke all tokens before deleting to avoid orphaned token lookups
-        $user->tokens()->delete();
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            $user->tokens()->delete();
+            UserDeviceToken::where('user_id', $user->id)->delete();
+            UserNotification::where('user_id', $user->id)->delete();
+            AiUsage::where('user_id', $user->id)->delete();
+            AiRequest::where('user_id', $user->id)->delete();
+            AiSetting::where('user_id', $user->id)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            $user->delete();
+        });
     }
 }

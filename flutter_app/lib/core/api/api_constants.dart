@@ -48,6 +48,7 @@ class ApiConstants {
   // remains the mutation endpoint for profile fields.
   static const String authMe = '/auth/me';
   static const String me = '/profile';
+  static const String deleteAccount = '/profile';
   static const String meAvatar = '/profile/avatar';
   static const String mePassword = '/profile/password';
 

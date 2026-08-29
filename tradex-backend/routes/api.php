@@ -103,6 +103,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/',         [ProfileController::class, 'show'])->name('show');
             Route::put('/',         [ProfileController::class, 'update'])->name('update');
+            Route::delete('/',      [ProfileController::class, 'destroy'])->name('destroy');
             Route::put('/password', [ProfileController::class, 'changePassword'])->name('password');
             Route::post('/avatar',  [ProfileController::class, 'updateAvatar'])->name('avatar');
         });

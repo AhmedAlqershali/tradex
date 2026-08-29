@@ -27,6 +27,10 @@ class AppLocalizations {
   String get noFavorites => _value('noFavorites');
   String get logout => _value('logout');
   String get loggingOut => _value('loggingOut');
+  String get deleteAccount => _value('deleteAccount');
+  String get deletingAccount => _value('deletingAccount');
+  String get deleteAccountConfirm => _value('deleteAccountConfirm');
+  String get deleteAccountMessage => _value('deleteAccountMessage');
   String get passwordCurrent => _value('passwordCurrent');
   String get passwordNew => _value('passwordNew');
   String get passwordConfirm => _value('passwordConfirm');
@@ -73,6 +77,11 @@ class AppLocalizations {
       'noFavorites': 'لا توجد منتجات مفضلة',
       'logout': 'تسجيل الخروج',
       'loggingOut': 'جارٍ تسجيل الخروج...',
+      'deleteAccount': 'حذف الحساب',
+      'deletingAccount': 'جارٍ حذف الحساب...',
+      'deleteAccountConfirm': 'حذف الحساب بشكل دائم؟',
+      'deleteAccountMessage':
+          'سيتم حذف حسابك بشكل دائم، وسيتم إلغاء جميع الجلسات والبيانات الشخصية المرتبطة به. لا يمكن التراجع عن هذا الإجراء.',
       'passwordCurrent': 'كلمة المرور الحالية',
       'passwordNew': 'كلمة المرور الجديدة',
       'passwordConfirm': 'تأكيد كلمة المرور الجديدة',
@@ -116,6 +125,11 @@ class AppLocalizations {
       'noFavorites': 'No favorite products',
       'logout': 'Log out',
       'loggingOut': 'Logging out...',
+      'deleteAccount': 'Delete Account',
+      'deletingAccount': 'Deleting account...',
+      'deleteAccountConfirm': 'Delete account permanently?',
+      'deleteAccountMessage':
+          'Your account will be permanently deleted and all associated sessions and personal data will be removed. This action cannot be undone.',
       'passwordCurrent': 'Current password',
       'passwordNew': 'New password',
       'passwordConfirm': 'Confirm new password',

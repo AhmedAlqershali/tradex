@@ -219,6 +219,22 @@ class UserController {
     }
   }
 
+  /// DELETE /profile (self-service account deletion).
+  /// Only clear local auth state when the server confirms the account is gone.
+  Future<void> deleteAccount({Future<void> Function()? performDelete}) async {
+    isLoadingNotifier.value = true;
+    try {
+      await (performDelete ?? UserService.instance.deleteAccount)();
+      await SecureStorageService.instance.deleteAccessToken();
+      await SecureStorageService.instance.deleteRefreshToken();
+      await _clearLegacySession();
+      currentUserNotifier.value = null;
+      authErrorNotifier.value = null;
+    } finally {
+      isLoadingNotifier.value = false;
+    }
+  }
+
   // ── Forgot password ───────────────────────────────────────────────────────────
 
   /// POST /auth/forgot-password

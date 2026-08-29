@@ -5,10 +5,17 @@ namespace App\Http\Controllers\Api\V1;
 use App\Contracts\Services\ProfileServiceInterface;
 use App\Http\Requests\Profile\ChangePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Models\AiRequest;
+use App\Models\AiSetting;
+use App\Models\AiUsage;
+use App\Models\UserDeviceToken;
+use App\Models\UserNotification;
 use App\Support\AvatarTrace;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -47,6 +54,40 @@ class ProfileController extends BaseApiController
         }
 
         return $this->success($profile, 'Profile updated successfully.');
+    }
+
+    // ── DELETE /api/v1/profile ────────────────────────────────────────────────
+
+    public function destroy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        DB::transaction(function () use ($user) {
+            // Revoke every Sanctum token owned by this user before the account is
+            // removed so the API rejects any still-cached client session.
+            $user->tokens()->delete();
+
+            // Explicitly remove user-owned personal records that are not covered by
+            // a cascade path or that must be cleaned before the user record vanishes.
+            UserDeviceToken::where('user_id', $user->id)->delete();
+            UserNotification::where('user_id', $user->id)->delete();
+            AiUsage::where('user_id', $user->id)->delete();
+            AiRequest::where('user_id', $user->id)->delete();
+            AiSetting::where('user_id', $user->id)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Merchant-owned stores, products, favorites, carts, orders, and the
+            // related foreign-key tables are left to the existing database cascade
+            // rules. This preserves unrelated global catalog data while removing the
+            // deleting user's personal data and current credentials.
+            $user->delete();
+        });
+
+        return $this->success(null, 'Account deleted successfully.');
     }
 
     // ── PUT /api/v1/profile/password ──────────────────────────────────────────
