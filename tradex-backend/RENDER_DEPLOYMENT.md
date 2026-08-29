@@ -29,7 +29,9 @@ The entrypoint creates writable Laravel directories, runs `storage:link`, applie
 pending schema-only migrations with `php artisan migrate --force`, runs the
 idempotent paid-plan seeder with
 `php artisan db:seed --class=Database\\Seeders\\PlanSeeder --no-interaction`,
-and runs `php artisan optimize` before starting that one Laravel web server with
+then seeds the default shopper categories with
+`php artisan db:seed --class=Database\\Seeders\\CategorySeeder --no-interaction`,
+and finally runs `php artisan optimize` before starting that one Laravel web server with
 `public` as its document root. It does not create users.
 
 The Blueprint mounts the `tradex-storage` Persistent Disk at

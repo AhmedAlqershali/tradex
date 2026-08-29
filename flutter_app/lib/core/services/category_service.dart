@@ -47,10 +47,63 @@ class CategoryService {
   }
 
   Future<List<CategoryOption>> getCategoryOptions() async {
-    final response = await ApiClient.instance
-        .get<Map<String, dynamic>>(ApiConstants.categories);
-    final raw = response.data!;
-    return _extractOptions(raw);
+    const perPage = 100;
+    final pages = <Map<String, dynamic>>[];
+    int page = 1;
+    int lastPage = 1;
+
+    while (page <= lastPage) {
+      final response = await ApiClient.instance.get<Map<String, dynamic>>(
+        ApiConstants.categories,
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
+      );
+
+      final raw = response.data ?? const {};
+      if (raw is! Map<String, dynamic>) {
+        break;
+      }
+
+      pages.add(raw);
+
+      final pageOptions = _extractOptions(raw);
+      if (pageOptions.isEmpty && page > 1) {
+        break;
+      }
+
+      final pagination = raw['pagination'];
+      if (pagination is! Map) {
+        break;
+      }
+
+      final nextLastPage = pagination['last_page'];
+      lastPage = nextLastPage is int ? nextLastPage : 1;
+      if (page >= lastPage) break;
+      page += 1;
+    }
+
+    return mergePaginatedResponses(pages);
+  }
+
+  static List<CategoryOption> mergePaginatedResponses(
+    List<Map<String, dynamic>> pages,
+  ) {
+    final merged = <CategoryOption>[];
+    final seen = <String>{};
+
+    for (final raw in pages) {
+      final options = CategoryService()._extractOptions(raw);
+      for (final option in options) {
+        final key = '${option.id}_${option.name.trim()}';
+        if (seen.contains(key)) continue;
+        seen.add(key);
+        merged.add(option);
+      }
+    }
+
+    return merged;
   }
 
   // ── Cities ────────────────────────────────────────────────────────────────────
