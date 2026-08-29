@@ -6,6 +6,7 @@ $publicPath = realpath(__DIR__.'/../public');
 $requestPath = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
 $requestedFile = realpath($publicPath.$requestPath);
 $publicStoragePath = realpath($publicPath.'/storage');
+$mountedStoragePath = realpath(__DIR__.'/../storage/app/public');
 
 if (
     $requestedFile !== false
@@ -14,6 +15,10 @@ if (
         || (
             $publicStoragePath !== false
             && str_starts_with($requestedFile, $publicStoragePath.DIRECTORY_SEPARATOR)
+        )
+        || (
+            $mountedStoragePath !== false
+            && str_starts_with($requestedFile, $mountedStoragePath.DIRECTORY_SEPARATOR)
         )
     )
     && is_file($requestedFile)

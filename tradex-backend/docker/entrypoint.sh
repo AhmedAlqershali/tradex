@@ -11,6 +11,11 @@ mkdir -p \
     storage/app/public \
     bootstrap/cache
 
+if [ -L public/storage ] || [ -e public/storage ]; then
+    rm -rf public/storage
+fi
+ln -sfn ../storage/app/public public/storage
+
 php artisan storage:link --force
 php artisan migrate --force --no-interaction
 php artisan db:seed --class=Database\\Seeders\\PlanSeeder --force --no-interaction
