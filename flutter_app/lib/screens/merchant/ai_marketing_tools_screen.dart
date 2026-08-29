@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/theme/app_colors.dart';
+import 'package:ai_saas/screens/merchant/merchant_subscription_screen.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
 import 'package:ai_saas/shared/ai/ai_result_model.dart';
 import 'package:flutter/foundation.dart';
@@ -237,7 +238,27 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       if (mounted) setState(() => _workspaceResult = result);
     } catch (error) {
       if (kDebugMode) debugPrint('[AI_RUNTIME] workspace error: ${error.runtimeType}: $error');
-      if (mounted) setState(() => _workspaceError = _friendlyAiError(error));
+      if (mounted) {
+        if (AiController.isSubscriptionRequiredError(error)) {
+          setState(() => _workspaceError = AiController.subscriptionRequiredMessage);
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(AiController.subscriptionRequiredMessage),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const MerchantSubscriptionScreen(),
+            ),
+          );
+          return;
+        }
+        setState(() => _workspaceError = _friendlyAiError(error));
+      }
     } finally {
       if (mounted) setState(() => _workspaceLoading = false);
     }
@@ -245,6 +266,9 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   String _friendlyAiError(Object error) {
     final cause = error is AiRuntimeFailure ? error.cause : error;
+    if (AiController.isSubscriptionRequiredError(error)) {
+      return AiController.subscriptionRequiredMessage;
+    }
     final message = cause.toString();
     if (error is AiRuntimeFailure) {
       return 'المرحلة: ${error.stage}\nالخطأ: $message';

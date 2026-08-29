@@ -39,6 +39,28 @@ class AiController {
   AiController._();
   static final AiController instance = AiController._();
 
+  static const String subscriptionRequiredMessage =
+      'يلزم وجود اشتراك نشط لاستخدام أدوات Tradex AI. يرجى الاشتراك للمتابعة.';
+
+  static bool isSubscriptionRequiredError(Object error) {
+    final cause = error is AiRuntimeFailure ? error.cause : error;
+    if (cause is ForbiddenException) {
+      final normalized = cause.message.toLowerCase();
+      return normalized.contains('active trial or paid subscription') ||
+          normalized.contains('subscription is required') ||
+          normalized.contains('requires an active') ||
+          normalized.contains('اشتراك') && normalized.contains('مطلوب');
+    }
+    if (cause is String) {
+      final normalized = cause.toLowerCase();
+      return normalized.contains('active trial or paid subscription') ||
+          normalized.contains('subscription is required') ||
+          normalized.contains('requires an active') ||
+          normalized.contains('اشتراك') && normalized.contains('مطلوب');
+    }
+    return false;
+  }
+
   // ── Public notifiers ─────────────────────────────────────────────────────────
 
   /// Current loading / result status.

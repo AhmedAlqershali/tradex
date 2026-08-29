@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/auth_service.dart';
+import 'package:ai_saas/shared/ai/ai_controller.dart';
 
 void main() {
   test('network logger never logs request or response bodies', () {
@@ -36,6 +37,20 @@ void main() {
 
     expect(exception, isA<ForbiddenException>());
     expect(exception.message, 'Forbidden. You do not have permission.');
+  });
+
+  test('detects merchant AI subscription denials from a 403 response', () {
+    const denied = ForbiddenException(
+      'An active trial or paid subscription is required to access merchant business features.',
+    );
+
+    expect(AiController.isSubscriptionRequiredError(denied), isTrue);
+    expect(
+      AiController.isSubscriptionRequiredError(
+        const ForbiddenException('You do not have permission.'),
+      ),
+      isFalse,
+    );
   });
 
   test('preserves Laravel subscription denial as a typed 403', () {
