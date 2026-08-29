@@ -94,7 +94,7 @@ class CategoryService {
     final seen = <String>{};
 
     for (final raw in pages) {
-      final options = CategoryService()._extractOptions(raw);
+      final options = CategoryService.instance._extractOptions(raw);
       for (final option in options) {
         final key = '${option.id}_${option.name.trim()}';
         if (seen.contains(key)) continue;
