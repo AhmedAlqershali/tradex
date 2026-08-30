@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/client/checkout_screen.dart';
 import 'package:ai_saas/shared/cart/cart_controller.dart';
