@@ -28,7 +28,7 @@ class OrderConfirmationScreen extends StatelessWidget {
           elevation: 0.5,
           automaticallyImplyLeading: false,
           title: Text(
-            'تم إرسال الطلب',
+            AppLocalizations.of(context).orderSubmitted,
             style: GoogleFonts.ibmPlexSans(
               color: _textDark,
               fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class OrderConfirmationScreen extends StatelessWidget {
 
                 // ── Heading ──────────────────────────────────────────────
                 Text(
-                  'تم إرسال طلبك بنجاح!',
+                  AppLocalizations.of(context).orderSubmittedMessage,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
@@ -72,7 +72,7 @@ class OrderConfirmationScreen extends StatelessWidget {
 
                 // ── Business message ─────────────────────────────────────
                 Text(
-                  'سيقوم التاجر بمراجعة طلبك والتواصل معك قريباً لتأكيد التفاصيل.',
+                  AppLocalizations.of(context).orderApprovedMessage,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 14.sp,
@@ -110,7 +110,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'العودة للرئيسية',
+                      AppLocalizations.of(context).backToHome,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.bold,
@@ -132,7 +132,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     );
                   },
                   child: Text(
-                    'عرض طلباتي',
+                    AppLocalizations.of(context).viewMyOrders,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 14.sp,
                       color: _primary,
@@ -152,7 +152,7 @@ class OrderConfirmationScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
       child: Text(
-        'رقم الطلب: #${order.ref}',
+        AppLocalizations.of(context).orderReference.replaceFirst('{ref}', order.ref),
         style: GoogleFonts.ibmPlexSans(
           fontSize: 13.sp,
           fontWeight: FontWeight.w600,

@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/merchant/add_product.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
@@ -34,6 +35,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -50,7 +52,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                 SizedBox(height: 24.h),
                 _buildSummaryRow(context),
                 SizedBox(height: 28.h),
-                _buildSectionLabel('الإجراءات السريعة'),
+                _buildSectionLabel(l10n.continueText),
                 SizedBox(height: 14.h),
                 _buildQuickActions(context),
                 SizedBox(height: 24.h),
@@ -96,13 +98,13 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('حالة الاشتراك والتجربة',
+                  Text(l10n.subscriptionStatus,
                       style: GoogleFonts.ibmPlexSans(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xff1A1A1A))),
                   SizedBox(height: 3.h),
-                  Text('عرض الخطة الحالية وتاريخ الانتهاء',
+                  Text(l10n.subscriptionStatus,
                       style: GoogleFonts.ibmPlexSans(
                           fontSize: 12.sp, color: const Color(0xff888888))),
                 ],
@@ -120,13 +122,13 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
   Widget _buildHeader(BuildContext context) {
     return BlocBuilder<StoreBloc, StoreState>(
       builder: (context, storeState) {
-        String storeName = 'متجرك';
+        String storeName = AppLocalizations.of(context).store;
         if (storeState is MyStoreLoaded) storeName = storeState.store.title;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'مرحباً بك 👋',
+              AppLocalizations.of(context).welcomeBack,
               style: GoogleFonts.ibmPlexSans(
                 fontSize: 14.sp,
                 color: const Color(0xff707070),
@@ -166,8 +168,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
         if (state is MerchantDashboardLoaded) {
           final dashboard = state.dashboard;
           if (dashboard.isEmpty) {
-            return const _DashboardMessage(
-                message: 'لا توجد بيانات للوحة التحكم.');
+            return _DashboardMessage(
+                message: AppLocalizations.of(context).noScreensAvailable);
           }
           return Column(
             children: [
@@ -175,7 +177,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                 children: [
                   Expanded(
                     child: _SummaryCard(
-                      label: 'طلبات جديدة',
+                      label: AppLocalizations.of(context).newOrders,
                       value: dashboard.orders.pendingReview.toString(),
                       icon: Icons.receipt_long_outlined,
                       color: _primary,
@@ -184,7 +186,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   SizedBox(width: 14.w),
                   Expanded(
                     child: _SummaryCard(
-                      label: 'المنتجات',
+                      label: AppLocalizations.of(context).products,
                       value: dashboard.products.total.toString(),
                       icon: Icons.inventory_2_outlined,
                       color: const Color(0xff22C55E),
@@ -197,7 +199,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                 children: [
                   Expanded(
                     child: _SummaryCard(
-                      label: 'المبيعات المكتملة',
+                      label: AppLocalizations.of(context).completedSales,
                       value: '₪${dashboard.totalSales.toStringAsFixed(0)}',
                       icon: Icons.payments_outlined,
                       color: const Color(0xff0EA5E9),
@@ -206,7 +208,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   SizedBox(width: 14.w),
                   Expanded(
                     child: _SummaryCard(
-                      label: 'مخزون منخفض',
+                      label: AppLocalizations.of(context).lowStock,
                       value: dashboard.products.lowStock.toString(),
                       icon: Icons.warning_amber_outlined,
                       color: const Color(0xffF59E0B),
@@ -237,35 +239,35 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
     final actions = [
       _QuickAction(
         icon: Icons.add_box_outlined,
-        label: 'إضافة منتج',
+        label: AppLocalizations.of(context).addProductAction,
         color: _primary,
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const AddProduct())),
       ),
       _QuickAction(
         icon: Icons.receipt_long_outlined,
-        label: 'الطلبات',
+        label: AppLocalizations.of(context).ordersAction,
         color: const Color(0xff22C55E),
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const MerchantOrdersScreen())),
       ),
       _QuickAction(
         icon: Icons.inventory_2_outlined,
-        label: 'المنتجات',
+        label: AppLocalizations.of(context).products,
         color: const Color(0xffF59E0B),
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const MerchantProductsScreen())),
       ),
       _QuickAction(
         icon: Icons.person_outline,
-        label: 'الملف الشخصي',
+        label: AppLocalizations.of(context).profileAction,
         color: const Color(0xffEC4899),
         onTap: () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
       ),
       _QuickAction(
         icon: Icons.storefront_outlined,
-        label: 'إعدادات المتجر',
+        label: AppLocalizations.of(context).storeSettingsAction,
         color: const Color(0xff0EA5E9),
         onTap: () => Navigator.push(context,
             MaterialPageRoute(builder: (_) => const StoreSettingsScreen())),

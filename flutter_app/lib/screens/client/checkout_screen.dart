@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/client/order_confirmation_screen.dart';
 import 'package:ai_saas/shared/cart/cart_controller.dart';
@@ -71,6 +72,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       },
       builder: (context, state) {
         final isLoading = state is OrderLoading;
+        final l10n = AppLocalizations.of(context);
 
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -90,21 +92,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionTitle('معلومات التوصيل'),
+                          _buildSectionTitle(l10n.deliveryInfo),
                           SizedBox(height: 14.h),
                           _buildCard(
                             children: [
                               _buildField(
-                                label: 'الاسم الكامل',
-                                hint: 'أحمد محمد',
+                                label: l10n.fullName,
+                                hint: l10n.fullNameExample,
                                 icon: Icons.person_outline,
                                 controller: _nameCtrl,
                                 isRequired: true,
                               ),
                               SizedBox(height: 14.h),
                               _buildField(
-                                label: 'رقم الهاتف',
-                                hint: '05XXXXXXXX',
+                                label: l10n.phoneNumber,
+                                hint: l10n.phoneNumberExample,
                                 icon: Icons.phone_outlined,
                                 controller: _phoneCtrl,
                                 keyboardType: TextInputType.phone,
@@ -116,13 +118,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ],
                           ),
                           SizedBox(height: 20.h),
-                          _buildSectionTitle('العنوان'),
+                          _buildSectionTitle(l10n.address),
                           SizedBox(height: 14.h),
                           _buildCard(
                             children: [
                               _buildField(
-                                label: 'المدينة',
-                                hint: 'غزة',
+                                label: l10n.city,
+                                hint: l10n.cityExample,
                                 icon: Icons.location_city_outlined,
                                 controller: _cityCtrl,
                                 isRequired: true,
@@ -130,13 +132,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ],
                           ),
                           SizedBox(height: 20.h),
-                          _buildSectionTitle('ملاحظات إضافية'),
+                          _buildSectionTitle(l10n.additionalNotes),
                           SizedBox(height: 14.h),
                           _buildCard(
                             children: [
                               _buildField(
-                                label: 'ملاحظات',
-                                hint: 'أي تعليمات خاصة للتوصيل...',
+                                label: l10n.notes,
+                                hint: l10n.deliveryNoteHint,
                                 icon: Icons.notes_outlined,
                                 controller: _notesCtrl,
                                 maxLines: 3,
@@ -184,7 +186,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ? const CircularProgressIndicator(
                                 color: Colors.white)
                             : Text(
-                                'تأكيد الطلب',
+                                l10n.confirmRequest,
                                 style: GoogleFonts.ibmPlexSans(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.bold),
@@ -214,7 +216,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       ),
       title: Text(
-        'إتمام الطلب',
+        l10n.checkout,
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -275,7 +277,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     return _buildCard(children: [
       Text(
-        'ملخص الطلب',
+        l10n.orderTotal,
         style: GoogleFonts.ibmPlexSans(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,
@@ -311,7 +313,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('الإجمالي',
+          Text(l10n.orderTotal,
               style: GoogleFonts.ibmPlexSans(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
@@ -360,7 +362,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           maxLines: maxLines,
           textDirection: TextDirection.rtl,
           validator: isRequired
-              ? (v) => (v == null || v.trim().isEmpty) ? 'هذا الحقل مطلوب' : null
+              ? (v) => (v == null || v.trim().isEmpty) ? l10n.requiredFieldMessage : null
               : null,
           style: GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textDark),
           decoration: InputDecoration(

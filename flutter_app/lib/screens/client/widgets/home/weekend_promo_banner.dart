@@ -33,7 +33,7 @@ class WeekendPromoBanner extends StatelessWidget {
               children: [
 
                 Text(
-                  'عروض نهاية الأسبوع 🔥',
+                  AppLocalizations.of(context).weekendDeals,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 15.sp,
@@ -44,7 +44,7 @@ class WeekendPromoBanner extends StatelessWidget {
                 SizedBox(height: 6.h),
 
                 Text(
-                  'خصومات تصل إلى 40%',
+                  AppLocalizations.of(context).dealsUpTo40,
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 11.sp,
@@ -77,7 +77,7 @@ class WeekendPromoBanner extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'احصل عليه',
+                AppLocalizations.of(context).getIt,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 11.sp,

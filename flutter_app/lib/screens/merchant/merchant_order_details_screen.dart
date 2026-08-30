@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/whatsapp_support_service.dart';
@@ -109,6 +110,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   Widget _buildFailureScaffold(BuildContext context, OrderFailure state) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -117,7 +119,7 @@ class _MerchantOrderDetailsScreenState
           backgroundColor: Colors.white,
           elevation: 0.5,
           title: Text(
-            'تفاصيل الطلب',
+            l10n.orderDetails,
             style: GoogleFonts.ibmPlexSans(
               color: _textDark,
               fontWeight: FontWeight.bold,
@@ -161,7 +163,7 @@ class _MerchantOrderDetailsScreenState
                         OrderByIdRequested(widget.orderId),
                       ),
                   child: Text(
-                    'إعادة المحاولة',
+                    l10n.retry,
                     style: GoogleFonts.ibmPlexSans(),
                   ),
                 ),
@@ -190,18 +192,18 @@ class _MerchantOrderDetailsScreenState
   }
 
   String _errorTitle(ApiException? error) {
-    if (error is NetworkException) return 'تعذر الاتصال بالشبكة';
-    if (error is TimeoutException) return 'انتهت مهلة الطلب';
-    if (error is AuthException) return 'انتهت جلسة الدخول';
-    if (error is ForbiddenException) return 'غير مصرح بالوصول';
-    if (error is ValidationException) return 'بيانات الطلب غير صالحة';
+    if (error is NetworkException) return AppLocalizations.of(context).networkError;
+    if (error is TimeoutException) return AppLocalizations.of(context).timeoutError;
+    if (error is AuthException) return AppLocalizations.of(context).sessionExpired;
+    if (error is ForbiddenException) return AppLocalizations.of(context).forbidden;
+    if (error is ValidationException) return AppLocalizations.of(context).invalidOrderId;
     if (error is ServerException && error.statusCode == 404) {
-      return 'الطلب غير موجود';
+      return AppLocalizations.of(context).orderNotFound;
     }
     if (error is ServerException && error.statusCode >= 500) {
-      return 'خطأ في الخادم';
+      return AppLocalizations.of(context).serverError;
     }
-    return 'تعذر تحميل تفاصيل الطلب';
+    return AppLocalizations.of(context).unableLoadOrderDetails;
   }
 
   Widget _buildScaffold(BuildContext context, AppOrder order) {
@@ -235,6 +237,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context, AppOrder order) {
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0.5,
@@ -244,7 +247,7 @@ class _MerchantOrderDetailsScreenState
         onPressed: () => Navigator.maybePop(context),
       ),
       title: Text(
-        'طلب #${order.ref}',
+        '${l10n.orderNumber} #${order.ref}',
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -267,7 +270,7 @@ class _MerchantOrderDetailsScreenState
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('رقم الطلب',
+                  Text(l10n.orderNumber,
                       style: GoogleFonts.ibmPlexSans(
                           fontSize: 11.sp, color: _textGray)),
                   SizedBox(height: 2.h),
@@ -287,18 +290,18 @@ class _MerchantOrderDetailsScreenState
           SizedBox(height: 14.h),
           InfoRow(
               icon: Icons.storefront_outlined,
-              label: 'المتجر',
+              label: l10n.store,
               value: o.storeName),
           SizedBox(height: 10.h),
           InfoRow(
               icon: Icons.calendar_today_outlined,
-              label: 'تاريخ الطلب',
+              label: l10n.orderDate,
               value: o.formattedDate),
           SizedBox(height: 10.h),
           InfoRow(
               icon: Icons.shopping_bag_outlined,
-              label: 'عدد المنتجات',
-              value: '${o.itemCount} منتج'),
+              label: l10n.productCount,
+              value: '${o.itemCount} ${l10n.products}'),
         ],
       ),
     );
@@ -309,7 +312,7 @@ class _MerchantOrderDetailsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('مسار الطلب',
+          Text(l10n.orderTimeline,
               style: GoogleFonts.ibmPlexSans(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
@@ -329,7 +332,7 @@ class _MerchantOrderDetailsScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('المنتجات',
+              Text(l10n.products,
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.bold,
@@ -411,7 +414,7 @@ class _MerchantOrderDetailsScreenState
           onPressed: () => _contactCustomer(context, order),
           icon: Icon(Icons.phone_in_talk_outlined, size: 18.sp),
           label: Text(
-            'محادثة العميل',
+            l10n.contactCustomer,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
@@ -462,7 +465,7 @@ class _MerchantOrderDetailsScreenState
       return;
     }
     if (WhatsAppSupportService.normalizePhone(order.customerPhone) == null) {
-      _showMessage(context, 'رقم هاتف العميل غير متوفر أو غير صالح');
+      _showMessage(context, AppLocalizations.of(context).invalidCustomerPhone);
       return;
     }
     final opened = await WhatsAppSupportService.openCustomerChat(
@@ -471,7 +474,7 @@ class _MerchantOrderDetailsScreenState
     if (!context.mounted) return;
     _showMessage(
       context,
-      opened ? 'تم فتح محادثة العميل' : 'تعذر فتح واتساب للعميل',
+      opened ? AppLocalizations.of(context).customerChatOpened : AppLocalizations.of(context).unableOpenCustomerWhatsApp,
     );
   }
 
@@ -501,43 +504,43 @@ List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
   switch (status) {
     case OrderStatus.pendingReview:
       return [
-        const MerchantOrderAction(
-          label: 'تواصل',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).contactCustomer,
           icon: Icons.phone_in_talk_outlined,
-          color: Color(0xff4D41DF),
+          color: const Color(0xff4D41DF),
           isContact: true,
         ),
-        const MerchantOrderAction(
-          label: 'تأكيد الطلب',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).confirmOrder,
           icon: Icons.check_circle_outline_rounded,
-          color: Color(0xff0891B2),
+          color: const Color(0xff0891B2),
           nextStatus: OrderStatus.confirmed,
         ),
-        const MerchantOrderAction(
-          label: 'إلغاء الطلب',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).cancelOrder,
           icon: Icons.cancel_outlined,
-          color: Color(0xffE53E3E),
+          color: const Color(0xffE53E3E),
           nextStatus: OrderStatus.cancelled,
         ),
       ];
     case OrderStatus.confirmed:
       return [
-        const MerchantOrderAction(
-          label: 'تواصل',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).contactCustomer,
           icon: Icons.phone_in_talk_outlined,
-          color: Color(0xff4D41DF),
+          color: const Color(0xff4D41DF),
           isContact: true,
         ),
-        const MerchantOrderAction(
-          label: 'تأكيد التسليم',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).confirmDelivery,
           icon: Icons.done_all_rounded,
-          color: Color(0xff00C896),
+          color: const Color(0xff00C896),
           nextStatus: OrderStatus.completed,
         ),
-        const MerchantOrderAction(
-          label: 'إلغاء الطلب',
+        MerchantOrderAction(
+          label: AppLocalizations.of(context).cancelOrder,
           icon: Icons.cancel_outlined,
-          color: Color(0xffE53E3E),
+          color: const Color(0xffE53E3E),
           nextStatus: OrderStatus.cancelled,
         ),
       ];

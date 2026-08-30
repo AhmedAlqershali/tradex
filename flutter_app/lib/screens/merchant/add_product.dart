@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/widgets/add_product_textfield.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
@@ -62,23 +63,24 @@ class _AddProductState extends State<AddProduct> {
   }
 
   void _publishProduct(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name        = _nameController.text.trim();
     final priceText   = _priceController.text.trim();
     final category    = _categoryController.text.trim();
     final description = _descriptionController.text.trim();
 
     if (name.isEmpty) {
-      _showSnackBar(context, 'يرجى إدخال اسم المنتج');
+      _showSnackBar(context, l10n.productNameRequired);
       return;
     }
     final price = double.tryParse(priceText) ?? 0.0;
     if (price <= 0) {
-      _showSnackBar(context, 'يرجى إدخال سعر صحيح');
+      _showSnackBar(context, l10n.productPriceRequired);
       return;
     }
     final quantity = int.tryParse(_quantityController.text.trim());
     if (quantity == null || quantity < 0) {
-      _showSnackBar(context, 'يرجى إدخال كمية مخزون صحيحة');
+      _showSnackBar(context, l10n.quantityRequired);
       return;
     }
 
@@ -86,7 +88,7 @@ class _AddProductState extends State<AddProduct> {
     if (widget.product == null) {
       context.read<ProductBloc>().add(ProductCreateRequested(
             name: name,
-            category: category.isNotEmpty ? category : 'عام',
+            category: category.isNotEmpty ? category : l10n.generalCategory,
             price: price,
             description: description,
             quantity: quantity,
@@ -98,7 +100,7 @@ class _AddProductState extends State<AddProduct> {
       context.read<ProductBloc>().add(ProductUpdateRequested(
             widget.product!.id,
             name: name,
-            category: category.isNotEmpty ? category : 'عام',
+            category: category.isNotEmpty ? category : l10n.generalCategory,
             price: price,
             description: description,
             quantity: quantity,
@@ -122,6 +124,7 @@ class _AddProductState extends State<AddProduct> {
   }
 
   void _showImageSourceSheet() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Directionality(
@@ -131,7 +134,7 @@ class _AddProductState extends State<AddProduct> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: Text('الكاميرا', style: GoogleFonts.ibmPlexSans()),
+              title: Text(l10n.camera, style: GoogleFonts.ibmPlexSans()),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
@@ -139,7 +142,7 @@ class _AddProductState extends State<AddProduct> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: Text('المعرض', style: GoogleFonts.ibmPlexSans()),
+              title: Text(l10n.gallery, style: GoogleFonts.ibmPlexSans()),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
@@ -166,11 +169,12 @@ class _AddProductState extends State<AddProduct> {
     return BlocConsumer<ProductBloc, ProductState>(
       listener: (context, state) {
         if (state is ProductCreated || state is ProductUpdated) {
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
            content: Text(
                widget.product == null
-                   ? 'تم نشر المنتج بنجاح ✅'
-                   : 'تم تحديث المنتج بنجاح ✅',
+                   ? l10n.productPublished
+                   : l10n.productUpdated,
                 style: GoogleFonts.ibmPlexSans(color: Colors.white)),
             backgroundColor: const Color(0xff22C55E),
             behavior: SnackBarBehavior.floating,
@@ -184,6 +188,7 @@ class _AddProductState extends State<AddProduct> {
         }
       },
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
         final isLoading = state is ProductLoading;
 
         return Directionality(
@@ -198,7 +203,7 @@ class _AddProductState extends State<AddProduct> {
                     color: const Color(0xff1A1A1A), size: 20.sp),
                 onPressed: () => Navigator.maybePop(context),
               ),
-               title: Text(widget.product == null ? 'إضافة منتج جديد' : 'تعديل المنتج',
+               title: Text(widget.product == null ? l10n.addProductNew : l10n.editProduct,
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -218,16 +223,16 @@ class _AddProductState extends State<AddProduct> {
                   // ── Form fields ──
                   AddProductTextField(
                     controller: _nameController,
-                    label: 'اسم المنتج',
-                    hint: 'مثال: حذاء رياضي نايك',
+                    label: l10n.productNameLabel,
+                    hint: l10n.productExample,
                     icon: Icons.inventory_2_outlined,
                   ),
                   SizedBox(height: 14.h),
 
                   AddProductTextField(
                     controller: _priceController,
-                    label: 'السعر (₪)',
-                    hint: 'مثال: 150',
+                    label: l10n.productPriceLabel,
+                    hint: l10n.priceExample,
                     icon: Icons.attach_money_outlined,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
@@ -235,8 +240,8 @@ class _AddProductState extends State<AddProduct> {
 
                    AddProductTextField(
                      controller: _quantityController,
-                     label: 'الكمية المتوفرة',
-                     hint: 'مثال: 25',
+                     label: l10n.productQuantityLabel,
+                     hint: l10n.quantityExample,
                      icon: Icons.inventory_outlined,
                      keyboardType: TextInputType.number,
                    ),
@@ -244,8 +249,8 @@ class _AddProductState extends State<AddProduct> {
 
                   AddProductTextField(
                     controller: _categoryController,
-                    label: 'التصنيف',
-                    hint: 'مثال: ملابس، إلكترونيات...',
+                    label: l10n.categoryLabel,
+                    hint: l10n.categoryExample,
                     icon: Icons.category_outlined,
                   ),
                   SizedBox(height: 8.h),
@@ -254,8 +259,8 @@ class _AddProductState extends State<AddProduct> {
 
                   AddProductTextField(
                     controller: _descriptionController,
-                    label: 'الوصف',
-                    hint: 'اكتب وصفاً للمنتج...',
+                    label: l10n.descriptionLabel,
+                    hint: l10n.productDescriptionExample,
                     icon: Icons.description_outlined,
                     maxLines: 4,
                   ),

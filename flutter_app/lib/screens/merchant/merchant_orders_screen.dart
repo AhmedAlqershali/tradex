@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/merchant/merchant_order_details_screen.dart';
 import 'package:ai_saas/shared/models/mock_order.dart';
@@ -56,12 +57,13 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
 
   // ── AppBar ─────────────────────────────────────────────────────────────────
   PreferredSizeWidget _buildAppBar() {
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0.5,
       automaticallyImplyLeading: false,
       title: Text(
-        'الطلبات الواردة',
+        l10n.merchantOrders,
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
       centerTitle: true,
       actions: [
         PopupMenuButton<String>(
-          tooltip: 'تصفية الحالة',
+          tooltip: l10n.filterStatus,
           icon: const Icon(Icons.filter_list_rounded, color: _textDark),
           onSelected: (value) {
             context.read<OrderBloc>().add(
@@ -80,13 +82,16 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
                   ),
                 );
           },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'all', child: Text('كل الطلبات')),
-            PopupMenuItem(value: 'pending_review', child: Text('قيد المراجعة')),
-            PopupMenuItem(value: 'confirmed', child: Text('تم تأكيد الطلب')),
-            PopupMenuItem(value: 'completed', child: Text('مكتمل')),
-            PopupMenuItem(value: 'cancelled', child: Text('ملغي')),
-          ],
+          itemBuilder: (_) {
+            final l10n = AppLocalizations.of(context);
+            return [
+              PopupMenuItem(value: 'all', child: Text(l10n.allOrders)),
+              PopupMenuItem(value: 'pending_review', child: Text(l10n.pendingReview)),
+              PopupMenuItem(value: 'confirmed', child: Text(l10n.confirmed)),
+              PopupMenuItem(value: 'completed', child: Text(l10n.completed)),
+              PopupMenuItem(value: 'cancelled', child: Text(l10n.cancelled)),
+            ];
+          },
         ),
       ],
     );
@@ -188,7 +193,7 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${order.itemCount} منتج',
+                Text('${order.itemCount} ${AppLocalizations.of(context).products}',
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 12.sp, color: _textGray)),
                 Text(
@@ -258,7 +263,7 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
             onPressed: () => context
                 .read<OrderBloc>()
                 .add(const MerchantOrdersLoadRequested()),
-            child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+            child: Text(AppLocalizations.of(context).retry, style: GoogleFonts.ibmPlexSans()),
           ),
         ],
       ),
@@ -281,13 +286,13 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
                   size: 46.sp, color: _primary),
             ),
             SizedBox(height: 20.h),
-            Text('لا توجد طلبات بعد',
+            Text(AppLocalizations.of(context).noOrdersYet,
                 style: GoogleFonts.ibmPlexSans(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: _textDark)),
             SizedBox(height: 8.h),
-            Text('ستظهر هنا طلبات العملاء فور وصولها',
+            Text(AppLocalizations.of(context).ordersWillAppear,
                 textAlign: TextAlign.center,
                 style:
                     GoogleFonts.ibmPlexSans(fontSize: 13.sp, color: _textGray)),

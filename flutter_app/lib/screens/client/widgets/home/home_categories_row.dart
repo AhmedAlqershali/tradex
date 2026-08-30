@@ -31,7 +31,7 @@ class HomeCategoriesRow extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'تعذر تحميل التصنيفات',
+                    AppLocalizations.of(context).categoryLoadError,
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 13.sp, color: const Color(0xff888888)),
                   ),
@@ -40,7 +40,7 @@ class HomeCategoriesRow extends StatelessWidget {
                   onPressed: () => context
                       .read<CategoryBloc>()
                       .add(const CategoryListRequested()),
-                  child: const Text('إعادة المحاولة'),
+                  child: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ),

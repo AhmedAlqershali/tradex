@@ -103,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'سوقك الذكي مدعوماً بالذكاء الاصطناعي',
+                      AppLocalizations.of(context).smartMarketplace,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 20.sp,
@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      'التجارة الإلكترونية المعززة بالذكاء الاصطناعي في متناول يدك',
+                      AppLocalizations.of(context).smartMarketplaceSubtitle,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp,

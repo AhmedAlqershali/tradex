@@ -8,6 +8,7 @@ import 'package:ai_saas/shared/users/user_model.dart';
 import 'package:ai_saas/shared/users/avatar_diagnostics.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/core/services/location_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -114,6 +115,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const Color primaryColor = Color(0xff623ce7);
     const Color textColor = Color(0xff0d1e3d);
     const Color inputFillColor = Color(0xfff4f6fa);
@@ -144,7 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'المعلومات الشخصية',
+            l10n.profileInfo,
             style: GoogleFonts.ibmPlexSans(
                 color: textColor, fontSize: 16.sp, fontWeight: FontWeight.bold),
           ),
@@ -208,7 +210,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         SizedBox(height: 32.h),
 
                         // 2. حقل الاسم
-                        _buildFieldLabel('الاسم كامل'),
+                        _buildFieldLabel(l10n.fullName),
                         TextFormField(
                           controller: _nameController,
                           style: GoogleFonts.ibmPlexSans(
@@ -216,7 +218,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500),
                           decoration: _inputDecoration(
-                            hint: 'أدخل اسمك الكامل',
+                            hint: l10n.enterFullName,
                             fillColor: inputFillColor,
                             prefixIcon: Icons.person_outline_rounded,
                           ),
@@ -224,7 +226,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         SizedBox(height: 20.h),
 
                         // 3. حقل البريد
-                        _buildFieldLabel('البريد الالكتروني'),
+                        _buildFieldLabel(l10n.email),
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -242,7 +244,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         SizedBox(height: 20.h),
 
                         // 4. حقل الهاتف
-                        _buildFieldLabel('رقم الهاتف'),
+                        _buildFieldLabel(l10n.phoneNumber),
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
@@ -260,7 +262,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         SizedBox(height: 20.h),
 
                         // 5. حقل الموقع
-                        _buildFieldLabel('الموقع الحالي'),
+                        _buildFieldLabel(l10n.currentLocation),
                         DropdownButtonFormField<String>(
                           value: LocationService.supportedRegions
                                   .contains(_currentSelectedLocation)
@@ -318,7 +320,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     : Icon(Icons.my_location_rounded,
                                         color: primaryColor, size: 18.sp),
                                 SizedBox(width: 10.w),
-                                Text('استخدام موقعي الحالي',
+                                Text(l10n.useCurrentLocation,
                                     style: GoogleFonts.ibmPlexSans(
                                         color: primaryColor,
                                         fontSize: 14.sp,
@@ -350,7 +352,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: _isSaving
                         ? const CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2)
-                        : Text('حفظ التغييرات',
+                        : Text(l10n.saveChanges,
                             style: GoogleFonts.ibmPlexSans(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,

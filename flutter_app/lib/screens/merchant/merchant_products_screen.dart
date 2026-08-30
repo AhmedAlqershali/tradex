@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/merchant/add_product.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
@@ -29,6 +30,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -38,7 +40,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
           listener: (context, state) {
             if (state is ProductDeleted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('تم حذف المنتج',
+                content: Text(l10n.productDeleted,
                     style: GoogleFonts.ibmPlexSans(color: Colors.white)),
                 backgroundColor: Colors.redAccent,
                 behavior: SnackBarBehavior.floating,
@@ -89,7 +91,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
       elevation: 0.5,
       automaticallyImplyLeading: false,
       title: Text(
-        'منتجاتي',
+        l10n.myProducts,
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -99,7 +101,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
       centerTitle: true,
        actions: [
          PopupMenuButton<String>(
-           tooltip: 'تصفية الحالة',
+           tooltip: l10n.filterStatus,
            icon: const Icon(Icons.filter_list_rounded, color: _textDark),
            onSelected: (value) {
              context.read<ProductBloc>().add(
@@ -108,11 +110,11 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                    ),
                  );
            },
-           itemBuilder: (_) => const [
-             PopupMenuItem(value: 'all', child: Text('كل المنتجات')),
-             PopupMenuItem(value: 'active', child: Text('نشط')),
-             PopupMenuItem(value: 'inactive', child: Text('مخفي')),
-             PopupMenuItem(value: 'out_of_stock', child: Text('نفد المخزون')),
+           itemBuilder: (_) => [
+             PopupMenuItem(value: 'all', child: Text(l10n.allProducts)),
+             PopupMenuItem(value: 'active', child: Text(l10n.active)),
+             PopupMenuItem(value: 'inactive', child: Text(l10n.inactive)),
+             PopupMenuItem(value: 'out_of_stock', child: Text(l10n.outOfStock)),
            ],
          ),
        ],
@@ -222,7 +224,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        isVisible ? 'ظاهر' : 'مخفي',
+        isVisible ? l10n.visible : l10n.hidden,
         style: GoogleFonts.ibmPlexSans(
           fontSize: 10.sp,
           fontWeight: FontWeight.bold,
@@ -246,7 +248,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        isOutOfStock ? 'نفد المخزون' : 'المخزون: $quantity',
+        isOutOfStock ? l10n.outOfStock : '${l10n.stock}: $quantity',
         style: GoogleFonts.ibmPlexSans(
           fontSize: 10.sp,
           fontWeight: FontWeight.bold,
@@ -282,17 +284,17 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
         child: AlertDialog(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.r)),
-          title: Text('حذف المنتج',
+          title: Text(l10n.deleteProduct,
               style: GoogleFonts.ibmPlexSans(fontWeight: FontWeight.bold)),
           content: Text(
-            'هل أنت متأكد من حذف "${product.name}"؟\nلا يمكن التراجع عن هذا الإجراء.',
+            l10n.deleteProductConfirm.replaceFirst('{name}', product.name),
             style: GoogleFonts.ibmPlexSans(
                 fontSize: 14.sp, color: const Color(0xff4A4A4A)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('إلغاء',
+              child: Text(l10n.cancel,
                   style: GoogleFonts.ibmPlexSans(color: Colors.grey)),
             ),
             TextButton(
@@ -302,7 +304,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                     .read<ProductBloc>()
                     .add(ProductDeleteRequested(product.id));
               },
-              child: Text('حذف',
+              child: Text(l10n.delete,
                   style: GoogleFonts.ibmPlexSans(
                       color: Colors.red,
                       fontWeight: FontWeight.bold)),
@@ -329,7 +331,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
             onPressed: () => context
                 .read<ProductBloc>()
                 .add(const MerchantProductsLoadRequested()),
-            child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+            child: Text(l10n.retry, style: GoogleFonts.ibmPlexSans()),
           ),
         ],
       ),
@@ -352,13 +354,13 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                   size: 46.sp, color: _primary),
             ),
             SizedBox(height: 20.h),
-            Text('لا توجد منتجات بعد',
+            Text(l10n.noProductsYet,
                 style: GoogleFonts.ibmPlexSans(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                     color: _textDark)),
             SizedBox(height: 8.h),
-            Text('انشر منتجك الأول وابدأ البيع الآن',
+            Text(l10n.publishFirstProduct,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.ibmPlexSans(
                     fontSize: 13.sp, color: Colors.grey)),
@@ -372,7 +374,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                   MaterialPageRoute(builder: (_) => const AddProduct()),
                 ),
                 icon: Icon(Icons.add_rounded, size: 20.sp),
-                label: Text('إضافة منتج جديد',
+                label: Text(l10n.addNewProduct,
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp, fontWeight: FontWeight.bold)),
               ),

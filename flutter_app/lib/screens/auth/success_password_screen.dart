@@ -53,7 +53,7 @@ class SuccessPasswordScreen extends StatelessWidget {
 
                   // عنوان النجاح الرئيسي
                   Text(
-                    'تم تغيير كلمة المرور بنجاح',
+                    AppLocalizations.of(context).passwordChanged,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 22.sp,
@@ -65,7 +65,7 @@ class SuccessPasswordScreen extends StatelessWidget {
 
                   // النص الفرعي التوضيحي
                   Text(
-                    'يمكنك الآن تسجيل الدخول باستخدام كلمة\nالمرور الجديدة الخاصة بك',
+                    AppLocalizations.of(context).passwordSuccessDescription,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 14.sp,
@@ -96,7 +96,7 @@ class SuccessPasswordScreen extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'تسجيل الدخول الآن',
+                        AppLocalizations.of(context).loginNow,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.bold,

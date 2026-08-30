@@ -131,7 +131,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       .read<ProductBloc>()
                       .add(ProductByIdRequested(_product.id));
                 },
-                child: const Text('إعادة المحاولة'),
+                child: Text(AppLocalizations.of(context).retry),
               ),
             ],
           ),
@@ -242,7 +242,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
                       if (_product.description.isNotEmpty) ...[
                         Text(
-                          'الوصف',
+                          AppLocalizations.of(context).description,
                           style: GoogleFonts.ibmPlexSans(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
@@ -265,7 +265,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: Text(
-                            'غير متوفر حالياً',
+                            AppLocalizations.of(context).productUnavailable,
                             style: GoogleFonts.ibmPlexSans(
                               color: Colors.redAccent,
                               fontWeight: FontWeight.bold,
@@ -277,7 +277,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       Row(
                         children: [
                           Text(
-                            'الكمية',
+                            AppLocalizations.of(context).quantityLabel,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,

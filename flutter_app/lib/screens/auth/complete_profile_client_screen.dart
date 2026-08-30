@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/screens/auth/complete_profile_photo_screen.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/core/services/location_service.dart';
@@ -44,7 +45,7 @@ class _CompleteProfileClientScreenState
   Future<void> _onNext() async {
     if (_selectedRegion == null || _selectedRegion!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اختر منطقتك أولاً.')),
+        SnackBar(content: Text(l10n.selectRegionFirst)),
       );
       return;
     }
@@ -58,6 +59,7 @@ class _CompleteProfileClientScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -66,7 +68,7 @@ class _CompleteProfileClientScreenState
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text(
-            'إكمال الملف للمتسوق',
+            l10n.completeProfileClient,
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff888888),
               fontSize: 14.sp,
@@ -89,7 +91,7 @@ class _CompleteProfileClientScreenState
 
                       // Heading
                       Text(
-                        'حدد منطقتك',
+                        l10n.chooseYourRegion,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -98,7 +100,7 @@ class _CompleteProfileClientScreenState
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'اختر المنطقة التي تتواجد بها لتخصيص تجربتك.',
+                        l10n.regionDescription,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 13.sp,
                           color: const Color(0xff707070),
@@ -118,7 +120,7 @@ class _CompleteProfileClientScreenState
                           textAlign: TextAlign.right,
                           style: GoogleFonts.ibmPlexSans(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            hintText: 'ابحث عن منطقتك...',
+                            hintText: l10n.searchRegion,
                             hintStyle: GoogleFonts.ibmPlexSans(
                               color: const Color(0xff888888),
                               fontSize: 13.sp,
@@ -155,7 +157,7 @@ class _CompleteProfileClientScreenState
                               : Icon(Icons.my_location,
                                   size: 18.sp, color: _primary),
                           label: Text(
-                            'استخدام موقعي الحالي',
+                            l10n.useCurrentLocation,
                             style: GoogleFonts.ibmPlexSans(
                               color: _primary,
                               fontWeight: FontWeight.bold,
@@ -318,15 +320,14 @@ class _CompleteProfileClientScreenState
       if (!mounted) return;
       if (result.region == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'تعذر مطابقة موقعك مع منطقة متاحة. اختر المنطقة يدوياً.')),
+          SnackBar(
+              content: Text(l10n.locationAutoMatchError)),
         );
         return;
       }
       setState(() => _selectedRegion = result.region);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تم تحديد الموقع: ${result.region}')),
+        SnackBar(content: Text('${l10n.locationSelected} ${result.region}')),
       );
     } on LocationException catch (e) {
       if (mounted) {
@@ -337,7 +338,7 @@ class _CompleteProfileClientScreenState
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تعذر الحصول على موقعك الحالي.')),
+          SnackBar(content: Text(l10n.unableGetCurrentLocation)),
         );
       }
     } finally {

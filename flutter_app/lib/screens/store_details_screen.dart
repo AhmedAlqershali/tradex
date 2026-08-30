@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
@@ -33,7 +34,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
     final storeId = _storeId;
     if (storeId == null || storeId.isEmpty) {
       _storeLoading = false;
-      _storeError = 'تعذر تحديد المتجر المطلوب.';
+      _storeError = AppLocalizations.of(context).storeSelectionRequired;
       return;
     }
 
@@ -56,7 +57,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
           backgroundColor: Colors.white,
           elevation: 0.5,
           title: Text(
-            'تفاصيل المتجر',
+            l10n.store,
             style: GoogleFonts.ibmPlexSans(
               color: textColor,
               fontSize: 16.sp,
@@ -133,7 +134,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
 
     final store = _serverStore;
     if (store == null) {
-      return _buildErrorState('تعذر تحميل بيانات المتجر.', () {
+      return _buildErrorState(AppLocalizations.of(context).unableLoadStoreData, () {
         context.read<StoreBloc>().add(StoreByIdRequested(_storeId!));
       });
     }
@@ -223,7 +224,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'منتجات المتجر',
+                      AppLocalizations.of(context).storeProducts,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
@@ -249,7 +250,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: Center(
-                child: Text('لا توجد منتجات في هذا المتجر',
+                child: Text(AppLocalizations.of(context).noProductsInStore,
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp, color: const Color(0xff888888))),
               ),
@@ -295,7 +296,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             SizedBox(height: 18.h),
             ElevatedButton(
               onPressed: onRetry,
-              child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+              child: Text(AppLocalizations.of(context).retry, style: GoogleFonts.ibmPlexSans()),
             ),
           ],
         ),

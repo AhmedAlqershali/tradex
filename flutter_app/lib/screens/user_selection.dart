@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/screens/auth/register_screen.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _UserSelectionState extends State<UserSelection> {
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFF5342E6);
     const Color backgroundColor = Color(0xFFF9FAFF);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -37,7 +39,7 @@ class _UserSelectionState extends State<UserSelection> {
 
                       // العنوان الرئيسي
                       Text(
-                        'مرحباً بك في Tradex',
+                        l10n.userWelcomeTitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 26.sp, // تقليل بسيط ليناسب الشاشات الصغيرة
@@ -47,7 +49,7 @@ class _UserSelectionState extends State<UserSelection> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'اختر نوع الحساب للمتابعة',
+                        l10n.userSelectionSubtitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 14.sp,
@@ -59,9 +61,9 @@ class _UserSelectionState extends State<UserSelection> {
 
                       // كارت متسوق
                       _buildSelectionCard(
-                        title: 'متسوق',
+                        title: l10n.shopperCardTitle,
                         description:
-                            'ابحث عن المنتجات، قارن الأسعار، وتسوق بسهولة ذكية.',
+                            l10n.shopperCardDescription,
                         imagePath: 'assets/images/client.png',
                         type: AppType.client,
                         isSelected: _selectedType == AppType.client,
@@ -70,9 +72,9 @@ class _UserSelectionState extends State<UserSelection> {
 
                       // كارت تاجر
                       _buildSelectionCard(
-                        title: 'تاجر',
+                        title: l10n.merchantCardTitle,
                         description:
-                            'قم ببيع منتجاتك، تتبع أرباحك، ووسع تجارتك باستخدام الذكاء الاصطناعي.',
+                            l10n.merchantCardDescription,
                         imagePath: 'assets/images/merchant.png',
                         type: AppType.merchant,
                         isSelected: _selectedType == AppType.merchant,
@@ -107,7 +109,7 @@ class _UserSelectionState extends State<UserSelection> {
                                 elevation: 0,
                               ),
                               child: Text(
-                                'متابعة',
+                                l10n.continueText,
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   color: Colors.white,
@@ -117,7 +119,7 @@ class _UserSelectionState extends State<UserSelection> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'بالنقر على متابعة، فإنك توافق على شروط الخدمة',
+                              l10n.termsAgreementText,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 11.sp,

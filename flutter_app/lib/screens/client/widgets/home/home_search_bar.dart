@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,6 +36,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
@@ -56,7 +58,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
           textInputAction: TextInputAction.search,
           onSubmitted: (_) => _submit(),
           decoration: InputDecoration(
-            hintText: 'ابحث عن منتجات، ماركات، متاجر...',
+            hintText: l10n.search,
             hintStyle: GoogleFonts.ibmPlexSans(
                 color: Colors.black38, fontSize: 13.sp),
             prefixIcon: GestureDetector(

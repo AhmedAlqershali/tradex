@@ -65,7 +65,7 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
         onPressed: () => Navigator.maybePop(context),
       ),
       title: Text(
-        'طلباتي',
+        AppLocalizations.of(context).myOrders,
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -155,7 +155,7 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${order.itemCount} منتج',
+                  '${order.itemCount} ${AppLocalizations.of(context).products}',
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 12.sp, color: _textGray),
                 ),
@@ -213,7 +213,7 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
               onPressed: () => context
                   .read<OrderBloc>()
                   .add(const ClientOrdersLoadRequested()),
-              child: Text('إعادة المحاولة',
+              child: Text(AppLocalizations.of(context).retry,
                   style: GoogleFonts.ibmPlexSans()),
             ),
           ],
@@ -242,7 +242,7 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'لا توجد طلبات بعد',
+              AppLocalizations.of(context).noOrdersYet,
               style: GoogleFonts.ibmPlexSans(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -251,7 +251,7 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
             ),
             SizedBox(height: 8.h),
             Text(
-              'ستظهر هنا طلباتك بعد إتمام أول عملية شراء',
+              AppLocalizations.of(context).noOrdersDescription,
               textAlign: TextAlign.center,
               style: GoogleFonts.ibmPlexSans(
                   fontSize: 13.sp, color: _textGray),

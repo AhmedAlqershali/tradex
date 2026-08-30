@@ -71,23 +71,23 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
   Widget _buildErrorScaffold(OrderFailure state) {
     final error = state.error;
     final title = error is AuthException
-        ? 'انتهت جلسة الدخول'
+        ? AppLocalizations.of(context).sessionExpired
         : error is ForbiddenException
-            ? 'غير مصرح بالوصول'
+            ? AppLocalizations.of(context).forbidden
             : error is ServerException && error.statusCode == 404
-                ? 'الطلب غير موجود'
+                ? AppLocalizations.of(context).serverError
                 : error is NetworkException
-                    ? 'تعذر الاتصال بالشبكة'
+                    ? AppLocalizations.of(context).networkError
                     : error is TimeoutException
-                        ? 'انتهت مهلة الطلب'
-                        : 'تعذر تحميل تفاصيل الطلب';
+                        ? AppLocalizations.of(context).timeoutError
+                        : AppLocalizations.of(context).unexpectedError;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _scaffoldBg,
         appBar: AppBar(
-          title: const Text('تفاصيل الطلب'),
+          title: Text(AppLocalizations.of(context).orderDetails),
           centerTitle: true,
         ),
         body: Center(
@@ -102,7 +102,7 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
                 const SizedBox(height: 20),
                 OutlinedButton(
                   onPressed: _loadOrder,
-                  child: const Text('إعادة المحاولة'),
+                  child: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ),
@@ -126,7 +126,7 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
             children: [
               _buildOrderHeader(o),
               SizedBox(height: 16.h),
-              OrderStatusTimeline(order: o, title: 'تتبع الطلب'),
+              OrderStatusTimeline(order: o, title: AppLocalizations.of(context).orderTrackingTitle),
               SizedBox(height: 16.h),
               OrderCustomerInfoCard(order: o),
               SizedBox(height: 16.h),
@@ -174,7 +174,7 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('رقم الطلب',
+                  Text(AppLocalizations.of(context).orderNumber,
                       style: GoogleFonts.ibmPlexSans(
                           fontSize: 11.sp, color: _textGray)),
                   SizedBox(height: 2.h),
@@ -194,18 +194,18 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
           SizedBox(height: 14.h),
           InfoRow(
               icon: Icons.storefront_outlined,
-              label: 'المتجر',
+              label: AppLocalizations.of(context).store,
               value: o.storeName),
           SizedBox(height: 10.h),
           InfoRow(
               icon: Icons.calendar_today_outlined,
-              label: 'تاريخ الطلب',
+              label: AppLocalizations.of(context).orderDate,
               value: o.formattedDate),
           SizedBox(height: 10.h),
           InfoRow(
               icon: Icons.shopping_bag_outlined,
-              label: 'عدد المنتجات',
-              value: '${o.itemCount} منتج'),
+              label: AppLocalizations.of(context).productCountLabel,
+              value: '${o.itemCount} ${AppLocalizations.of(context).products}'),
         ],
       ),
     );

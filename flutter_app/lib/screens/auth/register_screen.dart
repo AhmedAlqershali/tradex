@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
@@ -46,23 +47,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _handleRegister(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name = _nameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
     final phone = _phoneCtrl.text.trim();
     final password = _passwordCtrl.text;
 
     if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
-      _showError('يرجى ملء جميع الحقول المطلوبة');
+      _showError(l10n.enterEmailPassword);
       return;
     }
 
     if (password.length < 6) {
-      _showError('كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل');
+      _showError(l10n.passwordMinLength);
       return;
     }
 
     if (!_agreeToTerms) {
-      _showError('يرجى الموافقة على شروط الخدمة');
+      _showError(l10n.termsAgreementText);
       return;
     }
 
@@ -174,6 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
       builder: (context, state) {
         final bool isLoading = state is AuthLoading;
+        final l10n = AppLocalizations.of(context);
 
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -216,7 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // TITLE
                           Text(
-                            'إنشاء حساب جديد',
+                            l10n.registerNewAccount,
                             textDirection: TextDirection.rtl,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 26,
@@ -230,8 +233,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 // SUBTITLE
                           Text(
                             widget.type == AppType.merchant
-                                ? 'أنشئ حسابك التجاري الآن'
-                                : 'انضم إلى سوق Tradex الذكي',
+                                ? l10n.registerMerchantSubtitle
+                                : l10n.registerClientSubtitle,
                             textDirection: TextDirection.rtl,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 14,
@@ -242,7 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 28),
 
 // NAME
-                          _buildLabel('الاسم الكامل'),
+                          _buildLabel(l10n.fullName),
 
                           const SizedBox(height: 8),
 
@@ -265,7 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: _inputTextStyle(),
 
                             decoration: _inputDecoration(
-                              hint: 'أحمد محمد',
+                              hint: l10n.fullNameExample,
                               icon: Icons.person_outline,
                             ),
                           ),
@@ -274,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // EMAIL
                           _buildLabel(
-                            'البريد الإلكتروني',
+                            l10n.email,
                           ),
 
                           const SizedBox(height: 8),
@@ -299,7 +302,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // PHONE
                           _buildLabel(
-                            'رقم الهاتف',
+                            l10n.phoneNumber,
                           ),
 
                           const SizedBox(height: 8),
@@ -319,7 +322,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ],
                             decoration: _inputDecoration(
-                              hint: '05XXXXXXXX',
+                              hint: l10n.phoneNumberExample,
                               hintDirection: TextDirection.ltr,
                               icon: Icons.phone_outlined,
                             ),
@@ -329,7 +332,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 // PASSWORD
                           _buildLabel(
-                            'كلمة المرور',
+                            l10n.password,
                           ),
 
                           const SizedBox(height: 8),
@@ -372,7 +375,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              'كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل',
+                              l10n.passwordMinLength,
                               textDirection: TextDirection.rtl,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 12,
@@ -411,7 +414,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    'أوافق على شروط الخدمة وسياسة الخصوصية',
+                                    l10n.agreeTermsAndPrivacy,
                                     textDirection: TextDirection.rtl,
                                     style: GoogleFonts.ibmPlexSans(
                                       fontSize: 12,
@@ -433,8 +436,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             height: 50,
                             child: SizeButton(
                               title: isLoading
-                                  ? 'جارٍ إنشاء الحساب...'
-                                  : 'إنشاء الحساب',
+                                  ? l10n.creatingAccount
+                                  : l10n.createAccountAction,
                               onTap: isLoading
                                   ? null
                                   : () => _handleRegister(
@@ -454,7 +457,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 Text(
-                                  'لديك حساب بالفعل؟ ',
+                                  '${l10n.alreadyHaveAccount} ',
                                   textDirection: TextDirection.rtl,
                                   style: GoogleFonts.ibmPlexSans(
                                     color: textGrey,
@@ -473,7 +476,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     );
                                   },
                                   child: Text(
-                                    'سجل الدخول',
+                                    l10n.loginNow,
                                     textDirection: TextDirection.rtl,
                                     style: GoogleFonts.ibmPlexSans(
                                       color: primary,

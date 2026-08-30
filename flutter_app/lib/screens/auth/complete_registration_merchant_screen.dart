@@ -407,9 +407,7 @@ return;
 
 final String message =
 UserController.instance.authErrorNotifier.value ??
-'حدث خطأ أثناء حفظ بيانات المتجر. حاول مرة أخرى.';
-
-ScaffoldMessenger.of(context).showSnackBar(
+AppLocalizations.of(context).unableSaveChanges;
 SnackBar(
 content: Text(
 message,
@@ -452,7 +450,7 @@ size: 20.sp,
 onPressed: () => Navigator.pop(context),
 ),
 title: Text(
-'إكمال بروفايل التاجر',
+AppLocalizations.of(context).completeMerchantProfile,
 style: GoogleFonts.ibmPlexSans(
 color: Colors.grey,
 fontSize: 16.sp,
@@ -486,7 +484,7 @@ children: [
 // ==================================================
 
 Text(
-'الخطوة الأخيرة: إكمال البيانات',
+AppLocalizations.of(context).merchantProfileStep,
 style: GoogleFonts.ibmPlexSans(
 fontSize: 18.sp,
 fontWeight: FontWeight.bold,
@@ -578,15 +576,15 @@ SizedBox(height: 28.h),
 // STORE NAME
 // ==================================================
 
-_buildFieldLabel('اسم المتجر'),
+_buildFieldLabel(AppLocalizations.of(context).merchantStoreName),
 
 _buildTextField(
 _storeNameController,
-'مثال: متجر التقنية الحديثة',
+AppLocalizations.of(context).merchantStoreNameHint,
 validator: (value) {
 if (value == null ||
 value.trim().isEmpty) {
-return 'يرجى إدخال اسم المتجر';
+return AppLocalizations.of(context).merchantStoreNameRequired;
 }
 
 return null;
@@ -607,10 +605,10 @@ child: Column(
 crossAxisAlignment:
 CrossAxisAlignment.start,
 children: [
-_buildFieldLabel('فئة المتجر'),
+_buildFieldLabel(AppLocalizations.of(context).merchantStoreCategory),
 
 _buildPickerField(
-_selectedCategory ?? 'اختر الفئة',
+_selectedCategory ?? AppLocalizations.of(context).merchantChooseCategory,
 _showCategoryBottomSheet,
 ),
 ],
@@ -624,7 +622,7 @@ child: Column(
 crossAxisAlignment:
 CrossAxisAlignment.start,
 children: [
-_buildFieldLabel('المنطقة'),
+_buildFieldLabel(AppLocalizations.of(context).merchantRegion),
 
 _buildDropdownField(),
 ],
@@ -639,11 +637,11 @@ SizedBox(height: 16.h),
 // ADDRESS
 // ==================================================
 
-_buildFieldLabel('العنوان بالتفصيل'),
+_buildFieldLabel(AppLocalizations.of(context).merchantAddressDetail),
 
 _buildTextField(
 _addressDetailController,
-'الشارع، رقم المبنى...',
+AppLocalizations.of(context).merchantAddressHint,
 maxLines: 2,
 ),
 
@@ -661,11 +659,11 @@ SizedBox(height: 20.h),
 // DESCRIPTION
 // ==================================================
 
-_buildFieldLabel('وصف المتجر'),
+_buildFieldLabel(AppLocalizations.of(context).merchantDescription),
 
 _buildTextField(
 _descriptionController,
-'تحدث عن ما يميز متجرك...',
+AppLocalizations.of(context).merchantDescriptionHint,
 maxLines: 3,
 ),
 
@@ -675,7 +673,7 @@ SizedBox(height: 16.h),
 // WHATSAPP
 // ==================================================
 
-_buildFieldLabel('رقم الواتساب'),
+_buildFieldLabel(AppLocalizations.of(context).merchantWhatsApp),
 
 _buildWhatsAppField(),
 
@@ -685,11 +683,11 @@ SizedBox(height: 16.h),
 // WORK HOURS
 // ==================================================
 
-_buildFieldLabel('مواعيد العمل'),
+_buildFieldLabel(AppLocalizations.of(context).merchantWorkHours),
 
 _buildTextField(
 _workHoursController,
-'مثلاً: 10 صباحاً - 8 مساءً',
+AppLocalizations.of(context).merchantWorkHoursHint,
 ),
 
 SizedBox(height: 32.h),
@@ -1086,7 +1084,7 @@ mainAxisAlignment:
 MainAxisAlignment.center,
 children: [
 Text(
-'حفظ وإكمال التسجيل',
+AppLocalizations.of(context).saveChanges,
 style: GoogleFonts.ibmPlexSans(
 fontSize: 16.sp,
 fontWeight: FontWeight.bold,

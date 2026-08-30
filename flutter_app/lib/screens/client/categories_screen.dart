@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/search_screen.dart';
@@ -75,6 +76,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
@@ -95,7 +97,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ),
         actions: [
           IconButton(
-            tooltip: 'تحديد الموقع',
+            tooltip: l10n.search,
             onPressed: () => showLocationSelector(context),
             icon: Icon(
               Icons.location_on_outlined,
@@ -115,7 +117,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 width: double.infinity,
                 child: Text(
-                  'التصنيفات ',
+                  l10n.categories,
                   textAlign: TextAlign.right,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 36.sp,
@@ -128,7 +130,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 width: double.infinity,
                 child: Text(
-                  'تصفح أفضل المتاجر والخدمات في منطقتك ',
+                  l10n.categories,
                   textAlign: TextAlign.right,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 18.sp,
@@ -153,7 +155,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       child: Column(
                         children: [
                           Text(
-                            'تعذر تحميل التصنيفات',
+                            l10n.serverError,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 14.sp,
                               color: const Color(0xff707070),
@@ -165,7 +167,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 .read<CategoryBloc>()
                                 .add(const CategoryListRequested()),
                             child: Text(
-                              'إعادة المحاولة',
+                              l10n.retry,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 13.sp,
                                 color: const Color(0xff4D41DF),
@@ -185,7 +187,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 40.h),
                       child: Text(
-                        'لا توجد تصنيفات متاحة حالياً',
+                        l10n.noScreensAvailable,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 14.sp,
                           color: const Color(0xff707070),
@@ -294,7 +296,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            'متميز',
+                            l10n.featuredBadge,
                             style: GoogleFonts.ibmPlexSans(
                               fontSize: 12.sp,
                               color: Colors.white,
@@ -308,7 +310,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       bottom: 50.h,
                       right: 10.w,
                       child: Text(
-                        'أفضل عروض المولات',
+                        l10n.bestMallDeals,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 24.sp,
                           color: Colors.white,
@@ -320,7 +322,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       bottom: 30.h,
                       right: 10.w,
                       child: Text(
-                        'استكشف خصومات تصل إلى ٥٠٪',
+                        l10n.seeOffers,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 14.sp,
                           color: Colors.white,

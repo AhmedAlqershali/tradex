@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
@@ -33,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
 
@@ -40,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'يرجى إدخال البريد الإلكتروني وكلمة المرور',
+            l10n.enterEmailPassword,
             style: GoogleFonts.ibmPlexSans(),
           ),
           backgroundColor: Colors.redAccent,
@@ -62,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
+        final l10n = AppLocalizations.of(context);
         if (state is AuthAuthenticated) {
           // Load cart and favorites for the new session.
           context.read<CartBloc>().add(const CartLoadRequested());
@@ -75,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'إذا كان هناك حساب مرتبط بهذا البريد الإلكتروني، فقد تم إرسال رابط إعادة تعيين كلمة المرور.',
+                l10n.otpSent,
                 style: GoogleFonts.ibmPlexSans(),
               ),
               backgroundColor: Colors.green,
@@ -91,10 +94,11 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
         final isLoading = state is AuthLoading;
 
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: l10n.textDirection,
           child: Scaffold(
             backgroundColor: const Color(0xffF8F9FD),
             body: SafeArea(
@@ -141,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 SizedBox(width: 10.w),
                                 Text(
-                                  'Tradex',
+                                  l10n.appName,
                                   style: GoogleFonts.ibmPlexSans(
                                     fontSize: 18.sp,
                                     fontWeight: FontWeight.bold,
@@ -152,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'مرحباً بعودتك 👋',
+                              l10n.welcomeBack,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 24.sp,
                                 fontWeight: FontWeight.bold,
@@ -162,8 +166,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(height: 6.h),
                             Text(
                               widget.type == AppType.merchant
-                                  ? 'سجل دخولك لإدارة متجرك'
-                                  : 'سجل دخولك للتسوق الذكي',
+                                  ? l10n.welcomeBackMerchant
+                                  : l10n.welcomeBackClient,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 14.sp,
                                 color: Colors.white.withValues(alpha: 0.8),
@@ -176,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 28.h),
 
                       // ── Email ──
-                      Text('البريد الإلكتروني',
+                      Text(l10n.email,
                           style: GoogleFonts.ibmPlexSans(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -196,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 18.h),
 
                       // ── Password ──
-                      Text('كلمة المرور',
+                      Text(l10n.password,
                           style: GoogleFonts.ibmPlexSans(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -241,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               SizedBox(width: 8.w),
-                              Text('تذكرني',
+                              Text(l10n.rememberMe,
                                   style: GoogleFonts.ibmPlexSans(
                                       fontSize: 13.sp,
                                       color: const Color(0xff555555))),
@@ -250,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           GestureDetector(
                             onTap: _showForgotPasswordDialog,
                             child: Text(
-                              'نسيت كلمة المرور؟',
+                              l10n.forgotPassword,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 13.sp,
                                 color: primaryColor,
@@ -264,8 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 24.h),
 
                       SizeButton(
-                        title:
-                            isLoading ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول',
+                        title: isLoading ? l10n.loginLoading : l10n.login,
                         onTap: isLoading ? null : () => _handleLogin(context),
                       ),
 
@@ -284,6 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showForgotPasswordDialog() {
+    final l10n = AppLocalizations.of(context);
     final emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
     showDialog(
@@ -291,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           title: Text(
-            'استعادة كلمة المرور',
+            l10n.resetPassword,
             style: GoogleFonts.ibmPlexSans(
               fontWeight: FontWeight.bold,
             ),
@@ -302,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة تعيين كلمة المرور.',
+                  l10n.otpSent,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 13.sp,
                     color: const Color(0xff555555),
@@ -330,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
-                'إلغاء',
+                l10n.cancel,
                 style: GoogleFonts.ibmPlexSans(),
               ),
             ),
@@ -341,7 +345,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'يرجى إدخال البريد الإلكتروني.',
+                        l10n.enterEmailPlease,
                         style: GoogleFonts.ibmPlexSans(),
                       ),
                       backgroundColor: Colors.redAccent,
@@ -353,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'يرجى إدخال بريد إلكتروني صحيح.',
+                        l10n.enterValidEmail,
                         style: GoogleFonts.ibmPlexSans(),
                       ),
                       backgroundColor: Colors.redAccent,
@@ -380,7 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(
-                      'إرسال رابط إعادة التعيين',
+                      l10n.sendResetLink,
                       style: GoogleFonts.ibmPlexSans(),
                     ),
             ),
@@ -391,18 +395,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildFooter(Color primaryColor) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'ليس لديك حساب؟ ',
+          l10n.noAccount,
           style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff707070), fontSize: 13.sp),
         ),
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Text(
-            'أنشئ حساباً جديداً',
+            l10n.createAccount,
             style: GoogleFonts.ibmPlexSans(
                 color: primaryColor,
                 fontWeight: FontWeight.bold,

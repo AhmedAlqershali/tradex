@@ -106,7 +106,7 @@ class HomeTopBar extends StatelessWidget {
                         Flexible(
                           child: isLocationLoading
                               ? Text(
-                                  'جارٍ تحديد موقعك...',
+                                  AppLocalizations.of(context).locationLoading,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.ibmPlexSans(
                                     fontSize: 13.sp,
@@ -114,7 +114,7 @@ class HomeTopBar extends StatelessWidget {
                                   ),
                                 )
                               : Text(
-                                  locationName ?? 'حدد موقعك',
+                                  locationName ?? AppLocalizations.of(context).locationSelectPrompt,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.ibmPlexSans(
                                     fontSize: 15.sp,
@@ -131,7 +131,7 @@ class HomeTopBar extends StatelessWidget {
                   GestureDetector(
                     onTap: onLocationRetry,
                     child: Text(
-                      'تعذر تحديد الموقع — إعادة المحاولة',
+                      AppLocalizations.of(context).unableGetCurrentLocation,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.ibmPlexSans(
@@ -142,7 +142,7 @@ class HomeTopBar extends StatelessWidget {
                   )
                 else
                   Text(
-                    'الموقع الحالي',
+                    AppLocalizations.of(context).currentLocationTitle,
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 10.sp, color: Colors.black38),
                   ),

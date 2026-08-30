@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/fcm_service.dart';
 import 'package:ai_saas/shared/models/notification_model.dart';
@@ -43,13 +44,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _background,
         appBar: AppBar(
           title: Text(
-            'الإشعارات',
+            l10n.notifications,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
@@ -62,7 +64,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 final hasUnread =
                     state is NotificationsLoaded && state.unreadCount > 0;
                 return IconButton(
-                  tooltip: 'تحديد الكل كمقروء',
+                  tooltip: l10n.markAllRead,
                   onPressed: hasUnread
                       ? () => context.read<NotificationsBloc>().add(
                             const NotificationsMarkAllReadRequested(),
@@ -85,7 +87,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               return _MessageState(
                 icon: Icons.notifications_off_outlined,
                 message: state.message,
-                actionLabel: 'إعادة المحاولة',
+                actionLabel: l10n.retry,
                 onAction: () => context
                     .read<NotificationsBloc>()
                     .add(const NotificationsLoadRequested()),
@@ -100,9 +102,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             };
 
             if (items.isEmpty) {
-              return const _MessageState(
+              return _MessageState(
                 icon: Icons.notifications_none_rounded,
-                message: 'لا توجد إشعارات جديدة.',
+                message: l10n.noNotifications,
               );
             }
 

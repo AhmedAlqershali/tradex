@@ -85,7 +85,7 @@ class FeaturedProductCard extends StatelessWidget {
                         ));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('تمت الإضافة إلى السلة'),
+                        content: Text(AppLocalizations.of(context).cartAdded),
                         backgroundColor: _primary,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -100,8 +100,8 @@ class FeaturedProductCard extends StatelessWidget {
                       backgroundColor: _primary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r))),
-                  child: const Text(
-                    'أضف إلى السلة',
+                  child: Text(
+                    AppLocalizations.of(context).addToCart,
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),

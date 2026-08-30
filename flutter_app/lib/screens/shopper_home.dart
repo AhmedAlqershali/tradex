@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/client/widgets/home/home_categories_row.dart';
 import 'package:ai_saas/screens/client/widgets/home/home_hero_banner.dart';
@@ -83,9 +84,10 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
       final result = await LocationService.instance.getCurrentLocation();
       if (!mounted) return;
       if (result.region == null || result.region!.isEmpty) {
+        final l10n = AppLocalizations.of(context);
         setState(() {
           _isLocationLoading = false;
-          _locationError = 'تعذر مطابقة موقعك مع منطقة مدعومة.';
+          _locationError = l10n.unableGetCurrentLocation;
         });
         return;
       }
@@ -119,7 +121,7 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
       if (!mounted) return;
       setState(() {
         _isLocationLoading = false;
-        _locationError = 'تعذر الحصول على موقعك الحالي.';
+        _locationError = AppLocalizations.of(context).unableGetCurrentLocation;
       });
     }
   }
@@ -205,6 +207,7 @@ class _ClientDashboardCounters extends StatelessWidget {
         }
 
         if (state is ClientDashboardLoaded) {
+          final l10n = AppLocalizations.of(context);
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
@@ -212,7 +215,7 @@ class _ClientDashboardCounters extends StatelessWidget {
                 Expanded(
                   child: _DashboardCounterCard(
                     icon: Icons.receipt_long_outlined,
-                    label: 'طلباتي',
+                    label: l10n.orders,
                     value: state.dashboard.ordersCount,
                   ),
                 ),
@@ -220,7 +223,7 @@ class _ClientDashboardCounters extends StatelessWidget {
                 Expanded(
                   child: _DashboardCounterCard(
                     icon: Icons.favorite_border_rounded,
-                    label: 'مفضلاتي',
+                    label: l10n.favorites,
                     value: state.dashboard.favoritesCount,
                   ),
                 ),
@@ -334,7 +337,7 @@ class _DashboardCountersError extends StatelessWidget {
             ),
             TextButton(
               onPressed: onRetry,
-              child: const Text('إعادة المحاولة'),
+              child: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -378,7 +381,9 @@ class _NearbyStoresSection extends StatelessWidget {
         return Column(
           children: [
             SectionHeader(
-              title: region == null ? 'متاجر المنطقة' : 'متاجر في $region',
+              title: region == null
+                  ? AppLocalizations.of(context).nearbyStoresTitle
+                  : AppLocalizations.of(context).storesForRegion.replaceFirst('{region}', region ?? ''),
               onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -430,7 +435,7 @@ class _NearbyProductsSection extends StatelessWidget {
         return Column(
           children: [
             SectionHeader(
-              title: 'منتجات مختارة لك',
+              title: AppLocalizations.of(context).selectedForYou,
               onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/widgets/add_product_textfield.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
@@ -80,7 +81,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   void _save(BuildContext context) {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      _showSnack('يرجى إدخال اسم المتجر');
+      _showSnack(AppLocalizations.of(context).storeNameRequiredError);
       return;
     }
     context.read<StoreBloc>().add(
@@ -104,6 +105,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -113,7 +115,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
           elevation: 0,
           iconTheme: const IconThemeData(color: Color(0xff1A1A1A)),
           title: Text(
-            'إعدادات المتجر',
+            l10n.storeSettingsTitle,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -127,7 +129,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             if (state is MyStoreLoaded) {
               _prefill(state.store);
             } else if (state is StoreUpdated) {
-              _showSnack('تم حفظ إعدادات المتجر ✅', color: const Color(0xff22C55E));
+              _showSnack(l10n.storeSavedSuccessfully, color: const Color(0xff22C55E));
             } else if (state is StoreFailure) {
               _showSnack(state.message, color: Colors.redAccent);
             }
@@ -147,7 +149,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   Center(child: _buildLogoPicker()),
                   SizedBox(height: 28.h),
                   Text(
-                    'اسم المتجر',
+                    l10n.storeNameLabel,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
@@ -155,10 +157,10 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                     ),
                   ),
                   SizedBox(height: 6.h),
-                  AppTextField(name: 'اسم المتجر', controller: _nameController),
+                  AppTextField(name: l10n.storeNameHint, controller: _nameController),
                   SizedBox(height: 18.h),
                   Text(
-                    'وصف المتجر',
+                    l10n.storeDescriptionLabel,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
@@ -167,13 +169,13 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   ),
                   SizedBox(height: 6.h),
                   AppTextField(
-                    name: 'اكتب وصفاً مختصراً لمتجرك',
+                    name: l10n.storeDescriptionHint,
                     controller: _descriptionController,
                     maxLines: 4,
                   ),
                   SizedBox(height: 28.h),
                   SizeButton(
-                    title: isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات',
+                    title: isSaving ? l10n.savingChanges : l10n.saveChanges,
                     onTap: isSaving ? null : () => _save(context),
                   ),
                 ],

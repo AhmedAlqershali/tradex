@@ -103,7 +103,7 @@ class _CartScreenState extends State<CartScreen> {
         onPressed: () => Navigator.maybePop(context),
       ),
       title: Text(
-        'سلة التسوق',
+        AppLocalizations.of(context).shoppingCart,
         style: GoogleFonts.ibmPlexSans(
           color: _textDark,
           fontWeight: FontWeight.bold,
@@ -117,7 +117,7 @@ class _CartScreenState extends State<CartScreen> {
             onPressed: () =>
                 context.read<CartBloc>().add(const CartCleared()),
             child: Text(
-              'مسح الكل',
+              AppLocalizations.of(context).clearAll,
               style: GoogleFonts.ibmPlexSans(
                 color: Colors.redAccent,
                 fontSize: 13.sp,
@@ -145,7 +145,7 @@ class _CartScreenState extends State<CartScreen> {
           child: Row(
             children: [
               Text(
-                '$itemCount منتجات في السلة',
+                AppLocalizations.of(context).itemsInCart.replaceFirst('{count}', '$itemCount'),
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 13.sp,
                   color: _textGray,
@@ -183,7 +183,7 @@ class _CartScreenState extends State<CartScreen> {
           onPressed: () => context
               .read<CartBloc>()
               .add(const CartLoadRequested()),
-          child: Text('إعادة المحاولة', style: GoogleFonts.ibmPlexSans()),
+          child: Text(AppLocalizations.of(context).retry, style: GoogleFonts.ibmPlexSans()),
         ),
       ],
     );
@@ -362,7 +362,7 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('المجموع',
+              Text(AppLocalizations.of(context).total,
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -391,7 +391,7 @@ class _CartScreenState extends State<CartScreen> {
                     borderRadius: BorderRadius.circular(14.r)),
               ),
               child: Text(
-                'متابعة الطلب',
+                AppLocalizations.of(context).continueOrder,
                 style: GoogleFonts.ibmPlexSans(
                     fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
@@ -423,7 +423,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
           SizedBox(height: 20.h),
           Text(
-            'سلتك فارغة',
+            AppLocalizations.of(context).emptyCart,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,

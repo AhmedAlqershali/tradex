@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/whatsapp_support_service.dart';
 import 'package:ai_saas/shared/models/admin_plan_model.dart';
@@ -44,7 +45,7 @@ class _MerchantSubscriptionScreenState
           elevation: 0.5,
           iconTheme: const IconThemeData(color: Color(0xff1A1A1A)),
           title: Text(
-            'حالة الاشتراك',
+            l10n.subscriptionStatus,
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff1A1A1A),
               fontWeight: FontWeight.bold,
@@ -134,6 +135,7 @@ class _MerchantSubscriptionScreenState
     required bool loading,
     String? error,
   }) {
+    final l10n = AppLocalizations.of(context);
     final selectedId = _selectedPlan?.id;
     final selectedStillAvailable =
         selectedId != null && plans.any((plan) => plan.id == selectedId);
@@ -147,7 +149,7 @@ class _MerchantSubscriptionScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'الباقات المتاحة',
+          l10n.availablePlans,
           style: GoogleFonts.ibmPlexSans(
             fontSize: 17.sp,
             fontWeight: FontWeight.bold,
@@ -170,7 +172,7 @@ class _MerchantSubscriptionScreenState
           )
         else if (plans.isEmpty)
           _Message(
-            message: 'لا توجد باقات متاحة حالياً.',
+            message: l10n.noSubscriptionPlans,
             icon: Icons.card_membership_outlined,
             onRetry: () => context
                 .read<MerchantSubscriptionBloc>()
@@ -185,7 +187,7 @@ class _MerchantSubscriptionScreenState
               child: ElevatedButton.icon(
                 onPressed: () => _showRequestForm(plan: _selectedPlan),
                 icon: const Icon(Icons.arrow_back_rounded),
-                label: Text('متابعة مع ${_selectedPlan!.displayName}'),
+                label: Text('${l10n.continueText} ${_selectedPlan!.displayName}'),
               ),
             ),
           ],
@@ -236,8 +238,8 @@ class _MerchantSubscriptionScreenState
               ),
               SizedBox(height: 6.h),
               Text(
-                '${_priceLabel(plan.monthlyPrice, 'شهري')} · '
-                '${_priceLabel(plan.yearlyPrice, 'سنوي')}',
+                '${_priceLabel(plan.monthlyPrice, l10n.monthly)} · '
+                '${_priceLabel(plan.yearlyPrice, l10n.yearly)}',
                 style: GoogleFonts.ibmPlexSans(
                   color: _primary,
                   fontWeight: FontWeight.bold,
@@ -246,8 +248,8 @@ class _MerchantSubscriptionScreenState
               ),
               SizedBox(height: 7.h),
               Text(
-                'المنتجات: ${_limitLabel(plan.productLimit)} · '
-                'المتاجر: ${_limitLabel(plan.storeLimit)}',
+                '${l10n.productLimitLabel}: ${_limitLabel(plan.productLimit)} · '
+                '${l10n.storeLimitLabel}: ${_limitLabel(plan.storeLimit)}',
                 style: GoogleFonts.ibmPlexSans(
                   color: const Color(0xff707070),
                   fontSize: 12.sp,
@@ -276,6 +278,7 @@ class _MerchantSubscriptionScreenState
     List<AdminSubscriptionRequest> requests, {
     required bool loading,
   }) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -283,7 +286,7 @@ class _MerchantSubscriptionScreenState
           children: [
             Expanded(
               child: Text(
-                'طلبات الاشتراك',
+                l10n.subscriptionRequests,
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 17.sp,
                   fontWeight: FontWeight.bold,
@@ -294,7 +297,7 @@ class _MerchantSubscriptionScreenState
             TextButton.icon(
               onPressed: _showRequestForm,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('طلب جديد'),
+              label: Text(AppLocalizations.of(context).newRequest),
             ),
           ],
         ),
@@ -312,6 +315,7 @@ class _MerchantSubscriptionScreenState
   }
 
   Widget _buildRequestCard(AdminSubscriptionRequest request) {
+    final l10n = AppLocalizations.of(context);
     final color = _requestStatusColor(request.status);
     return Card(
       margin: EdgeInsets.only(bottom: 10.h),
@@ -339,7 +343,7 @@ class _MerchantSubscriptionScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request.plan?.displayName ?? 'طلب اشتراك',
+                      request.plan?.displayName ?? l10n.subscriptionRequestTitle,
                       style: GoogleFonts.ibmPlexSans(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
@@ -379,6 +383,7 @@ class _MerchantSubscriptionScreenState
   }
 
   void _showRequestForm({AdminPlan? plan}) {
+    final l10n = AppLocalizations.of(context);
     final selectedPlan = plan ?? _selectedPlan;
     final availablePlans =
         _plansFromState(context.read<MerchantSubscriptionBloc>().state);
@@ -387,8 +392,8 @@ class _MerchantSubscriptionScreenState
         SnackBar(
           content: Text(
             availablePlans.isEmpty
-                ? 'لا توجد باقات متاحة حالياً.'
-                : 'يرجى اختيار باقة أولاً.',
+                ? AppLocalizations.of(context).noSubscriptionPlans
+                : AppLocalizations.of(context).choosePlanFirst,
           ),
         ),
       );
@@ -434,20 +439,21 @@ class _MerchantSubscriptionScreenState
   String _requestStatusLabel(String status) {
     switch (status) {
       case 'approved':
-        return 'مقبول';
+        return AppLocalizations.of(context).approvedStatus;
       case 'rejected':
-        return 'مرفوض';
+        return AppLocalizations.of(context).rejectedStatus;
       case 'pending':
-        return 'قيد المراجعة';
+        return AppLocalizations.of(context).pendingStatus;
       default:
-        return status.isEmpty ? 'غير معروف' : status;
+        return status.isEmpty ? AppLocalizations.of(context).unknownStatus : status;
     }
   }
 
   Widget _buildStatusCard(AdminSubscription? subscription) {
+    final l10n = AppLocalizations.of(context);
     if (subscription == null) {
       return _Message(
-        message: 'لا يوجد اشتراك أو فترة تجريبية حالية.',
+        message: l10n.noSubscriptions,
         icon: Icons.card_membership_outlined,
       );
     }
@@ -500,27 +506,27 @@ class _MerchantSubscriptionScreenState
                 ),
               ),
               _statusPill(
-                entitled ? 'نشط' : 'منتهي',
+                entitled ? AppLocalizations.of(context).activeStatus : AppLocalizations.of(context).expiredStatus,
                 entitled ? const Color(0xff00A878) : const Color(0xffE53E3E),
               ),
             ],
           ),
           SizedBox(height: 22.h),
-          _detailRow('النوع', isTrial ? 'فترة تجريبية' : 'اشتراك مدفوع'),
-          _detailRow('الحالة', _statusLabel(subscription.status)),
+          _detailRow(AppLocalizations.of(context).typeLabel, isTrial ? AppLocalizations.of(context).trialLabel : AppLocalizations.of(context).paidSubscription),
+          _detailRow(AppLocalizations.of(context).statusLabel, _statusLabel(subscription.status)),
           if (subscription.startsAt != null)
             _detailRow(
-              'بدأ في',
+              AppLocalizations.of(context).startedAt,
               '${subscription.startsAt!.day}/${subscription.startsAt!.month}/${subscription.startsAt!.year}',
             ),
           if (subscription.billingCycle.isNotEmpty)
             _detailRow(
-                'دورة الفوترة', _billingLabel(subscription.billingCycle)),
+                AppLocalizations.of(context).billingCycleLabel, _billingLabel(subscription.billingCycle)),
           if (endsAt != null)
             _detailRow(
-              'ينتهي في',
+              AppLocalizations.of(context).endsAt,
               '${endsAt.day}/${endsAt.month}/${endsAt.year}'
-                  '${daysRemaining != null ? ' ($daysRemaining يوم متبقٍ)' : ''}',
+                  '${daysRemaining != null ? ' (${daysRemaining} ${AppLocalizations.of(context).daysRemaining})' : ''}',
             ),
           if (!entitled)
             Padding(
@@ -529,7 +535,7 @@ class _MerchantSubscriptionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'انتهى الوصول إلى ميزات التاجر. أرسل طلب اشتراك جديد لاستعادة الوصول بعد الموافقة.',
+                    AppLocalizations.of(context).merchantAccessExpiredMessage,
                     style: GoogleFonts.ibmPlexSans(
                       color: const Color(0xffC53030),
                       fontSize: 12.sp,
@@ -542,8 +548,8 @@ class _MerchantSubscriptionScreenState
                     child: OutlinedButton.icon(
                       onPressed: _openWhatsAppSupport,
                       icon: const Icon(Icons.chat_rounded),
-                      label: const Text(
-                        'Contact Support via WhatsApp\n+972 59 766 8446',
+                      label: Text(
+                        AppLocalizations.of(context).supportViaWhatsApp,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -560,8 +566,8 @@ class _MerchantSubscriptionScreenState
     final opened = await WhatsAppSupportService.openChat();
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تعذر فتح واتساب. تواصل مع الدعم على +972597668446.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).supportViaWhatsApp),
         ),
       );
     }
@@ -602,22 +608,22 @@ class _MerchantSubscriptionScreenState
   String _statusLabel(String status) {
     switch (status) {
       case 'active':
-        return 'نشط';
+        return AppLocalizations.of(context).activeStatus;
       case 'expired':
-        return 'منتهي';
+        return AppLocalizations.of(context).expiredStatus;
       case 'cancelled':
-        return 'ملغي';
+        return AppLocalizations.of(context).cancelledStatus;
       default:
-        return status.isEmpty ? 'غير معروف' : status;
+        return status.isEmpty ? AppLocalizations.of(context).unknownStatus : status;
     }
   }
 
   String _billingLabel(String cycle) {
     switch (cycle) {
       case 'monthly':
-        return 'شهري';
+        return AppLocalizations.of(context).monthly;
       case 'yearly':
-        return 'سنوي';
+        return AppLocalizations.of(context).yearly;
       default:
         return cycle;
     }
@@ -644,7 +650,7 @@ class _RequestEmptyState extends StatelessWidget {
               color: Color(0xff888888), size: 34),
           SizedBox(height: 8.h),
           Text(
-            'لا توجد طلبات اشتراك سابقة',
+            AppLocalizations.of(context).noPreviousSubscriptionRequests,
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff707070),
               fontSize: 13.sp,
@@ -653,7 +659,7 @@ class _RequestEmptyState extends StatelessWidget {
           SizedBox(height: 8.h),
           OutlinedButton(
             onPressed: onCreate,
-            child: const Text('إرسال طلب اشتراك'),
+            child: Text(AppLocalizations.of(context).sendSubscriptionRequest),
           ),
         ],
       ),
@@ -740,35 +746,35 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('إرسال طلب اشتراك',
+                      Text(AppLocalizations.of(context).requestSubscription,
                           style: GoogleFonts.ibmPlexSans(
                               fontSize: 19.sp, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6.h),
                       Text(
-                        'أدخل بيانات الخطة وارفع صورة إثبات الدفع لمراجعة الإدارة.',
+                        AppLocalizations.of(context).requestSubscriptionDescription,
                         style: GoogleFonts.ibmPlexSans(
                             color: const Color(0xff707070), fontSize: 12.sp),
                       ),
                       SizedBox(height: 16.h),
                       _field(
                         controller: _planIdController,
-                        label: 'معرّف الخطة',
-                        hint: 'مثال: 2',
+                        label: AppLocalizations.of(context).planIdLabel,
+                        hint: '2',
                         keyboardType: TextInputType.number,
                         validator: (value) => int.tryParse(value ?? '') == null
-                            ? 'معرّف الخطة مطلوب'
+                            ? AppLocalizations.of(context).planIdRequired
                             : null,
                       ),
                       SizedBox(height: 10.h),
                       DropdownButtonFormField<String>(
                         value: _billingCycle,
-                        decoration:
-                            const InputDecoration(labelText: 'دورة الفوترة'),
-                        items: const [
+                        decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).billingCycleLabel),
+                        items: [
                           DropdownMenuItem(
-                              value: 'monthly', child: Text('شهري')),
+                              value: 'monthly', child: Text(AppLocalizations.of(context).monthly)),
                           DropdownMenuItem(
-                              value: 'yearly', child: Text('سنوي')),
+                              value: 'yearly', child: Text(AppLocalizations.of(context).yearly)),
                         ],
                         onChanged: submitting
                             ? null
@@ -779,29 +785,29 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                       SizedBox(height: 10.h),
                       _field(
                         controller: _nameController,
-                        label: 'الاسم الكامل',
+                        label: AppLocalizations.of(context).fullName,
                         validator: (value) =>
-                            value!.trim().isEmpty ? 'الاسم الكامل مطلوب' : null,
+                            value!.trim().isEmpty ? AppLocalizations.of(context).fullNameRequired : null,
                       ),
                       SizedBox(height: 10.h),
                       _field(
                         controller: _phoneController,
-                        label: 'رقم الهاتف',
+                        label: AppLocalizations.of(context).phoneNumber,
                         keyboardType: TextInputType.phone,
                         validator: (value) =>
-                            value!.trim().isEmpty ? 'رقم الهاتف مطلوب' : null,
+                            value!.trim().isEmpty ? AppLocalizations.of(context).phoneRequired : null,
                       ),
                       SizedBox(height: 10.h),
                       DropdownButtonFormField<String>(
                         value: _paymentMethod,
-                        decoration:
-                            const InputDecoration(labelText: 'طريقة الدفع'),
-                        items: const [
+                        decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).paymentMethodLabel),
+                        items: [
                           DropdownMenuItem(
                               value: 'bank_transfer',
-                              child: Text('تحويل بنكي')),
+                              child: Text(AppLocalizations.of(context).bankTransfer)),
                           DropdownMenuItem(
-                              value: 'cash', child: Text('دفع نقدي')),
+                              value: 'cash', child: Text(AppLocalizations.of(context).cash)),
                         ],
                         onChanged: submitting
                             ? null
@@ -814,8 +820,8 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                         controller: _notesController,
                         maxLines: 3,
                         maxLength: 1000,
-                        decoration: const InputDecoration(
-                          labelText: 'ملاحظات (اختياري)',
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).notesOptional,
                           alignLabelWithHint: true,
                         ),
                       ),
@@ -824,14 +830,14 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                         onPressed: submitting ? null : _pickProof,
                         icon: const Icon(Icons.upload_file_outlined),
                         label: Text(_proof == null
-                            ? 'اختيار إثبات الدفع'
+                            ? AppLocalizations.of(context).selectPaymentProofLabel
                             : _proof!.name),
                       ),
                       if (_proof == null)
                         Padding(
                           padding: EdgeInsets.only(top: 5.h),
                           child: Text(
-                            'صورة JPEG أو PNG أو WebP، بحد أقصى 4 ميجابايت',
+                            AppLocalizations.of(context).paymentProofRequirements,
                             style: GoogleFonts.ibmPlexSans(
                                 color: const Color(0xff888888),
                                 fontSize: 11.sp),
@@ -849,7 +855,7 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                                   child: CircularProgressIndicator(
                                       color: Colors.white, strokeWidth: 2),
                                 )
-                              : const Text('إرسال الطلب'),
+                              : Text(AppLocalizations.of(context).sendRequestLabel),
                         ),
                       ),
                     ],
@@ -888,7 +894,7 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
     final proof = _proof;
     if (proof == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى اختيار صورة إثبات الدفع أولاً.')),
+        SnackBar(content: Text(AppLocalizations.of(context).paymentProofRequired)),
       );
       return;
     }
@@ -937,7 +943,7 @@ class _MerchantRequestDetailsSheet extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('تفاصيل طلب الاشتراك',
+                        child: Text(AppLocalizations.of(context).subscriptionRequestDetails,
                             style: GoogleFonts.ibmPlexSans(
                                 fontSize: 18.sp, fontWeight: FontWeight.bold)),
                       ),
@@ -950,16 +956,16 @@ class _MerchantRequestDetailsSheet extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 18.h),
-                  _line('الخطة', selected.plan?.displayName ?? '—'),
-                  _line('الحالة', selected.status),
-                  _line('دورة الفوترة', selected.billingCycle),
-                  _line('طريقة الدفع', selected.paymentMethod),
-                  _line('الاسم', selected.fullName),
-                  _line('الهاتف', selected.phone),
+                  _line(AppLocalizations.of(context).planId, selected.plan?.displayName ?? '—'),
+                  _line(AppLocalizations.of(context).statusLabel, selected.status),
+                  _line(AppLocalizations.of(context).billingCycleLabel, selected.billingCycle),
+                  _line(AppLocalizations.of(context).paymentMethodLabel, selected.paymentMethod),
+                  _line(AppLocalizations.of(context).fullName, selected.fullName),
+                  _line(AppLocalizations.of(context).phoneNumber, selected.phone),
                   if (selected.rejectionReason != null)
                     _line('سبب الرفض', selected.rejectionReason!),
                   if (selected.notes != null && selected.notes!.isNotEmpty)
-                    _line('ملاحظات', selected.notes!),
+                    _line(AppLocalizations.of(context).notesOptional, selected.notes!),
                 ],
               );
             },
@@ -1019,7 +1025,7 @@ class _Message extends StatelessWidget {
             if (onRetry != null) ...[
               SizedBox(height: 8.h),
               TextButton(
-                  onPressed: onRetry, child: const Text('إعادة المحاولة')),
+                  onPressed: onRetry, child: Text(AppLocalizations.of(context).retry)),
             ],
           ],
         ),

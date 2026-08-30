@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
@@ -26,7 +27,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   // ignore: unused_field — reserved for future region-filter feature
-  final String _selectedRegion = 'المنطقة';
+  final String _selectedRegion = '';
   String _selectedStoreCategory = '';
   String? _selectedCategoryId;
   String _searchQuery = '';
@@ -117,6 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -143,7 +145,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           style: GoogleFonts.ibmPlexSans(fontSize: 14.sp),
                           textDirection: TextDirection.rtl,
                           decoration: InputDecoration(
-                            hintText: 'ابحث عن منتج أو متجر...',
+                            hintText: l10n.search,
                             hintStyle: GoogleFonts.ibmPlexSans(
                                 fontSize: 13.sp,
                                 color: const Color(0xffAAAAAA)),
@@ -255,8 +257,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             SizedBox(height: 12.h),
                             Text(
                               _searchQuery.isEmpty
-                                  ? 'لا توجد منتجات'
-                                  : 'لا توجد نتائج لـ "$_searchQuery"',
+                                  ? AppLocalizations.of(context).noProductsFound
+                                  : AppLocalizations.of(context).noResultsForQuery.replaceFirst('{query}', _searchQuery),
                               style: GoogleFonts.ibmPlexSans(
                                   fontSize: 14.sp,
                                   color: const Color(0xff888888)),
@@ -334,7 +336,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         color: Colors.black12,
                         borderRadius: BorderRadius.circular(2.r))),
                 SizedBox(height: 12.h),
-                Text('اختر فئة المتجر',
+                Text(AppLocalizations.of(context).chooseStoreCategory,
                     style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,

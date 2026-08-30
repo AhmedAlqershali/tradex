@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
@@ -53,8 +54,8 @@ class _CompleteProfilePhotoScreenState
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تعذر اختيار الصورة'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).photoUploadFailed),
         ),
       );
     }
@@ -94,7 +95,7 @@ class _CompleteProfilePhotoScreenState
                   ),
                   SizedBox(height: 18.h),
                   Text(
-                    'اختر مصدر الصورة',
+                    AppLocalizations.of(context).chooseImageSourceTitle,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -110,7 +111,7 @@ class _CompleteProfilePhotoScreenState
                       size: 24.sp,
                     ),
                     title: Text(
-                      'معرض الصور',
+                      AppLocalizations.of(context).galleryLabel,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp,
                       ),
@@ -128,7 +129,7 @@ class _CompleteProfilePhotoScreenState
                       size: 24.sp,
                     ),
                     title: Text(
-                      'الكاميرا',
+                      AppLocalizations.of(context).cameraLabel,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp,
                       ),
@@ -177,7 +178,7 @@ class _CompleteProfilePhotoScreenState
 
       final message =
           UserController.instance.authErrorNotifier.value ??
-              'فشل رفع الصورة. يمكنك المتابعة والتغيير لاحقاً.';
+              AppLocalizations.of(context).photoUploadFailed;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -290,7 +291,7 @@ class _CompleteProfilePhotoScreenState
                 ),
               )
                   : Text(
-                'رفع صورة',
+                AppLocalizations.of(context).uploadPhoto,
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
@@ -316,7 +317,7 @@ class _CompleteProfilePhotoScreenState
                 ),
               ),
               child: Text(
-                'تخطي',
+                AppLocalizations.of(context).skip,
                 style: GoogleFonts.ibmPlexSans(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
@@ -359,7 +360,7 @@ class _CompleteProfilePhotoScreenState
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  'لا تملك صورة؟ اصنع واحدة تشبهك',
+                  AppLocalizations.of(context).aiImagePrompt,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.ibmPlexSans(
@@ -373,7 +374,7 @@ class _CompleteProfilePhotoScreenState
           ),
           SizedBox(height: 4.h),
           Text(
-            'كيف تود أن تبدو صورتك؟',
+            AppLocalizations.of(context).aiImagePromptHint,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 12.sp,
               color: _primary.withValues(alpha: 0.8),
@@ -409,7 +410,7 @@ class _CompleteProfilePhotoScreenState
                           fontSize: 13.sp,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'وصف تفصيلي للصورة...',
+                          hintText: AppLocalizations.of(context).aiPromptHint,
                           hintStyle: GoogleFonts.ibmPlexSans(
                             color: const Color(0xFFBBBBBB),
                             fontSize: 12.sp,
@@ -435,9 +436,9 @@ class _CompleteProfilePhotoScreenState
 
                         if (prompt.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'اكتب وصفاً للصورة أولاً',
+                                AppLocalizations.of(context).writeImageDescriptionFirst,
                               ),
                             ),
                           );
@@ -445,9 +446,9 @@ class _CompleteProfilePhotoScreenState
                         }
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'ميزة إنشاء الصورة بالذكاء الاصطناعي قيد التجهيز',
+                              AppLocalizations.of(context).aiFeatureInProgress,
                             ),
                           ),
                         );
@@ -464,7 +465,7 @@ class _CompleteProfilePhotoScreenState
                         ),
                       ),
                       child: Text(
-                        'إنشاء',
+                        AppLocalizations.of(context).generateImage,
                         style: GoogleFonts.ibmPlexSans(
                           color: _primary,
                           fontSize: 13.sp,
@@ -494,7 +495,7 @@ class _CompleteProfilePhotoScreenState
           scrolledUnderElevation: 0,
           centerTitle: true,
           title: Text(
-            'رفع صورة شخصية',
+            AppLocalizations.of(context).uploadPhoto,
             style: GoogleFonts.ibmPlexSans(
               color: _grayText,
               fontSize: 14.sp,
@@ -532,7 +533,7 @@ class _CompleteProfilePhotoScreenState
                       SizedBox(height: 24.h),
 
                       Text(
-                        'أضف صورتك الشخصية لتكتمل هويتك',
+                        AppLocalizations.of(context).profilePhotoTitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 20.sp,
@@ -544,7 +545,7 @@ class _CompleteProfilePhotoScreenState
                       SizedBox(height: 8.h),
 
                       Text(
-                        'يمكنك تغيير الصورة لاحقاً من إعدادات الحساب.',
+                        AppLocalizations.of(context).profilePhotoSubtitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 13.sp,

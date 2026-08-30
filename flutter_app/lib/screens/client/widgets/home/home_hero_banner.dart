@@ -27,7 +27,7 @@ class HomeHeroBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'اكتشف متاجر منطقتك',
+            AppLocalizations.of(context).discoverLocalStores,
             style: GoogleFonts.ibmPlexSans(
                 color: Colors.white,
                 fontSize: 20.sp,
@@ -35,7 +35,7 @@ class HomeHeroBanner extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            'أفضل العروض والخصومات القريبة منك 🔥',
+            AppLocalizations.of(context).bestLocalDeals,
             style: GoogleFonts.ibmPlexSans(
                 color: Colors.white.withValues(alpha: 0.9), fontSize: 13.sp),
           ),
@@ -52,7 +52,7 @@ class HomeHeroBanner extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.r)),
               padding: EdgeInsets.symmetric(horizontal: 20.w),
             ),
-            child: Text('اكتشف الآن',
+            child: Text(AppLocalizations.of(context).discoverNow,
                 style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
           ),
         ],

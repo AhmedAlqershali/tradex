@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
@@ -26,6 +27,7 @@ class _RecentlyArrivedScreenState extends State<RecentlyArrivedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -39,7 +41,7 @@ class _RecentlyArrivedScreenState extends State<RecentlyArrivedScreen> {
             onPressed: () => Navigator.maybePop(context),
           ),
           title: Text(
-            'وصل حديثاً',
+            l10n.newArrivals,
             style: GoogleFonts.ibmPlexSans(
                 color: Colors.black,
                 fontSize: 18.sp,
@@ -67,7 +69,7 @@ class _RecentlyArrivedScreenState extends State<RecentlyArrivedScreen> {
                     Icon(Icons.shopping_bag_outlined,
                         size: 60.sp, color: Colors.black12),
                     SizedBox(height: 12.h),
-                    Text('لا توجد منتجات حديثة',
+                    Text(l10n.noRecentProducts,
                         style: GoogleFonts.ibmPlexSans(
                             fontSize: 14.sp, color: Colors.black38)),
                   ],
@@ -147,7 +149,7 @@ class ProductGridCard extends StatelessWidget {
                           color: const Color(0xff4D41DF),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
-                        child: Text('مميز',
+                        child: Text(l10n.featured,
                             style: GoogleFonts.ibmPlexSans(
                                 fontSize: 9.sp,
                                 color: Colors.white,

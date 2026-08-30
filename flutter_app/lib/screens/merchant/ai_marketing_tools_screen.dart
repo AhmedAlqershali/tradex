@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/screens/merchant/merchant_subscription_screen.dart';
 import 'package:ai_saas/shared/ai/ai_controller.dart';
@@ -31,6 +32,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.scaffold,
       body: SafeArea(
@@ -49,11 +51,11 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                     _buildWorkspaceFeedback(),
                   ],
                   SizedBox(height: 28.h),
-                  _buildSectionHeading('أدواتك الذكية', 'كل ما تحتاجه لمتجرك'),
+                  _buildSectionHeading(l10n.aiSmartWorkspaceTitle, l10n.aiSmartWorkspaceSubtitle),
                   SizedBox(height: 12.h),
                   _buildQuickActions(),
                   SizedBox(height: 28.h),
-                  _buildSectionHeading('مصمّم لمتجرك', 'أفكار تبدأ منها الآن'),
+                  _buildSectionHeading(l10n.aiSmartWorkspaceTitle, l10n.aiSmartWorkspaceSubtitle),
                   SizedBox(height: 12.h),
                   _buildContextActions(),
                   SizedBox(height: 28.h),
@@ -68,6 +70,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Row(
@@ -89,7 +92,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             children: [
               Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               SizedBox(height: 2.h),
-              Text('مساحتك الذكية لإدارة متجرك', style: TextStyle(fontSize: 12.sp, color: AppColors.textGray)),
+              Text(l10n.aiSmartWorkspaceSubtitle, style: TextStyle(fontSize: 12.sp, color: AppColors.textGray)),
             ],
           ),
           const Spacer(),
@@ -116,9 +119,9 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ما الذي تريد إنجازه اليوم؟', style: TextStyle(color: Colors.white, fontSize: 19.sp, fontWeight: FontWeight.w700)),
+            Text(l10n.aiWhatToDoPrompt, style: TextStyle(color: Colors.white, fontSize: 19.sp, fontWeight: FontWeight.w700)),
             SizedBox(height: 5.h),
-            Text('اختر أداة أو ابدأ من فكرة منتجك.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.sp)),
+            Text(l10n.aiChooseToolPrompt, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12.sp)),
             SizedBox(height: 18.h),
             _buildToolSelector(),
             SizedBox(height: 12.h),
@@ -132,10 +135,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 maxLines: 5,
                 textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
-                  hintText: 'كيف يمكنني مساعدتك؟',
+                  hintText: l10n.aiPromptPlaceholder,
                   hintStyle: TextStyle(color: AppColors.textHint, fontSize: 13.sp),
                   suffixIcon: IconButton(
-                    tooltip: 'توليد النتيجة',
+                    tooltip: l10n.generateResult,
                     onPressed: _workspaceCanGenerate ? _generateInWorkspace : null,
                     icon: _workspaceLoading
                         ? SizedBox(width: 20.w, height: 20.h, child: const CircularProgressIndicator(strokeWidth: 2))
@@ -155,7 +158,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
               child: ElevatedButton.icon(
                 onPressed: _workspaceCanGenerate ? _generateInWorkspace : null,
                 icon: _workspaceLoading ? SizedBox(width: 17.w, height: 17.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.auto_awesome_rounded, size: 18),
-                label: Text(_workspaceLoading ? 'جارٍ التوليد...' : 'توليد باستخدام Tradex AI'),
+                label: Text(_workspaceLoading ? l10n.aiGenerateButtonLoading : l10n.aiGenerateButton),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primaryDark,
@@ -173,11 +176,12 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildToolSelector() {
-    const tools = [
-      (AiToolType.productDescription, 'وصف المنتج', Icons.description_outlined),
-      (AiToolType.instagramPost, 'محتوى تسويقي', Icons.campaign_outlined),
-      (AiToolType.hashtags, 'هاشتاقات', Icons.tag),
-      (AiToolType.customerReply, 'رد العميل', Icons.reply_rounded),
+    final l10n = AppLocalizations.of(context);
+    final tools = [
+      (AiToolType.productDescription, l10n.productDescriptionTool, Icons.description_outlined),
+      (AiToolType.instagramPost, l10n.marketingContentTool, Icons.campaign_outlined),
+      (AiToolType.hashtags, l10n.hashtagsTool, Icons.tag),
+      (AiToolType.customerReply, l10n.customerReplyTool, Icons.reply_rounded),
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -271,9 +275,9 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     }
     final message = cause.toString();
     if (error is AiRuntimeFailure) {
-      return 'المرحلة: ${error.stage}\nالخطأ: $message';
+      return '${AppLocalizations.of(context).aiStageLabel}: ${error.stage}\n${AppLocalizations.of(context).error}: $message';
     }
-    return 'المرحلة: غير محددة\nالخطأ: $message';
+    return '${AppLocalizations.of(context).aiStageLabel}: ${AppLocalizations.of(context).aiStageUnknown}\n${AppLocalizations.of(context).error}: $message';
   }
 
   Widget _buildWorkspaceFeedback() {
@@ -281,16 +285,16 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       return _feedbackCard(const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator())));
     }
     if (_workspaceError != null) {
-      return _feedbackCard(Row(children: [Icon(Icons.error_outline, color: AppColors.red, size: 22.sp), SizedBox(width: 10.w), Expanded(child: Text(_workspaceError!, style: TextStyle(color: AppColors.textDark, fontSize: 13.sp, height: 1.4))), IconButton(tooltip: 'إغلاق', onPressed: () => setState(() => _workspaceError = null), icon: const Icon(Icons.close))]));
+      return _feedbackCard(Row(children: [Icon(Icons.error_outline, color: AppColors.red, size: 22.sp), SizedBox(width: 10.w), Expanded(child: Text(_workspaceError!, style: TextStyle(color: AppColors.textDark, fontSize: 13.sp, height: 1.4))), IconButton(tooltip: AppLocalizations.of(context).close, onPressed: () => setState(() => _workspaceError = null), icon: const Icon(Icons.close))]));
     }
     final result = _workspaceResult;
     if (result == null) return const SizedBox.shrink();
     return _feedbackCard(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), IconButton(tooltip: 'نسخ', onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
+      Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), IconButton(tooltip: AppLocalizations.of(context).copy, onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
       const Divider(),
       ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: TextDirection.rtl, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
       SizedBox(height: 8.h),
-      Align(alignment: AlignmentDirectional.centerEnd, child: TextButton.icon(onPressed: _generateInWorkspace, icon: const Icon(Icons.refresh_rounded, size: 18), label: const Text('إعادة التوليد'))),
+      Align(alignment: AlignmentDirectional.centerEnd, child: TextButton.icon(onPressed: _generateInWorkspace, icon: const Icon(Icons.refresh_rounded, size: 18), label: Text(AppLocalizations.of(context).regenerateResult))),
     ]));
   }
 
@@ -298,7 +302,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   void _copyWorkspaceResult(String output) {
     Clipboard.setData(ClipboardData(text: output));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم نسخ النتيجة')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).resultCopied)));
   }
 
   Widget _buildSectionHeading(String title, String subtitle) {
@@ -314,11 +318,12 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildQuickActions() {
-    const tools = [
-      (AiToolType.productDescription, Icons.description_outlined, 'وصف منتج', AppColors.primary),
-      (AiToolType.instagramPost, Icons.camera_alt_outlined, 'منشور', AppColors.orange),
-      (AiToolType.hashtags, Icons.tag, 'هاشتاقات', AppColors.teal),
-      (AiToolType.customerReply, Icons.forum_outlined, 'رد عميل', AppColors.pink),
+    final l10n = AppLocalizations.of(context);
+    final tools = [
+      (AiToolType.productDescription, Icons.description_outlined, l10n.productDescriptionTool, AppColors.primary),
+      (AiToolType.instagramPost, Icons.camera_alt_outlined, l10n.marketingContentTool, AppColors.orange),
+      (AiToolType.hashtags, Icons.tag, l10n.hashtagsTool, AppColors.teal),
+      (AiToolType.customerReply, Icons.forum_outlined, l10n.customerReplyTool, AppColors.pink),
     ];
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -349,17 +354,18 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildContextActions() {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         reverse: true,
         child: Row(children: [
-          _contextChip('اكتب وصفًا مقنعًا', Icons.edit_note_rounded, AiToolType.productDescription),
+          _contextChip(l10n.aiContextPrompt1, Icons.edit_note_rounded, AiToolType.productDescription),
           SizedBox(width: 10.w),
-          _contextChip('جهّز منشورًا', Icons.campaign_outlined, AiToolType.instagramPost),
+          _contextChip(l10n.aiContextPrompt2, Icons.campaign_outlined, AiToolType.instagramPost),
           SizedBox(width: 10.w),
-          _contextChip('رد على عميل', Icons.reply_rounded, AiToolType.customerReply),
+          _contextChip(l10n.aiContextPrompt3, Icons.reply_rounded, AiToolType.customerReply),
         ]),
       ),
     );
@@ -378,6 +384,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildRecentSection() {
+    final l10n = AppLocalizations.of(context);
     return ValueListenableBuilder<List<AiResult>>(
       valueListenable: AiController.instance.historyNotifier,
       builder: (context, history, _) {
@@ -385,10 +392,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _buildSectionHeading('النشاط الأخير', 'محفوظ في هذه الجلسة'),
+            _buildSectionHeading(l10n.aiRecentActivity, l10n.aiSavedInSession),
             SizedBox(height: 12.h),
             if (recent.isEmpty)
-              Container(width: double.infinity, padding: EdgeInsets.all(18.r), decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: AppColors.border)), child: Row(children: [Icon(Icons.history_rounded, color: AppColors.textLight, size: 23.sp), SizedBox(width: 12.w), Expanded(child: Text('ستظهر نتائجك هنا بعد أول استخدام لأدوات Tradex AI.', style: TextStyle(color: AppColors.textGray, fontSize: 12.sp, height: 1.5))) ]))
+              Container(width: double.infinity, padding: EdgeInsets.all(18.r), decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: AppColors.border)), child: Row(children: [Icon(Icons.history_rounded, color: AppColors.textLight, size: 23.sp), SizedBox(width: 12.w), Expanded(child: Text(l10n.aiResultOutputHint, style: TextStyle(color: AppColors.textGray, fontSize: 12.sp, height: 1.5))) ]))
             else
               ...recent.map((result) => Padding(padding: EdgeInsets.only(bottom: 9.h), child: _recentItem(icon: _iconForTool(result.tool), iconColor: _colorForTool(result.tool), title: '${result.tool.label}: ${result.prompt.split(' | ').first}', time: _formatTime(result.generatedAt), onTap: () => setState(() { _selectedTool = result.tool; _workspaceResult = result; _workspaceError = null; })))),
           ]),
@@ -493,7 +500,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'مساعدك الذكي\nلإدارة متجرك\nباحترافية',
+              AppLocalizations.of(context).aiHeroTitle,
               style: TextStyle(
                 color: AppColors.white,
                 fontSize: 26.sp,
@@ -503,7 +510,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'استخدم أدوات الذكاء الاصطناعي لتوفير وزيادة مبيعاتك بضغطة زر واحدة.',
+              AppLocalizations.of(context).aiHeroSubtitle,
               style: TextStyle(
                 color: AppColors.white.withValues(alpha: 0.85),
                 fontSize: 14.sp,
@@ -519,14 +526,14 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                     AiToolType.productDescription,
                   ),
                   child: _heroButton(
-                    'ابدأ الآن',
+                    AppLocalizations.of(context).startNow,
                     AppColors.white,
                     AppColors.purple,
                   ),
                 ),
                 SizedBox(width: 12.w),
                 _heroButton(
-                  'شاهد الشرح',
+                  AppLocalizations.of(context).watchGuide,
                   Colors.transparent,
                   AppColors.white,
                   isOutlined: true,
@@ -708,7 +715,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       child: Column(
         children: [
           Text(
-            '98%',
+            AppLocalizations.of(context).aiAccuracy,
             style: TextStyle(
               color: AppColors.green,
               fontSize: 52.sp,
@@ -717,7 +724,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'دقة المحتوى المولّد بواسطة AI',
+            AppLocalizations.of(context).aiGeneratedAccuracy,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.white,
@@ -727,7 +734,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
           ),
           SizedBox(height: 6.h),
           Text(
-            'بناءً على أكثر من 10,000 محتوى تم إنشاؤه',
+            AppLocalizations.of(context).aiGeneratedVolume,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.white.withValues(alpha: 0.45),
@@ -753,7 +760,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'آخر العمليات',
+                  AppLocalizations.of(context).aiOverviewTitle,
                   style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.bold,
@@ -763,7 +770,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 TextButton(
                   onPressed: _showHistory,
                   child: Text(
-                    'عرض السجل',
+                    AppLocalizations.of(context).aiViewHistory,
                     style: TextStyle(
                       color: AppColors.purple,
                       fontSize: 13.sp,
@@ -785,7 +792,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                       borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Text(
-                      'لا توجد عمليات بعد. استخدم إحدى أدوات الذكاء الاصطناعي لبدء التوليد.',
+                      AppLocalizations.of(context).aiNoOperationsAfter,
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 13.sp,
@@ -830,7 +837,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             child: Padding(
               padding: EdgeInsets.all(20.r),
               child: history.isEmpty
-                  ? const Center(child: Text('لا توجد عمليات محفوظة بعد.'))
+                  ? Center(child: Text(AppLocalizations.of(context).aiNoHistory))
                   : ListView.separated(
                       itemCount: history.length,
                       separatorBuilder: (_, __) => const Divider(),
@@ -888,20 +895,21 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   String _formatTime(DateTime dt) {
     final diff = DateTime.now().difference(dt);
+    final l10n = AppLocalizations.of(context);
 
     if (diff.inMinutes < 1) {
-      return 'الآن';
+      return l10n.now;
     }
 
     if (diff.inMinutes < 60) {
-      return 'قبل ${diff.inMinutes} دقيقة';
+      return '${l10n.before} ${diff.inMinutes} ${l10n.minutesAgo}';
     }
 
     if (diff.inHours < 24) {
-      return 'قبل ${diff.inHours} ساعة';
+      return '${l10n.before} ${diff.inHours} ${l10n.hoursAgo}';
     }
 
-    return 'قبل ${diff.inDays} يوم';
+    return '${l10n.before} ${diff.inDays} ${l10n.daysAgo}';
   }
 
   Widget _recentItem({
@@ -1038,18 +1046,19 @@ class _AiToolSheetState extends State<_AiToolSheet> {
   }
 
   String get _sheetTitle {
+    final l10n = AppLocalizations.of(context);
     switch (widget.tool) {
       case AiToolType.productDescription:
-        return 'كتابة وصف منتج';
+        return l10n.aiGenerateSheetTitleProduct;
 
       case AiToolType.instagramPost:
-        return 'إنشاء بوست انستغرام';
+        return l10n.aiGenerateSheetTitleInstagram;
 
       case AiToolType.hashtags:
-        return 'توليد هاشتاقات';
+        return l10n.aiGenerateSheetTitleHashtags;
 
       case AiToolType.customerReply:
-        return 'كتابة رد للعميل';
+        return l10n.aiGenerateSheetTitleCustomerReply;
     }
   }
 
@@ -1138,9 +1147,9 @@ class _AiToolSheetState extends State<_AiToolSheet> {
     final cause = error is AiRuntimeFailure ? error.cause : error;
     final message = cause.toString();
     if (error is AiRuntimeFailure) {
-      return 'المرحلة: ${error.stage}\nالخطأ: $message';
+      return '${AppLocalizations.of(context).aiStageLabel}: ${error.stage}\n${AppLocalizations.of(context).error}: $message';
     }
-    return 'المرحلة: غير محددة\nالخطأ: $message';
+    return '${AppLocalizations.of(context).aiStageLabel}: ${AppLocalizations.of(context).aiStageUnknown}\n${AppLocalizations.of(context).error}: $message';
   }
 
   bool get _canGenerate {
@@ -1160,8 +1169,8 @@ class _AiToolSheetState extends State<_AiToolSheet> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          'تم النسخ إلى الحافظة ✅',
+        content: Text(
+          AppLocalizations.of(context).aiCopiedToClipboard,
           textDirection: TextDirection.rtl,
         ),
         backgroundColor: _accentColor,
@@ -1310,8 +1319,8 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                                   ),
                             label: Text(
                               _loading
-                                  ? 'جارٍ التوليد...'
-                                  : 'توليد بالذكاء الاصطناعي',
+                                  ? AppLocalizations.of(context).aiGenerateButtonLoading
+                                  : AppLocalizations.of(context).generateAiText,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 15.sp,
@@ -1346,62 +1355,62 @@ class _AiToolSheetState extends State<_AiToolSheet> {
     switch (widget.tool) {
       case AiToolType.productDescription:
         return [
-          _label('اسم المنتج *'),
+          _label(AppLocalizations.of(context).productNameLabel),
           _inputField(
             _field1,
-            'مثال: سماعات لاسلكية بلوتوث',
+            AppLocalizations.of(context).exampleWirelessHeadphones,
           ),
           SizedBox(height: 14.h),
-          _label('الفئة (اختياري)'),
+          _label(AppLocalizations.of(context).optionalCategory),
           _inputField(
             _field2,
-            'مثال: إلكترونيات',
+            AppLocalizations.of(context).categoryExample,
           ),
           SizedBox(height: 14.h),
-          _label('معلومات إضافية (اختياري)'),
+          _label(AppLocalizations.of(context).optionalDetails),
           _inputField(
             _field3,
-            'مثال: مقاومة للماء، بطارية 24 ساعة',
+            AppLocalizations.of(context).productDescriptionExample,
             maxLines: 3,
           ),
         ];
 
       case AiToolType.instagramPost:
         return [
-          _label('اسم المنتج / الموضوع *'),
+          _label(AppLocalizations.of(context).productOrTopic),
           _inputField(
             _field1,
-            'مثال: عطر ليلة الياسمين',
+            AppLocalizations.of(context).examplePerfume,
           ),
           SizedBox(height: 14.h),
-          _label('الفئة (اختياري)'),
+          _label(AppLocalizations.of(context).optionalCategory),
           _inputField(
             _field2,
-            'مثال: كوزمتكس',
+            AppLocalizations.of(context).exampleCosmetics,
           ),
         ];
 
       case AiToolType.hashtags:
         return [
-          _label('الموضوع أو المنتج *'),
+          _label(AppLocalizations.of(context).productOrTopic),
           _inputField(
             _field1,
-            'مثال: ملابس نسائية شتوية',
+            AppLocalizations.of(context).exampleWinterFashion,
           ),
           SizedBox(height: 14.h),
-          _label('الفئة (اختياري)'),
+          _label(AppLocalizations.of(context).optionalCategory),
           _inputField(
             _field2,
-            'مثال: أزياء',
+            AppLocalizations.of(context).categoryExample,
           ),
         ];
 
       case AiToolType.customerReply:
         return [
-          _label('رسالة العميل *'),
+          _label(AppLocalizations.of(context).customerMessageLabel),
           _inputField(
             _field1,
-            'الصق رسالة العميل هنا...',
+            AppLocalizations.of(context).exampleCustomerMessage,
             maxLines: 5,
           ),
         ];
@@ -1507,7 +1516,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
               ),
               SizedBox(width: 8.w),
               Text(
-                'النتيجة',
+                AppLocalizations.of(context).resultText,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
@@ -1549,7 +1558,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                 size: 16.sp,
               ),
               label: Text(
-                'نسخ النص',
+                AppLocalizations.of(context).copyText,
                 style: TextStyle(
                   color: _accentColor,
                   fontWeight: FontWeight.bold,

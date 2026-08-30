@@ -47,24 +47,25 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   }
 
   Future<void> _handleResetPassword() async {
+    final l10n = AppLocalizations.of(context);
     final newPassword = _newPasswordCtrl.text;
     final confirmPassword = _confirmPasswordCtrl.text;
     final resetToken = widget.token.isNotEmpty ? widget.token : widget.otp;
 
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      _showError('يرجى إدخال كلمة المرور الجديدة وتأكيدها.');
+      _showError(l10n.passwordResetRequired);
       return;
     }
     if (newPassword.length < 6) {
-      _showError('يجب أن تكون كلمة المرور 6 أحرف على الأقل.');
+      _showError(l10n.passwordMinLength);
       return;
     }
     if (newPassword != confirmPassword) {
-      _showError('كلمتا المرور غير متطابقتين.');
+      _showError(l10n.passwordMismatch);
       return;
     }
     if (widget.email.isEmpty || resetToken.isEmpty) {
-      _showError('رابط إعادة التعيين غير صالح أو منتهي الصلاحية.');
+      _showError(l10n.resetLinkInvalidOrExpired);
       return;
     }
 
@@ -85,12 +86,12 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
     } on ApiException catch (e) {
       if (!mounted) return;
       _showError(e is NetworkException
-          ? 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.'
+          ? l10n.networkCheck
           : (UserController.instance.authErrorNotifier.value ??
-              'حدث خطأ. حاول مرة أخرى.'));
+              l10n.genericRetryMessage));
     } catch (_) {
       if (!mounted) return;
-      _showError('حدث خطأ غير متوقع. حاول مرة أخرى.');
+      _showError(l10n.genericRetryMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -105,6 +106,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const Color primaryColor = Color(0xff4D41DF);
     const Color textColor = Color(0xff1A1A1A);
     const Color subTextColor = Color(0xff707070);
@@ -148,7 +150,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
                     // العنوان
                     Text(
-                      'تعيين كلمة مرور جديدة',
+                      l10n.passwordResetTitle,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 22.sp,
@@ -160,7 +162,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
                     // النص التوضيحي
                     Text(
-                      'الرجاء إدخال كلمة المرور الجديدة وتأكيدها للمتابعة.',
+                      l10n.passwordResetDescription,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 13.sp,
@@ -173,7 +175,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     // حقل كلمة المرور الجديدة
                     _buildPasswordField(
                       controller: _newPasswordCtrl,
-                      hint: 'كلمة المرور الجديدة',
+                      hint: l10n.passwordNewHint,
                       isObscured: _obscureText1,
                       onToggle: () =>
                           setState(() => _obscureText1 = !_obscureText1),
@@ -182,7 +184,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        'كلمة السر يجب أن تكون 6 أحرف أو أرقام على الأقل',
+                        l10n.passwordRuleHint,
                         textDirection: TextDirection.rtl,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 12.sp,
@@ -195,7 +197,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                     // حقل تأكيد كلمة المرور
                     _buildPasswordField(
                       controller: _confirmPasswordCtrl,
-                      hint: 'تأكيد كلمة المرور الجديدة',
+                      hint: l10n.passwordConfirmHint,
                       isObscured: _obscureText2,
                       onToggle: () =>
                           setState(() => _obscureText2 = !_obscureText2),
@@ -229,7 +231,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'تحديث كلمة المرور',
+                                    l10n.updatePasswordAction,
                                     style: GoogleFonts.ibmPlexSans(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,

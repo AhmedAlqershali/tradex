@@ -82,9 +82,10 @@ class _CodeRegisterState extends State<CodeRegister> {
 
   Future<void> _handleVerifyOtp() async {
     final otp = _otp;
+    final l10n = AppLocalizations.of(context);
     if (otp.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('يرجى إدخال رمز التحقق المكوّن من 4 أرقام',
+        content: Text(l10n.verificationCodeInputMessage,
             style: GoogleFonts.ibmPlexSans()),
         backgroundColor: Colors.redAccent,
       ));
@@ -111,16 +112,16 @@ class _CodeRegisterState extends State<CodeRegister> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             e is NetworkException
-                ? 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.'
+                ? l10n.otpNetworkRetry
                 : (UserController.instance.authErrorNotifier.value ??
-                    'رمز التحقق غير صحيح. حاول مرة أخرى.'),
+                    l10n.otpInvalid),
             style: GoogleFonts.ibmPlexSans()),
         backgroundColor: Colors.redAccent,
       ));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('حدث خطأ غير متوقع. حاول مرة أخرى.',
+        content: Text(l10n.genericRetryMessage,
             style: GoogleFonts.ibmPlexSans()),
         backgroundColor: Colors.redAccent,
       ));
@@ -130,19 +131,20 @@ class _CodeRegisterState extends State<CodeRegister> {
   }
 
   Future<void> _handleResendOtp() async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isLoading = true);
     try {
       await UserController.instance.forgotPassword(email: widget.email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('تم إعادة إرسال الرمز إلى ${widget.email}',
+        content: Text('${l10n.otpResendSuccess} ${widget.email}',
             style: GoogleFonts.ibmPlexSans()),
         backgroundColor: Colors.green,
       ));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('فشل إعادة الإرسال. حاول مرة أخرى.',
+        content: Text(l10n.otpResendFailed,
             style: GoogleFonts.ibmPlexSans()),
         backgroundColor: Colors.redAccent,
       ));
@@ -153,6 +155,7 @@ class _CodeRegisterState extends State<CodeRegister> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -166,7 +169,7 @@ class _CodeRegisterState extends State<CodeRegister> {
               icon: const Icon(Icons.arrow_back_ios_new_rounded,
                   color: Colors.black87)),
           title: Text(
-            'Tradex',
+            l10n.appName,
             style: GoogleFonts.ibmPlexSans(
               fontSize: 28.sp,
               fontWeight: FontWeight.bold,
@@ -197,7 +200,7 @@ class _CodeRegisterState extends State<CodeRegister> {
 
                   // العنوان الرئيسي
                   Text(
-                    'كود التحقق',
+                    l10n.verificationTitle,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
@@ -208,7 +211,7 @@ class _CodeRegisterState extends State<CodeRegister> {
 
                   // نصوص التوجيه
                   Text(
-                    'لقد أرسلنا رمزاً مكوناً من 4 أرقام إلى هاتفك',
+                    l10n.verificationIntro,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.ibmPlexSans(
                       fontSize: 14.sp,
@@ -278,7 +281,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'لم يصلك الكود؟ ',
+                        l10n.didNotReceiveCode,
                         style: GoogleFonts.ibmPlexSans(
                           fontSize: 14.sp,
                           color: const Color(0xff707070),
@@ -303,7 +306,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                     ),
                     child: Text(
-                      'إعادة ارسال الكود',
+                      l10n.resendCode,
                       style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp,
                         color: const Color(0xff4D41DF),
@@ -337,7 +340,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                               ),
                             )
                           : Text(
-                              'تأكيد الرمز',
+                              l10n.confirmCode,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 16.sp,
                                 color: Colors.white,

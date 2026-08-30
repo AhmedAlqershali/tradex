@@ -37,7 +37,9 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
             onPressed: () => Navigator.maybePop(context),
           ),
           title: Text(
-            widget.region == null ? 'المتاجر' : 'متاجر ${widget.region}',
+            widget.region == null
+                ? AppLocalizations.of(context).storeListTitle
+                : AppLocalizations.of(context).storesForRegion.replaceFirst('{region}', widget.region ?? ''),
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff1A1A1A),
               fontWeight: FontWeight.bold,
@@ -67,7 +69,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
                       onPressed: () => context
                           .read<StoreBloc>()
                           .add(StoresLoadRequested(region: widget.region)),
-                      child: Text('إعادة المحاولة',
+                      child: Text(AppLocalizations.of(context).retry,
                           style: GoogleFonts.ibmPlexSans()),
                     ),
                   ],

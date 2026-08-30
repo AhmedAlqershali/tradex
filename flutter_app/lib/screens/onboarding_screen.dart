@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/screens/user_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +10,7 @@ class OnboardingAIPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xff4D41DF);
+    final l10n = AppLocalizations.of(context);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -38,7 +40,7 @@ class OnboardingAIPage extends StatelessWidget {
                             _buildMainHeading(primaryColor),
                             SizedBox(height: 10.h),
                             Text(
-                              'حوّل أفكارك إلى حملات تسويقية احترافية في ثوانٍ معدودة. دع مساعدنا الذكي يتولى كتابة المحتوى وتصميم العروض.',
+                              l10n.onboardingDescription,
                               style: GoogleFonts.ibmPlexSans(
                                 color: const Color(0xff707070),
                                 fontSize: 14.sp,
@@ -81,7 +83,7 @@ class OnboardingAIPage extends StatelessWidget {
                                 left: -5.w,
                                 child: _buildFloatingBadge(
                                   icon: Icons.psychology_rounded,
-                                  label: 'تحليل البيانات',
+                                  label: l10n.onboardingDataAnalysis,
                                   color: primaryColor,
                                 ),
                               ),
@@ -134,7 +136,7 @@ class OnboardingAIPage extends StatelessWidget {
           Icon(Icons.auto_awesome_rounded, size: 14.sp, color: color),
           SizedBox(width: 6.w),
           Text(
-            'الذكاء الاصطناعي',
+            l10n.onboardingAiTag,
             style: GoogleFonts.ibmPlexSans(
               color: color,
               fontSize: 12.sp,
@@ -151,7 +153,7 @@ class OnboardingAIPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'سوّق باستخدام',
+          l10n.onboardingMainHeading,
           style: GoogleFonts.ibmPlexSans(
             fontSize: 28.sp,
             fontWeight: FontWeight.bold,
@@ -229,7 +231,7 @@ class OnboardingAIPage extends StatelessWidget {
           elevation: 0,
         ),
         child: Text(
-          'التالي',
+          l10n.next,
           style: GoogleFonts.ibmPlexSans(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -240,7 +242,7 @@ class OnboardingAIPage extends StatelessWidget {
     return TextButton(
       onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserSelection())),
       child: Text(
-        'تخطي للمرحلة النهائية',
+        l10n.skipToFinalStep,
         style: GoogleFonts.ibmPlexSans(color: const Color(0xff707070), fontSize: 14.sp),
       ),
     );
@@ -264,11 +266,11 @@ class OnboardingAIPage extends StatelessWidget {
             children: [
               const CircleAvatar(radius: 3, backgroundColor: Color(0xff14db66)),
               SizedBox(width: 6.w),
-              Text('وصف مقترح', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
+              Text(l10n.onboardingAiTag, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
             ],
           ),
           SizedBox(height: 4.h),
-          Text("اكتشف الأناقة العصرية مع تصاميمنا الجديدة.", style: TextStyle(fontSize: 10.sp, color: Colors.grey, height: 1.3)),
+          Text(l10n.onboardingDescription, style: TextStyle(fontSize: 10.sp, color: Colors.grey, height: 1.3)),
         ],
       ),
     );
@@ -289,7 +291,7 @@ class OnboardingAIPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('زيادة متوقعة', style: TextStyle(fontSize: 8.sp, color: const Color(0xFFE65100))),
+              Text(l10n.onboardingExpectedGrowth, style: TextStyle(fontSize: 8.sp, color: const Color(0xFFE65100))),
               Text('+240%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE65100))),
             ],
           ),
