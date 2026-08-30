@@ -45,6 +45,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const Color primaryColor = Color(0xff4D41DF);
     const Color textColor = Color(0xff1A1A1A);
     const Color subTextColor = Color(0xff718096);

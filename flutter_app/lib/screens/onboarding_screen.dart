@@ -67,7 +67,7 @@ class OnboardingAIPage extends StatelessWidget {
                               Positioned(
                                 top: 5.h,
                                 right: -10.w,
-                                child: _buildSuggestedDescriptionCard(),
+                                child: _buildSuggestedDescriptionCard(context),
                               ),
 
                               // أيقونة المشاركة (منتصف اليمين)
@@ -92,7 +92,7 @@ class OnboardingAIPage extends StatelessWidget {
                               Positioned(
                                 top: 120.h,
                                 left: -10.w,
-                                child: _buildStatBadge(),
+                                child: _buildStatBadge(context),
                               ),
                             ],
                           ),
@@ -254,7 +254,7 @@ class OnboardingAIPage extends StatelessWidget {
 
   // --- البطاقات العائمة ---
 
-  Widget _buildSuggestedDescriptionCard() {
+  Widget _buildSuggestedDescriptionCard(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Container(
       width: 160.w,
@@ -281,7 +281,7 @@ class OnboardingAIPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatBadge() {
+  Widget _buildStatBadge(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
