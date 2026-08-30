@@ -78,7 +78,7 @@ class WeekendPromoBanner extends StatelessWidget {
                 ),
               ),
               child: Text(
-                AppLocalizations.of(context).getIt,
+                AppLocalizations.of(context).discoverNow,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 11.sp,
