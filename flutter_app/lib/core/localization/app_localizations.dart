@@ -176,6 +176,34 @@ class AppLocalizations {
   String get passwordRequired => _value('passwordRequired');
   String get passwordMinLength => _value('passwordMinLength');
   String get passwordMismatch => _value('passwordMismatch');
+  String get phoneNumber => _value('phoneNumber');
+  String get chooseStoreCategory => _value('chooseStoreCategory');
+  String get confirmCode => _value('confirmCode');
+  String get didNotReceiveCode => _value('didNotReceiveCode');
+  String get profilePhotoTitle => _value('profilePhotoTitle');
+  String get profilePhotoSubtitle => _value('profilePhotoSubtitle');
+  String get storeSelectionRequired => _value('storeSelectionRequired');
+  String get storeProducts => _value('storeProducts');
+  String get unableLoadStoreData => _value('unableLoadStoreData');
+  String get merchantAccessExpiredMessage => _value('merchantAccessExpiredMessage');
+  String get orderApprovedMessage => _value('orderApprovedMessage');
+  String get orderNotFound => _value('orderNotFound');
+  String get unableLoadOrderDetails => _value('unableLoadOrderDetails');
+  String get confirmDelivery => _value('confirmDelivery');
+  String get subscriptionRequestTitle => _value('subscriptionRequestTitle');
+  String get discoverLocalStores => _value('discoverLocalStores');
+  String get bestLocalDeals => _value('bestLocalDeals');
+  String get dealsUpTo40 => _value('dealsUpTo40');
+  String get weekendDeals => _value('weekendDeals');
+  String get discoverNow => _value('discoverNow');
+  String get startNow => _value('startNow');
+  String get watchGuide => _value('watchGuide');
+  String get aiHeroTitle => _value('aiHeroTitle');
+  String get aiHeroSubtitle => _value('aiHeroSubtitle');
+  String get aiAccuracy => _value('aiAccuracy');
+  String get aiGeneratedAccuracy => _value('aiGeneratedAccuracy');
+  String get aiGeneratedVolume => _value('aiGeneratedVolume');
+  String get error => _value('error');
   String get sessionExpired => _value('sessionExpired');
   String get forbidden => _value('forbidden');
   String get serverError => _value('serverError');
@@ -255,9 +283,6 @@ class AppLocalizations {
   String get notesOptional => _value('notesOptional');
   String get chooseProofImageFirst => _value('chooseProofImageFirst');
   String get selectImageSource => _value('selectImageSource');
-  String get galleryLabel => _value('galleryLabel');
-  String get cameraLabel => _value('cameraLabel');
-  String get photoUploadFailed => _value('photoUploadFailed');
   String get noPhotoPrompt => _value('noPhotoPrompt');
   String get generateAiImage => _value('generateAiImage');
   String get aiPromptHint => _value('aiPromptHint');
@@ -331,7 +356,6 @@ class AppLocalizations {
   String get viewMyOrders => _value('viewMyOrders');
   String get orderReference => _value('orderReference');
   String get myOrders => _value('myOrders');
-  String get noOrdersYet => _value('noOrdersYet');
   String get noOrdersDescription => _value('noOrdersDescription');
   String get categoryLoadError => _value('categoryLoadError');
   String get featuredBadge => _value('featuredBadge');
@@ -391,7 +415,6 @@ class AppLocalizations {
   String get productPriceRequired => _value('productPriceRequired');
   String get quantityRequired => _value('quantityRequired');
   String get generalCategory => _value('generalCategory');
-  String get chooseImageSourceTitle => _value('chooseImageSourceTitle');
   String get addProductNew => _value('addProductNew');
   String get editProduct => _value('editProduct');
   String get productNameLabel => _value('productNameLabel');
@@ -404,7 +427,6 @@ class AppLocalizations {
   String get quantityExample => _value('quantityExample');
   String get categoryExample => _value('categoryExample');
   String get productDescriptionExample => _value('productDescriptionExample');
-  String get deleteCurrentImages => _value('deleteCurrentImages');
   String get subscriptionTitle => _value('subscriptionTitle');
   String get plansAvailable => _value('plansAvailable');
   String get noPlansAvailable => _value('noPlansAvailable');
@@ -427,9 +449,7 @@ class AppLocalizations {
   String get endsAt => _value('endsAt');
   String get daysRemaining => _value('daysRemaining');
   String get supportViaWhatsApp => _value('supportViaWhatsApp');
-  String get noPreviousSubscriptionRequests => _value('noPreviousSubscriptionRequests');
-  String get sendSubscriptionRequest => _value('sendSubscriptionRequest');
-  String get     supportContact => _value('supportContact');
+  String get supportContact => _value('supportContact');
   String get noSubscriptions => _value('noSubscriptions');
   String get aiToolsSmart => _value('aiToolsSmart');
   String get aiStoreSpace => _value('aiStoreSpace');
@@ -515,7 +535,7 @@ class AppLocalizations {
   String _value(String key) =>
       _translations[locale.languageCode]?[key] ?? _translations['ar']?[key] ?? key;
 
-  static const _translations = <String, Map<String, String>>{
+    static const _translations = <String, Map<String, String>>{
     'ar': {
       'appName': 'Tradex',
       'welcomeBack': 'مرحباً بعودتك 👋',
@@ -553,11 +573,7 @@ class AppLocalizations {
       'gallery': 'المعرض',
       'camera': 'الكاميرا',
       'imagePickerError': 'تعذر اختيار الصورة',
-      'saveChanges': 'حفظ التغييرات',
-      'changesSaved': 'تم حفظ التغييرات',
-      'unableSaveChanges': 'تعذر حفظ التغييرات. حاول مرة أخرى.',
       'personalInfo': 'المعلومات الشخصية',
-      'fullName': 'الاسم كامل',
       'enterFullName': 'أدخل اسمك الكامل',
       'completeProfileClient': 'إكمال الملف للمتسوق',
       'selectYourRegion': 'حدد منطقتك',
@@ -637,10 +653,6 @@ class AppLocalizations {
       'onboardingDataAnalysis': 'تحليل البيانات',
       'onboardingExpectedGrowth': 'الزيادة المتوقعة',
       'skipToFinalStep': 'تخطي للمرحلة النهائية',
-      'chooseImageSourceTitle': 'اختر مصدر الصورة',
-      'galleryLabel': 'معرض الصور',
-      'cameraLabel': 'الكاميرا',
-      'photoUploadFailed': 'تعذر اختيار الصورة',
       'fullNameExample': 'أحمد محمد',
       'phoneNumberExample': '05XXXXXXXX',
       'cityExample': 'غزة',
@@ -704,7 +716,7 @@ class AppLocalizations {
       'hidden': 'مخفي',
       'stock': 'المخزون',
       'deleteProduct': 'حذف المنتج',
-      'deleteProductConfirm': 'هل أنت متأكد من حذف "{name}"؟\nلا يمكن التراجع عن هذا الإجراء.',
+      'deleteProductConfirm': 'هل أنت متأكد من حذف "{name}"؟\\nلا يمكن التراجع عن هذا الإجراء.',
       'noProductsYet': 'لا توجد منتجات بعد',
       'publishFirstProduct': 'انشر منتجك الأول وابدأ البيع الآن',
       'addNewProduct': 'إضافة منتج جديد',
@@ -746,8 +758,6 @@ class AppLocalizations {
       'subscriptionRequests': 'طلبات الاشتراك',
       'newRequest': 'طلب جديد',
       'noSubscriptionPlans': 'لا توجد باقات متاحة حالياً.',
-      'noPreviousSubscriptionRequests': 'لا توجد طلبات اشتراك سابقة',
-      'sendSubscriptionRequest': 'إرسال طلب اشتراك',
       'noActiveSubscription': 'لا يوجد اشتراك أو فترة تجريبية حالية.',
       'continueWithPlan': 'متابعة مع {plan}',
       'choosePlanFirst': 'يرجى اختيار باقة أولاً.',
@@ -757,6 +767,33 @@ class AppLocalizations {
       'paymentMethod': 'طريقة الدفع',
       'fullName': 'الاسم الكامل',
       'phoneNumber': 'رقم الهاتف',
+      'chooseStoreCategory': 'اختر فئة المتجر',
+      'confirmCode': 'تأكيد الرمز',
+      'didNotReceiveCode': 'لم تستلم الرمز؟',
+      'profilePhotoTitle': 'الصورة الشخصية',
+      'profilePhotoSubtitle': 'أضف صورة واضحة حتى يتعرف عليك العملاء بسهولة.',
+      'storeSelectionRequired': 'يرجى اختيار متجر أولاً.',
+      'storeProducts': 'منتجات المتجر',
+      'unableLoadStoreData': 'تعذر تحميل بيانات المتجر.',
+      'merchantAccessExpiredMessage': 'انتهت صلاحية الوصول إلى متجرك. يرجى تجديد الاشتراك أو التواصل مع الدعم.',
+      'orderApprovedMessage': 'تمت الموافقة على طلبك بنجاح.',
+      'orderNotFound': 'لم يتم العثور على الطلب.',
+      'unableLoadOrderDetails': 'تعذر تحميل تفاصيل الطلب.',
+      'confirmDelivery': 'تأكيد التوصيل',
+      'subscriptionRequestTitle': 'طلب الاشتراك',
+      'discoverLocalStores': 'اكتشف المتاجر القريبة',
+      'bestLocalDeals': 'أفضل العروض المحلية',
+      'dealsUpTo40': 'عروض تصل إلى 40%',
+      'weekendDeals': 'عروض نهاية الأسبوع',
+      'discoverNow': 'اكتشف الآن',
+      'startNow': 'ابدأ الآن',
+      'watchGuide': 'شاهد الدليل',
+      'aiHeroTitle': 'منصة AI ذكية',
+      'aiHeroSubtitle': 'أنشئ محتوى تسويقي وإعلانات ومنشورات بشكل أسرع.',
+      'aiAccuracy': 'الدقة',
+      'aiGeneratedAccuracy': 'الدقة الناتجة',
+      'aiGeneratedVolume': 'الحجم الناتج',
+      'error': 'خطأ',
       'notesOptional': 'ملاحظات (اختياري)',
       'chooseProofImageFirst': 'يرجى اختيار صورة إثبات الدفع أولاً.',
       'selectImageSource': 'اختر مصدر الصورة',
@@ -779,7 +816,6 @@ class AppLocalizations {
       'ordersAction': 'الطلبات',
       'profileAction': 'الملف الشخصي',
       'storeSettingsAction': 'إعدادات المتجر',
-      'noOrdersYet': 'لا توجد طلبات بعد',
       'ordersWillAppear': 'ستظهر هنا طلبات العملاء فور وصولها',
       'updatePassword': 'تحديث كلمة المرور',
       'statusLabel': 'الحالة',
@@ -862,7 +898,6 @@ class AppLocalizations {
       'publishProduct': 'نشر المنتج',
       'saveProductChanges': 'حفظ التعديلات',
       'productImagesCount': 'صور المنتج ({count}/{max})',
-      'deleteCurrentImages': 'حذف الصور الحالية',
       'showProduct': 'إظهار المنتج',
       'featuredProduct': 'منتج مميز',
       'availableProducts': 'منتجات المتجر',
@@ -992,7 +1027,7 @@ class AppLocalizations {
       'phoneRequired': 'رقم الهاتف مطلوب',
       'monthly': 'شهري',
       'yearly': 'سنوي',
-      'bank_transfer': 'تحويل بنكي',
+      'bankTransfer': 'تحويل بنكي',
       'cash': 'دفع نقدي',
       'activeStatus': 'نشط',
       'expiredStatus': 'منتهي',
@@ -1046,6 +1081,34 @@ class AppLocalizations {
       'unableSaveChanges': 'Unable to save changes. Please try again.',
       'personalInfo': 'Personal information',
       'fullName': 'Full name',
+      'phoneNumber': 'Phone number',
+      'chooseStoreCategory': 'Choose store category',
+      'confirmCode': 'Confirm code',
+      'didNotReceiveCode': 'Didn’t receive the code?',
+      'profilePhotoTitle': 'Profile photo',
+      'profilePhotoSubtitle': 'Add a clear photo so customers can recognize you.',
+      'storeSelectionRequired': 'Please select a store first.',
+      'storeProducts': 'Store products',
+      'unableLoadStoreData': 'Unable to load store details.',
+      'merchantAccessExpiredMessage': 'Your merchant access has expired. Please renew your subscription or contact support.',
+      'orderApprovedMessage': 'Your order has been approved.',
+      'orderNotFound': 'Order not found.',
+      'unableLoadOrderDetails': 'Unable to load order details.',
+      'confirmDelivery': 'Confirm delivery',
+      'subscriptionRequestTitle': 'Subscription request',
+      'discoverLocalStores': 'Discover local stores',
+      'bestLocalDeals': 'Best local deals',
+      'dealsUpTo40': 'Deals up to 40%',
+      'weekendDeals': 'Weekend deals',
+      'discoverNow': 'Discover now',
+      'startNow': 'Start now',
+      'watchGuide': 'Watch guide',
+      'aiHeroTitle': 'AI-powered storefront',
+      'aiHeroSubtitle': 'Generate product, marketing, and support content faster.',
+      'aiAccuracy': 'Accuracy',
+      'aiGeneratedAccuracy': 'Generated accuracy',
+      'aiGeneratedVolume': 'Generated volume',
+      'error': 'Error',
       'enterFullName': 'Enter your full name',
       'completeProfileClient': 'Complete shopper profile',
       'selectYourRegion': 'Select your region',
@@ -1192,7 +1255,7 @@ class AppLocalizations {
       'hidden': 'Hidden',
       'stock': 'Stock',
       'deleteProduct': 'Delete product',
-      'deleteProductConfirm': 'Are you sure you want to delete "{name}"?\nThis action cannot be undone.',
+      'deleteProductConfirm': 'Are you sure you want to delete "{name}"?\\nThis action cannot be undone.',
       'noProductsYet': 'No products yet',
       'publishFirstProduct': 'Publish your first product and start selling now',
       'addNewProduct': 'Add new product',
@@ -1253,7 +1316,6 @@ class AppLocalizations {
       'exampleWirelessHeadphones': 'Example: Wireless Bluetooth headphones',
       'examplePerfume': 'Example: jasmine night perfume',
       'exampleCosmetics': 'Example: cosmetics',
-      'exampleWinterFashion': 'Example: women\'s winter fashion',
       'exampleCustomerMessage': 'Paste the customer message here...',
       'minutesAgo': 'min ago',
       'hoursAgo': 'hr ago',
@@ -1274,7 +1336,7 @@ class AppLocalizations {
       'phoneRequired': 'Phone number is required',
       'monthly': 'Monthly',
       'yearly': 'Yearly',
-      'bank_transfer': 'Bank transfer',
+      'bankTransfer': 'Bank transfer',
       'cash': 'Cash payment',
       'activeStatus': 'Active',
       'expiredStatus': 'Expired',
@@ -1287,20 +1349,3 @@ class AppLocalizations {
       'productCategoryDefault': 'General',
     },
   };
-}
-
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) =>
-      locale.languageCode == 'ar' || locale.languageCode == 'en';
-
-  @override
-  Future<AppLocalizations> load(Locale locale) async =>
-      AppLocalizations(locale);
-
-  @override
-  bool shouldReload(_AppLocalizationsDelegate old) => false;
-}
