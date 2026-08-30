@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';

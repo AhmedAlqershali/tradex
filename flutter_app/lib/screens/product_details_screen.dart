@@ -1,3 +1,4 @@
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';

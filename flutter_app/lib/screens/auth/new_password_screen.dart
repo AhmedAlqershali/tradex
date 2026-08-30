@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/screens/auth/success_password_screen.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';

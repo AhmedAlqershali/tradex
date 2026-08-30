@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/api/api_exception.dart';
+import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/shared/widgets/app_card.dart';
 import 'package:ai_saas/shared/widgets/info_row.dart';
