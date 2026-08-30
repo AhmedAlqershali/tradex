@@ -400,29 +400,31 @@ type: widget.type,
 (route) => false,
 );
 } catch (e) {
-debugPrint('Merchant profile error: $e');
+  debugPrint('Merchant profile error: $e');
 
-if (!mounted) {
-return;
-}
+  if (!mounted) {
+    return;
+  }
 
-final String message =
-UserController.instance.authErrorNotifier.value ??
-AppLocalizations.of(context).unableSaveChanges;
-SnackBar(
-content: Text(
-message,
-style: GoogleFonts.ibmPlexSans(),
-),
-backgroundColor: Colors.redAccent,
-),
-);
+  final String message =
+      UserController.instance.authErrorNotifier.value ??
+      AppLocalizations.of(context).unableSaveChanges;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        message,
+        style: GoogleFonts.ibmPlexSans(),
+      ),
+      backgroundColor: Colors.redAccent,
+    ),
+  );
 } finally {
-if (mounted) {
-setState(() {
-_isLoading = false;
-});
-}
+  if (mounted) {
+    setState(() {
+      _isLoading = false;
+    });
+  }
 }
 }
 
