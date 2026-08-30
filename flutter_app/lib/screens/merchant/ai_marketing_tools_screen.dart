@@ -103,6 +103,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildAssistantCard() {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
