@@ -39,9 +39,9 @@ class AppConfig {
   static String _normalizeStoragePath(String value) {
     var path = value.trim();
     path = path.replaceAll(RegExp(r'^https?://[^/]+', caseSensitive: false), '');
-    path = path.replaceAll(RegExp(r'^/+', ''), '');
+    path = path.replaceAll(RegExp(r'^/+'), '');
     path = path.replaceAll(RegExp(r'^(?:api/v1/)?storage/', caseSensitive: false), '');
-    path = path.replaceAll(RegExp(r'^/+', ''), '');
+    path = path.replaceAll(RegExp(r'^/+'), '');
     if (path.isEmpty) return 'storage';
     return 'storage/$path';
   }

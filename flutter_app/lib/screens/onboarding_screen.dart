@@ -255,6 +255,7 @@ class OnboardingAIPage extends StatelessWidget {
   // --- البطاقات العائمة ---
 
   Widget _buildSuggestedDescriptionCard() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: 160.w,
       padding: EdgeInsets.all(10.r),
@@ -281,6 +282,7 @@ class OnboardingAIPage extends StatelessWidget {
   }
 
   Widget _buildStatBadge() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
