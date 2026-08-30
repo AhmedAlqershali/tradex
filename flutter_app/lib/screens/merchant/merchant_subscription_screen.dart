@@ -198,6 +198,7 @@ class _MerchantSubscriptionScreenState
   }
 
   Widget _buildPlanCard(AdminPlan plan) {
+    final l10n = AppLocalizations.of(context);
     final selected = _selectedPlan?.id == plan.id;
     return Card(
       margin: EdgeInsets.only(bottom: 10.h),

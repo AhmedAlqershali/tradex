@@ -43,6 +43,7 @@ class _CompleteProfileClientScreenState
   ];
 
   Future<void> _onNext() async {
+    final l10n = AppLocalizations.of(context);
     if (_selectedRegion == null || _selectedRegion!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.selectRegionFirst)),
@@ -313,6 +314,7 @@ class _CompleteProfileClientScreenState
   }
 
   Future<void> _useCurrentLocation() async {
+    final l10n = AppLocalizations.of(context);
     if (_isLocating) return;
     setState(() => _isLocating = true);
     try {
