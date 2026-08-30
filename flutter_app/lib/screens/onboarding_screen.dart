@@ -35,9 +35,9 @@ class OnboardingAIPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 20.h),
-                            _buildAITag(primaryColor),
+                            _buildAITag(context, primaryColor),
                             SizedBox(height: 16.h),
-                            _buildMainHeading(primaryColor),
+                            _buildMainHeading(context, primaryColor),
                             SizedBox(height: 10.h),
                             Text(
                               l10n.onboardingDescription,
@@ -123,7 +123,8 @@ class OnboardingAIPage extends StatelessWidget {
 
   // --- مكونات الواجهة الصغيرة ---
 
-  Widget _buildAITag(Color color) {
+  Widget _buildAITag(BuildContext context, Color color) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
@@ -148,7 +149,8 @@ class OnboardingAIPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMainHeading(Color color) {
+  Widget _buildMainHeading(BuildContext context, Color color) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -220,6 +222,7 @@ class OnboardingAIPage extends StatelessWidget {
   }
 
   Widget _buildMainButton(BuildContext context, Color color) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       width: double.infinity,
       height: 54.h,
@@ -239,6 +242,7 @@ class OnboardingAIPage extends StatelessWidget {
   }
 
   Widget _buildSkipButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return TextButton(
       onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserSelection())),
       child: Text(

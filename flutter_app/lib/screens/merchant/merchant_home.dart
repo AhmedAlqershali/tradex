@@ -67,6 +67,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
   }
 
   Widget _buildSubscriptionShortcut(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () => Navigator.push(
         context,

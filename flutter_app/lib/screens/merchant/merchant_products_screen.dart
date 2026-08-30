@@ -86,6 +86,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0.5,
@@ -215,6 +216,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   Widget _buildVisibilityBadge(bool isVisible) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
@@ -235,6 +237,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   Widget _buildStockBadge(int quantity, String status) {
+    final l10n = AppLocalizations.of(context);
     final isOutOfStock = status == 'out_of_stock' || quantity <= 0;
     final color = isOutOfStock
         ? Colors.redAccent
@@ -277,6 +280,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   void _confirmDelete(BuildContext context, Product product) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => Directionality(
@@ -316,6 +320,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   Widget _buildErrorState(BuildContext context, String message) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -339,6 +344,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 32.w),

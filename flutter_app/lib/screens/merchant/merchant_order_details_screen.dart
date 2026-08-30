@@ -259,6 +259,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   Widget _buildOrderHeader(AppOrder o) {
+    final l10n = AppLocalizations.of(context);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,6 +309,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   Widget _buildTimeline(AppOrder order) {
+    final l10n = AppLocalizations.of(context);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,6 +327,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   Widget _buildProductsCard(AppOrder order) {
+    final l10n = AppLocalizations.of(context);
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,6 +408,7 @@ class _MerchantOrderDetailsScreenState
   }
 
   Widget _buildConversationButton(BuildContext context, AppOrder order) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 10.h),
       child: SizedBox(
@@ -456,7 +460,8 @@ class _MerchantOrderDetailsScreenState
   }
 
   List<MerchantOrderAction> _getActions(AppOrder order) {
-    return merchantOrderActionsFor(order.status);
+    final l10n = AppLocalizations.of(context);
+    return merchantOrderActionsFor(l10n, order.status);
   }
 
   Future<void> _contactCustomer(BuildContext context, AppOrder order) async {
@@ -500,24 +505,27 @@ class MerchantOrderAction {
   });
 }
 
-List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
+List<MerchantOrderAction> merchantOrderActionsFor(
+  AppLocalizations l10n,
+  OrderStatus status,
+) {
   switch (status) {
     case OrderStatus.pendingReview:
       return [
         MerchantOrderAction(
-          label: AppLocalizations.of(context).contactCustomer,
+          label: l10n.contactCustomer,
           icon: Icons.phone_in_talk_outlined,
           color: const Color(0xff4D41DF),
           isContact: true,
         ),
         MerchantOrderAction(
-          label: AppLocalizations.of(context).confirmOrder,
+          label: l10n.confirmOrder,
           icon: Icons.check_circle_outline_rounded,
           color: const Color(0xff0891B2),
           nextStatus: OrderStatus.confirmed,
         ),
         MerchantOrderAction(
-          label: AppLocalizations.of(context).cancelOrder,
+          label: l10n.cancelOrder,
           icon: Icons.cancel_outlined,
           color: const Color(0xffE53E3E),
           nextStatus: OrderStatus.cancelled,
@@ -526,19 +534,19 @@ List<MerchantOrderAction> merchantOrderActionsFor(OrderStatus status) {
     case OrderStatus.confirmed:
       return [
         MerchantOrderAction(
-          label: AppLocalizations.of(context).contactCustomer,
+          label: l10n.contactCustomer,
           icon: Icons.phone_in_talk_outlined,
           color: const Color(0xff4D41DF),
           isContact: true,
         ),
         MerchantOrderAction(
-          label: AppLocalizations.of(context).confirmDelivery,
+          label: l10n.confirmDelivery,
           icon: Icons.done_all_rounded,
           color: const Color(0xff00C896),
           nextStatus: OrderStatus.completed,
         ),
         MerchantOrderAction(
-          label: AppLocalizations.of(context).cancelOrder,
+          label: l10n.cancelOrder,
           icon: Icons.cancel_outlined,
           color: const Color(0xffE53E3E),
           nextStatus: OrderStatus.cancelled,
