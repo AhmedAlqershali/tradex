@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,7 +12,7 @@ class ProductImageResource extends JsonResource
     {
         return [
             'id'         => $this->id,
-            'url'        => url('/storage/'.ltrim($this->path, '/')),
+            'url'        => PublicMediaUrl::forPath($this->path),
             'sort_order' => $this->sort_order,
         ];
     }

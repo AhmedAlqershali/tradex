@@ -17,6 +17,21 @@ void main() {
     expect(option.imageUrl, contains('/storage/categories/electronics.jpg'));
   });
 
+  test('normalizes category image URLs to the production media origin without duplicate storage', () {
+    final option = CategoryOption.fromServerJson({
+      'id': 9,
+      'name': 'Home',
+      'image': 'https://tradex-v2us.onrender.com/api/v1/storage/categories/home.jpg',
+    });
+
+    expect(
+      option.imageUrl,
+      'https://tradex-v2us.onrender.com/storage/categories/home.jpg',
+    );
+    expect(option.imageUrl, isNot(contains('/api/v1/storage/')));
+    expect(option.imageUrl, isNot(contains('/storage/storage/')));
+  });
+
   testWidgets('category without an image uses the existing icon fallback',
       (tester) async {
     await tester.pumpWidget(

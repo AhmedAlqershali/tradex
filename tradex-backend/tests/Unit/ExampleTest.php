@@ -2,15 +2,27 @@
 
 namespace Tests\Unit;
 
+use App\Models\ProductImage;
+use App\Support\PublicMediaUrl;
 use PHPUnit\Framework\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_that_true_is_true(): void
+    protected function setUp(): void
     {
-        $this->assertTrue(true);
+        parent::setUp();
+        config()->set('app.url', 'http://localhost');
+    }
+
+    public function test_public_media_url_is_canonicalized_for_product_images(): void
+    {
+        $image = new ProductImage([
+            'path' => '/storage/products/123/abc.jpg',
+        ]);
+
+        $this->assertSame(
+            PublicMediaUrl::PROD_ORIGIN . '/storage/products/123/abc.jpg',
+            $image->url,
+        );
     }
 }

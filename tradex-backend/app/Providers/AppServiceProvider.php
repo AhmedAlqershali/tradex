@@ -23,6 +23,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $rootUrl = trim((string) env('APP_URL', 'https://tradex-v2us.onrender.com'));
+        if ($rootUrl !== '') {
+            $normalized = rtrim($rootUrl, '/');
+            $isLocal = preg_match('/^(https?:\/\/)?(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i', $normalized) === 1;
+            if (! $isLocal) {
+                URL::forceRootUrl($normalized);
+            }
+        }
+
         // Stricter limiter for brute-force-sensitive auth endpoints
         // (login, client/merchant registration). Keyed by IP so a single
         // client can't lock legitimate users out of their own accounts,

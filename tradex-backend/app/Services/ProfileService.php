@@ -6,6 +6,7 @@ use App\Contracts\Services\ProfileServiceInterface;
 use App\Models\Store;
 use App\Models\User;
 use App\Support\AvatarTrace;
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -125,9 +126,7 @@ class ProfileService implements ProfileServiceInterface
                 'store_name'  => $s->store_name,
                 'description' => $s->description,
                 'region'      => $s->region,
-                'logo'        => $s->logo
-                    ? Storage::disk('public')->url($s->logo)
-                    : null,
+                'logo'        => PublicMediaUrl::forPath($s->logo),
                 'status'      => $s->status,
             ])->values();
         }
@@ -149,6 +148,6 @@ class ProfileService implements ProfileServiceInterface
             return null;
         }
 
-        return url('/storage/'.ltrim($path, '/'));
+        return PublicMediaUrl::forPath($path);
     }
 }

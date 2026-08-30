@@ -52,9 +52,10 @@ return [
     |
     */
 
-    // Production APP_URL must be the public HTTPS origin. The HTTPS fallback
-    // prevents generated public URLs from defaulting to an insecure scheme.
-    'url' => env('APP_URL', 'https://localhost'),
+    // Production APP_URL must be the public HTTPS origin. The default must not
+    // fall back to localhost in deployed environments; this keeps generated media
+    // URLs on the real public host rather than a local or stale Render URL.
+    'url' => env('APP_URL', 'https://tradex-v2us.onrender.com'),
 
     /*
     |--------------------------------------------------------------------------

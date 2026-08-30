@@ -3,9 +3,9 @@
 namespace App\Http\Resources\User;
 
 use App\Http\Resources\Subscription\SubscriptionResource;
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class UserResource extends JsonResource
 {
@@ -18,9 +18,7 @@ class UserResource extends JsonResource
             'phone'  => $this->phone,
             'role'   => $this->role,
             'status' => $this->status,
-            'avatar' => $this->avatar
-                ? Storage::disk('public')->url($this->avatar)
-                : null,
+            'avatar' => PublicMediaUrl::forPath($this->avatar),
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

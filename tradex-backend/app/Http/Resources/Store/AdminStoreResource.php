@@ -4,9 +4,9 @@ namespace App\Http\Resources\Store;
 
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Subscription\SubscriptionResource;
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Detailed store resource for admin endpoints.
@@ -20,9 +20,7 @@ class AdminStoreResource extends JsonResource
             'id'          => $this->id,
             'store_name'  => $this->store_name,
             'description' => $this->description,
-            'logo'        => $this->logo
-                ? Storage::disk('public')->url($this->logo)
-                : null,
+            'logo'        => PublicMediaUrl::forPath($this->logo),
             'status'      => $this->status,
 
             // Counts (available when loaded with withCount)

@@ -28,6 +28,24 @@ class AppConfig {
     defaultValue: 'https://tradex-v2us.onrender.com/api/v1',
   );
 
+  static String get mediaBaseUrl {
+    final apiUri = Uri.parse(baseUrl);
+    final scheme = apiUri.scheme.isEmpty ? 'https' : apiUri.scheme;
+    final host = apiUri.host.isEmpty ? 'tradex-v2us.onrender.com' : apiUri.host;
+    final port = apiUri.hasPort ? ':${apiUri.port}' : '';
+    return '$scheme://$host$port';
+  }
+
+  static String _normalizeStoragePath(String value) {
+    var path = value.trim();
+    path = path.replaceAll(RegExp(r'^https?://[^/]+', caseSensitive: false), '');
+    path = path.replaceAll(RegExp(r'^/+', ''), '');
+    path = path.replaceAll(RegExp(r'^(?:api/v1/)?storage/', caseSensitive: false), '');
+    path = path.replaceAll(RegExp(r'^/+', ''), '');
+    if (path.isEmpty) return 'storage';
+    return 'storage/$path';
+  }
+
   /// Resolves media paths returned by the API without coupling the UI to a
   /// deployment hostname. The API normally returns an absolute Storage URL,
   /// but older environments may return a root-relative path.
@@ -37,28 +55,32 @@ class AppConfig {
       return trimmed;
     }
 
-    final apiUri = Uri.parse(baseUrl);
     final parsed = Uri.tryParse(trimmed);
     if (parsed != null && parsed.hasScheme && parsed.host.isNotEmpty) {
-      // Local Laravel development commonly generates http://localhost URLs
-      // from APP_URL. Those URLs are not reachable by a device or the
-      // proxied Replit preview, so keep the returned path but use the same
-      // origin as the configured API.
-      if (parsed.host != 'localhost' &&
-          parsed.host != '127.0.0.1' &&
-          parsed.host != '0.0.0.0') {
-        return trimmed;
+      final normalizedHost = parsed.host.toLowerCase();
+      final sameOrigin = normalizedHost == Uri.parse(mediaBaseUrl).host;
+      final localHosts = {
+        'localhost',
+        '127.0.0.1',
+        '0.0.0.0',
+      };
+
+      if (!localHosts.contains(normalizedHost) && !sameOrigin) {
+        final normalized = _normalizeStoragePath(parsed.path);
+        final mediaUri = Uri.parse(mediaBaseUrl);
+        return mediaUri.replace(path: '/$normalized', query: parsed.query, fragment: parsed.fragment).toString();
       }
 
-      final localPath = parsed.path.isEmpty ? '/' : parsed.path;
-      return apiUri.replace(path: '', query: null, fragment: null).toString() +
-          localPath +
-          (parsed.hasQuery ? '?${parsed.query}' : '');
+      final normalizedPath = _normalizeStoragePath(parsed.path);
+      final mediaUri = Uri.parse(mediaBaseUrl);
+      return mediaUri
+          .replace(path: '/$normalizedPath', query: parsed.query, fragment: parsed.fragment)
+          .toString();
     }
 
-    final path = trimmed.startsWith('/') ? trimmed : '/$trimmed';
-    return apiUri.replace(path: '', query: null, fragment: null).toString() +
-        path;
+    final normalizedPath = _normalizeStoragePath(trimmed);
+    final mediaUri = Uri.parse(mediaBaseUrl);
+    return mediaUri.replace(path: '/$normalizedPath', query: null, fragment: null).toString();
   }
 
   // ── Environment helpers ───────────────────────────────────────────────────────

@@ -102,6 +102,31 @@ void main() {
       expect(AppUser.isServerPhotoPath('/data/user/0/cache/a.jpg'), isFalse);
     });
 
+    test('normalizes relative and absolute media URLs to the production media origin', () {
+      expect(
+        AppConfig.resolveMediaUrl('avatars/a.jpg'),
+        'https://tradex-v2us.onrender.com/storage/avatars/a.jpg',
+      );
+      expect(
+        AppConfig.resolveMediaUrl('/storage/avatars/a.jpg'),
+        'https://tradex-v2us.onrender.com/storage/avatars/a.jpg',
+      );
+      expect(
+        AppConfig.resolveMediaUrl(
+          'https://tradex-v2us.onrender.com/api/v1/storage/avatars/a.jpg',
+        ),
+        'https://tradex-v2us.onrender.com/storage/avatars/a.jpg',
+      );
+      expect(
+        AppConfig.resolveMediaUrl('http://localhost/storage/avatars/b.jpg'),
+        'https://tradex-v2us.onrender.com/storage/avatars/b.jpg',
+      );
+      expect(
+        AppConfig.resolveMediaUrl('https://old-domain.example/storage/avatars/c.jpg'),
+        'https://tradex-v2us.onrender.com/storage/avatars/c.jpg',
+      );
+    });
+
     test('does not let the follow-up profile response erase an uploaded avatar',
         () {
       final profileResponse = AppUser.fromServerJson({

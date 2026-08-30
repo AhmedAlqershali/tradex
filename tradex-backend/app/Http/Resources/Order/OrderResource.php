@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Order;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,9 +25,7 @@ class OrderResource extends JsonResource
             'store' => $this->whenLoaded('store', fn () => [
                 'id'         => $this->store->id,
                 'store_name' => $this->store->store_name,
-                'logo'       => $this->store->logo
-                    ? url('/storage/'.ltrim($this->store->logo, '/'))
-                    : null,
+                'logo'       => PublicMediaUrl::forPath($this->store->logo),
             ]),
 
             // Client summary (merchant view)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Cart;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,9 +21,7 @@ class CartItemResource extends JsonResource
                 'id'     => $product->id,
                 'name'   => $product->name,
                 'status' => $product->status,
-                'image'  => $product->image
-                    ? url('/storage/'.ltrim($product->image, '/'))
-                    : null,
+                'image'  => PublicMediaUrl::forPath($product->image),
                 'store'  => $product->store ? [
                     'id'         => $product->store->id,
                     'store_name' => $product->store->store_name,

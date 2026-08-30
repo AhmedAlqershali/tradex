@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Store;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,9 +15,7 @@ class StoreResource extends JsonResource
             'store_name' => $this->store_name,
             'description' => $this->description,
             'region'     => $this->region,
-            'logo'       => $this->logo
-                ? url('/storage/'.ltrim($this->logo, '/'))
-                : null,
+            'logo'       => PublicMediaUrl::forPath($this->logo),
             'status'         => $this->status,
             'products_count' => $this->products_count ?? 0,
             'phone'         => $this->whenLoaded('owner', fn () => $this->owner?->phone),

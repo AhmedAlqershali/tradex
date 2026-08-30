@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,9 +26,7 @@ class ProductResource extends JsonResource
             'is_available' => $this->isAvailable(),
 
             // Primary image (quick access thumbnail)
-            'image'  => $this->image
-                ? url('/storage/'.ltrim($this->image, '/'))
-                : null,
+            'image'  => PublicMediaUrl::forPath($this->image),
 
             // Full image gallery
             'images' => ProductImageResource::collection(

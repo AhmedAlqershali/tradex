@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Category;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class CategoryResource extends JsonResource
 {
@@ -13,9 +13,7 @@ class CategoryResource extends JsonResource
         return [
             'id'    => $this->id,
             'name'  => $this->name,
-            'image' => $this->image
-                ? Storage::disk('public')->url($this->image)
-                : null,
+            'image' => PublicMediaUrl::forPath($this->image),
             'status'         => $this->status,
             // products_count is only present when the query eager-loaded it
             // (admin endpoints). Public marketplace responses omit this field.

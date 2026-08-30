@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Review;
 
+use App\Support\PublicMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class ReviewResource extends JsonResource
 {
@@ -17,9 +17,7 @@ class ReviewResource extends JsonResource
             'reviewer' => $this->whenLoaded('user', fn () => [
                 'id'     => $this->user->id,
                 'name'   => $this->user->name,
-                'avatar' => $this->user->avatar
-                    ? Storage::disk('public')->url($this->user->avatar)
-                    : null,
+                'avatar' => PublicMediaUrl::forPath($this->user->avatar),
             ]),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
