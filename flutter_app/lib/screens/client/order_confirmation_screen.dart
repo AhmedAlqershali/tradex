@@ -84,7 +84,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                 SizedBox(height: 24.h),
 
                 // ── Order reference ──────────────────────────────────────
-                ...orders.map(_buildOrderReference),
+                ...orders.map((order) => _buildOrderReference(context, order)),
                 SizedBox(height: 48.h),
 
                 // ── Back to home ─────────────────────────────────────────
@@ -149,7 +149,7 @@ class OrderConfirmationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderReference(AppOrder order) {
+  Widget _buildOrderReference(BuildContext context, AppOrder order) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
       child: Text(

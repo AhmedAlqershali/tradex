@@ -78,7 +78,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           textDirection: TextDirection.rtl,
           child: Scaffold(
             backgroundColor: _scaffoldBg,
-            appBar: _buildAppBar(),
+            appBar: _buildAppBar(context),
             body: Form(
               key: _formKey,
               child: Column(
@@ -97,6 +97,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           _buildCard(
                             children: [
                               _buildField(
+                                context: context,
                                 label: l10n.fullName,
                                 hint: l10n.fullNameExample,
                                 icon: Icons.person_outline,
@@ -105,6 +106,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ),
                               SizedBox(height: 14.h),
                               _buildField(
+                                context: context,
                                 label: l10n.phoneNumber,
                                 hint: l10n.phoneNumberExample,
                                 icon: Icons.phone_outlined,
@@ -123,6 +125,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           _buildCard(
                             children: [
                               _buildField(
+                                context: context,
                                 label: l10n.city,
                                 hint: l10n.cityExample,
                                 icon: Icons.location_city_outlined,
@@ -137,6 +140,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           _buildCard(
                             children: [
                               _buildField(
+                                context: context,
                                 label: l10n.notes,
                                 hint: l10n.deliveryNoteHint,
                                 icon: Icons.notes_outlined,
@@ -148,7 +152,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           SizedBox(height: 20.h),
 
                           // Order summary
-                          _buildOrderSummaryCard(),
+                          _buildOrderSummaryCard(context),
                           SizedBox(height: 24.h),
                         ],
                       ),
@@ -204,7 +208,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   // ── AppBar ─────────────────────────────────────────────────────────────────
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0.5,
@@ -271,9 +277,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildOrderSummaryCard() {
+  Widget _buildOrderSummaryCard(BuildContext context) {
     final items = CartController.instance.items;
     final total = items.fold<double>(0, (s, i) => s + i.lineTotal);
+    final l10n = AppLocalizations.of(context);
 
     return _buildCard(children: [
       Text(
@@ -329,6 +336,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildField({
+    required BuildContext context,
     required String label,
     required String hint,
     required IconData icon,
@@ -338,6 +346,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     int maxLines = 1,
     bool isRequired = false,
   }) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
