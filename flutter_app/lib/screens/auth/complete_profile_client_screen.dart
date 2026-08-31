@@ -6,6 +6,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+Future<bool> submitClientProfileRegion({
+  required BuildContext context,
+  required String? selectedRegion,
+  required Future<void> Function({String? region}) saveRegion,
+  required VoidCallback onSuccess,
+}) async {
+  final l10n = AppLocalizations.of(context);
+
+  if (selectedRegion == null || selectedRegion.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.selectRegionFirst)),
+    );
+    return false;
+  }
+
+  try {
+    await saveRegion(region: selectedRegion.trim());
+    onSuccess();
+    return true;
+  } catch (_) {
+    final message = UserController.instance.authErrorNotifier.value ??
+        l10n.unableSaveChanges;
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+    rethrow;
+  }
+}
+
 // ─── CompleteProfileClientScreen ─────────────────────────────────────────────
 //
 // Region-selection step in the client onboarding flow.
@@ -18,7 +49,12 @@ import 'package:google_fonts/google_fonts.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CompleteProfileClientScreen extends StatefulWidget {
-  const CompleteProfileClientScreen({super.key});
+  const CompleteProfileClientScreen({
+    super.key,
+    this.onSubmitRegion,
+  });
+
+  final Future<void> Function({String? region})? onSubmitRegion;
 
   @override
   State<CompleteProfileClientScreen> createState() =>
@@ -32,6 +68,7 @@ class _CompleteProfileClientScreenState
 
   String? _selectedRegion = UserController.instance.currentUser?.region;
   bool _isLocating = false;
+  bool _isSubmitting = false;
 
   final List<Map<String, dynamic>> _regions = [
     {'name': 'غزة', 'icon': Icons.location_on_outlined},
@@ -42,20 +79,38 @@ class _CompleteProfileClientScreenState
     {'name': 'دير البلح', 'icon': Icons.location_on_outlined},
   ];
 
+  Future<void> _saveSelectedRegion(String region) {
+    final saver = widget.onSubmitRegion ?? UserController.instance.updateProfile;
+    return saver(region: region);
+  }
+
   Future<void> _onNext() async {
-    final l10n = AppLocalizations.of(context);
-    if (_selectedRegion == null || _selectedRegion!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.selectRegionFirst)),
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await submitClientProfileRegion(
+        context: context,
+        selectedRegion: _selectedRegion,
+        saveRegion: ({String? region}) => _saveSelectedRegion(region ?? ''),
+        onSuccess: () {
+          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const CompleteProfilePhotoScreen(),
+            ),
+          );
+        },
       );
-      return;
+    } catch (_) {
+      // The submit helper already shows the user-facing error and rethrows for
+      // the calling flow to terminate without navigation.
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
-    await UserController.instance.updateProfile(region: _selectedRegion);
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const CompleteProfilePhotoScreen()),
-    );
   }
 
   @override
@@ -278,7 +333,7 @@ class _CompleteProfileClientScreenState
                   width: double.infinity,
                   height: 54.h,
                   child: ElevatedButton(
-                    onPressed: _onNext,
+                    onPressed: _isSubmitting ? null : _onNext,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _primary,
                       foregroundColor: Colors.white,
@@ -287,22 +342,31 @@ class _CompleteProfileClientScreenState
                         borderRadius: BorderRadius.circular(14.r),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'التالي',
-                          style: GoogleFonts.ibmPlexSans(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'التالي',
+                                style: GoogleFonts.ibmPlexSans(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Icon(Icons.arrow_back_rounded,
+                                  color: Colors.white, size: 18.sp),
+                            ],
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Icon(Icons.arrow_back_rounded,
-                            color: Colors.white, size: 18.sp),
-                      ],
-                    ),
                   ),
                 ),
               ),
