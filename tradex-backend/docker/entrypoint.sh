@@ -2,6 +2,11 @@
 
 set -eu
 
+APP_ROOT=/var/www/html
+PUBLIC_STORAGE_PATH="$APP_ROOT/storage/app/public"
+PUBLIC_STORAGE_LINK="$APP_ROOT/public/storage"
+STORAGE_SEED_PATH="$APP_ROOT/storage_seed"
+
 mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
@@ -11,20 +16,29 @@ mkdir -p \
     storage/app/public \
     bootstrap/cache
 
-if [ -L public/storage ] || [ -e public/storage ]; then
-    rm -rf public/storage
+if [ -L "$PUBLIC_STORAGE_LINK" ] || [ -e "$PUBLIC_STORAGE_LINK" ]; then
+    rm -rf "$PUBLIC_STORAGE_LINK"
 fi
-ln -sfn ../storage/app/public public/storage
+ln -s "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"
 
-# If the mounted persistent storage is empty, copy any baked-in public files
-# included in the image into the mount so committed fixtures (avatars, logos,
-# product images) remain available after the volume is attached by Render.
-if [ -d "/var/www/html/storage_seed" ] && [ -d "storage/app/public" ]; then
-    if [ -z "$(ls -A storage/app/public)" ]; then
-        echo "Seeding mounted storage/app/public from baked-in storage_seed"
-        cp -a /var/www/html/storage_seed/. storage/app/public/ || true
-        chmod -R 755 storage/app/public || true
-    fi
+# Copy only missing committed public files. Existing uploaded files on the
+# persistent disk are never overwritten or deleted.
+if [ -d "$STORAGE_SEED_PATH" ]; then
+    cp -an "$STORAGE_SEED_PATH/." "$PUBLIC_STORAGE_PATH/" || true
+fi
+
+chmod 775 "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"
+find "$PUBLIC_STORAGE_PATH" -type d -exec chmod 775 {} + 2>/dev/null || true
+find "$PUBLIC_STORAGE_PATH" -type f -exec chmod 664 {} + 2>/dev/null || true
+
+echo "[storage] path=$PUBLIC_STORAGE_PATH"
+echo "[storage] public_link=$PUBLIC_STORAGE_LINK"
+echo "[storage] link_target=$(readlink -f "$PUBLIC_STORAGE_LINK" 2>/dev/null || true)"
+if [ -d "$PUBLIC_STORAGE_PATH" ]; then
+    echo "[storage] target_exists=true file_count=$(find "$PUBLIC_STORAGE_PATH" -type f | wc -l)"
+    find "$PUBLIC_STORAGE_PATH" -maxdepth 2 -type f -print | head -50
+else
+    echo "[storage] target_exists=false file_count=0"
 fi
 
 php artisan storage:link --force
