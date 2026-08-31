@@ -70,7 +70,76 @@ services:
       - key: CACHE_STORE
         value: database
       - key: QUEUE_CONNECTION
-        value: sync
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: SANCTUM_EXPIRATION_MINUTES
+        value: "129600"
+
+  - type: worker
+    name: tradex-queue
+    runtime: docker
+    rootDir: tradex-backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    command: php artisan queue:work database --tries=3 --sleep=5 --timeout=3600
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        value: https://tradex-v2us.onrender.com
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Tradex
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: tradex-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: tradex-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: tradex-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: tradex-db
+          property: username
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: tradex-db
+          property: password
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL

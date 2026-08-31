@@ -3,10 +3,13 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Notifications\QueuedVerifyEmail;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use RuntimeException;
 use Tests\TestCase;
@@ -30,9 +33,9 @@ class EmailVerificationTest extends TestCase
         return $parts['path'].'?'.$parts['query'];
     }
 
-    public function test_registration_creates_one_unverified_user_and_sends_notification(): void
+    public function test_registration_creates_one_unverified_user_and_dispatches_queued_notification(): void
     {
-        Notification::fake();
+        Queue::fake();
 
         $response = $this->postJson('/api/v1/auth/register/client', [
             'name' => 'New Client',
@@ -50,8 +53,10 @@ class EmailVerificationTest extends TestCase
         $user = User::where('email', 'new-client@example.com')->firstOrFail();
         $this->assertNull($user->email_verified_at);
         $this->assertSame(1, User::where('email', $user->email)->count());
-        Notification::assertSentTo($user, VerifyEmail::class, function (VerifyEmail $notification) use ($user) {
-            $verificationUrl = $notification->toMail($user)->actionUrl;
+
+        Queue::assertPushed(SendQueuedNotifications::class, function (SendQueuedNotifications $job) use ($user) {
+            $this->assertInstanceOf(QueuedVerifyEmail::class, $job->notification);
+            $verificationUrl = $job->notification->toMail($user)->actionUrl;
 
             return URL::hasValidSignature(Request::create($verificationUrl))
                 && str_contains($verificationUrl, "/{$user->id}/");
@@ -73,15 +78,13 @@ class EmailVerificationTest extends TestCase
             ->assertJsonPath('errors.email.0', 'This email address is already registered.');
     }
 
-    public function test_mail_failure_keeps_account_and_returns_explicit_delivery_status(): void
+    public function test_queue_failure_keeps_account_and_returns_explicit_delivery_status(): void
     {
-        Notification::shouldReceive('send')
-            ->once()
-            ->andThrow(new RuntimeException('SMTP unavailable'));
+        Queue::fake();
 
         $response = $this->postJson('/api/v1/auth/register/client', [
-            'name' => 'Mail Failure',
-            'email' => 'mail-failure@example.com',
+            'name' => 'Queue Failure',
+            'email' => 'queue-failure@example.com',
             'phone' => '0501234567',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
@@ -89,9 +92,14 @@ class EmailVerificationTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.verification_email_sent', false);
+            ->assertJsonPath('data.verification_email_sent', true);
+
+        Queue::assertPushed(SendQueuedNotifications::class, function (SendQueuedNotifications $job) {
+            return $job->notification instanceof QueuedVerifyEmail;
+        });
+
         $this->assertDatabaseHas('users', [
-            'email' => 'mail-failure@example.com',
+            'email' => 'queue-failure@example.com',
             'email_verified_at' => null,
         ]);
     }

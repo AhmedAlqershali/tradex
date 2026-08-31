@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Contracts\Services\AuthServiceInterface;
+use App\Contracts\Services\SubscriptionServiceInterface;
 use App\Models\Store;
 use App\Models\User;
+use App\Notifications\QueuedVerifyEmail;
 use App\Support\PublicMediaUrl;
-use App\Contracts\Services\SubscriptionServiceInterface;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -251,11 +252,11 @@ class AuthService implements AuthServiceInterface
     private function sendVerificationNotification(User $user): bool
     {
         try {
-            $user->sendEmailVerificationNotification();
+            $user->notify(new QueuedVerifyEmail());
 
             return true;
         } catch (Throwable $exception) {
-            Log::error('Registration verification email could not be sent.', [
+            Log::error('Registration verification email could not be queued.', [
                 'user_id'   => $user->getKey(),
                 'email'     => $user->getEmailForVerification(),
                 'exception' => $exception,
