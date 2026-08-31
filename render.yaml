@@ -1,3 +1,9 @@
+databases:
+  - name: tradex-db
+    databaseName: tradex
+    user: tradex
+    plan: free
+
 services:
   - type: web
     name: tradex-backend
@@ -38,15 +44,25 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        sync: false
+        fromDatabase:
+          name: tradex-db
+          property: host
       - key: DB_PORT
-        value: "5432"
+        fromDatabase:
+          name: tradex-db
+          property: port
       - key: DB_DATABASE
-        sync: false
+        fromDatabase:
+          name: tradex-db
+          property: database
       - key: DB_USERNAME
-        sync: false
+        fromDatabase:
+          name: tradex-db
+          property: username
       - key: DB_PASSWORD
-        sync: false
+        fromDatabase:
+          name: tradex-db
+          property: password
       - key: FILESYSTEM_DISK
         value: public
       - key: SESSION_DRIVER
