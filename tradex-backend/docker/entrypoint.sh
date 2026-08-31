@@ -45,6 +45,11 @@ php artisan storage:link --force
 php artisan migrate --force --no-interaction
 php artisan db:seed --class=Database\\Seeders\\PlanSeeder --force --no-interaction
 php artisan db:seed --class=Database\\Seeders\\CategorySeeder --force --no-interaction
+
+if [ "${VERIFY_EXISTING_USERS:-}" = "true" ]; then
+    php artisan users:verify-existing
+fi
+
 php artisan tradex:provision-admin
 php artisan optimize
 
