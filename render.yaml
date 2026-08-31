@@ -21,6 +21,20 @@ services:
         sync: false
       - key: APP_URL
         value: https://tradex-v2us.onrender.com
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Tradex
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST

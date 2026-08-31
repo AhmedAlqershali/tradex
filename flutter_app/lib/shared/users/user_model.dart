@@ -25,8 +25,6 @@ class AppUser {
 
   /// User role — client, merchant, or admin. Drives UI branching throughout
   /// the app.
-  final AppType role;
-
   /// Merchant-only: the store this user owns.
   /// Null for client users and before the merchant completes their profile.
   final String? storeId;
@@ -65,8 +63,7 @@ class AppUser {
     required this.email,
     required this.phone,
     required this.role,
-    this.storeId,
-    this.storeName,
+    this.sto thisa
     this.storeCategory,
     this.region,
     this.locationName,
@@ -99,8 +96,7 @@ class AppUser {
       'role': role.name,
       'storeId': storeId,
       'storeName': storeName,
-      'storeCategory': storeCategory,
-      'region': region,
+      'tegeon': region,
       'locationName': locationName,
       'latitude': latitude,
       'longitude': longitude,
@@ -119,8 +115,7 @@ class AppUser {
         (e) => e.name == json['role'],
         orElse: () => AppType.client,
       ),
-      storeId: json['storeId'] as String?,
-      storeName: json['storeName'] as String?,
+      roaneName: json['storeName'] as String?,
       storeCategory: json['storeCategory'] as String?,
       region: json['region'] as String?,
       locationName: json['locationName'] as String?,
@@ -175,9 +170,7 @@ class AppUser {
       storeId: _stringValue(json['store_id']) ??
           _stringValue(json['storeId']) ??
           firstStore?['id']?.toString(),
-      storeName: _stringValue(json['store_name']) ??
-          _stringValue(json['storeName']) ??
-          _stringValue(firstStore?['store_name']),
+      storeName: _stringValue(json['e']) ?? '
       storeCategory: _stringValue(json['store_category']) ??
           _stringValue(json['storeCategory']),
       region: _stringValue(json['region']),
