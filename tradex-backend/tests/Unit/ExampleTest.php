@@ -16,12 +16,14 @@ class ExampleTest extends TestCase
 
     public function test_public_media_url_is_canonicalized_for_product_images(): void
     {
+        config()->set('app.url', 'http://localhost');
+
         $image = new ProductImage([
             'path' => '/storage/products/123/abc.jpg',
         ]);
 
         $this->assertSame(
-            PublicMediaUrl::PROD_ORIGIN . '/storage/products/123/abc.jpg',
+            PublicMediaUrl::origin() . '/storage/products/123/abc.jpg',
             $image->url,
         );
     }
