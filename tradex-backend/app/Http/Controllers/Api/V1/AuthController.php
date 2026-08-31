@@ -169,7 +169,12 @@ class AuthController extends BaseApiController
             return $this->error('Your email address is already verified.', 422);
         }
 
-        $this->authService->resendVerificationEmail($user);
+        if (! $this->authService->resendVerificationEmail($user)) {
+            return $this->error(
+                'Verification email could not be sent. Please try again later.',
+                503
+            );
+        }
 
         return $this->success(null, 'Verification email sent. Please check your inbox.');
     }

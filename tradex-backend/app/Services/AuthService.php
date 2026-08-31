@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Contracts\Services\AuthServiceInterface;
 use App\Models\Store;
 use App\Models\User;
+use App\Support\PublicMediaUrl;
 use App\Contracts\Services\SubscriptionServiceInterface;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 use Illuminate\Validation\ValidationException;
 
 class AuthService implements AuthServiceInterface
@@ -32,19 +35,26 @@ class AuthService implements AuthServiceInterface
      */
     public function registerClient(array $data): array
     {
-        $user = new User();
-        $user->fill([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'phone'    => $data['phone'],
-            'password' => Hash::make($data['password']),
-        ]);
-        $user->role   = 'client';
-        $user->status = 'active';
-        $user->save();
+        $user = DB::transaction(function () use ($data) {
+            $user = new User();
+            $user->fill([
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'phone'    => $data['phone'],
+                'password' => Hash::make($data['password']),
+            ]);
+            $user->role   = 'client';
+            $user->status = 'active';
+            $user->save();
+
+            return $user;
+        });
+
+        $verificationEmailSent = $this->sendVerificationNotification($user);
 
         return [
-            'user' => $this->userPayload($user),
+            'user'                     => $this->userPayload($user),
+            'verification_email_sent' => $verificationEmailSent,
         ];
     }
 
@@ -87,9 +97,12 @@ class AuthService implements AuthServiceInterface
             ];
         });
 
+        $verificationEmailSent = $this->sendVerificationNotification($registration['user']);
+
         return [
-            'user'  => $this->userPayload($registration['user']),
-            'store' => $this->storePayload($registration['store']),
+            'user'                     => $this->userPayload($registration['user']),
+            'store'                    => $this->storePayload($registration['store']),
+            'verification_email_sent' => $verificationEmailSent,
         ];
     }
 
@@ -225,9 +238,31 @@ class AuthService implements AuthServiceInterface
     // Email verification
     // -------------------------------------------------------------------------
 
-    public function resendVerificationEmail(User $user): void
+    public function resendVerificationEmail(User $user): bool
     {
-        $user->sendEmailVerificationNotification();
+        return $this->sendVerificationNotification($user);
+    }
+
+    /**
+     * Send verification only after registration has committed. Mail transport
+     * failures must not turn a persisted account into a misleading 500 error;
+     * the authenticated resend endpoint remains available for recovery.
+     */
+    private function sendVerificationNotification(User $user): bool
+    {
+        try {
+            $user->sendEmailVerificationNotification();
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::error('Registration verification email could not be sent.', [
+                'user_id'   => $user->getKey(),
+                'email'     => $user->getEmailForVerification(),
+                'exception' => $exception,
+            ]);
+
+            return false;
+        }
     }
 
     /**

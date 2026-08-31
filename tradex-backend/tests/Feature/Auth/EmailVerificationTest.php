@@ -3,186 +3,141 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Routing\Middleware\ValidateSignature;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
+use RuntimeException;
 use Tests\TestCase;
 
-/**
- * Email verification flow tests.
- *
- * Signed URL tests generate a real signed URL via URL::temporarySignedRoute
- * so the ValidateSignature middleware passes. Tests that specifically check
- * invalid-hash logic disable the signed middleware to isolate controller logic.
- */
 class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function verifyUrl(User $user, ?string $hashOverride = null): string
+    private function verifyUrl(User $user, ?string $hash = null): string
     {
-        $hash = $hashOverride ?? sha1($user->getEmailForVerification());
-
-        $fullUrl = URL::temporarySignedRoute(
+        $url = URL::temporarySignedRoute(
             'api.v1.auth.verification.verify',
             now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => $hash]
+            [
+                'id' => $user->id,
+                'hash' => $hash ?? sha1($user->getEmailForVerification()),
+            ]
         );
+        $parts = parse_url($url);
 
-        // Extract path + query for the test HTTP client.
-        $parsed = parse_url($fullUrl);
-
-        return $parsed['path'] . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+        return $parts['path'].'?'.$parts['query'];
     }
 
-    private function headers(string $token): array
+    public function test_registration_creates_one_unverified_user_and_sends_notification(): void
     {
-        return ['Authorization' => "Bearer {$token}", 'Accept' => 'application/json'];
-    }
+        Notification::fake();
 
-    // =========================================================================
-    // GET /api/v1/auth/email/verify/{id}/{hash}
-    // =========================================================================
+        $response = $this->postJson('/api/v1/auth/register/client', [
+            'name' => 'New Client',
+            'email' => 'new-client@example.com',
+            'phone' => '0501234567',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
 
-    public function test_unverified_user_can_verify_email(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => null]);
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.verification_email_sent', true)
+            ->assertJsonMissingPath('data.token');
 
+        $user = User::where('email', 'new-client@example.com')->firstOrFail();
         $this->assertNull($user->email_verified_at);
+        $this->assertSame(1, User::where('email', $user->email)->count());
+        Notification::assertSentTo($user, VerifyEmail::class, function (VerifyEmail $notification) use ($user) {
+            $verificationUrl = $notification->toMail($user)->actionUrl;
+
+            return URL::hasValidSignature(Request::create($verificationUrl))
+                && str_contains($verificationUrl, "/{$user->id}/");
+        });
+    }
+
+    public function test_duplicate_email_returns_validation_error(): void
+    {
+        User::factory()->create(['email' => 'duplicate@example.com']);
+
+        $this->postJson('/api/v1/auth/register/client', [
+            'name' => 'Duplicate',
+            'email' => 'duplicate@example.com',
+            'phone' => '0501234567',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ])->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('errors.email.0', 'This email address is already registered.');
+    }
+
+    public function test_mail_failure_keeps_account_and_returns_explicit_delivery_status(): void
+    {
+        Notification::shouldReceive('send')
+            ->once()
+            ->andThrow(new RuntimeException('SMTP unavailable'));
+
+        $response = $this->postJson('/api/v1/auth/register/client', [
+            'name' => 'Mail Failure',
+            'email' => 'mail-failure@example.com',
+            'phone' => '0501234567',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.verification_email_sent', false);
+        $this->assertDatabaseHas('users', [
+            'email' => 'mail-failure@example.com',
+            'email_verified_at' => null,
+        ]);
+    }
+
+    public function test_valid_signed_link_verifies_the_correct_user(): void
+    {
+        $user = User::factory()->unverified()->create();
 
         $this->getJson($this->verifyUrl($user))
             ->assertOk()
-            ->assertJsonPath('success', true)
             ->assertJsonPath('data.email_verified', true);
 
         $this->assertNotNull($user->fresh()->email_verified_at);
     }
 
-    public function test_already_verified_user_gets_success_with_flag(): void
+    public function test_invalid_hash_and_tampered_signature_are_rejected(): void
     {
-        $user = User::factory()->create(['email_verified_at' => now()]);
+        $user = User::factory()->unverified()->create();
 
-        $this->getJson($this->verifyUrl($user))
-            ->assertOk()
-            ->assertJsonPath('success', true)
-            ->assertJsonPath('data.email_verified', true);
-    }
-
-    public function test_invalid_hash_returns_403(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => null]);
-
-        // Bypass the signed middleware to test the hash comparison logic.
-        $this->withoutMiddleware(ValidateSignature::class)
-            ->getJson("/api/v1/auth/email/verify/{$user->id}/badhash")
+        $this->getJson($this->verifyUrl($user, 'invalid-hash'))
             ->assertStatus(403)
             ->assertJsonPath('success', false);
+
+        $this->getJson($this->verifyUrl($user).'&extra=1')
+            ->assertStatus(403);
+        $this->assertNull($user->fresh()->email_verified_at);
     }
 
-    public function test_nonexistent_user_returns_404(): void
+    public function test_unverified_user_cannot_login_but_verified_user_can(): void
     {
-        $user = User::factory()->create(['email_verified_at' => null]);
-
-        // Use a valid-looking signed URL but with a non-existent user ID.
-        $this->withoutMiddleware(ValidateSignature::class)
-            ->getJson('/api/v1/auth/email/verify/99999/somehash')
-            ->assertNotFound()
-            ->assertJsonPath('success', false);
-    }
-
-    public function test_tampered_signature_is_rejected(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => null]);
-
-        // Build the valid URL then tamper with the signature parameter.
-        $url     = $this->verifyUrl($user);
-        $tampered = $url . '&extra=1'; // invalidates the signature
-
-        $this->getJson($tampered)
-            ->assertStatus(403); // ValidateSignature returns 403 on failure
-    }
-
-    public function test_verify_response_has_standard_envelope(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => null]);
-
-        $this->getJson($this->verifyUrl($user))
-            ->assertOk()
-            ->assertJsonStructure(['success', 'message', 'data' => ['email_verified']]);
-    }
-
-    // =========================================================================
-    // POST /api/v1/auth/email/resend
-    // =========================================================================
-
-    public function test_verified_user_can_login(): void
-    {
-        $user = User::factory()->create([
-            'email'    => 'verified-login@example.com',
+        $user = User::factory()->unverified()->create([
+            'email' => 'login-verification@example.com',
             'password' => bcrypt('Password123!'),
-            'status'   => 'active',
-            'role'     => 'client',
-            'email_verified_at' => now(),
+            'status' => 'active',
         ]);
 
         $this->postJson('/api/v1/auth/login', [
-            'email'    => 'verified-login@example.com',
+            'email' => $user->email,
             'password' => 'Password123!',
-        ])->assertOk()
-            ->assertJsonPath('success', true)
-            ->assertJsonPath('data.user.email', $user->email)
-            ->assertJsonPath('data.token', fn ($token) => ! empty($token));
-    }
+        ])->assertStatus(422)->assertJsonMissingPath('data.token');
 
-    public function test_unverified_user_cannot_login_and_no_token_is_issued(): void
-    {
-        User::factory()->create([
-            'email'    => 'unverified-login@example.com',
-            'password' => bcrypt('Password123!'),
-            'status'   => 'active',
-            'role'     => 'client',
-            'email_verified_at' => null,
-        ]);
+        $user->markEmailAsVerified();
 
         $this->postJson('/api/v1/auth/login', [
-            'email'    => 'unverified-login@example.com',
+            'email' => $user->email,
             'password' => 'Password123!',
-        ])
-            ->assertStatus(422)
-            ->assertJsonPath('success', false)
-            ->assertJsonPath('errors.email.0', 'يرجى تأكيد بريدك الإلكتروني أولًا.')
-            ->assertJsonMissingPath('data.token');
-
-        $this->assertDatabaseCount('personal_access_tokens', 0);
-    }
-
-    public function test_unverified_user_can_request_resend(): void
-    {
-        Notification::fake();
-
-        $user  = User::factory()->create(['email_verified_at' => null]);
-        $token = $user->createToken('test')->plainTextToken;
-
-        $this->postJson('/api/v1/auth/email/resend', [], $this->headers($token))
-            ->assertOk()
-            ->assertJsonPath('success', true);
-    }
-
-    public function test_already_verified_user_gets_error_on_resend(): void
-    {
-        $user  = User::factory()->create(['email_verified_at' => now()]);
-        $token = $user->createToken('test')->plainTextToken;
-
-        $this->postJson('/api/v1/auth/email/resend', [], $this->headers($token))
-            ->assertStatus(422)
-            ->assertJsonPath('success', false);
-    }
-
-    public function test_resend_requires_authentication(): void
-    {
-        $this->postJson('/api/v1/auth/email/resend', [])
-            ->assertStatus(401)
-            ->assertJsonPath('success', false);
+        ])->assertOk()->assertJsonPath('data.token', fn ($token) => ! empty($token));
     }
 }

@@ -39,8 +39,10 @@ class AuthTest extends TestCase
             ->assertJsonMissingPath('data.token');
 
         $this->assertDatabaseHas('users', ['email' => 'client@example.com', 'role' => 'client']);
-        Notification::assertNotSentTo(
-            User::where('email', 'client@example.com')->first(),
+        $client = User::where('email', 'client@example.com')->firstOrFail();
+        $this->assertNull($client->email_verified_at);
+        Notification::assertSentTo(
+            $client,
             VerifyEmail::class
         );
 
@@ -117,7 +119,8 @@ class AuthTest extends TestCase
         $this->assertTrue($trial->ends_at->equalTo($trial->starts_at->copy()->addDays(14)));
         $this->assertSame(1, Subscription::where('user_id', $merchant->id)->count());
         $this->assertDatabaseHas('stores', ['store_name' => 'Test Store']);
-        Notification::assertNotSentTo(
+        $this->assertNull($merchant->email_verified_at);
+        Notification::assertSentTo(
             $merchant,
             VerifyEmail::class
         );

@@ -55,7 +55,7 @@ interface AuthServiceInterface
     /**
      * Dispatch a new verification email to the given user.
      */
-    public function resendVerificationEmail(User $user): void;
+    public function resendVerificationEmail(User $user): bool;
 
     /**
      * Mark the user's email as verified and fire the Verified event.
