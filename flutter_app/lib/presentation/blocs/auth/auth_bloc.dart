@@ -56,7 +56,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: event.password,
         role: event.role,
       );
-      if (!isClosed) emit(AuthAuthenticated(user: user));
+      // After registration, user must verify email before logging in.
+      // Emit AuthAwaitingEmailVerification instead of AuthAuthenticated.
+      if (!isClosed) emit(AuthAwaitingEmailVerification(user: user, role: event.role));
     } on ApiException catch (e) {
       if (!isClosed) emit(AuthFailure(message: e.message));
     } catch (e) {

@@ -41,6 +41,7 @@ class ApiConstants {
   // /auth/email/verify/{id}/{hash}), not an in-app OTP code. Kept for the
   // resend-verification action only.
   static const String resendVerification = '/auth/email/resend';
+  static const String resendVerificationUnauthenticated = '/auth/email/resend-unauthenticated';
 
   // ── Profile ───────────────────────────────────────────────────────────────────
   // `/auth/me` is the authenticated-user read endpoint and includes the

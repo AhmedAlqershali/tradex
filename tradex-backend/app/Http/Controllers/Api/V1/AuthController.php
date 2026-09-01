@@ -180,6 +180,45 @@ class AuthController extends BaseApiController
     }
 
     /**
+     * POST /api/v1/auth/email/resend-unauthenticated
+     *
+     * Resends the verification email for an unauthenticated user.
+     * Accepts email in the request body instead of using authenticated user.
+     * Used by Flutter app during registration flow before user has been verified.
+     * Rate limited via throttle:auth (5 req/min/IP).
+     */
+    public function resendVerificationUnauthenticated(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email:rfc,dns',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            // Do not disclose whether the email exists in our system.
+            // This prevents user enumeration attacks.
+            return $this->success(null, 'If an account with that email exists, a verification email has been sent.');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->success(
+                ['email_verified' => true],
+                'Your email address is already verified.'
+            );
+        }
+
+        if (!$this->authService->resendVerificationEmail($user)) {
+            return $this->error(
+                'Verification email could not be sent. Please try again later.',
+                503
+            );
+        }
+
+        return $this->success(null, 'Verification email sent. Please check your inbox.');
+    }
+
+    /**
      * GET /api/v1/auth/email/verify/{id}/{hash}
      *
      * Handles the signed verification link that Laravel emails to the user.

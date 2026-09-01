@@ -3,6 +3,7 @@ import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
 import 'package:ai_saas/screens/auth/complete_registration_merchant_screen.dart';
+import 'package:ai_saas/screens/auth/email_verification_screen.dart';
 import 'package:ai_saas/screens/auth/login_screen.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +151,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
+        if (state is AuthAwaitingEmailVerification) {
+          // After registration, show email verification screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EmailVerificationScreen(
+                user: state.user,
+                role: state.role,
+                onVerificationSuccess: (verifiedUser) {
+                  // After verification, navigate to profile completion
+                  if (state.role == AppType.merchant) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CompleteProfileMerchantScreen(
+                          type: AppType.merchant,
+                        ),
+                      ),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CompleteProfileClientScreen(),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          );
+        }
+
         if (state is AuthAuthenticated) {
           if (widget.type == AppType.merchant) {
             Navigator.push(

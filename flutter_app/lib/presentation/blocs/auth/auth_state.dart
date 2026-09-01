@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
+import 'package:ai_saas/models/app_type.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -58,6 +59,17 @@ class AuthOtpVerified extends AuthState {
 
   @override
   List<Object?> get props => [];
+}
+
+/// Emitted when registration is successful but email verification is required.
+class AuthAwaitingEmailVerification extends AuthState {
+  const AuthAwaitingEmailVerification({required this.user, required this.role});
+
+  final AppUser user;
+  final AppType role;
+
+  @override
+  List<Object?> get props => [user, role];
 }
 
 /// Emitted after a successful password reset.
