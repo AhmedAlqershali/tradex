@@ -11,6 +11,7 @@ class QueueJobFailed
      * Handle the event.
      *
      * Logs failed queue jobs with diagnostic information (without secrets).
+     * Provides clear exception details for troubleshooting.
      */
     public function handle(JobFailed $event): void
     {
@@ -20,6 +21,19 @@ class QueueJobFailed
         // Extract job class name safely
         $jobClass = $payload['displayName'] ?? ($payload['job'] ?? 'unknown');
 
+        // Format clear diagnostic message for logs
+        $diagnosticMessage = sprintf(
+            "[QUEUE JOB FAILED] Job: %s | Exception: %s | Message: %s | File: %s:%d",
+            $jobClass,
+            $exception::class,
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine()
+        );
+
+        Log::error($diagnosticMessage);
+
+        // Also log structured array for log aggregation systems
         Log::error('Queue job failed', [
             'job_class' => $jobClass,
             'queue' => $event->job->getQueue(),
