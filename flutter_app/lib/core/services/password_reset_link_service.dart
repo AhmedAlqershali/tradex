@@ -161,8 +161,8 @@ class DeepLinkService {
       MaterialPageRoute(
         builder: (_) => NewPasswordScreen(
           type: AppType.client,
-          email: payload.email,
-          token: payload.token,
+          email: resetPayload.email,
+          token: resetPayload.token,
         ),
       ),
     );
