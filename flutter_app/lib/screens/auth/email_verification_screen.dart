@@ -79,17 +79,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       // Check response
       final data = response.data;
       if (data == null || data['data'] == null) {
-        throw const ApiException(
+        throw ServerException(
+          'Invalid response from verification endpoint',
           statusCode: 500,
-          message: 'Invalid response from verification endpoint',
         );
       }
 
       final verified = data['data']['email_verified'] == true;
       if (!verified) {
-        throw const ApiException(
+        throw ServerException(
+          'Verification failed',
           statusCode: 422,
-          message: 'Verification failed',
         );
       }
 
@@ -105,12 +105,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
       if (!mounted) return;
 
-      // Update user to mark verified
-      final verifiedUser = widget.user.copyWith(
-        emailVerifiedAt: DateTime.now(),
-      );
-
-      widget.onVerificationSuccess?.call(verifiedUser);
+      // Backend has verified the email. Call success callback with current user.
+      // The user can now proceed to profile completion and login.
+      widget.onVerificationSuccess?.call(widget.user);
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -176,17 +173,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   String _getErrorMessage(ApiException e) {
-    if (e.statusCode == 404) {
-      return 'حساب غير موجود.';
-    } else if (e.statusCode == 403) {
-      return 'رابط التحقق غير صحيح أو انتهت صلاحيته.';
-    } else if (e.statusCode == 422) {
-      return 'لا يمكن التحقق من البريد الإلكتروني.';
+    if (e is ServerException) {
+      if (e.statusCode == 404) {
+        return 'حساب غير موجود.';
+      } else if (e.statusCode == 403) {
+        return 'رابط التحقق غير صحيح أو انتهت صلاحيته.';
+      } else if (e.statusCode == 422) {
+        return 'لا يمكن التحقق من البريد الإلكتروني.';
+      }
     } else if (e is NetworkException) {
       return 'خطأ في الاتصال. تحقق من الإنترنت.';
-    } else {
-      return e.message;
     }
+    return e.message;
   }
 
   @override
