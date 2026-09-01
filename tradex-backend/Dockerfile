@@ -40,6 +40,7 @@ RUN if [ -d storage/app/public ]; then mkdir -p /var/www/html/storage_seed && cp
 
 COPY --from=assets /var/www/html/public/build ./public/build
 COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY docker/start.sh /usr/local/bin/docker-start
 
 RUN mkdir -p \
     storage/framework/cache \
@@ -50,9 +51,9 @@ RUN mkdir -p \
     storage/app/public \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
-    && chmod +x /usr/local/bin/docker-entrypoint
+    && chmod +x /usr/local/bin/docker-entrypoint /usr/local/bin/docker-start
 
 EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} -t public docker/router.php"]
+CMD ["docker-start"]
