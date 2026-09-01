@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use App\Listeners\QueueJobFailed;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -75,6 +78,13 @@ class AppServiceProvider extends ServiceProvider
                     'hash' => sha1($notifiable->getEmailForVerification()),
                 ]
             );
+        });
+
+        // ── Queue failure logging ────────────────────────────────────────────
+        // Log all queue job failures with diagnostic information for
+        // production troubleshooting (especially email verification jobs).
+        Queue::failing(function (JobFailed $event) {
+            (new QueueJobFailed())->handle($event);
         });
     }
 }
