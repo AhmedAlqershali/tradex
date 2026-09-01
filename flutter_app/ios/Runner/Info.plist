@@ -49,5 +49,18 @@
 	<string>يستخدم Tradex موقعك لتعبئة منطقتك الحالية.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>يستخدم Tradex موقعك لتعبئة منطقتك الحالية.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleName</key>
+			<string>Tradex</string>
+			<key>CFBundleURLName</key>
+			<string>com.tradex.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tradex</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

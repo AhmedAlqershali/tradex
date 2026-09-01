@@ -20,9 +20,13 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- Password reset deep links -->
                 <data android:scheme="https" android:host="tradex-v2us.onrender.com" android:pathPrefix="/api/v1/auth/password/reset"/>
                 <data android:scheme="http" android:host="tradex-v2us.onrender.com" android:pathPrefix="/api/v1/auth/password/reset"/>
                 <data android:scheme="tradex" android:host="reset" android:pathPattern=".*"/>
+                <!-- Email verification deep links -->
+                <data android:scheme="https" android:host="tradex-v2us.onrender.com" android:pathPrefix="/api/v1/auth/email/verify"/>
+                <data android:scheme="http" android:host="tradex-v2us.onrender.com" android:pathPrefix="/api/v1/auth/email/verify"/>
             </intent-filter>
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
