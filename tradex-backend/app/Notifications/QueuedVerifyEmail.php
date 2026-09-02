@@ -48,4 +48,23 @@ class QueuedVerifyEmail extends VerifyEmail implements ShouldQueue
             throw $e;
         }
     }
+
+    public function failed(\Throwable $e): void
+    {
+        $config = config('mail');
+        $mailer = $config['default'] ?? 'unknown';
+        $mailerConfig = $config['mailers'][$mailer] ?? [];
+
+        Log::error('QueuedVerifyEmail job failed', [
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+            'default_mailer' => $mailer,
+            'mailer_transport' => $mailerConfig['transport'] ?? 'unknown',
+            'smtp_host' => $mailerConfig['host'] ?? 'default',
+            'smtp_port' => $mailerConfig['port'] ?? 'default',
+            'smtp_scheme' => $mailerConfig['scheme'] ?? 'not set',
+            'mail_from_address' => $config['from']['address'] ?? 'not set',
+            'mail_from_name' => $config['from']['name'] ?? 'not set',
+        ]);
+    }
 }
