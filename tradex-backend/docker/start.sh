@@ -1,56 +1,70 @@
 #!/usr/bin/env sh
 
-set -e
+set -eu
 
 APP_ROOT=/var/www/html
 PORT="${PORT:-8000}"
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Start both PHP server and queue worker in the same container.
-# Both processes run in the background with proper signal handling.
-# Render detects HTTP availability via the PHP server port binding.
-# Queue worker processes jobs from the database table continuously.
-# ──────────────────────────────────────────────────────────────────────────────
-
-# PID of background PHP process
 PHP_PID=""
+QUEUE_PID=""
+SHUTTING_DOWN=0
 
-# Handle graceful shutdown on TERM (Render) and INT (Ctrl+C)
-# POSIX sh syntax: use TERM INT (not SIGTERM SIGINT)
-on_signal() {
-    echo "[container] Received shutdown signal, gracefully stopping PHP server..."
+process_is_running() {
+    [ -d "/proc/$1" ] || return 1
+    [ "$(cat "/proc/$1/stat" 2>/dev/null | cut -d ' ' -f 3)" != "Z" ]
+}
 
-    if [ -n "$PHP_PID" ] && kill -0 "$PHP_PID" 2>/dev/null; then
-        echo "[container] Stopping PHP server (PID $PHP_PID)..."
+stop_processes() {
+    if [ -n "$PHP_PID" ] && process_is_running "$PHP_PID"; then
         kill -TERM "$PHP_PID" 2>/dev/null || true
-        wait "$PHP_PID" 2>/dev/null || true
     fi
+    if [ -n "$QUEUE_PID" ] && process_is_running "$QUEUE_PID"; then
+        kill -TERM "$QUEUE_PID" 2>/dev/null || true
+    fi
+}
 
+on_signal() {
+    SHUTTING_DOWN=1
+    echo "[container] Received shutdown signal; stopping HTTP server and queue worker..." >&2
+    stop_processes
+    wait "$PHP_PID" 2>/dev/null || true
+    wait "$QUEUE_PID" 2>/dev/null || true
     exit 0
 }
 
 trap on_signal TERM INT
 
-echo "[container] Starting Tradex backend..."
-echo "[container] HTTP server will bind to 0.0.0.0:$PORT"
-
 cd "$APP_ROOT"
 
-# Start PHP built-in server in the background
-echo "[container] Starting PHP server on port $PORT..."
-php -S 0.0.0.0:$PORT -t public docker/router.php &
+echo "[container] Starting HTTP server on 0.0.0.0:$PORT..." >&2
+php -S "0.0.0.0:$PORT" -t public docker/router.php &
 PHP_PID=$!
-echo "[container] PHP server started (PID $PHP_PID)"
 
-# Give PHP server a moment to bind to the port (Render needs to detect it)
-sleep 2
+echo "[container] Starting queue worker: php artisan queue:work database..." >&2
+php artisan queue:work database &
+QUEUE_PID=$!
 
-# Verify PHP server is still running
-if ! kill -0 "$PHP_PID" 2>/dev/null; then
-    echo "[container] FATAL: PHP server failed to start"
-    exit 1
-fi
+echo "[container] HTTP server PID: $PHP_PID; queue worker PID: $QUEUE_PID" >&2
 
-# Wait for the PHP HTTP process only. The dedicated Render worker service handles
-# queue processing using `php artisan queue:work database`.
-wait "$PHP_PID"
+while :; do
+    if ! process_is_running "$PHP_PID"; then
+        if [ "$SHUTTING_DOWN" -eq 0 ]; then
+            echo "[container] FATAL: HTTP server exited unexpectedly" >&2
+            stop_processes
+            wait "$PHP_PID" 2>/dev/null || true
+            wait "$QUEUE_PID" 2>/dev/null || true
+            exit 1
+        fi
+    fi
+
+    if ! process_is_running "$QUEUE_PID"; then
+        if [ "$SHUTTING_DOWN" -eq 0 ]; then
+            echo "[container] FATAL: queue worker exited unexpectedly" >&2
+            stop_processes
+            wait "$PHP_PID" 2>/dev/null || true
+            wait "$QUEUE_PID" 2>/dev/null || true
+            exit 1
+        fi
+    fi
+
+    sleep 1
+done
