@@ -33,7 +33,7 @@ class EmailVerificationTest extends TestCase
         return $parts['path'].'?'.$parts['query'];
     }
 
-    public function test_registration_creates_one_unverified_user_and_dispatches_queued_notification(): void
+    public function test_registration_creates_one_unverified_user_without_dispatching_laravel_notification(): void
     {
         Queue::fake();
 
@@ -47,20 +47,15 @@ class EmailVerificationTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.verification_email_sent', true)
+            ->assertJsonPath('data.verification_email_sent', false)
+            ->assertJsonPath('data.firebase_verification_required', true)
             ->assertJsonMissingPath('data.token');
 
         $user = User::where('email', 'new-client@example.com')->firstOrFail();
         $this->assertNull($user->email_verified_at);
         $this->assertSame(1, User::where('email', $user->email)->count());
 
-        Queue::assertPushed(SendQueuedNotifications::class, function (SendQueuedNotifications $job) use ($user) {
-            $this->assertInstanceOf(QueuedVerifyEmail::class, $job->notification);
-            $verificationUrl = $job->notification->toMail($user)->actionUrl;
-
-            return URL::hasValidSignature(Request::create($verificationUrl))
-                && str_contains($verificationUrl, "/{$user->id}/");
-        });
+        Queue::assertNothingPushed();
     }
 
     public function test_duplicate_email_returns_validation_error(): void
@@ -78,10 +73,8 @@ class EmailVerificationTest extends TestCase
             ->assertJsonPath('errors.email.0', 'This email address is already registered.');
     }
 
-    public function test_queue_failure_keeps_account_and_returns_explicit_delivery_status(): void
+    public function test_firebase_registration_keeps_account_unverified(): void
     {
-        Queue::fake();
-
         $response = $this->postJson('/api/v1/auth/register/client', [
             'name' => 'Queue Failure',
             'email' => 'queue-failure@example.com',
@@ -92,16 +85,24 @@ class EmailVerificationTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.verification_email_sent', true);
-
-        Queue::assertPushed(SendQueuedNotifications::class, function (SendQueuedNotifications $job) {
-            return $job->notification instanceof QueuedVerifyEmail;
-        });
+            ->assertJsonPath('data.verification_email_sent', false)
+            ->assertJsonPath('data.firebase_verification_required', true);
 
         $this->assertDatabaseHas('users', [
             'email' => 'queue-failure@example.com',
             'email_verified_at' => null,
         ]);
+    }
+
+    public function test_invalid_firebase_id_token_cannot_verify_email(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $this->postJson('/api/v1/auth/email/verify/firebase', [
+            'id_token' => 'invalid-token',
+        ])->assertStatus(422);
+
+        $this->assertNull($user->fresh()->email_verified_at);
     }
 
     public function test_valid_signed_link_verifies_the_correct_user(): void

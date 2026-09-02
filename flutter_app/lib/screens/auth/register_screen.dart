@@ -5,6 +5,7 @@ import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
 import 'package:ai_saas/screens/auth/complete_registration_merchant_screen.dart';
 import 'package:ai_saas/screens/auth/email_verification_screen.dart';
 import 'package:ai_saas/screens/auth/login_screen.dart';
+import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/screens/widgets/size_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -159,7 +160,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               builder: (_) => EmailVerificationScreen(
                 user: state.user,
                 role: state.role,
-                onVerificationSuccess: (verifiedUser) {
+                onVerificationSuccess: (verifiedUser) async {
+                  await UserController.instance.loginPendingVerification(
+                    email: verifiedUser.email,
+                    role: state.role,
+                  );
                   // After verification, navigate to profile completion
                   if (state.role == AppType.merchant) {
                     Navigator.push(

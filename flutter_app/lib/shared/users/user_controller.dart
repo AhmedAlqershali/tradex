@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/auth_service.dart';
+import 'package:ai_saas/core/services/firebase_email_verification_service.dart';
 import 'package:ai_saas/core/services/store_service.dart';
 import 'package:ai_saas/core/services/user_service.dart';
 import 'package:ai_saas/core/storage/secure_storage_service.dart';
@@ -42,6 +43,7 @@ class UserController {
   // current value before awaiting /auth/me and only publishes its result when
   // the value is unchanged.
   int _profileGeneration = 0;
+  String? _pendingVerificationPassword;
 
   /// True while any auth operation is in progress.
   final ValueNotifier<bool> isLoadingNotifier = ValueNotifier(false);
@@ -170,6 +172,10 @@ class UserController {
   }) async {
     _begin();
     try {
+      await FirebaseEmailVerificationService.instance.registerAndSend(
+        email: email,
+        password: password,
+      );
       final result = role == AppType.merchant
           ? await AuthService.instance.registerMerchant(
               name: name,
@@ -184,6 +190,7 @@ class UserController {
               phone: phone,
               password: password,
             );
+      _pendingVerificationPassword = password;
       if (result.tokens.accessToken.isNotEmpty) {
         await _storeTokens(result.tokens);
       }
@@ -195,6 +202,21 @@ class UserController {
       rethrow;
     } finally {
       _end();
+    }
+  }
+
+  Future<AppUser> loginPendingVerification({
+    required String email,
+    required AppType role,
+  }) async {
+    final password = _pendingVerificationPassword;
+    if (password == null) {
+      throw const AuthException('Registration credentials are no longer available.');
+    }
+    try {
+      return await login(email: email, password: password, role: role);
+    } finally {
+      _pendingVerificationPassword = null;
     }
   }
 
@@ -211,6 +233,8 @@ class UserController {
     } catch (_) {
       // Always clear local state even when the server call fails.
     } finally {
+      _pendingVerificationPassword = null;
+      await FirebaseEmailVerificationService.instance.signOut();
       await SecureStorageService.instance.clearAll();
       await _clearLegacySession();
       currentUserNotifier.value = null;

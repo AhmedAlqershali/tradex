@@ -62,4 +62,9 @@ interface AuthServiceInterface
      * The hash comparison is performed by the caller (controller).
      */
     public function markEmailAsVerified(User $user): void;
+
+    /**
+     * Verify a Firebase ID token and synchronize the matching Laravel user.
+     */
+    public function syncFirebaseVerification(string $idToken): array;
 }

@@ -219,6 +219,21 @@ class AuthController extends BaseApiController
     }
 
     /**
+     * POST /api/v1/auth/email/verify/firebase
+     */
+    public function verifyFirebaseEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'id_token' => ['required', 'string'],
+        ]);
+
+        return $this->success(
+            $this->authService->syncFirebaseVerification($request->string('id_token')->toString()),
+            'Email address verified successfully.'
+        );
+    }
+
+    /**
      * GET /api/v1/auth/email/verify/{id}/{hash}
      *
      * Handles the signed verification link that Laravel emails to the user.

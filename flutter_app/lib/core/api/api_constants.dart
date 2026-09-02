@@ -42,6 +42,7 @@ class ApiConstants {
   // resend-verification action only.
   static const String resendVerification = '/auth/email/resend';
   static const String resendVerificationUnauthenticated = '/auth/email/resend-unauthenticated';
+  static const String syncFirebaseVerification = '/auth/email/verify/firebase';
 
   // ── Profile ───────────────────────────────────────────────────────────────────
   // `/auth/me` is the authenticated-user read endpoint and includes the

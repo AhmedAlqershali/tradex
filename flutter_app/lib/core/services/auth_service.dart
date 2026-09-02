@@ -120,6 +120,14 @@ class AuthService {
         .post<Map<String, dynamic>>(ApiConstants.resendVerification);
   }
 
+  /// POST /auth/email/verify/firebase
+  Future<void> syncFirebaseVerification(String idToken) async {
+    await ApiClient.instance.post<Map<String, dynamic>>(
+      ApiConstants.syncFirebaseVerification,
+      data: {'id_token': idToken},
+    );
+  }
+
   // ── Forgot password ───────────────────────────────────────────────────────────
   /// POST /auth/password/forgot
   Future<void> forgotPassword({required String email}) async {

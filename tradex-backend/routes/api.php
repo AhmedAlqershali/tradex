@@ -68,6 +68,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Rate limited (5/min/IP) — prevent abuse of resend endpoint
         Route::middleware('throttle:auth')->group(function () {
             Route::post('/email/resend-unauthenticated', [AuthController::class, 'resendVerificationUnauthenticated'])->name('verification.resend-unauthenticated');
+            Route::post('/email/verify/firebase', [AuthController::class, 'verifyFirebaseEmail'])->name('verification.verify-firebase');
         });
 
         Route::middleware(['auth:sanctum', 'user.active'])->group(function () {

@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Models\User;
 use App\Notifications\QueuedVerifyEmail;
 use App\Support\PublicMediaUrl;
+use Kreait\Firebase\Factory;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -51,11 +52,10 @@ class AuthService implements AuthServiceInterface
             return $user;
         });
 
-        $verificationEmailSent = $this->sendVerificationNotification($user);
-
         return [
             'user'                     => $this->userPayload($user),
-            'verification_email_sent' => $verificationEmailSent,
+            'verification_email_sent' => false,
+            'firebase_verification_required' => true,
         ];
     }
 
@@ -98,12 +98,11 @@ class AuthService implements AuthServiceInterface
             ];
         });
 
-        $verificationEmailSent = $this->sendVerificationNotification($registration['user']);
-
         return [
             'user'                     => $this->userPayload($registration['user']),
             'store'                    => $this->storePayload($registration['store']),
-            'verification_email_sent' => $verificationEmailSent,
+            'verification_email_sent' => false,
+            'firebase_verification_required' => true,
         ];
     }
 
@@ -279,6 +278,45 @@ class AuthService implements AuthServiceInterface
         // markEmailAsVerified() does not fire the Verified event internally;
         // we fire it so listeners (analytics, welcome emails, etc.) can hook in.
         event(new Verified($user));
+    }
+
+    public function syncFirebaseVerification(string $idToken): array
+    {
+        try {
+            $auth = (new Factory())
+                ->withServiceAccount(config('services.firebase.credentials'))
+                ->createAuth();
+            $verifiedToken = $auth->verifyIdToken($idToken);
+            $claims = $verifiedToken->claims();
+            $email = $claims->get('email');
+            $emailVerified = $claims->get('email_verified', false);
+        } catch (Throwable $exception) {
+            Log::warning('Firebase email verification token rejected.', [
+                'exception' => $exception::class,
+            ]);
+            throw ValidationException::withMessages([
+                'id_token' => ['The Firebase verification token is invalid.'],
+            ]);
+        }
+
+        if (!is_string($email) || !$emailVerified) {
+            throw ValidationException::withMessages([
+                'id_token' => ['The Firebase email is not verified.'],
+            ]);
+        }
+
+        $user = User::whereRaw('LOWER(email) = ?', [strtolower($email)])->first();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'id_token' => ['No matching Tradex account was found.'],
+            ]);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $this->markEmailAsVerified($user);
+        }
+
+        return ['email_verified' => true];
     }
 
     // -------------------------------------------------------------------------

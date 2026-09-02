@@ -6,6 +6,8 @@ import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/services/password_reset_link_service.dart';
+import 'package:ai_saas/core/services/firebase_email_verification_service.dart';
+import 'package:ai_saas/core/services/auth_service.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/users/user_model.dart';
 
@@ -132,12 +134,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     });
 
     try {
-      // Call unauthenticated resend endpoint
-      // This endpoint accepts email and resends the verification email
-      await ApiClient.instance.post<Map<String, dynamic>>(
-        ApiConstants.resendVerificationUnauthenticated,
-        data: {'email': widget.user.email},
-      );
+      await FirebaseEmailVerificationService.instance.resend();
 
       if (!mounted) return;
 
@@ -168,6 +165,48 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       setState(() {
         _isResending = false;
         _verificationError = 'فشل إعادة الإرسال. حاول مجدداً.';
+      });
+    }
+  }
+
+  Future<void> _checkFirebaseVerification() async {
+    if (_isVerifying) return;
+
+    setState(() {
+      _isVerifying = true;
+      _verificationError = null;
+    });
+
+    try {
+      final idToken = await FirebaseEmailVerificationService.instance
+          .refreshAndGetIdToken();
+      if (idToken == null) {
+        throw ServerException(
+          'Email is not verified yet.',
+          statusCode: 422,
+        );
+      }
+
+      await AuthService.instance.syncFirebaseVerification(idToken);
+      if (!mounted) return;
+
+      setState(() {
+        _isVerifying = false;
+        _verificationComplete = true;
+      });
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) widget.onVerificationSuccess?.call(widget.user);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isVerifying = false;
+        _verificationError = _getErrorMessage(e);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isVerifying = false;
+        _verificationError = 'لم يتم تأكيد البريد بعد. تحقق من الرسالة ثم حاول مجدداً.';
       });
     }
   }
@@ -344,37 +383,45 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
                 // Resend button
                 if (!_verificationComplete)
-                  ElevatedButton(
-                    onPressed: _isResending ? null : _handleResendClick,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff4D41DF),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 32.w,
-                        vertical: 14.h,
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _isVerifying ? null : _checkFirebaseVerification,
+                        child: const Text('تحققت من بريدي'),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      disabledBackgroundColor: const Color(0xffDDD),
-                    ),
-                    child: _isResending
-                        ? SizedBox(
-                            width: 20.w,
-                            height: 20.w,
-                            child: const CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'إعادة إرسال رابط التحقق',
-                            style: GoogleFonts.ibmPlexSans(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                      SizedBox(height: 12.h),
+                      ElevatedButton(
+                        onPressed: _isResending ? null : _handleResendClick,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xff4D41DF),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 32.w,
+                            vertical: 14.h,
                           ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          disabledBackgroundColor: const Color(0xffDDD),
+                        ),
+                        child: _isResending
+                            ? SizedBox(
+                                width: 20.w,
+                                height: 20.w,
+                                child: const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'إعادة إرسال رابط التحقق',
+                                style: GoogleFonts.ibmPlexSans(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ],
                   ),
 
                 SizedBox(height: 24.h),
