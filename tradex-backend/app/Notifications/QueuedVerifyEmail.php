@@ -58,7 +58,9 @@ class QueuedVerifyEmail extends VerifyEmail implements ShouldQueue
         Log::error('QueuedVerifyEmail job failed', [
             'exception' => $e::class,
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => substr($e->getTraceAsString(), 0, 4000),
             'default_mailer' => $mailer,
             'mailer_transport' => $mailerConfig['transport'] ?? 'unknown',
             'smtp_host' => $mailerConfig['host'] ?? 'default',
