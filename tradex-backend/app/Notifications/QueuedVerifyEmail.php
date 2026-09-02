@@ -43,6 +43,7 @@ class QueuedVerifyEmail extends VerifyEmail implements ShouldQueue
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'trace' => substr($e->getTraceAsString(), 0, 4000),
             ]);
 
             throw $e;
