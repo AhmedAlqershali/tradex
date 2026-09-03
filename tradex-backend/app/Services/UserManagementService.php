@@ -11,7 +11,10 @@ use App\Models\UserDeviceToken;
 use App\Models\UserNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Kreait\Firebase\Factory;
+use Throwable;
 
 class UserManagementService implements UserManagementServiceInterface
 {
@@ -114,6 +117,8 @@ class UserManagementService implements UserManagementServiceInterface
      */
     public function deleteUser(User $user): void
     {
+        $storagePaths = $this->ownedStoragePaths($user);
+
         DB::transaction(function () use ($user) {
             $user->tokens()->delete();
             UserDeviceToken::where('user_id', $user->id)->delete();
@@ -123,11 +128,90 @@ class UserManagementService implements UserManagementServiceInterface
             AiSetting::where('user_id', $user->id)->delete();
             DB::table('sessions')->where('user_id', $user->id)->delete();
 
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-
             $user->delete();
         });
+
+        $failures = $this->deleteStoragePaths($storagePaths);
+        $firebaseFailure = $this->deleteFirebaseAccount($user);
+
+        if ($firebaseFailure !== null) {
+            $failures[] = $firebaseFailure;
+        }
+
+        if ($failures !== []) {
+            Log::error('User deletion completed with external cleanup failures.', [
+                'user_id' => $user->id,
+                'failures' => $failures,
+            ]);
+
+            throw new \RuntimeException('The account was removed, but some external resources could not be cleaned up. Please contact support.');
+        }
+    }
+
+    /** @return array{public: string[], local: string[]} */
+    private function ownedStoragePaths(User $user): array
+    {
+        $public = array_filter([$user->avatar]);
+        $local = [];
+        $user->loadMissing(['stores.products.images', 'subscriptionRequests']);
+
+        foreach ($user->stores as $store) {
+            $public[] = $store->logo;
+            foreach ($store->products as $product) {
+                $public[] = $product->image;
+                foreach ($product->images as $image) {
+                    $public[] = $image->path;
+                }
+            }
+        }
+
+        foreach ($user->subscriptionRequests as $request) {
+            $local[] = $request->payment_proof_image;
+        }
+
+        return [
+            'public' => array_values(array_filter(array_unique($public))),
+            'local' => array_values(array_filter(array_unique($local))),
+        ];
+    }
+
+    /** @param array{public: string[], local: string[]} $paths */
+    private function deleteStoragePaths(array $paths): array
+    {
+        $failures = [];
+        foreach (['public' => 'public', 'local' => 'local'] as $group => $diskName) {
+            $disk = Storage::disk($diskName);
+            foreach ($paths[$group] as $path) {
+                try {
+                    if ($disk->exists($path) && ! $disk->delete($path)) {
+                        $failures[] = "{$diskName}:{$path}";
+                    }
+                } catch (Throwable $exception) {
+                    $failures[] = "{$diskName}:{$path} ({$exception->getMessage()})";
+                }
+            }
+        }
+
+        return $failures;
+    }
+
+    private function deleteFirebaseAccount(User $user): ?string
+    {
+        $credentials = config('services.firebase.credentials');
+        if (! $credentials) {
+            return null;
+        }
+
+        try {
+            $auth = (new Factory())->withServiceAccount($credentials)->createAuth();
+            $firebaseUser = $auth->getUserByEmail($user->email);
+            $auth->deleteUser($firebaseUser->uid);
+        } catch (\Kreait\Firebase\Exception\Auth\UserNotFound $exception) {
+            return null;
+        } catch (Throwable $exception) {
+            return "firebase:{$user->email} ({$exception->getMessage()})";
+        }
+
+        return null;
     }
 }

@@ -40,7 +40,10 @@
                 <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-500/15 text-indigo-300' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                     <span aria-hidden="true">◫</span> Categories
                 </a>
-                @foreach (['Users', 'Plans & subscriptions', 'Reviews'] as $item)
+                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('admin.users.*') ? 'bg-indigo-500/15 text-indigo-300' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                    <span aria-hidden="true">•</span> Users
+                </a>
+                @foreach (['Plans & subscriptions', 'Reviews'] as $item)
                     <div class="flex cursor-not-allowed items-center justify-between rounded-xl px-4 py-3 text-sm text-slate-500" aria-disabled="true">
                         <span class="flex items-center gap-3"><span aria-hidden="true">•</span>{{ $item }}</span>
                         <span class="text-[10px] uppercase tracking-wider text-slate-700">Later</span>
@@ -89,6 +92,7 @@
                         <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.orders.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Orders</a>
                         <a href="{{ route('admin.products.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.products.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Products</a>
                         <a href="{{ route('admin.categories.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Categories</a>
+                        <a href="{{ route('admin.users.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.users.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Users</a>
                     </nav>
                 </details>
             </header>

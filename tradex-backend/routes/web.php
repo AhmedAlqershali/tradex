@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\StoreController as AdminStoreController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,6 +36,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/stores', [AdminStoreController::class, 'index'])->name('stores.index');
         Route::get('/stores/{store}', [AdminStoreController::class, 'show'])->name('stores.show');
         Route::put('/stores/{store}/status', [AdminStoreController::class, 'updateStatus'])->name('stores.status');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
