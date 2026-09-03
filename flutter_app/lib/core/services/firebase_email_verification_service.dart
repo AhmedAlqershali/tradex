@@ -16,6 +16,8 @@ class FirebaseEmailVerificationService {
         email: email,
         password: password,
       );
+    } catch (_) {
+      rethrow;
     }
     await credential.user!.sendEmailVerification();
     return true;
