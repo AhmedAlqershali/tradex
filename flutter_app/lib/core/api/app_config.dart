@@ -57,25 +57,7 @@ class AppConfig {
 
     final parsed = Uri.tryParse(trimmed);
     if (parsed != null && parsed.hasScheme && parsed.host.isNotEmpty) {
-      final normalizedHost = parsed.host.toLowerCase();
-      final sameOrigin = normalizedHost == Uri.parse(mediaBaseUrl).host;
-      final localHosts = {
-        'localhost',
-        '127.0.0.1',
-        '0.0.0.0',
-      };
-
-      if (!localHosts.contains(normalizedHost) && !sameOrigin) {
-        final normalized = _normalizeStoragePath(parsed.path);
-        final mediaUri = Uri.parse(mediaBaseUrl);
-        return mediaUri.replace(path: '/$normalized', query: parsed.query, fragment: parsed.fragment).toString();
-      }
-
-      final normalizedPath = _normalizeStoragePath(parsed.path);
-      final mediaUri = Uri.parse(mediaBaseUrl);
-      return mediaUri
-          .replace(path: '/$normalizedPath', query: parsed.query, fragment: parsed.fragment)
-          .toString();
+      return trimmed;
     }
 
     final normalizedPath = _normalizeStoragePath(trimmed);

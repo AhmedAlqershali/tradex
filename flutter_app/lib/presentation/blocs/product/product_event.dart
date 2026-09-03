@@ -123,7 +123,7 @@ class ProductUpdateRequested extends ProductEvent {
   /// gallery* — the backend has no per-image add/delete endpoint.
   final List<String> imagePaths;
 
-  /// When true (and [imagePaths] is empty), removes all existing images.
+  /// When true, clears existing images before adding [imagePaths].
   final bool clearImages;
 
   @override

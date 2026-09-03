@@ -25,8 +25,7 @@ final class PublicMediaUrl
         $value = str_replace('\\', '/', $value);
 
         if (preg_match('#^https?://#i', $value) === 1) {
-            $parsed = parse_url($value);
-            $value = $parsed['path'] ?? '/';
+            return $value;
         }
 
         $value = preg_replace('#^/+#', '', $value);

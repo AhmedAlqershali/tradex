@@ -27,7 +27,7 @@ class _AddProductState extends State<AddProduct> {
   final List<File> _attachedImages = [];
   final List<String> _existingImageUrls = [];
   bool _clearExistingImages = false;
-  final int _maxImages = 3;
+  final int _maxImages = 10;
   final ImagePicker _picker = ImagePicker();
 
   final TextEditingController _nameController       = TextEditingController();
@@ -107,7 +107,7 @@ class _AddProductState extends State<AddProduct> {
             isVisible: isEnabled1,
             isFeatured: isEnabled2,
             imagePaths: imagePaths,
-            clearImages: _clearExistingImages && imagePaths.isEmpty,
+            clearImages: _clearExistingImages,
           ));
     }
   }

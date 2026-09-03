@@ -11,7 +11,9 @@ use App\Contracts\Services\UserNotificationServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class ProductService implements ProductServiceInterface
 {
@@ -74,7 +76,8 @@ class ProductService implements ProductServiceInterface
         ]);
 
         if (! empty($imageFiles)) {
-            $this->storeImages($product, $imageFiles);
+            $images = $this->storeImages($product, $imageFiles);
+            $this->productRepository->syncImages($product, $images);
 
             // Set the product's primary image field to the first stored path
             // so clients have a quick-access thumbnail without joining product_images.
@@ -129,33 +132,69 @@ class ProductService implements ProductServiceInterface
             'status',
         ]));
 
-        $product = $this->productRepository->update($product, $updatable);
+        $oldPaths = [];
+        $newPaths = [];
+        $updatedProduct = $product;
 
-        // Handle image update
-        if (! empty($imageFiles)) {
-            // Delete old images from disk when replacing
-            $this->deleteStoredImages($product);
-            $this->storeImages($product, $imageFiles);
-            $product->refresh();
-            $firstImage = $product->images()->orderBy('sort_order')->first();
-            $product->image = $firstImage?->path;
-            $product->save();
-        } elseif (! empty($data['clear_images'])) {
-            $this->deleteStoredImages($product);
-            $this->productRepository->syncImages($product, []);
-            $product->image = null;
-            $product->save();
+        try {
+            DB::transaction(function () use ($product, $updatable, $imageFiles, $data, &$oldPaths, &$newPaths, &$updatedProduct): void {
+                $product = $this->productRepository->update($product, $updatable);
+                $updatedProduct = $product;
+                $product->load('images');
+                $clearImages = filter_var($data['clear_images'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                if (! empty($imageFiles)) {
+                    $existing = $product->images->map(fn ($image) => [
+                        'path' => $image->path,
+                        'sort_order' => $image->sort_order,
+                    ])->all();
+                    if ($clearImages) {
+                        $oldPaths = $this->storedPaths($product);
+                        $existing = [];
+                    }
+                    if (count($existing) + count($imageFiles) > 10) {
+                        throw ValidationException::withMessages([
+                            'images' => ['You may have a maximum of 10 product images.'],
+                        ]);
+                    }
+                    $newPaths = $this->storeImages($product, $imageFiles, $existing);
+                    $this->productRepository->syncImages($product, [...$existing, ...$newPaths]);
+                    $product->refresh();
+                    $product->image = $product->images()->orderBy('sort_order')->value('path');
+                    $product->save();
+                } elseif ($clearImages) {
+                    $oldPaths = $this->storedPaths($product);
+                    $this->productRepository->syncImages($product, []);
+                    $product->image = null;
+                    $product->save();
+                }
+            });
+        } catch (\Throwable $exception) {
+            foreach ($newPaths as $image) {
+                Storage::disk('public')->delete($image['path']);
+            }
+            throw $exception;
         }
 
-        return $product->load(['category', 'images']);
+        foreach ($oldPaths as $path) {
+            if (! in_array($path, array_column($newPaths, 'path'), true)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return $updatedProduct->load(['category', 'images']);
     }
 
     public function delete(Product $product): bool
     {
-        // Remove images from disk before deleting the model
-        $this->deleteStoredImages($product);
+        $paths = $this->storedPaths($product->load('images'));
+        $deleted = DB::transaction(fn () => $this->productRepository->delete($product));
 
-        return $this->productRepository->delete($product);
+        foreach ($paths as $path) {
+            Storage::disk('public')->delete($path);
+        }
+
+        return $deleted;
     }
 
     // ── Client marketplace ────────────────────────────────────────────────────
@@ -181,36 +220,48 @@ class ProductService implements ProductServiceInterface
     // -------------------------------------------------------------------------
 
     /**
-     * Store uploaded files under products/{product_id}/ and sync the DB records.
+    * Store uploaded files under products/{product_id}; DB records are synced
+    * by the surrounding transaction.
      *
      * @param  UploadedFile[]  $files
      */
-    private function storeImages(Product $product, array $files): void
+    private function storeImages(Product $product, array $files, array $existing = []): array
     {
         $images = [];
+        $nextSortOrder = empty($existing)
+            ? 0
+            : max(array_column($existing, 'sort_order')) + 1;
 
-        foreach ($files as $index => $file) {
-            $path = $file->store("products/{$product->id}", 'public');
+        try {
+            foreach ($files as $index => $file) {
+                $path = $file->store("products/{$product->id}", 'public');
 
-            $images[] = [
-                'path'       => $path,
-                'sort_order' => $index,
-            ];
+                $images[] = [
+                    'path'       => $path,
+                    'sort_order' => $nextSortOrder + $index,
+                ];
+            }
+        } catch (\Throwable $exception) {
+            foreach ($images as $image) {
+                Storage::disk('public')->delete($image['path']);
+            }
+            throw $exception;
         }
 
-        $this->productRepository->syncImages($product, $images);
+        return $images;
     }
 
     /**
      * Delete all stored image files for a product from disk.
      * DB rows are handled separately (via syncImages or cascade delete).
      */
-    private function deleteStoredImages(Product $product): void
+    private function storedPaths(Product $product): array
     {
-        $product->load('images');
-
-        foreach ($product->images as $image) {
-            Storage::disk('public')->delete($image->path);
+        $paths = $product->images->pluck('path')->all();
+        if ($product->image) {
+            $paths[] = $product->image;
         }
+
+        return array_values(array_unique(array_filter($paths)));
     }
 }

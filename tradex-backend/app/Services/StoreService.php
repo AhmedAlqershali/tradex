@@ -106,12 +106,20 @@ class StoreService implements StoreServiceInterface
      */
     public function updateStoreLogo(Store $store, UploadedFile $file): Store
     {
-        if ($store->logo && Storage::disk('public')->exists($store->logo)) {
-            Storage::disk('public')->delete($store->logo);
-        }
-
+        $oldPath = $store->logo;
         $path = $file->store('logos', 'public');
 
-        return $this->storeRepository->updateLogo($store, $path);
+        try {
+            $updated = $this->storeRepository->updateLogo($store, $path);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+            throw $exception;
+        }
+
+        if ($oldPath && $oldPath !== $path) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        return $updated;
     }
 }

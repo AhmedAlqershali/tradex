@@ -4,7 +4,11 @@ namespace Tests\Feature\Merchant;
 
 use App\Models\Store;
 use App\Models\User;
+use App\Contracts\Repositories\StoreRepositoryInterface;
+use App\Services\StoreService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -124,5 +128,44 @@ class StoreTest extends TestCase
             'store_name' => 'Hacked Store',
         ], $this->headers($token))
             ->assertStatus(404);
+    }
+
+    public function test_merchant_logo_replacement_keeps_new_file_and_removes_old_file(): void
+    {
+        Storage::fake('public');
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        Storage::disk('public')->put('logos/old.jpg', 'old');
+        $store->update(['logo' => 'logos/old.jpg']);
+
+        $this->post("/api/v1/merchant/stores/{$store->id}/logo", [
+            'logo' => UploadedFile::fake()->image('new.jpg'),
+        ], $this->headers($token))->assertOk();
+
+        $newPath = $store->fresh()->logo;
+        Storage::disk('public')->assertMissing('logos/old.jpg');
+        Storage::disk('public')->assertExists($newPath);
+    }
+
+    public function test_logo_replacement_removes_new_file_when_database_update_fails(): void
+    {
+        Storage::fake('public');
+        $store = Store::factory()->create(['logo' => 'logos/old.jpg']);
+        Storage::disk('public')->put('logos/old.jpg', 'old');
+
+        $repository = $this->mock(StoreRepositoryInterface::class);
+        $repository->shouldReceive('updateLogo')
+            ->once()
+            ->andThrow(new \RuntimeException('database unavailable'));
+
+        $this->expectException(\RuntimeException::class);
+        try {
+            (new StoreService($repository))->updateStoreLogo(
+                $store,
+                UploadedFile::fake()->image('new.jpg'),
+            );
+        } finally {
+            Storage::disk('public')->assertExists('logos/old.jpg');
+            $this->assertCount(1, Storage::disk('public')->allFiles('logos'));
+        }
     }
 }

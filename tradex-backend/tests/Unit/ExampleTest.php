@@ -27,4 +27,11 @@ class ExampleTest extends TestCase
             $image->url,
         );
     }
+
+    public function test_public_media_url_preserves_external_storage_urls(): void
+    {
+        $url = 'https://cdn.example.com/products/image%20name.jpg?version=2';
+
+        $this->assertSame($url, PublicMediaUrl::forPath($url));
+    }
 }

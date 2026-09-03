@@ -339,21 +339,75 @@ class ProductTest extends TestCase
         $product = Product::factory()->forStore($store)->create();
 
         // First, add 1 image
-        $this->putJson("/api/v1/merchant/products/{$product->id}", [
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
             'images' => [UploadedFile::fake()->image('first.jpg')],
         ], $this->headers($token))->assertOk();
 
         $this->assertDatabaseCount('product_images', 1);
 
         // Replace with 2 new images
-        $this->putJson("/api/v1/merchant/products/{$product->id}", [
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
             'images' => [
                 UploadedFile::fake()->image('new1.jpg'),
                 UploadedFile::fake()->image('new2.jpg'),
             ],
+            'clear_images' => true,
         ], $this->headers($token))->assertOk();
 
         $this->assertDatabaseCount('product_images', 2);
+    }
+
+    public function test_update_with_new_images_preserves_existing_by_default(): void
+    {
+        Storage::fake('public');
+
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $product = Product::factory()->forStore($store)->create();
+
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
+            'images' => [UploadedFile::fake()->image('existing.jpg')],
+        ], $this->headers($token))->assertOk();
+        $existingPath = $product->fresh()->image;
+
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
+            'images' => [UploadedFile::fake()->image('additional.jpg')],
+        ], $this->headers($token))->assertOk();
+
+        $product->refresh();
+        $this->assertDatabaseCount('product_images', 2);
+        $this->assertSame($existingPath, $product->image);
+        Storage::disk('public')->assertExists($existingPath);
+    }
+
+    public function test_update_rejects_more_than_ten_total_images_without_changing_existing_images(): void
+    {
+        Storage::fake('public');
+
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $product = Product::factory()->forStore($store)->create();
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
+            'images' => [UploadedFile::fake()->image('existing.jpg')],
+        ], $this->headers($token))->assertOk();
+
+        $existingPath = $product->fresh()->image;
+        $tooManyImages = array_map(
+            fn (int $index) => UploadedFile::fake()->image("additional-{$index}.jpg"),
+            range(1, 10),
+        );
+
+        $this->post("/api/v1/merchant/products/{$product->id}", [
+            '_method' => 'PUT',
+            'images' => $tooManyImages,
+        ], $this->headers($token))->assertStatus(422);
+
+        $this->assertDatabaseCount('product_images', 1);
+        $this->assertSame($existingPath, $product->fresh()->image);
+        Storage::disk('public')->assertExists($existingPath);
     }
 
     public function test_update_clear_images_removes_all(): void
