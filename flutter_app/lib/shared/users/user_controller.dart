@@ -528,20 +528,26 @@ class UserController {
         );
         storeId = store.id;
       }
+      final resolvedStoreId = storeId;
+      if (resolvedStoreId == null || resolvedStoreId.isEmpty) {
+        throw const UnknownException(
+          'Merchant store ID was not returned by the server.',
+        );
+      }
 
       // Upload logo if a new local file path was provided.
       if (logoPath != null &&
           !logoPath.startsWith('http://') &&
           !logoPath.startsWith('https://')) {
         await StoreService.instance.uploadStoreLogo(
-          storeId: storeId,
+          storeId: resolvedStoreId,
           filePath: logoPath,
         );
       }
 
       // Persist store details on the server.
       final store = await StoreService.instance.updateMyStore(
-        storeId: storeId,
+        storeId: resolvedStoreId,
         name: storeName.isNotEmpty ? storeName : 'متجري',
         region: region,
       );
