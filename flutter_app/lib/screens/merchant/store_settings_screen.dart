@@ -142,12 +142,18 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             final isSaving = state is StoreLoading;
 
             return SingleChildScrollView(
-              padding: EdgeInsets.all(20.r),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
+                20.r,
+                12.r,
+                20.r,
+                16.r + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(child: _buildLogoPicker()),
-                  SizedBox(height: 28.h),
+                  SizedBox(height: 18.h),
                   Text(
                     l10n.storeNameLabel,
                     style: GoogleFonts.ibmPlexSans(
@@ -158,7 +164,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   ),
                   SizedBox(height: 6.h),
                   AppTextField(name: l10n.storeNameHint, controller: _nameController),
-                  SizedBox(height: 18.h),
+                  SizedBox(height: 12.h),
                   Text(
                     l10n.storeDescriptionLabel,
                     style: GoogleFonts.ibmPlexSans(
@@ -173,7 +179,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                     controller: _descriptionController,
                     maxLines: 4,
                   ),
-                  SizedBox(height: 28.h),
+                  SizedBox(height: 18.h),
                   SizeButton(
                     title: isSaving ? l10n.savingChanges : l10n.saveChanges,
                     onTap: isSaving ? null : () => _save(context),

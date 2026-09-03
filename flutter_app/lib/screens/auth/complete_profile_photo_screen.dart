@@ -514,9 +514,11 @@ class _CompleteProfilePhotoScreenState
                 physics: const ClampingScrollPhysics(),
                 keyboardDismissBehavior:
                 ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 24.w,
-                  vertical: 20.h,
+                padding: EdgeInsets.fromLTRB(
+                  24.w,
+                  12.h,
+                  24.w,
+                  16.h + MediaQuery.viewInsetsOf(context).bottom,
                 ),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -526,11 +528,11 @@ class _CompleteProfilePhotoScreenState
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 12.h),
 
                       _buildAvatarPicker(),
 
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 16.h),
 
                       Text(
                         AppLocalizations.of(context).profilePhotoTitle,
@@ -553,11 +555,11 @@ class _CompleteProfilePhotoScreenState
                         ),
                       ),
 
-                      SizedBox(height: 40.h),
+                      SizedBox(height: 24.h),
 
                       _buildActionButtons(),
 
-                      SizedBox(height: 36.h),
+                      SizedBox(height: 24.h),
 
                       _buildAiCard(),
 

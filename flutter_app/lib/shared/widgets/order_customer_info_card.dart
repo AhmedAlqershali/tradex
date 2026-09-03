@@ -26,16 +26,16 @@ class OrderCustomerInfoCard extends StatelessWidget {
           const AppCardTitle(
               text: 'بيانات العميل',
               icon: Icons.person_outline_rounded),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           _row(Icons.person_outline_rounded, 'الاسم', order.customerName),
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           _row(Icons.phone_outlined, 'الجوال', order.customerPhone),
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           _row(Icons.location_city_outlined, 'المدينة', order.customerCity),
           if (order.notes != null && order.notes!.isNotEmpty) ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: 10.h),
             Divider(height: 1.h, color: const Color(0xffF0F0F0)),
-            SizedBox(height: 12.h),
+            SizedBox(height: 10.h),
             const AppCardTitle(
                 text: 'ملاحظات',
                 icon: Icons.sticky_note_2_outlined),

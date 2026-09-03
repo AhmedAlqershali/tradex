@@ -214,21 +214,21 @@ class _MerchantOrderDetailsScreenState
         appBar: _buildAppBar(context, order),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderHeader(order),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               _buildTimeline(order),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               _buildProductsCard(order),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               OrderCustomerInfoCard(order: order),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               if (_getActions(order).isNotEmpty)
                 _buildActionButtons(context, order),
-              SizedBox(height: 30.h),
+              SizedBox(height: 20.h),
             ],
           ),
         ),

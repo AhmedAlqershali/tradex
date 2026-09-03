@@ -168,7 +168,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
 
                 // ─── Store name + rating ───
                 Row(
@@ -218,7 +218,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                   ),
                 ],
 
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
 
                 // ─── Products section ───
                 Row(
@@ -249,7 +249,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             _buildProductsError()
           else if (_products.isEmpty)
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Center(
                 child: Text(AppLocalizations.of(context).noProductsInStore,
                     style: GoogleFonts.ibmPlexSans(
@@ -274,7 +274,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
               ),
             ),
 
-          SizedBox(height: 24.h),
+          SizedBox(height: 16.h),
         ],
       ),
     );

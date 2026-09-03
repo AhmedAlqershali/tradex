@@ -151,8 +151,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: _isSuccess
               ? _buildSuccess(l10n)
               : SingleChildScrollView(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    16.h,
+                    20.w,
+                    16.h + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -174,7 +178,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             color: const Color(0xff707070),
                           ),
                         ),
-                        SizedBox(height: 28.h),
+                        SizedBox(height: 18.h),
                         _passwordField(
                           controller: _currentController,
                           label: l10n.passwordCurrent,
@@ -187,7 +191,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           validator: (value) =>
                               _required(value, l10n, 'current_password'),
                         ),
-                        SizedBox(height: 18.h),
+                        SizedBox(height: 12.h),
                         _passwordField(
                           controller: _newController,
                           label: l10n.passwordNew,
@@ -199,7 +203,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           validator: (value) =>
                               _newPasswordValidator(value, l10n),
                         ),
-                        SizedBox(height: 18.h),
+                        SizedBox(height: 12.h),
                         _passwordField(
                           controller: _confirmController,
                           label: l10n.passwordConfirm,

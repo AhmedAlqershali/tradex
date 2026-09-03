@@ -120,10 +120,14 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
           child: Center(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding:
-                  EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                12.h,
+                20.w,
+                16.h + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               child: Container(
-                padding: EdgeInsets.all(24.r),
+                padding: EdgeInsets.all(20.r),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20.r),
@@ -138,7 +142,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 6.h),
 
                     // أيقونة القفل
                     CircleAvatar(
@@ -147,7 +151,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                       child: Icon(Icons.lock_reset_rounded,
                           color: primaryColor, size: 40.sp),
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 16.h),
 
                     // العنوان
                     Text(
@@ -171,7 +175,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                         height: 1.4,
                       ),
                     ),
-                    SizedBox(height: 30.h),
+                    SizedBox(height: 20.h),
 
                     // حقل كلمة المرور الجديدة
                     _buildPasswordField(
@@ -203,7 +207,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                       onToggle: () =>
                           setState(() => _obscureText2 = !_obscureText2),
                     ),
-                    SizedBox(height: 30.h),
+                    SizedBox(height: 20.h),
 
                     // زر التحديث
                     SizedBox(

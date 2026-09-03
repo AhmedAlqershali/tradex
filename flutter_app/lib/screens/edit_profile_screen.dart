@@ -157,8 +157,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    12.h,
+                    20.w,
+                    16.h + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -207,7 +211,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(height: 20.h),
 
                         // 2. حقل الاسم
                         _buildFieldLabel(l10n.fullName),
@@ -223,7 +227,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             prefixIcon: Icons.person_outline_rounded,
                           ),
                         ),
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 14.h),
 
                         // 3. حقل البريد
                         _buildFieldLabel(l10n.email),
@@ -241,7 +245,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             prefixIcon: Icons.email_outlined,
                           ),
                         ),
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 14.h),
 
                         // 4. حقل الهاتف
                         _buildFieldLabel(l10n.phoneNumber),

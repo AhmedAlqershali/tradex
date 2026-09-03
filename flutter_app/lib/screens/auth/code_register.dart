@@ -182,12 +182,16 @@ class _CodeRegisterState extends State<CodeRegister> {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                12.h,
+                20.w,
+                16.h + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 12.h),
 
                   // أيقونة الحماية والأمان
                   CircleAvatar(
@@ -197,7 +201,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                     child: Icon(Icons.security_rounded,
                         size: 36.sp, color: const Color(0xff4D41DF)),
                   ),
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 16.h),
 
                   // العنوان الرئيسي
                   Text(
@@ -228,7 +232,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                       color: const Color(0xff1A1A1A),
                     ),
                   ),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 20.h),
 
                   // حقول إدخال الرمز
                   Row(
@@ -275,7 +279,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 20.h),
 
                   // قسم العداد المؤقتي للرمز
                   Row(
@@ -315,7 +319,7 @@ class _CodeRegisterState extends State<CodeRegister> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40.h),
+                  SizedBox(height: 20.h),
 
                   // زر تأكيد الرمز
                   SizedBox(

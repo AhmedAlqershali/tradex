@@ -225,7 +225,7 @@ class _AddProductState extends State<AddProduct> {
                 children: [
                   // ── Images section ──
                   _buildImagesSection(),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 14.h),
 
                   // ── Form fields ──
                   AddProductTextField(
@@ -285,7 +285,7 @@ class _AddProductState extends State<AddProduct> {
                     value: isEnabled2,
                     onChanged: (v) => setState(() => isEnabled2 = v),
                   ),
-                  SizedBox(height: 28.h),
+                  SizedBox(height: 20.h),
 
                   SizeButton(
                      title: isLoading

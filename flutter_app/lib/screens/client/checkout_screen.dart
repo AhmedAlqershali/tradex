@@ -87,13 +87,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 16.h),
+                      padding: EdgeInsets.fromLTRB(
+                        16.w,
+                        12.h,
+                        16.w,
+                        16.h + MediaQuery.viewInsetsOf(context).bottom,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildSectionTitle(l10n.deliveryInfo),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 10.h),
                           _buildCard(
                             children: [
                               _buildField(
@@ -104,7 +108,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 controller: _nameCtrl,
                                 isRequired: true,
                               ),
-                              SizedBox(height: 14.h),
+                              SizedBox(height: 10.h),
                               _buildField(
                                 context: context,
                                 label: l10n.phoneNumber,
@@ -119,9 +123,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 20.h),
+                          SizedBox(height: 16.h),
                           _buildSectionTitle(l10n.address),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 10.h),
                           _buildCard(
                             children: [
                               _buildField(
@@ -134,9 +138,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 20.h),
+                          SizedBox(height: 16.h),
                           _buildSectionTitle(l10n.additionalNotes),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 10.h),
                           _buildCard(
                             children: [
                               _buildField(
@@ -149,7 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 20.h),
+                          SizedBox(height: 16.h),
 
                           // Order summary
                           _buildOrderSummaryCard(context),
@@ -161,7 +165,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   // Confirm button
                   Container(
-                    padding: EdgeInsets.all(16.r),
+                    padding: EdgeInsets.fromLTRB(
+                      16.r,
+                      12.r,
+                      16.r,
+                      12.r + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [

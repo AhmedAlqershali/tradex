@@ -151,10 +151,10 @@ class OrderProductsCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           ...products.map((p) => OrderProductLine(product: p)),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
+            padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Divider(height: 1.h, color: const Color(0xffEEEEEE)),
           ),
           Row(

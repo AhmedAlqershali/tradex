@@ -243,9 +243,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      6,
+                      20,
+                      12 + MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -281,7 +283,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 18),
 
 // NAME
                           _buildLabel(l10n.fullName),
@@ -312,7 +314,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 17),
+                          const SizedBox(height: 11),
 
 // EMAIL
                           _buildLabel(
@@ -337,7 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 17),
+                          const SizedBox(height: 11),
 
 // PHONE
                           _buildLabel(
@@ -367,7 +369,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 17),
+                          const SizedBox(height: 11),
 
 // PASSWORD
                           _buildLabel(
@@ -467,7 +469,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 25),
+                          const SizedBox(height: 16),
 
 // REGISTER
                           SizedBox(
@@ -485,9 +487,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 22),
-
-                          const SizedBox(height: 25),
+                          const SizedBox(height: 16),
 
 // LOGIN
                           Center(

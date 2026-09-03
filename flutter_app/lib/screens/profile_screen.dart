@@ -161,7 +161,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               return SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  12.h,
+                  20.w,
+                  16.h + MediaQuery.viewInsetsOf(context).bottom,
+                ),
                 child: Column(
                   children: [
                     // ── Avatar & name ──────────────────────────────────────
@@ -218,17 +223,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 18.h),
 
                     // ── Settings list ──────────────────────────────────────
                     _buildSettingsSection(context),
 
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 16.h),
 
                     // ── Favorites ──────────────────────────────────────────
                     _buildFavoritesSection(),
 
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 16.h),
 
                     // ── Logout ─────────────────────────────────────────────
                     _buildLogoutButton(context),

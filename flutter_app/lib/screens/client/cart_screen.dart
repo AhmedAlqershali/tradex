@@ -142,7 +142,7 @@ class _CartScreenState extends State<CartScreen> {
       children: [
         // Item count header
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: Row(
             children: [
               Text(
@@ -163,7 +163,7 @@ class _CartScreenState extends State<CartScreen> {
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             itemCount: items.length,
-            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+            separatorBuilder: (_, __) => SizedBox(height: 8.h),
             itemBuilder: (context, index) =>
                 _buildCartItemCard(context, items[index]),
           ),
@@ -244,7 +244,7 @@ class _CartScreenState extends State<CartScreen> {
                   style: GoogleFonts.ibmPlexSans(
                       fontSize: 11.sp, color: _textGray),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 6.h),
                 Text(
                   '₪${item.lineTotal.toStringAsFixed(0)}',
                   style: GoogleFonts.ibmPlexSans(

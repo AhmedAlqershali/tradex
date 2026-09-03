@@ -139,11 +139,16 @@ class _CompleteProfileClientScreenState
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    12.h,
+                    20.w,
+                    16.h + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 12.h),
 
                       // Heading
                       Text(
@@ -162,7 +167,7 @@ class _CompleteProfileClientScreenState
                           color: const Color(0xff707070),
                         ),
                       ),
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 14.h),
 
                       // Search field
                       Container(

@@ -121,16 +121,16 @@ class _ClientOrderDetailsScreenState extends State<ClientOrderDetailsScreen> {
         appBar: _buildAppBar(context, o),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildOrderHeader(o),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               OrderStatusTimeline(order: o, title: AppLocalizations.of(context).orderTrackingTitle),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               OrderCustomerInfoCard(order: o),
-              SizedBox(height: 16.h),
+              SizedBox(height: 12.h),
               OrderProductsCard(products: o.products, total: o.total),
               SizedBox(height: 24.h),
             ],

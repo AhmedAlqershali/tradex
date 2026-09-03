@@ -258,11 +258,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
         body: SafeArea(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              12.h,
+              20.w,
+              16.h + MediaQuery.viewInsetsOf(context).bottom,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 20.h),
+                SizedBox(height: 12.h),
 
                 // Icon
                 if (!_verificationComplete)
@@ -287,7 +292,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                       color: Colors.green,
                     ),
                   ),
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
 
                 // Title
                 Text(
@@ -298,7 +303,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                     color: const Color(0xff1A1A1A),
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 10.h),
 
                 // Email display
                 if (!_verificationComplete)
@@ -318,7 +323,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                       ),
                     ),
                   ),
-                if (!_verificationComplete) SizedBox(height: 20.h),
+                if (!_verificationComplete) SizedBox(height: 14.h),
 
                 // Description
                 if (!_verificationComplete)
@@ -332,7 +337,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                       height: 1.5,
                     ),
                   ),
-                if (!_verificationComplete) SizedBox(height: 32.h),
+                if (!_verificationComplete) SizedBox(height: 20.h),
 
                 // Loading or success message
                 if (_isVerifying)

@@ -106,16 +106,16 @@ class _MerchantSubscriptionScreenState
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+                      EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
                   children: [
                     _buildStatusCard(subscription),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 12.h),
                     _buildPlanSection(
                       plans,
                       loading: plansLoading,
                       error: plansError,
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 12.h),
                     _buildRequestSection(
                       requests,
                       loading: requestsLoading,

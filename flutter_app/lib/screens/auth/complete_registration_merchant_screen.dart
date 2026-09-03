@@ -472,8 +472,7 @@ padding: EdgeInsets.only(
 left: 20.w,
 right: 20.w,
 top: 10.h,
-bottom: 24.h +
-MediaQuery.of(context).viewPadding.bottom,
+                bottom: 16.h + MediaQuery.viewInsetsOf(context).bottom,
 ),
 
 child: Form(
@@ -510,7 +509,7 @@ primaryColor,
 ),
 ),
 
-SizedBox(height: 24.h),
+SizedBox(height: 16.h),
 
 // ==================================================
 // LOGO
