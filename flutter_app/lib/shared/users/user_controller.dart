@@ -171,8 +171,9 @@ class UserController {
     required AppType role,
   }) async {
     _begin();
+    var firebaseUserCreated = false;
     try {
-      await FirebaseEmailVerificationService.instance.registerAndSend(
+      firebaseUserCreated = await FirebaseEmailVerificationService.instance.registerAndSend(
         email: email,
         password: password,
       );
@@ -198,7 +199,15 @@ class UserController {
       await _clearLegacySession();
       return result.user;
     } on ApiException catch (e) {
+      if (firebaseUserCreated) {
+        await FirebaseEmailVerificationService.instance.deleteCurrentUser();
+      }
       authErrorNotifier.value = _localiseError(e);
+      rethrow;
+    } catch (e) {
+      if (firebaseUserCreated) {
+        await FirebaseEmailVerificationService.instance.deleteCurrentUser();
+      }
       rethrow;
     } finally {
       _end();

@@ -6,16 +6,18 @@ class FirebaseEmailVerificationService {
 
   FirebaseAuth get _auth => FirebaseAuth.instance;
 
-  Future<void> registerAndSend({
+  Future<bool> registerAndSend({
     required String email,
     required String password,
   }) async {
     UserCredential credential;
+    var created = false;
     try {
       credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      created = true;
     } on FirebaseAuthException catch (error) {
       if (error.code != 'email-already-in-use') rethrow;
       credential = await _auth.signInWithEmailAndPassword(
@@ -24,6 +26,14 @@ class FirebaseEmailVerificationService {
       );
     }
     await credential.user!.sendEmailVerification();
+    return created;
+  }
+
+  Future<void> deleteCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    await user.delete();
+    await _auth.signOut();
   }
 
   Future<void> resend() async {

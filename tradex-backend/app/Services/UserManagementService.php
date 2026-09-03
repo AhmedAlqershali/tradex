@@ -119,6 +119,16 @@ class UserManagementService implements UserManagementServiceInterface
     {
         $storagePaths = $this->ownedStoragePaths($user);
 
+        $firebaseFailure = $this->deleteFirebaseAccount($user);
+        if ($firebaseFailure !== null) {
+            Log::error('User deletion blocked because Firebase cleanup failed.', [
+                'user_id' => $user->id,
+                'failure' => $firebaseFailure,
+            ]);
+
+            throw new \RuntimeException('The account could not be deleted because its Firebase account could not be removed. Please contact support.');
+        }
+
         DB::transaction(function () use ($user) {
             $user->tokens()->delete();
             UserDeviceToken::where('user_id', $user->id)->delete();
@@ -132,11 +142,6 @@ class UserManagementService implements UserManagementServiceInterface
         });
 
         $failures = $this->deleteStoragePaths($storagePaths);
-        $firebaseFailure = $this->deleteFirebaseAccount($user);
-
-        if ($firebaseFailure !== null) {
-            $failures[] = $firebaseFailure;
-        }
 
         if ($failures !== []) {
             Log::error('User deletion completed with external cleanup failures.', [
@@ -199,7 +204,9 @@ class UserManagementService implements UserManagementServiceInterface
     {
         $credentials = config('services.firebase.credentials');
         if (! $credentials) {
-            return null;
+            return app()->environment('testing')
+                ? null
+                : "firebase:{$user->email} (Firebase credentials are not configured)";
         }
 
         try {
