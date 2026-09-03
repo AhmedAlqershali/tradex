@@ -199,7 +199,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     ),
                     itemBuilder: (context, index) {
                       final option = options[index];
-                      final name = option.name;
+                      final name = option.localizedName(isArabic: l10n.isArabic);
 
                       return Container(
                         decoration: BoxDecoration(
@@ -218,7 +218,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => SearchScreen(
-                                initialCategory: name,
+                                initialCategory: option.name,
                                 initialCategoryId: option.id,
                               ),
                             ),
@@ -236,7 +236,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 ),
                                 child: CategoryImage(
                                   imageUrl: option.imageUrl,
-                                  fallbackIcon: _iconFor(name),
+                                  fallbackIcon: _iconFor(option.name),
                                 ),
                               ),
                               SizedBox(height: 15.h),

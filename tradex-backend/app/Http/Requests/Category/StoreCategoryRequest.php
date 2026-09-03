@@ -18,9 +18,11 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'   => ['required', 'string', 'max:100', 'unique:categories,name'],
-            'image'  => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-            'status' => ['sometimes', 'in:active,inactive'],
+            'name'    => ['required', 'string', 'max:100', 'unique:categories,name'],
+            'name_ar' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'name_en' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'image'   => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'status'  => ['sometimes', 'in:active,inactive'],
         ];
     }
 

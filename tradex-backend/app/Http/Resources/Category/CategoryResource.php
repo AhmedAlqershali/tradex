@@ -13,6 +13,8 @@ class CategoryResource extends JsonResource
         return [
             'id'    => $this->id,
             'name'  => $this->name,
+            'name_ar' => $this->name_ar,
+            'name_en' => $this->name_en,
             'image' => PublicMediaUrl::forPath($this->image),
             'status'         => $this->status,
             // products_count is only present when the query eager-loaded it

@@ -64,7 +64,9 @@ class HomeCategoriesRow extends StatelessWidget {
               final category = options[index];
               return _CategoryItem(
                 icon: _iconFor(category.name),
-                label: category.name,
+                label: category.localizedName(
+                  isArabic: AppLocalizations.of(context).isArabic,
+                ),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(

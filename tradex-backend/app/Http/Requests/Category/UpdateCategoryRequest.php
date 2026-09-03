@@ -26,14 +26,16 @@ class UpdateCategoryRequest extends FormRequest
         $categoryId = $this->route('id');
 
         return [
-            'name'   => [
+            'name'    => [
                 'sometimes',
                 'string',
                 'max:100',
                 Rule::unique('categories', 'name')->ignore($categoryId),
             ],
-            'image'  => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
-            'status' => ['sometimes', 'in:active,inactive'],
+            'name_ar' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'name_en' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'image'   => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'status'  => ['sometimes', 'in:active,inactive'],
         ];
     }
 

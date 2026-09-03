@@ -3,11 +3,24 @@ import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 
 class CategoryOption {
-  const CategoryOption({required this.id, required this.name, this.imageUrl});
+  const CategoryOption({
+    required this.id,
+    required this.name,
+    this.nameAr,
+    this.nameEn,
+    this.imageUrl,
+  });
 
   final String id;
   final String name;
+  final String? nameAr;
+  final String? nameEn;
   final String? imageUrl;
+
+  String localizedName({required bool isArabic}) {
+    final localized = isArabic ? nameAr : nameEn;
+    return localized?.trim().isNotEmpty == true ? localized! : name;
+  }
 
   factory CategoryOption.fromServerJson(Map<String, dynamic> json) {
     final rawImage = json['image'];
@@ -15,10 +28,17 @@ class CategoryOption {
     return CategoryOption(
       id: json['id'].toString(),
       name: (json['name'] ?? json['label'] ?? json['value'] ?? '').toString(),
+      nameAr: _optionalText(json['name_ar']),
+      nameEn: _optionalText(json['name_en']),
       imageUrl: rawImage is String && rawImage.trim().isNotEmpty
           ? AppConfig.resolveMediaUrl(rawImage)
           : null,
     );
+  }
+
+  static String? _optionalText(Object? value) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty || text == 'null' ? null : text;
   }
 }
 
