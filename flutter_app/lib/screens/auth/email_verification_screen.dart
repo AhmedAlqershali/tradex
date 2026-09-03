@@ -52,9 +52,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _checkFirebaseVerification();
-    });
     // Listen for deep link verification
     DeepLinkService.instance.onEmailVerificationLink = _handleVerificationLink;
   }
