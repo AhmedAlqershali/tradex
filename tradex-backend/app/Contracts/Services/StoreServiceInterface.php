@@ -37,6 +37,11 @@ interface StoreServiceInterface
     public function getForMerchant(User $merchant): Collection;
 
     /**
+     * Return the merchant's existing store, or create their first store.
+     */
+    public function createForMerchant(User $merchant, array $data): Store;
+
+    /**
      * Find a specific store that belongs to the given merchant.
      * Returns null if not found or if the merchant does not own it.
      */

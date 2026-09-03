@@ -76,6 +76,31 @@ class StoreTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
+    public function test_merchant_can_create_first_store_and_repeating_request_does_not_duplicate_it(): void
+    {
+        $merchant = User::factory()->merchant()->create();
+        $this->entitleMerchant($merchant);
+        $token = $merchant->createToken('test')->plainTextToken;
+
+        $first = $this->postJson('/api/v1/merchant/stores', [
+            'store_name' => 'Legacy Merchant Store',
+            'region'     => 'Gaza',
+        ], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.store_name', 'Legacy Merchant Store');
+
+        $storeId = $first->json('data.id');
+
+        $this->postJson('/api/v1/merchant/stores', [
+            'store_name' => 'A Different Name',
+        ], $this->headers($token))
+            ->assertOk()
+            ->assertJsonPath('data.id', $storeId)
+            ->assertJsonPath('data.store_name', 'Legacy Merchant Store');
+
+        $this->assertSame(1, Store::where('user_id', $merchant->id)->count());
+    }
+
     // ── Show store ────────────────────────────────────────────────────────────
 
     public function test_merchant_can_view_own_store(): void

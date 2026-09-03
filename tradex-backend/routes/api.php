@@ -208,6 +208,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
                     // ── Store management ──────────────────────────────────────
                     Route::get('stores',                    [MerchantStoreController::class, 'index'])->name('stores.index');
+                    Route::post('stores',                   [MerchantStoreController::class, 'store'])->name('stores.store');
                     Route::get('stores/{id}',               [MerchantStoreController::class, 'show'])->name('stores.show');
                     Route::put('stores/{id}',               [MerchantStoreController::class, 'update'])->name('stores.update');
                     Route::post('stores/{id}/logo',         [MerchantStoreController::class, 'updateLogo'])->name('stores.logo');

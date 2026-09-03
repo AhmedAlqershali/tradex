@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class StoreService implements StoreServiceInterface
@@ -73,6 +74,33 @@ class StoreService implements StoreServiceInterface
     public function getForMerchant(User $merchant): Collection
     {
         return $this->storeRepository->getForMerchant($merchant);
+    }
+
+    /**
+     * Create only the first store for a merchant. Locking the owner row makes
+     * concurrent completion requests observe the same existing store.
+     */
+    public function createForMerchant(User $merchant, array $data): Store
+    {
+        return DB::transaction(function () use ($merchant, $data) {
+            $lockedMerchant = User::whereKey($merchant->id)->lockForUpdate()->firstOrFail();
+
+            $store = $lockedMerchant->stores()->orderBy('id')->first();
+            if ($store) {
+                return $store->fresh(['owner:id,phone']);
+            }
+
+            $store = new Store();
+            $store->fill([
+                'store_name' => $data['store_name'],
+                'region'     => $data['region'] ?? null,
+            ]);
+            $store->user_id = $lockedMerchant->id;
+            $store->status = 'active';
+            $store->save();
+
+            return $store->fresh(['owner:id,phone']);
+        });
     }
 
     /**

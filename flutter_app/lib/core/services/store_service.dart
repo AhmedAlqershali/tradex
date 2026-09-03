@@ -64,6 +64,24 @@ class StoreService {
     return StoreModel.fromServerJson(list.first);
   }
 
+  /// POST /merchant/stores — returns the existing store when one is present.
+  Future<StoreModel> createMyStore({
+    required String name,
+    String? region,
+  }) async {
+    final response = await ApiClient.instance.post<Map<String, dynamic>>(
+      ApiConstants.myStores,
+      data: {
+        'store_name': name,
+        if (region != null) 'region': region,
+      },
+    );
+    final raw = response.data!;
+    final storeJson =
+        raw['data'] is Map ? raw['data'] as Map<String, dynamic> : raw;
+    return StoreModel.fromServerJson(storeJson);
+  }
+
   /// PUT /merchant/stores/:id
   /// Backend accepts store_name, description, region, and phone.
   Future<StoreModel> updateMyStore({

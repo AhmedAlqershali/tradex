@@ -253,8 +253,9 @@ class UserController {
     }
     try {
       final user = await login(email: email, password: password, role: role);
+      final authoritativeUser = await refreshProfileIfCurrent();
       await SecureStorageService.instance.clearPendingVerification();
-      return user;
+      return authoritativeUser ?? user;
     } finally {
       _pendingVerificationPassword = null;
     }
@@ -519,11 +520,13 @@ class UserController {
     _begin();
     _invalidateProfileRefreshes();
     try {
-      final storeId = currentUserNotifier.value?.storeId;
+      var storeId = currentUserNotifier.value?.storeId;
       if (storeId == null || storeId.isEmpty) {
-        throw const UnknownException(
-          'Merchant store was not created during registration.',
+        final store = await StoreService.instance.createMyStore(
+          name: storeName.isNotEmpty ? storeName : 'متجري',
+          region: region,
         );
+        storeId = store.id;
       }
 
       // Upload logo if a new local file path was provided.
