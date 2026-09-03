@@ -580,15 +580,24 @@ class _MerchantSubscriptionScreenState
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
         children: [
-          Text(label,
-              style: GoogleFonts.ibmPlexSans(
-                  fontSize: 13.sp, color: const Color(0xff888888))),
-          const Spacer(),
-          Text(value,
-              style: GoogleFonts.ibmPlexSans(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xff1A1A1A))),
+          Expanded(
+            child: Text(label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp, color: const Color(0xff888888))),
+          ),
+          SizedBox(width: 12.w),
+          Flexible(
+            child: Text(value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: GoogleFonts.ibmPlexSans(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xff1A1A1A))),
+          ),
         ],
       ),
     );

@@ -135,19 +135,27 @@ class _ClientOrdersScreenState extends State<ClientOrdersScreen> {
                 Icon(Icons.storefront_outlined,
                     size: 14.sp, color: _textGray),
                 SizedBox(width: 4.w),
-                Text(
-                  order.storeName,
-                  style: GoogleFonts.ibmPlexSans(
-                      fontSize: 12.sp, color: _textGray),
+                Expanded(
+                  child: Text(
+                    order.storeName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 12.sp, color: _textGray),
+                  ),
                 ),
                 SizedBox(width: 12.w),
                 Icon(Icons.calendar_today_outlined,
                     size: 14.sp, color: _textGray),
                 SizedBox(width: 4.w),
-                Text(
-                  order.formattedDate,
-                  style: GoogleFonts.ibmPlexSans(
-                      fontSize: 12.sp, color: _textGray),
+                Flexible(
+                  child: Text(
+                    order.formattedDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 12.sp, color: _textGray),
+                  ),
                 ),
               ],
             ),

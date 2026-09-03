@@ -177,16 +177,24 @@ class _MerchantOrdersScreenState extends State<MerchantOrdersScreen> {
               children: [
                 Icon(Icons.person_outline, size: 14.sp, color: _textGray),
                 SizedBox(width: 4.w),
-                Text(order.customerName,
+                Expanded(
+                  child: Text(order.customerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.ibmPlexSans(
-                        fontSize: 12.sp, color: _textGray)),
+                      fontSize: 12.sp, color: _textGray)),
+                ),
                 SizedBox(width: 12.w),
                 Icon(Icons.calendar_today_outlined,
                     size: 14.sp, color: _textGray),
                 SizedBox(width: 4.w),
-                Text(order.formattedDate,
+                Flexible(
+                  child: Text(order.formattedDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.ibmPlexSans(
-                        fontSize: 12.sp, color: _textGray)),
+                      fontSize: 12.sp, color: _textGray)),
+                ),
               ],
             ),
             SizedBox(height: 10.h),

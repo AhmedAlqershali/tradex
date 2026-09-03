@@ -87,13 +87,20 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             child: Icon(Icons.auto_awesome, color: Colors.white, size: 23.sp),
           ),
           SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
               SizedBox(height: 2.h),
-              Text(l10n.aiSmartWorkspaceSubtitle, style: TextStyle(fontSize: 12.sp, color: AppColors.textGray)),
-            ],
+                Text(
+                  l10n.aiSmartWorkspaceSubtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12.sp, color: AppColors.textGray),
+                ),
+              ],
+            ),
           ),
           const Spacer(),
           Icon(Icons.tune_rounded, color: AppColors.textMid, size: 22.sp),

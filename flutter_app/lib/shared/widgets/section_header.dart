@@ -31,12 +31,16 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.ibmPlexSans(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xff1A1A1A),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.ibmPlexSans(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xff1A1A1A),
+              ),
             ),
           ),
           if (onTap != null)

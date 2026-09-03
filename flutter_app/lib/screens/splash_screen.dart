@@ -110,9 +110,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF8F9FD),
-      body: SafeArea(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xffF8F9FD),
+        body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 30.w),
           child: Column(
@@ -169,6 +171,7 @@ class _SplashScreenState extends State<SplashScreen> {
               SizedBox(height: 40.h),
             ],
           ),
+        ),
         ),
       ),
     );

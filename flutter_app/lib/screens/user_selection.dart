@@ -21,9 +21,11 @@ class _UserSelectionState extends State<UserSelection> {
     const Color backgroundColor = Color(0xFFF9FAFF);
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: SafeArea(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        body: SafeArea(
         // LayoutBuilder يعطينا مقاسات الشاشة المتاحة
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -135,6 +137,7 @@ class _UserSelectionState extends State<UserSelection> {
               ),
             );
           },
+        ),
         ),
       ),
     );

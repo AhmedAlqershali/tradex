@@ -11,9 +11,11 @@ class SuccessPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF8F9FD), // لون الخلفية الهادئ المائل للبياض في واجهاتك
-      body: SafeArea(
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xffF8F9FD), // لون الخلفية الهادئ المائل للبياض في واجهاتك
+        body: SafeArea(
         child: Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -111,6 +113,7 @@ class SuccessPasswordScreen extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
       ),
     );
