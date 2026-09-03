@@ -71,8 +71,7 @@
 | 8 | `web/index.html` — title/description showed `ai_saas` | Updated: title `Tradex`, description `Tradex — منصة التسوق الذكي` |
 | 9 | `android/app/build.gradle.kts` — placeholder `com.example.ai_saas` application ID | Changed to `ps.tradex.app`; signing comment updated with keystore generation instructions |
 | 10 | `ios/Runner/Info.plist` — `CFBundleDisplayName` = "Ai Saas", `CFBundleName` = "ai_saas" | Changed both to "Tradex" |
-| 11 | `replit.md` — incorrectly said "No external state management packages" and "No Firebase / no backend yet" | Fixed to reflect flutter_bloc + fully-integrated Laravel API |
-| 12 | `flutter analyze` — 1 unused-import warning in new `ai_service.dart` | Removed unused import; 0 issues confirmed |
+| 11 | `flutter analyze` — 1 unused-import warning in new `ai_service.dart` | Removed unused import; 0 issues confirmed |
 
 ---
 

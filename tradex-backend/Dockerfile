@@ -3,8 +3,7 @@ FROM node:22-bookworm-slim AS assets
 WORKDIR /var/www/html
 
 COPY package.json package-lock.json ./
-RUN sed -i 's#http://package-firewall\.replit\.local/npm/#https://registry.npmjs.org/#g' package-lock.json \
-    && npm ci --registry=https://registry.npmjs.org/
+RUN npm ci --registry=https://registry.npmjs.org/
 
 COPY resources ./resources
 COPY vite.config.js ./

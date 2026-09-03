@@ -29,7 +29,10 @@ class _BnScreenState extends State<BnScreen> {
     final selectedIndex = _currentIndex.clamp(0, items.length - 1);
 
     return Scaffold(
-      body: items[selectedIndex].widget,
+      body: IndexedStack(
+        index: selectedIndex,
+        children: [for (final item in items) item.widget],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,

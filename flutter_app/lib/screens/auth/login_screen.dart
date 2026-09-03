@@ -104,9 +104,15 @@ class _LoginScreenState extends State<LoginScreen> {
             body: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    10.h,
+                    20.w,
+                    16.h + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -301,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           content: SizedBox(
-            width: 320,
+            width: double.infinity,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

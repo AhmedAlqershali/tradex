@@ -128,8 +128,9 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: _scaffoldBg,
         body: SafeArea(

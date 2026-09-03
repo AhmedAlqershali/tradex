@@ -77,8 +77,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
+    return Directionality(
+      textDirection: l10n.textDirection,
+      child: Scaffold(
+        appBar: AppBar(
         titleSpacing: 0,
         actionsPadding: EdgeInsets.only(right: 20.w),
         title: Text(
@@ -109,9 +111,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -123,18 +125,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     fontSize: 36.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                width: double.infinity,
-                child: Text(
-                  l10n.categories,
-                  textAlign: TextAlign.right,
-                  style: GoogleFonts.ibmPlexSans(
-                    fontSize: 18.sp,
-                    color: const Color(0xff464555),
                   ),
                 ),
               ),
@@ -273,15 +263,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 },
               ),
               SizedBox(height: 20.h),
-              SizedBox(
-                width: 342.w,
-                height: 193.h,
-                child: Stack(
-                  children: [
+              AspectRatio(
+                aspectRatio: 342 / 193,
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16.w),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: Stack(
+                    children: [
                     Image.asset(
                       'assets/images/shoes.png',
-                      width: 342.w,
-                      height: 193.h,
+                      width: double.infinity,
+                      height: double.infinity,
                       fit: BoxFit.cover,
                     ),
                     Positioned(
@@ -329,11 +324,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 20.h),
             ],
+            ),
           ),
         ),
       ),

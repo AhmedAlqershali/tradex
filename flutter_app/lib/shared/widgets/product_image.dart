@@ -34,6 +34,22 @@ class ProductImage extends StatelessWidget {
         ),
       );
 
+  Widget _loadingWidget(BuildContext context) => Container(
+        color: const Color(0xffF0F1F5),
+        width: width,
+        height: height,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     if (url.isEmpty) return _fallbackWidget;
@@ -44,6 +60,10 @@ class ProductImage extends StatelessWidget {
         fit: fit,
         width: width,
         height: height,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || frame != null) return child;
+          return _loadingWidget(context);
+        },
         errorBuilder: (_, __, ___) => _fallbackWidget,
       );
     }
@@ -55,6 +75,10 @@ class ProductImage extends StatelessWidget {
         fit: fit,
         width: width,
         height: height,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || frame != null) return child;
+          return _loadingWidget(context);
+        },
         errorBuilder: (_, __, ___) => _fallbackWidget,
       );
     } catch (_) {

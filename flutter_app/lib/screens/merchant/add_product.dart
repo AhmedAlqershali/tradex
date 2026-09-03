@@ -192,7 +192,7 @@ class _AddProductState extends State<AddProduct> {
         final isLoading = state is ProductLoading;
 
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: l10n.textDirection,
           child: Scaffold(
             backgroundColor: const Color(0xffF8F9FD),
             appBar: AppBar(
@@ -212,7 +212,14 @@ class _AddProductState extends State<AddProduct> {
             ),
             body: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                16.h,
+                16.w,
+                20.h + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -347,102 +354,110 @@ class _AddProductState extends State<AddProduct> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text(
-             'صور المنتج (${_existingImageUrls.length + _attachedImages.length}/$_maxImages)',
-            style: GoogleFonts.ibmPlexSans(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xff1A1A1A))),
+        Text(
+          'صور المنتج (${_existingImageUrls.length + _attachedImages.length}/$_maxImages)',
+          style: GoogleFonts.ibmPlexSans(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xff1A1A1A),
+          ),
+        ),
         SizedBox(height: 10.h),
-        Row(
-          children: [
-             ..._existingImageUrls.map(
-               (url) => Padding(
-                 padding: EdgeInsets.only(left: 8.w),
-                 child: ClipRRect(
-                   borderRadius: BorderRadius.circular(10.r),
-                   child: Image.network(
-                     url,
-                     width: 72.w,
-                     height: 72.w,
-                     fit: BoxFit.cover,
-                     errorBuilder: (_, __, ___) => Container(
-                       width: 72.w,
-                       height: 72.w,
-                       color: const Color(0xffF0F1F5),
-                       child: const Icon(Icons.broken_image_outlined),
-                     ),
-                   ),
-                 ),
-               ),
-             ),
-            ..._attachedImages.map(
-              (file) => Padding(
-                padding: EdgeInsets.only(left: 8.w),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: Image.file(file,
-                          width: 72.w,
-                          height: 72.w,
-                          fit: BoxFit.cover),
-                    ),
-             if (_existingImageUrls.isNotEmpty)
-               Padding(
-                 padding: EdgeInsets.only(right: 8.w),
-                 child: TextButton(
-                   onPressed: () => setState(() {
-                     _existingImageUrls.clear();
-                     _clearExistingImages = true;
-                   }),
-                   child: Text('حذف الصور الحالية',
-                       style: GoogleFonts.ibmPlexSans(
-                           color: Colors.redAccent, fontSize: 11.sp)),
-                 ),
-               ),
-                    Positioned(
-                      top: 2,
-                      left: 2,
-                      child: GestureDetector(
-                        onTap: () => setState(
-                            () => _attachedImages.remove(file)),
-                        child: Container(
-                          width: 18.w,
-                          height: 18.w,
-                          decoration: const BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.close,
-                              size: 12.sp, color: Colors.white),
-                        ),
+        SizedBox(
+          height: 72.w,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            reverse: AppLocalizations.of(context).isArabic,
+            children: [
+              ..._existingImageUrls.map(
+                (url) => Padding(
+                  padding: EdgeInsets.only(left: 8.w),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Image.network(
+                      url,
+                      width: 72.w,
+                      height: 72.w,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 72.w,
+                        height: 72.w,
+                        color: const Color(0xffF0F1F5),
+                        child: const Icon(Icons.broken_image_outlined),
                       ),
                     ),
-                  ],
+                  ),
                 ),
+              ),
+              ..._attachedImages.map(
+                (file) => Padding(
+                  padding: EdgeInsets.only(left: 8.w),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.r),
+                        child: Image.file(file,
+                            width: 72.w,
+                            height: 72.w,
+                            fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _attachedImages.remove(file)),
+                          child: const CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.black54,
+                            child: Icon(Icons.close,
+                                size: 14, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_existingImageUrls.length + _attachedImages.length < _maxImages)
+                _buildAddImageButton(),
+            ],
+          ),
+        ),
+        if (_existingImageUrls.isNotEmpty)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              onPressed: () => setState(() {
+                _existingImageUrls.clear();
+                _clearExistingImages = true;
+              }),
+              child: Text(
+                'حذف الصور الحالية',
+                style: GoogleFonts.ibmPlexSans(
+                    color: Colors.redAccent, fontSize: 11.sp),
               ),
             ),
-             if (_existingImageUrls.length + _attachedImages.length < _maxImages)
-              GestureDetector(
-                onTap: _showImageSourceSheet,
-                child: Container(
-                  width: 72.w,
-                  height: 72.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(
-                        color: const Color(0xffDDDDDD),
-                        style: BorderStyle.solid),
-                  ),
-                  child: Icon(Icons.add_photo_alternate_outlined,
-                      size: 28.sp, color: const Color(0xffAAAAAA)),
-                ),
-              ),
-          ],
-        ),
+          ),
       ],
+    );
+  }
+
+  Widget _buildAddImageButton() {
+    return GestureDetector(
+      onTap: _showImageSourceSheet,
+      child: Container(
+        width: 72.w,
+        height: 72.w,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: const Color(0xffDDDDDD)),
+        ),
+        child: Icon(Icons.add_photo_alternate_outlined,
+            size: 28.sp, color: const Color(0xffAAAAAA)),
+      ),
     );
   }
 
