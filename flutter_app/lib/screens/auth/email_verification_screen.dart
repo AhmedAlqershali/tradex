@@ -34,21 +34,34 @@ class EmailVerificationScreen extends StatefulWidget {
       _EmailVerificationScreenState();
 }
 
-class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
+class _EmailVerificationScreenState extends State<EmailVerificationScreen>
+    with WidgetsBindingObserver {
   bool _isVerifying = false;
   bool _isResending = false;
   String? _verificationError;
   bool _verificationComplete = false;
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _checkFirebaseVerification();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkFirebaseVerification();
+    });
     // Listen for deep link verification
     DeepLinkService.instance.onEmailVerificationLink = _handleVerificationLink;
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     // Clean up the callback
     if (DeepLinkService.instance.onEmailVerificationLink == _handleVerificationLink) {
       DeepLinkService.instance.onEmailVerificationLink = null;

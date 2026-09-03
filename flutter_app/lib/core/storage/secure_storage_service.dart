@@ -20,8 +20,12 @@ class SecureStorageService {
   final FlutterSecureStorage _storage;
 
   // ── Key names ─────────────────────────────────────────────────────────────────
-  static const _keyAccessToken  = 'tradex_access_token';
-  static const _keyRefreshToken = 'tradex_refresh_token';
+    static const _keyAccessToken = 'tradex_access_token';
+    static const _keyRefreshToken = 'tradex_refresh_token';
+    static const _keyPendingVerificationUser =
+            'tradex_pending_verification_user';
+    static const _keyPendingVerificationPassword =
+            'tradex_pending_verification_password';
 
   // ── Access token ──────────────────────────────────────────────────────────────
 
@@ -44,6 +48,28 @@ class SecureStorageService {
 
   Future<void> deleteRefreshToken() =>
       _storage.delete(key: _keyRefreshToken);
+
+    Future<void> savePendingVerification({
+        required String userJson,
+        required String password,
+    }) async {
+        await _storage.write(key: _keyPendingVerificationUser, value: userJson);
+        await _storage.write(
+            key: _keyPendingVerificationPassword,
+            value: password,
+        );
+    }
+
+    Future<String?> readPendingVerificationUser() =>
+            _storage.read(key: _keyPendingVerificationUser);
+
+    Future<String?> readPendingVerificationPassword() =>
+            _storage.read(key: _keyPendingVerificationPassword);
+
+    Future<void> clearPendingVerification() async {
+        await _storage.delete(key: _keyPendingVerificationUser);
+        await _storage.delete(key: _keyPendingVerificationPassword);
+    }
 
   // ── Bulk clear ────────────────────────────────────────────────────────────────
 

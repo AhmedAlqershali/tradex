@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_saas/models/app_type.dart';
@@ -44,6 +45,28 @@ class UserController {
   // the value is unchanged.
   int _profileGeneration = 0;
   String? _pendingVerificationPassword;
+
+  Future<AppUser?> loadPendingEmailVerification() async {
+    final userJson = await SecureStorageService.instance
+        .readPendingVerificationUser();
+    if (userJson == null || userJson.isEmpty) return null;
+    try {
+      final user = AppUser.fromJson(
+        Map<String, dynamic>.from(jsonDecode(userJson) as Map),
+      );
+      _pendingVerificationPassword = await SecureStorageService.instance
+          .readPendingVerificationPassword();
+      if (_pendingVerificationPassword == null) {
+        await SecureStorageService.instance.clearPendingVerification();
+        return null;
+      }
+      currentUserNotifier.value = user;
+      return user;
+    } catch (_) {
+      await SecureStorageService.instance.clearPendingVerification();
+      return null;
+    }
+  }
 
   /// True while any auth operation is in progress.
   final ValueNotifier<bool> isLoadingNotifier = ValueNotifier(false);
@@ -192,6 +215,10 @@ class UserController {
               password: password,
             );
       _pendingVerificationPassword = password;
+      await SecureStorageService.instance.savePendingVerification(
+        userJson: jsonEncode(result.user.toJson()),
+        password: password,
+      );
       if (result.tokens.accessToken.isNotEmpty) {
         await _storeTokens(result.tokens);
       }
@@ -202,12 +229,14 @@ class UserController {
       if (firebaseUserCreated) {
         await FirebaseEmailVerificationService.instance.deleteCurrentUser();
       }
+      await SecureStorageService.instance.clearPendingVerification();
       authErrorNotifier.value = _localiseError(e);
       rethrow;
     } catch (e) {
       if (firebaseUserCreated) {
         await FirebaseEmailVerificationService.instance.deleteCurrentUser();
       }
+      await SecureStorageService.instance.clearPendingVerification();
       rethrow;
     } finally {
       _end();
@@ -223,7 +252,9 @@ class UserController {
       throw const AuthException('Registration credentials are no longer available.');
     }
     try {
-      return await login(email: email, password: password, role: role);
+      final user = await login(email: email, password: password, role: role);
+      await SecureStorageService.instance.clearPendingVerification();
+      return user;
     } finally {
       _pendingVerificationPassword = null;
     }
@@ -243,6 +274,7 @@ class UserController {
       // Always clear local state even when the server call fails.
     } finally {
       _pendingVerificationPassword = null;
+      await SecureStorageService.instance.clearPendingVerification();
       await FirebaseEmailVerificationService.instance.signOut();
       await SecureStorageService.instance.clearAll();
       await _clearLegacySession();

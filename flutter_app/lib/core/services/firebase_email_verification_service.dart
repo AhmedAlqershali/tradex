@@ -10,23 +10,15 @@ class FirebaseEmailVerificationService {
     required String email,
     required String password,
   }) async {
-    UserCredential credential;
-    var created = false;
+    late final UserCredential credential;
     try {
       credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      created = true;
-    } on FirebaseAuthException catch (error) {
-      if (error.code != 'email-already-in-use') rethrow;
-      credential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
     }
     await credential.user!.sendEmailVerification();
-    return created;
+    return true;
   }
 
   Future<void> deleteCurrentUser() async {

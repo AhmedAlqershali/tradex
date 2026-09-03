@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,6 +115,32 @@ void main() {
     expect(restored, same(expectedUser));
     expect(UserController.instance.currentUser, same(expectedUser));
     expect(secureStorageValues['tradex_access_token'], 'restoration-token');
+  });
+
+  test('pending email verification state survives controller recreation',
+      () async {
+    final expectedUser = AppUser.fromServerJson({
+      'id': 41,
+      'name': 'Pending User',
+      'email': 'pending@example.com',
+      'phone': '0501234567',
+      'role': 'client',
+    });
+    await SecureStorageService.instance.savePendingVerification(
+      userJson: jsonEncode(expectedUser.toJson()),
+      password: 'registration-password',
+    );
+    UserController.instance.currentUserNotifier.value = null;
+
+    final restored =
+        await UserController.instance.loadPendingEmailVerification();
+
+    expect(restored?.email, expectedUser.email);
+    expect(UserController.instance.currentUser?.email, expectedUser.email);
+    expect(
+      await SecureStorageService.instance.readPendingVerificationPassword(),
+      'registration-password',
+    );
   });
 
   test('401 restoration clears authentication and reports session expiry',

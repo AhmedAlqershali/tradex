@@ -3,6 +3,10 @@ import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
+import 'package:ai_saas/models/app_type.dart';
+import 'package:ai_saas/screens/auth/email_verification_screen.dart';
+import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
+import 'package:ai_saas/screens/auth/complete_registration_merchant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,6 +47,41 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     // Check for a saved user session.
+    final pendingUser =
+        await UserController.instance.loadPendingEmailVerification();
+
+    if (!mounted) return;
+
+    if (pendingUser != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EmailVerificationScreen(
+            user: pendingUser,
+            role: pendingUser.role,
+            onVerificationSuccess: (verifiedUser) async {
+              await UserController.instance.loginPendingVerification(
+                email: verifiedUser.email,
+                role: pendingUser.role,
+              );
+              if (!mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => pendingUser.role == AppType.merchant
+                      ? const CompleteProfileMerchantScreen(
+                          type: AppType.merchant,
+                        )
+                      : const CompleteProfileClientScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
     final savedUser = await UserController.instance.loadSession();
 
     if (!mounted) return;
