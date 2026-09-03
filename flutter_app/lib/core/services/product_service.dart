@@ -194,6 +194,7 @@ class ProductService {
       final formData = FormData.fromMap({
         ...body,
         '_method': 'PUT',
+        if (clearImages) 'clear_images': true,
         for (final path in imagePaths)
           'images[]': await MultipartFile.fromFile(path),
       });

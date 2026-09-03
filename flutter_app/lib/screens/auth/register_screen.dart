@@ -472,19 +472,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 16),
 
 // REGISTER
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: SizeButton(
-                              title: isLoading
-                                  ? l10n.creatingAccount
-                                  : l10n.createAccountAction,
-                              onTap: isLoading
-                                  ? null
-                                  : () => _handleRegister(
-                                        context,
-                                      ),
-                            ),
+                          SizeButton(
+                            title: isLoading
+                                ? l10n.creatingAccount
+                                : l10n.createAccountAction,
+                            onTap: isLoading
+                                ? null
+                                : () => _handleRegister(
+                                      context,
+                                    ),
                           ),
 
                           const SizedBox(height: 16),

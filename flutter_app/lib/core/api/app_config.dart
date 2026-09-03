@@ -57,7 +57,12 @@ class AppConfig {
 
     final parsed = Uri.tryParse(trimmed);
     if (parsed != null && parsed.hasScheme && parsed.host.isNotEmpty) {
-      return trimmed;
+      final path = parsed.path.toLowerCase();
+      final isStorageUrl = path == '/storage' ||
+          path.startsWith('/storage/') ||
+          path == '/api/v1/storage' ||
+          path.startsWith('/api/v1/storage/');
+      if (!isStorageUrl) return trimmed;
     }
 
     final normalizedPath = _normalizeStoragePath(trimmed);
