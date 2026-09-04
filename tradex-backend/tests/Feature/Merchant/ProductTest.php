@@ -215,6 +215,77 @@ class ProductTest extends TestCase
         $this->assertDatabaseMissing('products', ['id' => $productId, 'image' => null]);
     }
 
+    public function test_product_is_not_persisted_with_an_image_path_when_storage_fails(): void
+    {
+        $this->mockProductStorage(false);
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+
+        $response = $this->postJson('/api/v1/merchant/products', [
+            'store_id' => $store->id,
+            'name' => 'Storage Failure Product',
+            'price' => 10,
+            'quantity' => 1,
+            'images' => [UploadedFile::fake()->image('failed.jpg')],
+        ], $this->headers($token));
+
+        $response->assertStatus(500);
+        $this->assertDatabaseCount('product_images', 0);
+        $this->assertDatabaseHas('products', [
+            'name' => 'Storage Failure Product',
+            'image' => null,
+        ]);
+    }
+
+    public function test_product_is_not_persisted_with_a_missing_stored_image(): void
+    {
+        $this->mockProductStorage('products/missing.jpg', false);
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+
+        $response = $this->postJson('/api/v1/merchant/products', [
+            'store_id' => $store->id,
+            'name' => 'Missing Image Product',
+            'price' => 10,
+            'quantity' => 1,
+            'images' => [UploadedFile::fake()->image('missing.jpg')],
+        ], $this->headers($token));
+
+        $response->assertStatus(500);
+        $this->assertDatabaseCount('product_images', 0);
+        $this->assertDatabaseHas('products', [
+            'name' => 'Missing Image Product',
+            'image' => null,
+        ]);
+    }
+
+    public function test_failed_multi_image_upload_does_not_leave_an_uploaded_path(): void
+    {
+        Storage::fake('public');
+        $disk = \Mockery::mock(Storage::disk('public'))->makePartial();
+        $disk->shouldReceive('putFileAs')->twice()->andReturn('products/first.jpg', false);
+        $disk->shouldReceive('exists')->once()->with('products/first.jpg')->andReturn(true);
+        $disk->shouldReceive('delete')->once()->with('products/first.jpg')->andReturn(true);
+        Storage::set('public', $disk);
+
+        ['store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $response = $this->postJson('/api/v1/merchant/products', [
+            'store_id' => $store->id,
+            'name' => 'Partial Upload Product',
+            'price' => 10,
+            'quantity' => 1,
+            'images' => [
+                UploadedFile::fake()->image('first.jpg'),
+                UploadedFile::fake()->image('second.jpg'),
+            ],
+        ], $this->headers($token));
+
+        $response->assertStatus(500);
+        $this->assertDatabaseCount('product_images', 0);
+        $this->assertDatabaseHas('products', [
+            'name' => 'Partial Upload Product',
+            'image' => null,
+        ]);
+    }
+
     public function test_create_product_fails_validation_without_required_fields(): void
     {
         ['token' => $token] = $this->actingAsMerchant();
@@ -431,6 +502,20 @@ class ProductTest extends TestCase
 
         $this->assertDatabaseCount('product_images', 0);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'image' => null]);
+    }
+
+    private function mockProductStorage(string|false $path, bool $exists = true): void
+    {
+        Storage::fake('public');
+
+        $disk = \Mockery::mock(Storage::disk('public'))->makePartial();
+        $disk->shouldReceive('putFileAs')->once()->andReturn($path);
+
+        if ($path !== false) {
+            $disk->shouldReceive('exists')->once()->with($path)->andReturn($exists);
+        }
+
+        Storage::set('public', $disk);
     }
 
     // =========================================================================

@@ -132,7 +132,7 @@ class ProductService {
     }
     final categoryId = await _resolveCategoryId(category);
 
-    final formData = FormData.fromMap({
+    final formData = await buildProductMultipartFormData({
       'store_id': storeId,
       if (categoryId != null) 'category_id': categoryId,
       'name': name,
@@ -141,9 +141,7 @@ class ProductService {
       'quantity': quantity,
       'status':
           isVisible ? (quantity > 0 ? 'active' : 'out_of_stock') : 'inactive',
-      for (final path in imagePaths)
-        'images[]': await MultipartFile.fromFile(path),
-    });
+    }, imagePaths);
 
     final response = await ApiClient.instance
         .postFormData<Map<String, dynamic>>(
@@ -191,13 +189,11 @@ class ProductService {
       // PHP does not parse multipart bodies on PUT requests, so file
       // uploads on update must be sent as POST with Laravel's `_method`
       // override field (its standard workaround, supported out of the box).
-      final formData = FormData.fromMap({
+      final formData = await buildProductMultipartFormData({
         ...body,
         '_method': 'PUT',
         if (clearImages) 'clear_images': true,
-        for (final path in imagePaths)
-          'images[]': await MultipartFile.fromFile(path),
-      });
+      }, imagePaths);
       final response =
           await ApiClient.instance.postFormData<Map<String, dynamic>>(
         ApiConstants.merchantProductById(id),
@@ -301,4 +297,19 @@ class ProductService {
     }
     return [];
   }
+}
+
+Future<FormData> buildProductMultipartFormData(
+  Map<String, dynamic> fields,
+  List<String> imagePaths,
+) async {
+  final formData = FormData.fromMap(fields);
+
+  for (final path in imagePaths) {
+    formData.files.add(
+      MapEntry('images[]', await MultipartFile.fromFile(path)),
+    );
+  }
+
+  return formData;
 }

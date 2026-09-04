@@ -236,6 +236,10 @@ class ProductService implements ProductServiceInterface
             foreach ($files as $index => $file) {
                 $path = $file->store("products/{$product->id}", 'public');
 
+                if ($path === false || ! Storage::disk('public')->exists($path)) {
+                    throw new \RuntimeException('Product image could not be persisted.');
+                }
+
                 $images[] = [
                     'path'       => $path,
                     'sort_order' => $nextSortOrder + $index,
