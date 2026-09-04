@@ -12,6 +12,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+bool _isExistingEmailError(String message) {
+  final normalized = message.toLowerCase();
+  return normalized.contains('email.unique') ||
+    normalized.contains('email:') &&
+      (normalized.contains('already registered') ||
+        normalized.contains('already exists') ||
+        normalized.contains('unique'));
+}
+
 class RegisterScreen extends StatefulWidget {
   final AppType type;
 
@@ -210,7 +219,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
 
         if (state is AuthFailure) {
-          _showError(state.message);
+          final l10n = AppLocalizations.of(context);
+          _showError(
+            _isExistingEmailError(state.message)
+                ? l10n.emailAlreadyRegistered
+                : state.message,
+          );
         }
       },
       builder: (context, state) {

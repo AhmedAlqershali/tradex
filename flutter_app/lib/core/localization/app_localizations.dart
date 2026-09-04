@@ -144,6 +144,7 @@ class AppLocalizations {
   String get requiredFieldMessage => _value('requiredFieldMessage');
   String get chooseCategory => _value('chooseCategory');
   String get accountAlreadyExists => _value('accountAlreadyExists');
+  String get emailAlreadyRegistered => _value('emailAlreadyRegistered');
   String get loginNow => _value('loginNow');
   String get chooseStoreCategoryLabel => _value('chooseStoreCategoryLabel');
   String get defaultUser => _value('defaultUser');
@@ -660,6 +661,7 @@ class AppLocalizations {
       'requiredFieldMessage': 'هذا الحقل مطلوب',
       'chooseCategory': 'اختر الفئة',
       'accountAlreadyExists': 'لديك حساب بالفعل؟',
+      'emailAlreadyRegistered': 'هذا البريد الإلكتروني مسجل بالفعل.',
       'loginNow': 'سجل الدخول',
       'chooseStoreCategoryLabel': 'اختر الفئة',
       'settings': 'الإعدادات',
@@ -1197,6 +1199,7 @@ class AppLocalizations {
       'requiredFieldMessage': 'This field is required',
       'chooseCategory': 'Choose category',
       'accountAlreadyExists': 'Already have an account?',
+      'emailAlreadyRegistered': 'This email is already registered.',
       'loginNow': 'Log in',
       'chooseStoreCategoryLabel': 'Choose category',
       'settings': 'Settings',

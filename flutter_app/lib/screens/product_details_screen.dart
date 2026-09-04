@@ -21,6 +21,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool _loading = true;
   String? _error;
   int _quantity = 1;
+  bool _addingToCart = false;
 
   @override
   void initState() {
@@ -42,7 +43,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _addToCart(BuildContext context) {
-    if (!_product.isAvailable || _quantity > _product.quantity) return;
+    if (!_product.isAvailable || _quantity > _product.quantity || _addingToCart) {
+      return;
+    }
+    setState(() => _addingToCart = true);
     // CartItemAdded calls POST /cart/items on the server so the item is
     // persisted before the user navigates to the cart screen.
     context.read<CartBloc>().add(CartItemAdded(
@@ -80,11 +84,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         BlocListener<CartBloc, CartState>(
           listener: (context, state) {
             if (state is CartFailure) {
+              if (_addingToCart) setState(() => _addingToCart = false);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content:
                       Text(state.message, style: GoogleFonts.ibmPlexSans()),
                   backgroundColor: Colors.redAccent,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else if (state is CartLoaded && _addingToCart) {
+              setState(() => _addingToCart = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context).cartAdded,
+                    style: GoogleFonts.ibmPlexSans(),
+                  ),
+                  backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -96,7 +113,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         textDirection: TextDirection.rtl,
         child: Scaffold(
           backgroundColor: const Color(0xffF8F9FD),
-          body: _buildBody(context),
+          body: SafeArea(child: _buildBody(context)),
         ),
       ),
     );
@@ -204,6 +221,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           Expanded(
                             child: Text(
                               _product.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 22.sp,
                                 fontWeight: FontWeight.bold,
@@ -333,10 +352,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             width: double.infinity,
             height: 52.h,
             child: ElevatedButton.icon(
-              onPressed: _product.isAvailable && _quantity > 0
+              onPressed: _product.isAvailable && _quantity > 0 && !_addingToCart
                   ? () => _addToCart(context)
                   : null,
-              icon: Icon(Icons.shopping_cart_outlined, size: 20.sp),
+              icon: _addingToCart
+                  ? SizedBox(
+                      width: 20.sp,
+                      height: 20.sp,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(Icons.shopping_cart_outlined, size: 20.sp),
               label: Text(
                 _product.isAvailable
                     ? 'إضافة إلى السلة • ₪${(_product.price * _quantity).toStringAsFixed(0)}'

@@ -315,10 +315,12 @@ class _SearchScreenState extends State<SearchScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) {
-        return Directionality(
+        return SafeArea(
+          top: false,
+          child: Directionality(
           textDirection: TextDirection.rtl,
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.7,
+            height: MediaQuery.sizeOf(ctx).height * 0.7,
             decoration: BoxDecoration(
               color: const Color(0xfffcfdff),
               borderRadius: BorderRadius.only(
@@ -336,7 +338,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         color: Colors.black12,
                         borderRadius: BorderRadius.circular(2.r))),
                 SizedBox(height: 12.h),
-                Text(AppLocalizations.of(context).chooseStoreCategory,
+                Text(AppLocalizations.of(ctx).chooseStoreCategory,
                     style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
@@ -348,7 +350,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     crossAxisSpacing: 10.w,
                     mainAxisSpacing: 10.h,
                     childAspectRatio: 1.2,
-                    children: _categoryOptions(context).map((option) {
+                    children: _categoryOptions(ctx).map((option) {
                       final isSelected = _selectedCategoryId == option.id;
                       return GestureDetector(
                         onTap: () {
@@ -395,6 +397,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
+          ),
           ),
         );
       },
