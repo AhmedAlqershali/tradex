@@ -52,12 +52,16 @@ PROMPT;
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
         $userPrompt = <<<PROMPT
-    Create the product description in {$language}.
+    Write only the final product description in {$language}, as if it will be
+    pasted directly into a marketplace listing. Do not explain the task or
+    your process. Do not include a heading, labels such as "Goal:" or "Task:",
+    language notes such as "(in Arabic)", markdown, or any meta-commentary.
 
     PRODUCT FACTS (use only these facts):
     {$context}
 
     Focus on concrete customer value and keep uncertainty out of the copy.
+    Return the description text only.
     PROMPT;
 
         $response = $this->provider->complete(

@@ -170,7 +170,7 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
           final dashboard = state.dashboard;
           if (dashboard.isEmpty) {
             return _DashboardMessage(
-                message: AppLocalizations.of(context).noScreensAvailable);
+                message: AppLocalizations.of(context).noDashboardData);
           }
           return Column(
             children: [

@@ -219,6 +219,7 @@ class AppLocalizations {
   String get aiTools => _value('aiTools');
   String get myProducts => _value('myProducts');
   String get noScreensAvailable => _value('noScreensAvailable');
+  String get noDashboardData => _value('noDashboardData');
   String get markAllRead => _value('markAllRead');
   String get noNotifications => _value('noNotifications');
   String get filterStatus => _value('filterStatus');
@@ -707,6 +708,7 @@ class AppLocalizations {
       'aiTools': 'أدوات AI',
       'myProducts': 'منتجاتي',
       'noScreensAvailable': 'لا توجد شاشات متاحة',
+      'noDashboardData': 'لا توجد بيانات للوحة التحكم بعد.',
       'markAllRead': 'تحديد الكل كمقروء',
       'noNotifications': 'لا توجد إشعارات جديدة.',
       'filterStatus': 'تصفية الحالة',
@@ -1245,6 +1247,7 @@ class AppLocalizations {
       'aiTools': 'AI tools',
       'myProducts': 'My products',
       'noScreensAvailable': 'No screens available',
+      'noDashboardData': 'No dashboard data yet.',
       'markAllRead': 'Mark all as read',
       'noNotifications': 'No new notifications.',
       'filterStatus': 'Filter status',

@@ -238,7 +238,7 @@ class AiController {
         path,
         data: {
           'context': safeContext,
-          'language': 'Arabic',
+          'language': _detectLanguage(safeContext),
           if (purpose != null) 'purpose': purpose,
           if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
         },
@@ -264,6 +264,10 @@ class AiController {
     } catch (error) {
       throw AiRuntimeFailure(stage: stage, cause: error);
     }
+  }
+
+  String _detectLanguage(String text) {
+    return RegExp(r'[\u0600-\u06FF]').hasMatch(text) ? 'Arabic' : 'English';
   }
 
   // ── Marketing-content parsing ─────────────────────────────────────────────────

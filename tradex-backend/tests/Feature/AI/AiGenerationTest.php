@@ -71,6 +71,29 @@ class AiGenerationTest extends TestCase
             ]]);
     }
 
+    public function test_product_description_prompt_requests_only_final_text_in_requested_language(): void
+    {
+        $token = $this->merchantToken();
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->withArgs(function (string $systemPrompt, string $userPrompt): bool {
+                return str_contains($systemPrompt, 'Plain text only')
+                    && str_contains($userPrompt, 'final product description in Arabic')
+                    && str_contains($userPrompt, 'Return the description text only.')
+                    && str_contains($userPrompt, 'جوال حديث ايفون 17');
+            })
+            ->andReturn(['result' => 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.', 'tokens_used' => 40]);
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context'  => 'جوال حديث ايفون 17',
+            'language' => 'Arabic',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.result', 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.');
+    }
+
     public function test_product_description_records_usage(): void
     {
         $merchant = User::factory()->merchant()->create();
