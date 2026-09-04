@@ -169,7 +169,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       16.r,
                       12.r,
                       16.r,
-                      12.r + MediaQuery.viewInsetsOf(context).bottom,
+                      12.r,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
