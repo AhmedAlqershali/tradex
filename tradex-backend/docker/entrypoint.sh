@@ -16,13 +16,20 @@ mkdir -p \
     "$PUBLIC_STORAGE_PATH" \
     "$APP_ROOT/bootstrap/cache"
 
-if [ -L "$PUBLIC_STORAGE_LINK" ] || [ -e "$PUBLIC_STORAGE_LINK" ]; then
-    rm -rf "$PUBLIC_STORAGE_LINK"
+LINK_TARGET="$(readlink -f "$PUBLIC_STORAGE_LINK" 2>/dev/null || true)"
+if [ -e "$PUBLIC_STORAGE_LINK" ] && [ ! -L "$PUBLIC_STORAGE_LINK" ]; then
+    echo "[storage] ERROR: $PUBLIC_STORAGE_LINK exists but is not a symlink" >&2
+    exit 1
 fi
-ln -s "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"
+if [ "$LINK_TARGET" != "$PUBLIC_STORAGE_PATH" ]; then
+    if [ -L "$PUBLIC_STORAGE_LINK" ]; then
+        rm -f "$PUBLIC_STORAGE_LINK"
+    fi
+    ln -s "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"
+fi
 
 # Fail startup rather than serving media URLs through a broken or stale link.
-if [ ! -L "$PUBLIC_STORAGE_LINK" ] || [ "$(readlink "$PUBLIC_STORAGE_LINK")" != "$PUBLIC_STORAGE_PATH" ]; then
+if [ ! -L "$PUBLIC_STORAGE_LINK" ] || [ "$(readlink -f "$PUBLIC_STORAGE_LINK" 2>/dev/null || true)" != "$PUBLIC_STORAGE_PATH" ]; then
     echo "[storage] ERROR: public storage link is invalid" >&2
     exit 1
 fi
@@ -47,10 +54,8 @@ else
     echo "[storage] target_exists=false file_count=0"
 fi
 
-php artisan storage:link --force
-
-if [ ! -L "$PUBLIC_STORAGE_LINK" ] || [ "$(readlink "$PUBLIC_STORAGE_LINK")" != "$PUBLIC_STORAGE_PATH" ]; then
-    echo "[storage] ERROR: artisan storage:link did not create the expected link" >&2
+if [ ! -L "$PUBLIC_STORAGE_LINK" ] || [ "$(readlink -f "$PUBLIC_STORAGE_LINK" 2>/dev/null || true)" != "$PUBLIC_STORAGE_PATH" ]; then
+    echo "[storage] ERROR: public storage link is invalid after initialization" >&2
     exit 1
 fi
 php artisan migrate --force --no-interaction

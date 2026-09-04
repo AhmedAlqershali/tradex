@@ -8,6 +8,7 @@ services:
   - type: web
     name: tradex-backend
     runtime: docker
+    plan: starter
     rootDir: tradex-backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
