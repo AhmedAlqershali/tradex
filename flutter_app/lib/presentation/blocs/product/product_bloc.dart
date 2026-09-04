@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/services/product_service.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
+import 'package:ai_saas/shared/models/store_model.dart';
 
 part 'product_event.dart';
 part 'product_state.dart';
@@ -14,6 +15,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<MerchantProductsLoadRequested>(_onMerchantProductsLoadRequested);
     on<ProductByIdRequested>(_onProductByIdRequested);
     on<ProductSearchRequested>(_onProductSearchRequested);
+    on<UnifiedSearchRequested>(_onUnifiedSearchRequested);
     on<ProductCreateRequested>(_onProductCreateRequested);
     on<ProductUpdateRequested>(_onProductUpdateRequested);
     on<ProductDeleteRequested>(_onProductDeleteRequested);
@@ -84,6 +86,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         storeId: event.storeId,
       );
       emit(ProductSearchResult(results, event.query));
+    } catch (e) {
+      emit(ProductFailure(_errorMessage(e)));
+    }
+  }
+
+  Future<void> _onUnifiedSearchRequested(
+    UnifiedSearchRequested event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(const ProductLoading());
+    try {
+      final result = await ProductService.instance.unifiedSearch(event.query);
+      emit(UnifiedSearchResultState(result.products, result.stores, event.query));
     } catch (e) {
       emit(ProductFailure(_errorMessage(e)));
     }

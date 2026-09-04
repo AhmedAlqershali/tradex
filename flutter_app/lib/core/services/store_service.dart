@@ -131,9 +131,24 @@ class StoreService {
   // ── Store products ────────────────────────────────────────────────────────────
   /// GET /stores/:id/products
   Future<List<Product>> getStoreProducts(String storeId) async {
-    // There is no /stores/{id}/products route. The supported client catalog
-    // endpoint exposes store_id filtering.
-    return ProductService.instance.getProducts(storeId: storeId);
+    final products = <Product>[];
+    var page = 1;
+
+    while (true) {
+      final response = await ApiClient.instance.get<Map<String, dynamic>>(
+        ApiConstants.storeProducts(storeId),
+        queryParameters: {'per_page': 100, 'page': page},
+      );
+      final raw = response.data!;
+      products.addAll(parseProductsPageForTesting(raw));
+
+      final pagination = extractPaginationForTesting(raw);
+      final lastPage = pagination?['last_page'];
+      if (lastPage is! num || page >= lastPage.toInt()) break;
+      page++;
+    }
+
+    return products;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -146,5 +161,26 @@ class StoreService {
       return data.cast<Map<String, dynamic>>();
     }
     return [];
+  }
+
+  static List<Product> parseProductsPageForTesting(Map<String, dynamic> raw) {
+    final outer = raw['data'] ?? raw;
+    final data = outer is Map && outer['data'] is List ? outer['data'] : outer;
+    if (data is! List) return [];
+    return data
+        .whereType<Map>()
+        .map((item) => Product.fromServerJson(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  static Map<String, dynamic>? extractPaginationForTesting(
+      Map<String, dynamic> raw) {
+    final outer = raw['data'];
+    if (outer is Map && outer['pagination'] is Map) {
+      return Map<String, dynamic>.from(outer['pagination'] as Map);
+    }
+    return raw['pagination'] is Map
+        ? Map<String, dynamic>.from(raw['pagination'] as Map)
+        : null;
   }
 }

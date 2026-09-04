@@ -124,11 +124,13 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
       return _buildErrorState(
         _storeError!,
         () {
+          final storeId = _storeId;
+          if (storeId == null || storeId.isEmpty) return;
           setState(() {
             _storeLoading = true;
             _storeError = null;
           });
-          context.read<StoreBloc>().add(StoreByIdRequested(_storeId!));
+          context.read<StoreBloc>().add(StoreByIdRequested(storeId));
         },
       );
     }
@@ -213,6 +215,25 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                         store.location!,
                         style: GoogleFonts.ibmPlexSans(
                             fontSize: 13.sp, color: subTextColor),
+                      ),
+                    ],
+                  ),
+                ],
+
+                if (store.phone != null && store.phone!.isNotEmpty) ...[
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(Icons.phone_outlined,
+                          size: 14.sp, color: subTextColor),
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: Text(
+                          store.phone!,
+                          style: GoogleFonts.ibmPlexSans(
+                              fontSize: 13.sp, color: subTextColor),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),

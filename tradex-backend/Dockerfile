@@ -33,10 +33,6 @@ RUN composer install \
     --no-interaction \
     --optimize-autoloader
 
-# Preserve a baked-in copy of the repository's public disk contents so the
-# startup script can seed an attached persistent Render disk when it's empty.
-RUN if [ -d storage/app/public ]; then mkdir -p /var/www/html/storage_seed && cp -a storage/app/public/. /var/www/html/storage_seed/ || true; fi
-
 COPY --from=assets /var/www/html/public/build ./public/build
 COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY docker/start.sh /usr/local/bin/docker-start

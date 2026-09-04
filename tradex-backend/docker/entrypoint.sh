@@ -5,7 +5,6 @@ set -eu
 APP_ROOT=/var/www/html
 PUBLIC_STORAGE_PATH="$APP_ROOT/storage/app/public"
 PUBLIC_STORAGE_LINK="$APP_ROOT/public/storage"
-STORAGE_SEED_PATH="$APP_ROOT/storage_seed"
 
 mkdir -p \
     "$APP_ROOT/storage/framework/cache" \
@@ -22,22 +21,16 @@ if [ -e "$PUBLIC_STORAGE_LINK" ] && [ ! -L "$PUBLIC_STORAGE_LINK" ]; then
     exit 1
 fi
 if [ "$LINK_TARGET" != "$PUBLIC_STORAGE_PATH" ]; then
-    if [ -L "$PUBLIC_STORAGE_LINK" ]; then
-        rm -f "$PUBLIC_STORAGE_LINK"
+    if [ -e "$PUBLIC_STORAGE_LINK" ] || [ -L "$PUBLIC_STORAGE_LINK" ]; then
+        rm -rf "$PUBLIC_STORAGE_LINK"
     fi
-    ln -s "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"
+    php artisan storage:link --force
 fi
 
 # Fail startup rather than serving media URLs through a broken or stale link.
 if [ ! -L "$PUBLIC_STORAGE_LINK" ] || [ "$(readlink -f "$PUBLIC_STORAGE_LINK" 2>/dev/null || true)" != "$PUBLIC_STORAGE_PATH" ]; then
     echo "[storage] ERROR: public storage link is invalid" >&2
     exit 1
-fi
-
-# Copy only missing committed public files. Existing uploaded files on the
-# persistent disk are never overwritten or deleted.
-if [ -d "$STORAGE_SEED_PATH" ]; then
-    cp -an "$STORAGE_SEED_PATH/." "$PUBLIC_STORAGE_PATH/" || true
 fi
 
 chmod 775 "$PUBLIC_STORAGE_PATH" "$PUBLIC_STORAGE_LINK"

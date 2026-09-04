@@ -43,6 +43,17 @@ class ProductSearchResult extends ProductState {
   List<Object?> get props => [results, query];
 }
 
+class UnifiedSearchResultState extends ProductState {
+  const UnifiedSearchResultState(this.products, this.stores, this.query);
+
+  final List<Product> products;
+  final List<StoreModel> stores;
+  final String query;
+
+  @override
+  List<Object?> get props => [products, stores, query];
+}
+
 class ProductCreated extends ProductState {
   const ProductCreated(this.product);
 

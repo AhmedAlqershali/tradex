@@ -87,6 +87,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Stores
         Route::get('stores',      [Client\StoreController::class, 'index'])->name('stores.index');
         Route::get('stores/{id}', [Client\StoreController::class, 'show'])->name('stores.show');
+        Route::get('stores/{id}/products', [Client\StoreController::class, 'products'])->name('stores.products');
+
+        Route::get('search', [Client\SearchController::class, 'index'])->name('search');
 
         // Products browsing (public — no auth required)
         // Supports: search, category_id, store_id, price_min, price_max,

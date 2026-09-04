@@ -3,6 +3,7 @@ import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/api/api_constants.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
+import 'package:ai_saas/shared/models/search_result_model.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 
 // ─── ProductService ───────────────────────────────────────────────────────────
@@ -107,6 +108,14 @@ class ProductService {
     );
     final raw = response.data!;
     return _extractProductList(raw);
+  }
+
+  Future<UnifiedSearchResult> unifiedSearch(String query) async {
+    final response = await ApiClient.instance.get<Map<String, dynamic>>(
+      ApiConstants.search,
+      queryParameters: {'query': query, 'per_page': 100},
+    );
+    return UnifiedSearchResult.fromServerJson(response.data!);
   }
 
   // ── Merchant CRUD ─────────────────────────────────────────────────────────────

@@ -2,7 +2,9 @@ import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
+import 'package:ai_saas/screens/store_details_screen.dart';
 import 'package:ai_saas/shared/models/product_model.dart';
+import 'package:ai_saas/shared/models/store_model.dart';
 import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,10 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _searchController.text = widget.initialQuery!;
       // Trigger search immediately.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ProductBloc>().add(ProductSearchRequested(
-              _searchQuery,
-              categoryId: _selectedCategoryId,
-            ));
+        context.read<ProductBloc>().add(UnifiedSearchRequested(_searchQuery));
       });
     } else if (widget.initialCategoryId != null &&
         widget.initialCategoryId!.isNotEmpty) {
@@ -90,10 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
             categoryId: _selectedCategoryId,
           ));
     } else {
-      context.read<ProductBloc>().add(ProductSearchRequested(
-            query.trim(),
-            categoryId: _selectedCategoryId,
-          ));
+      context.read<ProductBloc>().add(UnifiedSearchRequested(query.trim()));
     }
   }
 
@@ -240,14 +236,61 @@ class _SearchScreenState extends State<SearchScreen> {
                       return const Center(child: CircularProgressIndicator());
                     }
 
+                    if (state is ProductFailure) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.w),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.ibmPlexSans(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xff888888),
+                                ),
+                              ),
+                              SizedBox(height: 14.h),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  final query = _searchQuery.trim();
+                                  if (query.isEmpty) {
+                                    context.read<ProductBloc>().add(
+                                          ProductsLoadRequested(
+                                            category: _selectedCategoryId == null &&
+                                                    _selectedStoreCategory.isNotEmpty
+                                                ? _selectedStoreCategory
+                                                : null,
+                                            categoryId: _selectedCategoryId,
+                                          ),
+                                        );
+                                  } else {
+                                    context.read<ProductBloc>().add(
+                                        UnifiedSearchRequested(query));
+                                  }
+                                },
+                                icon: const Icon(Icons.refresh_rounded),
+                                label: Text(AppLocalizations.of(context).retry),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
                     List<Product> products = [];
+                    List<StoreModel> stores = [];
                     if (state is ProductsLoaded) {
                       products = state.products;
                     } else if (state is ProductSearchResult) {
                       products = state.results;
+                    } else if (state is UnifiedSearchResultState) {
+                      products = state.products;
+                      stores = state.stores;
                     }
 
-                    if (products.isEmpty) {
+                    if (products.isEmpty && stores.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -268,20 +311,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       );
                     }
 
-                    return GridView.builder(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.7,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
-                      ),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) =>
-                          _buildProductCard(context, products[index]),
-                    );
+                    return _buildUnifiedResults(context, stores, products);
                   },
                 ),
               ),
@@ -407,6 +437,134 @@ class _SearchScreenState extends State<SearchScreen> {
   List<CategoryOption> _categoryOptions(BuildContext context) {
     final state = context.read<CategoryBloc>().state;
     return state is CategoriesLoaded ? state.options : const [];
+  }
+
+  Widget _buildUnifiedResults(
+    BuildContext context,
+    List<StoreModel> stores,
+    List<Product> products,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    return ListView(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      physics: const BouncingScrollPhysics(),
+      children: [
+        if (stores.isNotEmpty) ...[
+          _buildSectionTitle(l10n.searchStores),
+          SizedBox(height: 8.h),
+          ...stores.map((store) => _buildStoreResultCard(context, store)),
+          SizedBox(height: 16.h),
+        ],
+        if (products.isNotEmpty) ...[
+          _buildSectionTitle(l10n.searchProducts),
+          SizedBox(height: 8.h),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, index) =>
+                _buildProductCard(context, products[index]),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.ibmPlexSans(
+        fontSize: 17.sp,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xff1A1A1A),
+      ),
+    );
+  }
+
+  Widget _buildStoreResultCard(BuildContext context, StoreModel store) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => StoreDetailsScreen(store: store)),
+      ),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.all(10.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.r),
+              child: store.imageUrl.isEmpty
+                  ? _storePlaceholder()
+                  : Image.network(
+                      store.imageUrl,
+                      width: 58.w,
+                      height: 58.w,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _storePlaceholder(),
+                    ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    store.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.ibmPlexSans(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (store.subTitle.isNotEmpty) ...[
+                    SizedBox(height: 4.h),
+                    Text(
+                      store.subTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.ibmPlexSans(
+                        fontSize: 12.sp,
+                        color: const Color(0xff718096),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_left_rounded,
+                color: const Color(0xff8A8FA3), size: 22.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _storePlaceholder() {
+    return Container(
+      width: 58.w,
+      height: 58.w,
+      color: const Color(0xffF0F1F6),
+      child: Icon(Icons.storefront_outlined,
+          color: const Color(0xff8A8FA3), size: 26.sp),
+    );
   }
 
   Widget _buildProductCard(BuildContext context, Product product) {

@@ -25,6 +25,8 @@ interface StoreServiceInterface
      */
     public function findActive(int $id): ?Store;
 
+    public function listActiveProducts(int $storeId, int $perPage = 15): LengthAwarePaginator;
+
     public function follow(User $client, int $storeId): void;
 
     public function unfollow(User $client, int $storeId): void;

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\StoreRepositoryInterface;
 use App\Contracts\Services\StoreServiceInterface;
+use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -29,7 +30,13 @@ class StoreService implements StoreServiceInterface
     {
         $perPage = min((int) ($filters['per_page'] ?? 15), 100);
 
-        $query = Store::active()->withCount('products');
+        $query = Store::active()
+            ->with('owner:id,phone')
+            ->withCount([
+                'products as products_count' => fn ($products) => $products
+                    ->where('status', 'active')
+                    ->where('quantity', '>', 0),
+            ]);
 
         if (! empty($filters['search'])) {
             $query->where('store_name', 'like', '%' . $filters['search'] . '%');
@@ -51,8 +58,25 @@ class StoreService implements StoreServiceInterface
     public function findActive(int $id): ?Store
     {
         return Store::active()
-            ->withCount('products')
+            ->with('owner:id,phone')
+            ->withCount([
+                'products as products_count' => fn ($products) => $products
+                    ->where('status', 'active')
+                    ->where('quantity', '>', 0),
+            ])
             ->find($id);
+    }
+
+    public function listActiveProducts(int $storeId, int $perPage = 15): LengthAwarePaginator
+    {
+        return Product::query()
+            ->where('store_id', $storeId)
+            ->where('status', 'active')
+            ->where('quantity', '>', 0)
+            ->with(['store', 'category', 'images'])
+            ->latest()
+            ->paginate(min($perPage, 100))
+            ->withQueryString();
     }
 
     public function follow(User $client, int $storeId): void

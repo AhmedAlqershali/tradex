@@ -153,4 +153,26 @@ class StoreTest extends TestCase
         $response->assertOk()
                  ->assertJsonPath('data.products_count', 3);
     }
+
+    public function test_store_show_includes_public_owner_phone(): void
+    {
+        $merchant = User::factory()->merchant()->create(['phone' => '0500000000']);
+        $store = Store::factory()->forUser($merchant)->active()->create();
+
+        $this->getJson("/api/v1/stores/{$store->id}")
+             ->assertOk()
+             ->assertJsonPath('data.phone', '0500000000');
+    }
+
+    public function test_store_products_count_matches_visible_products(): void
+    {
+        $store = Store::factory()->active()->create();
+        Product::factory()->forStore($store)->create(['status' => 'active', 'quantity' => 2]);
+        Product::factory()->forStore($store)->create(['status' => 'inactive', 'quantity' => 2]);
+        Product::factory()->forStore($store)->create(['status' => 'active', 'quantity' => 0]);
+
+        $this->getJson("/api/v1/stores/{$store->id}")
+             ->assertOk()
+             ->assertJsonPath('data.products_count', 1);
+    }
 }

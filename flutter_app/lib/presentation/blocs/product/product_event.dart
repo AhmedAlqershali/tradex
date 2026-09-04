@@ -59,6 +59,15 @@ class ProductSearchRequested extends ProductEvent {
   List<Object?> get props => [query, categoryId, storeId];
 }
 
+class UnifiedSearchRequested extends ProductEvent {
+  const UnifiedSearchRequested(this.query);
+
+  final String query;
+
+  @override
+  List<Object?> get props => [query];
+}
+
 class ProductCreateRequested extends ProductEvent {
   const ProductCreateRequested({
     required this.name,

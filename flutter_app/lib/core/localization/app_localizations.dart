@@ -261,6 +261,8 @@ class AppLocalizations {
   String get productCount => _value('productCount');
   String get orderTimeline => _value('orderTimeline');
   String get products => _value('products');
+  String get searchProducts => _value('searchProducts');
+  String get searchStores => _value('searchStores');
   String get contactCustomer => _value('contactCustomer');
   String get confirmOrder => _value('confirmOrder');
   String get cancelOrder => _value('cancelOrder');
@@ -750,6 +752,8 @@ class AppLocalizations {
       'productCount': 'عدد المنتجات',
       'orderTimeline': 'مسار الطلب',
       'products': 'المنتجات',
+      'searchProducts': 'المنتجات',
+      'searchStores': 'المتاجر',
       'contactCustomer': 'محادثة العميل',
       'confirmOrder': 'تأكيد الطلب',
       'cancelOrder': 'إلغاء الطلب',
@@ -1092,6 +1096,8 @@ class AppLocalizations {
       'profilePhotoSubtitle': 'Add a clear photo so customers can recognize you.',
       'storeSelectionRequired': 'Please select a store first.',
       'storeProducts': 'Store products',
+      'searchProducts': 'Products',
+      'searchStores': 'Stores',
       'unableLoadStoreData': 'Unable to load store details.',
       'merchantAccessExpiredMessage': 'Your merchant access has expired. Please renew your subscription or contact support.',
       'orderApprovedMessage': 'Your order has been approved.',

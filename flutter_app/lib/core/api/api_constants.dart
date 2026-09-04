@@ -65,6 +65,7 @@ class ApiConstants {
   static const String stores = '/stores';
   static String storeById(String id) => '/stores/$id';
   static String storeProducts(String storeId) => '/stores/$storeId/products';
+    static const String search = '/search';
 
   // Merchant-owned store management — backend has no "/stores/me" shortcut;
   // every merchant store route is id-based.

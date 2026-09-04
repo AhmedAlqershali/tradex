@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Client;
 
 use App\Contracts\Services\StoreServiceInterface;
 use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Store\StoreCollection;
 use App\Http\Resources\Store\StoreResource;
 use Illuminate\Http\JsonResponse;
@@ -65,6 +66,27 @@ class StoreController extends BaseApiController
         }
 
         return $this->success(new StoreResource($store), 'Store retrieved successfully.');
+    }
+
+    public function products(Request $request, int $id): JsonResponse
+    {
+        if (! $this->storeService->findActive($id)) {
+            return $this->notFound('Store not found.');
+        }
+
+        $request->validate([
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $products = $this->storeService->listActiveProducts(
+            $id,
+            (int) $request->input('per_page', 15),
+        );
+
+        return $this->success(
+            (new ProductCollection($products))->toArray($request),
+            'Store products retrieved successfully.',
+        );
     }
 
     public function follow(Request $request, int $id): JsonResponse
