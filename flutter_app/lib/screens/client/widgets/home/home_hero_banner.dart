@@ -1,5 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
-import 'package:ai_saas/screens/recently_arrived_screen.dart';
+import 'package:ai_saas/screens/nearby_stores_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +10,9 @@ import 'package:google_fonts/google_fonts.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class HomeHeroBanner extends StatelessWidget {
-  const HomeHeroBanner({super.key});
+  const HomeHeroBanner({super.key, this.region});
+
+  final String? region;
 
   static const Color _primary = Color(0xff4D41DF);
 
@@ -45,7 +47,7 @@ class HomeHeroBanner extends StatelessWidget {
             onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => const RecentlyArrivedScreen())),
+                  builder: (_) => NearbyStoresScreen(region: region))),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _primary,

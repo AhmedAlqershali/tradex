@@ -156,7 +156,7 @@ class _ShopperHomePageState extends State<ShopperHomePage> {
                       SizedBox(height: 12.h),
                       const HomeSearchBar(),
                       SizedBox(height: 12.h),
-                      const HomeHeroBanner(),
+                      HomeHeroBanner(region: _currentRegion),
                       SizedBox(height: 16.h),
                       const HomeCategoriesRow(),
                       SizedBox(height: 16.h),
