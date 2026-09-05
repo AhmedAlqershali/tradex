@@ -452,6 +452,9 @@ class AppLocalizations {
   String get startedAt => _value('startedAt');
   String get endsAt => _value('endsAt');
   String get daysRemaining => _value('daysRemaining');
+  String get unlimited => _value('unlimited');
+  String get noPlanName => _value('noPlanName');
+  String get rejectionReason => _value('rejectionReason');
   String get supportViaWhatsApp => _value('supportViaWhatsApp');
   String get supportContact => _value('supportContact');
   String get noSubscriptions => _value('noSubscriptions');
@@ -976,6 +979,9 @@ class AppLocalizations {
       'startedAt': 'بدأ في',
       'endsAt': 'ينتهي في',
       'daysRemaining': 'يوم متبقٍ',
+      'unlimited': 'غير محدود',
+      'noPlanName': 'بدون خطة',
+      'rejectionReason': 'سبب الرفض',
       'supportViaWhatsApp': 'تعذر فتح واتساب. تواصل مع الدعم على +972597668446.',
       'noPreviousSubscriptionRequests': 'لا توجد طلبات اشتراك سابقة',
       'sendSubscriptionRequest': 'إرسال طلب اشتراك',
@@ -1356,6 +1362,29 @@ class AppLocalizations {
       'rejectedStatus': 'Rejected',
       'pendingStatus': 'Pending review',
       'requestStatusLabel': 'Request status',
+      'subscriptionStatus': 'Subscription status',
+      'availablePlans': 'Available plans',
+      'subscriptionRequests': 'Subscription requests',
+      'newRequest': 'New request',
+      'noSubscriptionPlans': 'No subscription plans are currently available.',
+      'noPreviousSubscriptionRequests': 'No previous subscription requests.',
+      'sendSubscriptionRequest': 'Send subscription request',
+      'noActiveSubscription': 'No active subscription or trial period.',
+      'continueWithPlan': 'Continue with {plan}',
+      'choosePlanFirst': 'Please choose a plan first.',
+      'subscriptionRequestDetails': 'Subscription request details',
+      'planId': 'Plan ID',
+      'billingCycle': 'Billing cycle',
+      'paymentMethod': 'Payment method',
+      'trialLabel': 'Trial period',
+      'paidSubscription': 'Paid subscription',
+      'startedAt': 'Started at',
+      'endsAt': 'Ends at',
+      'daysRemaining': 'days remaining',
+      'unlimited': 'Unlimited',
+      'noPlanName': 'No plan',
+      'rejectionReason': 'Rejection reason',
+      'noSubscriptions': 'No active subscription or trial period.',
       'productCategoryDefault': 'General',
     },
   };

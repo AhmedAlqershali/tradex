@@ -38,7 +38,7 @@ class _MerchantSubscriptionScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: _bg,
         appBar: AppBar(
@@ -150,7 +150,7 @@ class _MerchantSubscriptionScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.availablePlans,
+          l10n.plansAvailable,
           style: GoogleFonts.ibmPlexSans(
             fontSize: 17.sp,
             fontWeight: FontWeight.bold,
@@ -173,7 +173,7 @@ class _MerchantSubscriptionScreenState
           )
         else if (plans.isEmpty)
           _Message(
-            message: l10n.noSubscriptionPlans,
+            message: l10n.noPlansAvailable,
             icon: Icons.card_membership_outlined,
             onRetry: () => context
                 .read<MerchantSubscriptionBloc>()
@@ -250,8 +250,8 @@ class _MerchantSubscriptionScreenState
               ),
               SizedBox(height: 7.h),
               Text(
-                '${l10n.productLimitLabel}: ${_limitLabel(plan.productLimit)} · '
-                '${l10n.storeLimitLabel}: ${_limitLabel(plan.storeLimit)}',
+                '${l10n.productLimitLabel}: ${_limitLabel(plan.productLimit, l10n)} · '
+                '${l10n.storeLimitLabel}: ${_limitLabel(plan.storeLimit, l10n)}',
                 style: GoogleFonts.ibmPlexSans(
                   color: const Color(0xff707070),
                   fontSize: 12.sp,
@@ -299,7 +299,7 @@ class _MerchantSubscriptionScreenState
             TextButton.icon(
               onPressed: _showRequestForm,
               icon: const Icon(Icons.add_rounded),
-              label: Text(AppLocalizations.of(context).newRequest),
+              label: Text(l10n.requestNew),
             ),
           ],
         ),
@@ -345,7 +345,9 @@ class _MerchantSubscriptionScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request.plan?.displayName ?? l10n.subscriptionRequestTitle,
+                        request.plan?.displayName.isNotEmpty == true
+                          ? request.plan!.displayName
+                          : l10n.noPlanName,
                       style: GoogleFonts.ibmPlexSans(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
@@ -353,7 +355,7 @@ class _MerchantSubscriptionScreenState
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '${_billingLabel(request.billingCycle)} · ${request.paymentMethod}',
+                      '${_billingLabel(request.billingCycle)} · ${_paymentLabel(request.paymentMethod)}',
                       style: GoogleFonts.ibmPlexSans(
                         color: const Color(0xff888888),
                         fontSize: 12.sp,
@@ -394,7 +396,7 @@ class _MerchantSubscriptionScreenState
         SnackBar(
           content: Text(
             availablePlans.isEmpty
-                ? AppLocalizations.of(context).noSubscriptionPlans
+              ? AppLocalizations.of(context).noPlansAvailable
                 : AppLocalizations.of(context).choosePlanFirst,
           ),
         ),
@@ -425,7 +427,8 @@ class _MerchantSubscriptionScreenState
   String _priceLabel(double price, String cycle) =>
       '$cycle: ${price.toStringAsFixed(2)}';
 
-  String _limitLabel(int? value) => value == null ? 'غير محدود' : '$value';
+  String _limitLabel(int? value, AppLocalizations l10n) =>
+      value == null ? l10n.unlimited : '$value';
 
   Color _requestStatusColor(String status) {
     switch (status) {
@@ -499,7 +502,9 @@ class _MerchantSubscriptionScreenState
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  subscription.planName,
+                    subscription.planName.isEmpty
+                      ? l10n.noPlanName
+                      : subscription.planName,
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 19.sp,
                     fontWeight: FontWeight.bold,
@@ -639,6 +644,18 @@ class _MerchantSubscriptionScreenState
         return cycle;
     }
   }
+
+  String _paymentLabel(String method) {
+    final l10n = AppLocalizations.of(context);
+    switch (method) {
+      case 'bank_transfer':
+        return l10n.bankTransfer;
+      case 'cash':
+        return l10n.cash;
+      default:
+        return method;
+    }
+  }
 }
 
 class _RequestEmptyState extends StatelessWidget {
@@ -720,7 +737,7 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: SafeArea(
         child: Container(
           constraints: BoxConstraints(
@@ -931,7 +948,7 @@ class _MerchantRequestDetailsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: SafeArea(
         child: Container(
           padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
@@ -967,14 +984,21 @@ class _MerchantRequestDetailsSheet extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 18.h),
-                  _line(AppLocalizations.of(context).planId, selected.plan?.displayName ?? '—'),
-                  _line(AppLocalizations.of(context).statusLabel, selected.status),
-                  _line(AppLocalizations.of(context).billingCycleLabel, selected.billingCycle),
-                  _line(AppLocalizations.of(context).paymentMethodLabel, selected.paymentMethod),
+                    _line(AppLocalizations.of(context).planIdLabel,
+                      selected.plan?.displayName.isNotEmpty == true
+                        ? selected.plan!.displayName
+                        : AppLocalizations.of(context).noPlanName),
+                    _line(AppLocalizations.of(context).statusLabel,
+                      _requestStatusLabel(context, selected.status)),
+                    _line(AppLocalizations.of(context).billingCycleLabel,
+                      _billingLabel(context, selected.billingCycle)),
+                    _line(AppLocalizations.of(context).paymentMethodLabel,
+                      _paymentLabel(context, selected.paymentMethod)),
                   _line(AppLocalizations.of(context).fullName, selected.fullName),
                   _line(AppLocalizations.of(context).phoneNumber, selected.phone),
                   if (selected.rejectionReason != null)
-                    _line('سبب الرفض', selected.rejectionReason!),
+                    _line(AppLocalizations.of(context).rejectionReason,
+                      selected.rejectionReason!),
                   if (selected.notes != null && selected.notes!.isNotEmpty)
                     _line(AppLocalizations.of(context).notesOptional, selected.notes!),
                 ],
@@ -1008,6 +1032,44 @@ class _MerchantRequestDetailsSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _requestStatusLabel(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context);
+    switch (status) {
+      case 'approved':
+        return l10n.approvedStatus;
+      case 'rejected':
+        return l10n.rejectedStatus;
+      case 'pending':
+        return l10n.pendingStatus;
+      default:
+        return status.isEmpty ? l10n.unknownStatus : status;
+    }
+  }
+
+  String _billingLabel(BuildContext context, String cycle) {
+    final l10n = AppLocalizations.of(context);
+    switch (cycle) {
+      case 'monthly':
+        return l10n.monthly;
+      case 'yearly':
+        return l10n.yearly;
+      default:
+        return cycle;
+    }
+  }
+
+  String _paymentLabel(BuildContext context, String method) {
+    final l10n = AppLocalizations.of(context);
+    switch (method) {
+      case 'bank_transfer':
+        return l10n.bankTransfer;
+      case 'cash':
+        return l10n.cash;
+      default:
+        return method;
+    }
   }
 }
 

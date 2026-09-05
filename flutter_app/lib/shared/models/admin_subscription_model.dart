@@ -33,7 +33,6 @@ class AdminSubscription {
       planId: _text(planMap['id']),
       planName: _text(
         planMap['display_name'] ?? planMap['name'],
-        fallback: 'بدون خطة',
       ),
       billingCycle: _text(json['billing_cycle']),
       type: _text(json['type']),
