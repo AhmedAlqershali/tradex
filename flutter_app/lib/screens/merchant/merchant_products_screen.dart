@@ -138,6 +138,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   }
 
   Widget _buildProductCard(BuildContext context, Product product) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
