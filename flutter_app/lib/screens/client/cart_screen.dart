@@ -401,9 +401,9 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             ],
-        ],
-      ),
-    );
+          ),
+        ),
+      );
   }
 
   // ── Empty State ────────────────────────────────────────────────────────────
