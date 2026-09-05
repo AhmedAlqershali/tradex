@@ -300,6 +300,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
+          scrollable: true,
           title: Text(
             l10n.resetPassword,
             style: GoogleFonts.ibmPlexSans(

@@ -55,8 +55,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                   SizedBox(height: 12.h),
                   _buildQuickActions(),
                   SizedBox(height: 28.h),
-                  _buildSectionHeading(l10n.aiSmartWorkspaceTitle, l10n.aiSmartWorkspaceSubtitle),
-                  SizedBox(height: 12.h),
                   _buildContextActions(),
                   SizedBox(height: 28.h),
                   _buildRecentSection(),
@@ -72,7 +70,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   Widget _buildHeader() {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Row(
         children: [
           Container(
@@ -112,7 +110,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   Widget _buildAssistantCard() {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Container(
         padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
@@ -137,7 +135,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)),
               child: TextField(
                 controller: _promptController,
-                textDirection: TextDirection.rtl,
+                textDirection: l10n.textDirection,
                 onChanged: (_) => setState(() {}),
                 minLines: 3,
                 maxLines: 5,
@@ -170,8 +168,8 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primaryDark,
-                  disabledBackgroundColor: Colors.white.withValues(alpha: 0.45),
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+                  disabledBackgroundColor: AppColors.textGray,
+                  disabledForegroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                 ),
@@ -193,12 +191,12 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      reverse: true,
+      reverse: l10n.isArabic,
       child: Row(
         children: tools.map((item) {
           final selected = _selectedTool == item.$1;
           return Padding(
-            padding: EdgeInsets.only(left: 8.w),
+            padding: EdgeInsetsDirectional.only(start: 8.w),
             child: ChoiceChip(
               selected: selected,
               label: Text(item.$2),
@@ -300,7 +298,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     return _feedbackCard(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), IconButton(tooltip: AppLocalizations.of(context).copy, onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
       const Divider(),
-      ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: TextDirection.rtl, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
+      ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: AppLocalizations.of(context).textDirection, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
       SizedBox(height: 8.h),
       Align(alignment: AlignmentDirectional.centerEnd, child: TextButton.icon(onPressed: _generateInWorkspace, icon: const Icon(Icons.refresh_rounded, size: 18), label: Text(AppLocalizations.of(context).regenerateResult))),
     ]));
@@ -315,11 +313,11 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   Widget _buildSectionHeading(String title, String subtitle) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: Row(
         children: [
           Expanded(child: Text(title, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w800, color: AppColors.textDark))),
-          Text(subtitle, style: TextStyle(fontSize: 11.sp, color: AppColors.textGray)),
+          Flexible(child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.end, style: TextStyle(fontSize: 11.sp, color: AppColors.textGray))),
         ],
       ),
     );
@@ -334,7 +332,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       (AiToolType.customerReply, Icons.forum_outlined, l10n.customerReplyTool, AppColors.pink),
     ];
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: Wrap(
         spacing: 10.w,
         runSpacing: 10.h,
@@ -364,10 +362,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   Widget _buildContextActions() {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        reverse: true,
+        reverse: AppLocalizations.of(context).isArabic,
         child: Row(children: [
           _contextChip(l10n.aiContextPrompt1, Icons.edit_note_rounded, AiToolType.productDescription),
           SizedBox(width: 10.w),
@@ -398,7 +396,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       builder: (context, history, _) {
         final recent = history.take(3).toList();
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: AppLocalizations.of(context).textDirection,
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _buildSectionHeading(l10n.aiRecentActivity, l10n.aiSavedInSession),
             SizedBox(height: 12.h),
@@ -428,7 +426,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       child: Row(
-        textDirection: TextDirection.rtl,
+        textDirection: AppLocalizations.of(context).textDirection,
         children: [
           Container(
             width: 38.w,
@@ -489,7 +487,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   Widget _buildHeroBanner() {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.w),
         padding: EdgeInsets.all(28.r),
@@ -599,7 +597,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     required AiToolType tool,
   }) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: Container(
         margin: EdgeInsets.symmetric(
           horizontal: 20.w,
@@ -758,7 +756,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   Widget _buildRecentOperations() {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
@@ -839,7 +837,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
         child: Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: AppLocalizations.of(context).textDirection,
           child: SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.75,
             child: Padding(
@@ -1129,7 +1127,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
         SnackBar(
           content: Text(
             message,
-            textDirection: TextDirection.rtl,
+            textDirection: AppLocalizations.of(context).textDirection,
           ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
@@ -1179,7 +1177,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
       SnackBar(
         content: Text(
           AppLocalizations.of(context).aiCopiedToClipboard,
-          textDirection: TextDirection.rtl,
+          textDirection: AppLocalizations.of(context).textDirection,
         ),
         backgroundColor: _accentColor,
         behavior: SnackBarBehavior.floating,
@@ -1200,7 +1198,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       child: DraggableScrollableSheet(
         initialChildSize: 0.88,
         minChildSize: 0.50,
@@ -1287,7 +1285,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                       20.r,
                       20.r,
                       20.r,
-                      40.r,
+                      40.r + MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1304,8 +1302,8 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                             onPressed: _canGenerate ? _generate : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _accentColor,
-                              disabledBackgroundColor:
-                                  _accentColor.withValues(alpha: 0.4),
+                                        disabledBackgroundColor: AppColors.textGray,
+                                        disabledForegroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14.r),
                               ),
@@ -1451,7 +1449,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
     return TextField(
       controller: ctrl,
       maxLines: maxLines,
-      textDirection: TextDirection.rtl,
+      textDirection: AppLocalizations.of(context).textDirection,
       onChanged: (_) {
         if (mounted) {
           setState(() {});
@@ -1462,7 +1460,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
         fillColor: Colors.white,
         hintText: hint,
         hintStyle: TextStyle(
-          color: Colors.black38,
+          color: AppColors.textHint,
           fontSize: 13.sp,
         ),
         border: OutlineInputBorder(
@@ -1539,7 +1537,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
           ),
           SelectableText(
             _result!.output,
-            textDirection: TextDirection.rtl,
+            textDirection: AppLocalizations.of(context).textDirection,
             style: TextStyle(
               fontSize: 13.sp,
               color: const Color(0xff333333),

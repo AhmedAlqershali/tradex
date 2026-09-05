@@ -32,7 +32,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: _scaffoldBg,
         appBar: _buildAppBar(context),
@@ -174,17 +174,17 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 11.sp, color: const Color(0xff888888))),
                 SizedBox(height: 6.h),
-                Row(
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 4.h,
                   children: [
                     Text('₪${product.price.toStringAsFixed(0)}',
                         style: GoogleFonts.ibmPlexSans(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.bold,
                             color: _primary)),
-                    SizedBox(width: 8.w),
                     _buildVisibilityBadge(product.isVisible),
-                     SizedBox(width: 8.w),
-                     _buildStockBadge(product.quantity, product.status),
+                    _buildStockBadge(product.quantity, product.status),
                   ],
                 ),
               ],
@@ -195,6 +195,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
                _iconBtn(
                  icon: Icons.edit_outlined,
                  color: _primary,
+                 semanticLabel: l10n.editProduct,
                  onTap: () => Navigator.push(
                    context,
                    MaterialPageRoute(
@@ -206,6 +207,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
               _iconBtn(
                 icon: Icons.delete_outline_rounded,
                 color: Colors.redAccent,
+                semanticLabel: l10n.deleteProduct,
                 onTap: () => _confirmDelete(context, product),
               ),
             ],
@@ -264,17 +266,25 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
   Widget _iconBtn({
     required IconData icon,
     required Color color,
+    required String semanticLabel,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(8.r),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(10.r),
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Tooltip(
+        message: semanticLabel,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(icon, size: 18.sp, color: color),
+          ),
         ),
-        child: Icon(icon, size: 18.sp, color: color),
       ),
     );
   }
@@ -284,7 +294,7 @@ class _MerchantProductsScreenState extends State<MerchantProductsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: l10n.textDirection,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.r)),

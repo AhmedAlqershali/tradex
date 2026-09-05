@@ -25,8 +25,9 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: const Color(0xffF8F9FD),
         appBar: AppBar(
@@ -38,9 +39,9 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
             onPressed: () => Navigator.maybePop(context),
           ),
           title: Text(
-            widget.region == null
-                ? AppLocalizations.of(context).storeListTitle
-                : AppLocalizations.of(context).storesForRegion.replaceFirst('{region}', widget.region ?? ''),
+                widget.region == null
+                ? l10n.storeListTitle
+                : l10n.storesForRegion.replaceFirst('{region}', widget.region ?? ''),
             style: GoogleFonts.ibmPlexSans(
               color: const Color(0xff1A1A1A),
               fontWeight: FontWeight.bold,
@@ -83,7 +84,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
 
             if (stores.isEmpty) {
               return Center(
-                child: Text('لا توجد متاجر',
+                child: Text(l10n.noStoresFound,
                     style: GoogleFonts.ibmPlexSans(
                         fontSize: 14.sp, color: const Color(0xff888888))),
               );

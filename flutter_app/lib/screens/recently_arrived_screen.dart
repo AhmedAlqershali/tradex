@@ -29,7 +29,7 @@ class _RecentlyArrivedScreenState extends State<RecentlyArrivedScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: const Color(0xfff8fafc),
         appBar: AppBar(
@@ -53,6 +53,34 @@ class _RecentlyArrivedScreenState extends State<RecentlyArrivedScreen> {
           builder: (context, state) {
             if (state is ProductLoading) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (state is ProductFailure) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24.r),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.wifi_off_rounded,
+                          size: 60.sp, color: Colors.grey.shade400),
+                      SizedBox(height: 16.h),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.ibmPlexSans(
+                            fontSize: 13.sp, color: const Color(0xff707070)),
+                      ),
+                      SizedBox(height: 20.h),
+                      ElevatedButton(
+                        onPressed: () => context
+                            .read<ProductBloc>()
+                            .add(const ProductsLoadRequested()),
+                        child: Text(l10n.retry),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
 
             List<Product> products = [];

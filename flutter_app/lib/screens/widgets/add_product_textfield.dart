@@ -103,7 +103,7 @@ class AddProductTextField extends StatelessWidget {
   static const Color _fieldFill  = Color(0xffF2F3F6);
   static const Color _border     = Color(0xffEFEFEF);
   static const Color _textDark   = Color(0xff1A1A1A);
-  static const Color _textHint   = Color(0xffBBBBBB);
+  static const Color _textHint   = Color(0xff666666);
 
   @override
   Widget build(BuildContext context) {

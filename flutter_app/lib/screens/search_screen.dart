@@ -116,7 +116,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: l10n.textDirection,
       child: Scaffold(
         backgroundColor: const Color(0xffF8F9FD),
         body: SafeArea(
@@ -139,7 +139,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           controller: _searchController,
                           onChanged: _onSearchChanged,
                           style: GoogleFonts.ibmPlexSans(fontSize: 14.sp),
-                          textDirection: TextDirection.rtl,
+                          textDirection: l10n.textDirection,
                           decoration: InputDecoration(
                             hintText: l10n.search,
                             hintStyle: GoogleFonts.ibmPlexSans(
@@ -348,7 +348,7 @@ class _SearchScreenState extends State<SearchScreen> {
         return SafeArea(
           top: false,
           child: Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection: AppLocalizations.of(context).textDirection,
           child: Container(
             height: MediaQuery.sizeOf(ctx).height * 0.7,
             decoration: BoxDecoration(

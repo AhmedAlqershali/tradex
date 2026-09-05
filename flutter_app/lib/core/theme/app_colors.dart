@@ -26,7 +26,7 @@ class AppColors {
   static const textMid     = Color(0xff464555);
   static const textGray    = Color(0xff707070);
   static const textLight   = Color(0xff888888);
-  static const textHint    = Color(0xffBBBBBB);
+  static const textHint    = Color(0xff666666);
 
   // ── Borders & fills ─────────────────────────────────────────────────────────
   static const border      = Color(0xffEFEFEF);
