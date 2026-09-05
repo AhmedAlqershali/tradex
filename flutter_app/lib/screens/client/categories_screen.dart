@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/search_screen.dart';
@@ -129,8 +130,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
               ),
               SizedBox(height: 8.h),
-              BlocBuilder<CategoryBloc, CategoryState>(
-                builder: (context, state) {
+              ValueListenableBuilder<Locale>(
+                valueListenable: AppLocaleController.instance.localeNotifier,
+                builder: (context, locale, _) => BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, state) {
                   if (state is CategoryLoading || state is CategoryInitial) {
                     return Padding(
                       padding: EdgeInsets.symmetric(vertical: 40.h),
@@ -187,6 +190,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   }
 
                   return GridView.builder(
+                    key: ValueKey(locale.languageCode),
                     padding: EdgeInsets.all(8.r),
                     itemCount: options.length,
                     shrinkWrap: true,
@@ -199,7 +203,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     ),
                     itemBuilder: (context, index) {
                       final option = options[index];
-                      final name = option.localizedName(isArabic: l10n.isArabic);
+                      final name = option.localizedName(
+                        isArabic: locale.languageCode == 'ar',
+                      );
 
                       return Container(
                         decoration: BoxDecoration(
@@ -260,7 +266,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       );
                     },
                   );
-                },
+                  },
+                ),
               ),
               SizedBox(height: 20.h),
               AspectRatio(

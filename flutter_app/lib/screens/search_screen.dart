@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
@@ -172,8 +173,10 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
 
               // ── Category chips ──
-              BlocBuilder<CategoryBloc, CategoryState>(
-                builder: (context, categoryState) {
+              ValueListenableBuilder<Locale>(
+                valueListenable: AppLocaleController.instance.localeNotifier,
+                builder: (context, locale, _) => BlocBuilder<CategoryBloc, CategoryState>(
+                  builder: (context, categoryState) {
                   if (categoryState is! CategoriesLoaded ||
                       categoryState.options.isEmpty) {
                     return const SizedBox(height: 38);
@@ -182,6 +185,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   return SizedBox(
                     height: 38.h,
                     child: ListView.separated(
+                      key: ValueKey(locale.languageCode),
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
@@ -207,7 +211,9 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                             ),
                             child: Text(
-                              option.name,
+                              option.localizedName(
+                                isArabic: locale.languageCode == 'ar',
+                              ),
                               style: GoogleFonts.ibmPlexSans(
                                 fontSize: 12.sp,
                                 color: isSelected
@@ -223,7 +229,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       },
                     ),
                   );
-                },
+                  },
+                ),
               ),
 
               SizedBox(height: 12.h),
@@ -408,7 +415,10 @@ class _SearchScreenState extends State<SearchScreen> {
                                       ? const Color(0xff4D41DF)
                                       : const Color(0xff888888)),
                               SizedBox(height: 4.h),
-                              Text(option.name,
+                              Text(
+                                  option.localizedName(
+                                    isArabic: AppLocalizations.of(ctx).isArabic,
+                                  ),
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.ibmPlexSans(
                                       fontSize: 10.sp,

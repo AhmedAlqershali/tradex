@@ -346,55 +346,58 @@ class _CartScreenState extends State<CartScreen> {
 
   // ── Order Summary ──────────────────────────────────────────────────────────
   Widget _buildOrderSummary(BuildContext context, double total) {
-    return Container(
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(AppLocalizations.of(context).total,
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.all(20.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(AppLocalizations.of(context).total,
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: _textDark)),
+                Text('₪${total.toStringAsFixed(0)}',
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: _primary)),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            SizedBox(
+              width: double.infinity,
+              height: 52.h,
+              child: ElevatedButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r)),
+                ),
+                child: Text(
+                  AppLocalizations.of(context).continueOrder,
                   style: GoogleFonts.ibmPlexSans(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: _textDark)),
-              Text('₪${total.toStringAsFixed(0)}',
-                  style: GoogleFonts.ibmPlexSans(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: _primary)),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            height: 52.h,
-            child: ElevatedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CheckoutScreen()),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r)),
-              ),
-              child: Text(
-                AppLocalizations.of(context).continueOrder,
-                style: GoogleFonts.ibmPlexSans(
-                    fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      fontSize: 16.sp, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),

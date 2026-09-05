@@ -164,45 +164,48 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
 
                   // Confirm button
-                  Container(
-                    padding: EdgeInsets.fromLTRB(
-                      16.r,
-                      12.r,
-                      16.r,
-                      12.r,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, -4),
-                        ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 52.h,
-                      child: ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () => _confirmOrder(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14.r)),
-                        ),
-                        child: isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : Text(
-                                l10n.confirmRequest,
-                                style: GoogleFonts.ibmPlexSans(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold),
+                  SafeArea(
+                    top: false,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        16.r,
+                        12.r,
+                        16.r,
+                        12.r,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () => _confirmOrder(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14.r)),
+                          ),
+                          child: isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
+                              : Text(
+                                  l10n.confirmRequest,
+                                  style: GoogleFonts.ibmPlexSans(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                       ),
                     ),

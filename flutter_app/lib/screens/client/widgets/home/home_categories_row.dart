@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/core/services/category_service.dart';
 import 'package:ai_saas/screens/search_screen.dart';
@@ -17,8 +18,10 @@ class HomeCategoriesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CategoryBloc, CategoryState>(
-      builder: (context, state) {
+    return ValueListenableBuilder<Locale>(
+      valueListenable: AppLocaleController.instance.localeNotifier,
+      builder: (context, locale, _) => BlocBuilder<CategoryBloc, CategoryState>(
+        builder: (context, state) {
         if (state is CategoryLoading || state is CategoryInitial) {
           return const SizedBox(
             height: 110,
@@ -56,6 +59,7 @@ class HomeCategoriesRow extends StatelessWidget {
         return SizedBox(
           height: 112.h,
           child: ListView.separated(
+            key: ValueKey(locale.languageCode),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             scrollDirection: Axis.horizontal,
             itemCount: options.length,
@@ -65,7 +69,7 @@ class HomeCategoriesRow extends StatelessWidget {
               return _CategoryItem(
                 icon: _iconFor(category.name),
                 label: category.localizedName(
-                  isArabic: AppLocalizations.of(context).isArabic,
+                  isArabic: locale.languageCode == 'ar',
                 ),
                 onTap: () => Navigator.push(
                   context,
@@ -80,7 +84,8 @@ class HomeCategoriesRow extends StatelessWidget {
             },
           ),
         );
-      },
+        },
+      ),
     );
   }
 
