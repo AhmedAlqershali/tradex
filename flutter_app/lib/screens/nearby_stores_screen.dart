@@ -17,6 +17,8 @@ class NearbyStoresScreen extends StatefulWidget {
 }
 
 class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
+  List<StoreModel> _loadedStores = const [];
+
   @override
   void initState() {
     super.initState();
@@ -52,10 +54,10 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
         ),
         body: BlocBuilder<StoreBloc, StoreState>(
           builder: (context, state) {
-            if (state is StoreLoading) {
+            if (state is StoreLoading && _loadedStores.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (state is StoreFailure) {
+            if (state is StoreFailure && _loadedStores.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -79,8 +81,8 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
               );
             }
 
-            List<StoreModel> stores = [];
-            if (state is StoresLoaded) stores = state.stores;
+            if (state is StoresLoaded) _loadedStores = state.stores;
+            final stores = _loadedStores;
 
             if (stores.isEmpty) {
               return Center(

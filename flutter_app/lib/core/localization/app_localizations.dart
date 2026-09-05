@@ -1258,6 +1258,7 @@ class AppLocalizations {
       'orders': 'Orders',
       'aiTools': 'AI tools',
       'myProducts': 'My products',
+      'products': 'Products',
       'noScreensAvailable': 'No screens available',
       'noDashboardData': 'No dashboard data yet.',
       'markAllRead': 'Mark all as read',
