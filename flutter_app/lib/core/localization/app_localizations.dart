@@ -1374,6 +1374,7 @@ class AppLocalizations {
       'continueWithPlan': 'Continue with {plan}',
       'choosePlanFirst': 'Please choose a plan first.',
       'subscriptionRequestDetails': 'Subscription request details',
+      'supportContact': 'Technical Support',
       'planId': 'Plan ID',
       'billingCycle': 'Billing cycle',
       'paymentMethod': 'Payment method',

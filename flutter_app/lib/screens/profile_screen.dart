@@ -11,6 +11,7 @@ import 'package:ai_saas/shared/widgets/product_image.dart';
 import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/localization/app_locale_controller.dart';
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/services/whatsapp_support_service.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -300,12 +301,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         _buildSettingsTile(
+          icon: Icons.support_agent_outlined,
+          label: l10n.supportContact,
+          onTap: _openTechnicalSupport,
+        ),
+        _buildSettingsTile(
           icon: Icons.language_outlined,
           label: l10n.language,
           onTap: () => _showLanguagePicker(context),
         ),
       ],
     );
+  }
+
+  Future<void> _openTechnicalSupport() async {
+    final opened = await WhatsAppSupportService.openChat();
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).supportViaWhatsApp)),
+      );
+    }
   }
 
   Future<void> _showLanguagePicker(BuildContext context) async {
