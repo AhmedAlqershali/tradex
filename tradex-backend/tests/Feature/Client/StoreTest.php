@@ -154,6 +154,20 @@ class StoreTest extends TestCase
                  ->assertJsonPath('data.products_count', 3);
     }
 
+    public function test_store_show_returns_the_persisted_logo_as_a_public_url(): void
+    {
+        $store = Store::factory()->active()->create([
+            'logo' => 'logos/ahmed.jpg',
+        ]);
+
+        $this->getJson("/api/v1/stores/{$store->id}")
+             ->assertOk()
+             ->assertJsonPath(
+                 'data.logo',
+                 'https://api.tradex.test/storage/logos/ahmed.jpg',
+             );
+    }
+
     public function test_store_show_includes_public_owner_phone(): void
     {
         $merchant = User::factory()->merchant()->create(['phone' => '0500000000']);

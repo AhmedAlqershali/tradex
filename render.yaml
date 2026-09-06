@@ -13,6 +13,10 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/health
+    disk:
+      name: tradex-storage
+      mountPath: /var/www/html/storage
+      sizeGB: 10
 
     # Render supplies PORT automatically. The Docker image reads it at startup.
     envVars:
