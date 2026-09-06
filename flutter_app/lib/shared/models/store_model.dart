@@ -14,6 +14,7 @@ class StoreModel {
   final String title;
   final String subTitle;
   final String imageUrl;
+  final String? ownerAvatarUrl;
 
   /// Physical address shown in store cards and store detail info row.
   final String? location;
@@ -28,6 +29,7 @@ class StoreModel {
     required this.title,
     required this.subTitle,
     required this.imageUrl,
+    this.ownerAvatarUrl,
     this.location,
     this.tag,
     this.badge,
@@ -42,6 +44,7 @@ class StoreModel {
         'title': title,
         'subTitle': subTitle,
         'imageUrl': imageUrl,
+        'ownerAvatarUrl': ownerAvatarUrl,
         'location': location,
         'tag': tag,
         'badge': badge,
@@ -54,6 +57,7 @@ class StoreModel {
         title: json['title'] as String? ?? '',
         subTitle: json['subTitle'] as String? ?? '',
         imageUrl: json['imageUrl'] as String? ?? '',
+        ownerAvatarUrl: json['ownerAvatarUrl'] as String?,
         location: json['location'] as String?,
         tag: json['tag'] as String?,
         badge: json['badge'] as String?,
@@ -67,6 +71,7 @@ class StoreModel {
         json['logo_url'] ??
         json['imageUrl'] ??
         json['image_url'];
+    final rawOwnerAvatar = json['owner_avatar'];
 
     return StoreModel(
       id: json['id']?.toString(),
@@ -77,6 +82,9 @@ class StoreModel {
       subTitle:
           json['description'] as String? ?? json['subTitle'] as String? ?? '',
       imageUrl: rawImage is String ? AppConfig.resolveMediaUrl(rawImage) : '',
+      ownerAvatarUrl: rawOwnerAvatar is String && rawOwnerAvatar.trim().isNotEmpty
+          ? AppConfig.resolveMediaUrl(rawOwnerAvatar)
+          : null,
       location: json['region'] as String? ??
           json['city'] as String? ??
           json['location'] as String?,

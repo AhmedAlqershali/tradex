@@ -17,6 +17,10 @@ class StoreResource extends JsonResource
             'region'      => $this->region,
             'logo'        => PublicMediaUrl::forPath($this->logo),
             'phone'       => $this->whenLoaded('owner', fn () => $this->owner?->phone),
+            'owner_avatar' => $this->whenLoaded(
+                'owner',
+                fn () => PublicMediaUrl::forPath($this->owner?->avatar),
+            ),
             'status'      => $this->status,
             'products_count' => $this->products_count ?? 0,
             'created_at'  => $this->created_at?->toIso8601String(),

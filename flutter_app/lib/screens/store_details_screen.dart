@@ -141,6 +141,7 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
         context.read<StoreBloc>().add(StoreByIdRequested(_storeId!));
       });
     }
+    final merchantImageUrl = store.ownerAvatarUrl ?? store.imageUrl;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -152,10 +153,10 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
             padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16.r),
-              child: store.imageUrl.isEmpty
+              child: merchantImageUrl.isEmpty
                   ? _storeImagePlaceholder(180.h)
                   : Image.network(
-                      store.imageUrl,
+                      merchantImageUrl,
                       height: 180.h,
                       width: double.infinity,
                       fit: BoxFit.cover,

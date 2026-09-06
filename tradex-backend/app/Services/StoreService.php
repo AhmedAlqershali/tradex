@@ -31,7 +31,7 @@ class StoreService implements StoreServiceInterface
         $perPage = min((int) ($filters['per_page'] ?? 15), 100);
 
         $query = Store::active()
-            ->with('owner:id,phone')
+            ->with('owner:id,phone,avatar')
             ->withCount([
                 'products as products_count' => fn ($products) => $products
                     ->where('status', 'active')
@@ -58,7 +58,7 @@ class StoreService implements StoreServiceInterface
     public function findActive(int $id): ?Store
     {
         return Store::active()
-            ->with('owner:id,phone')
+            ->with('owner:id,phone,avatar')
             ->withCount([
                 'products as products_count' => fn ($products) => $products
                     ->where('status', 'active')
