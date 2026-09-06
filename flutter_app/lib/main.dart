@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ai_saas/core/api/api_client.dart';
 import 'package:ai_saas/core/theme/app_colors.dart';
 import 'package:ai_saas/core/localization/app_locale_controller.dart';
@@ -15,9 +17,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppLocaleController.instance.load();
-  await FcmService.instance.initialize();
-  await DeepLinkService.instance.initialize();
+  try {
+    await AppLocaleController.instance
+        .load()
+        .timeout(const Duration(seconds: 2));
+  } catch (_) {
+  }
 
   // When a 401 cannot be recovered via token refresh, notify UserController so
   // it can clear user state. Done via callback to avoid a circular import
@@ -26,6 +31,21 @@ void main() async {
       () => UserController.instance.onTokenExpired());
 
   runApp(const MyApp());
+  unawaited(_initializeOptionalServices());
+}
+
+Future<void> _initializeOptionalServices() async {
+  try {
+    await FcmService.instance.initialize().timeout(const Duration(seconds: 5));
+  } catch (_) {
+  }
+
+  try {
+    await DeepLinkService.instance
+        .initialize()
+        .timeout(const Duration(seconds: 3));
+  } catch (_) {
+  }
 }
 
 class MyApp extends StatelessWidget {

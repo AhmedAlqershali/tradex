@@ -21,6 +21,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   double progress = 0.0;
   late Timer _timer;
+  bool _navigationStarted = false;
 
   @override
   void initState() {
@@ -38,68 +39,79 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if (progress >= 1) {
         timer.cancel();
-        _checkSessionAndNavigate();
+        unawaited(_checkSessionAndNavigate());
       }
     });
   }
 
   Future<void> _checkSessionAndNavigate() async {
-    if (!mounted) return;
+    if (!mounted || _navigationStarted) return;
+    _navigationStarted = true;
 
-    // Check for a saved user session.
-    final pendingUser =
-        await UserController.instance.loadPendingEmailVerification();
+    try {
+      // Check for a saved user session.
+      final pendingUser = await UserController.instance
+          .loadPendingEmailVerification()
+          .timeout(const Duration(seconds: 3));
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (pendingUser != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => EmailVerificationScreen(
-            user: pendingUser,
-            role: pendingUser.role,
-            onVerificationSuccess: (verifiedUser) async {
-              await UserController.instance.loginPendingVerification(
-                email: verifiedUser.email,
-                role: pendingUser.role,
-              );
-              if (!mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => pendingUser.role == AppType.merchant
-                      ? const CompleteProfileMerchantScreen(
-                          type: AppType.merchant,
-                        )
-                      : const CompleteProfileClientScreen(),
-                ),
-              );
-            },
+      if (pendingUser != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmailVerificationScreen(
+              user: pendingUser,
+              role: pendingUser.role,
+              onVerificationSuccess: (verifiedUser) async {
+                await UserController.instance.loginPendingVerification(
+                  email: verifiedUser.email,
+                  role: pendingUser.role,
+                );
+                if (!mounted) return;
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => pendingUser.role == AppType.merchant
+                        ? const CompleteProfileMerchantScreen(
+                            type: AppType.merchant,
+                          )
+                        : const CompleteProfileClientScreen(),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      );
-      return;
+        );
+        return;
+      }
+
+      final savedUser = await UserController.instance
+          .loadSession()
+          .timeout(const Duration(seconds: 8));
+
+      if (!mounted) return;
+
+      if (savedUser != null) {
+        // Session exists — restore the correct home screen.
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => BnScreen(type: savedUser.role)),
+        );
+      } else {
+        _navigateToOnboarding();
+      }
+    } catch (_) {
+      if (mounted) _navigateToOnboarding();
     }
+  }
 
-    final savedUser = await UserController.instance.loadSession();
-
+  void _navigateToOnboarding() {
     if (!mounted) return;
-
-    if (savedUser != null) {
-      // Session exists — restore the correct home screen.
-      final type = savedUser.role;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => BnScreen(type: type)),
-      );
-    } else {
-      // No session — start from onboarding.
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OnboardingAIPage()),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const OnboardingAIPage()),
+    );
   }
 
   @override
