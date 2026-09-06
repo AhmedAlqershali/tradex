@@ -18,6 +18,8 @@ class StoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final storeImageUrl = store.ownerAvatarUrl ?? store.imageUrl;
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -37,9 +39,9 @@ class StoreCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius:
                     BorderRadius.vertical(top: Radius.circular(16.r)),
-                child: store.imageUrl.isNotEmpty
+                child: storeImageUrl.isNotEmpty
                     ? Image.network(
-                        store.imageUrl,
+                        storeImageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         errorBuilder: (_, __, ___) => _placeholder(),

@@ -103,7 +103,7 @@ class _NearbyStoresScreenState extends State<NearbyStoresScreen> {
                   storeName: store.title,
                   location: store.location ?? store.subTitle,
                   rating: store.rating?.toStringAsFixed(1) ?? '—',
-                  imageUrl: store.imageUrl,
+                  imageUrl: store.ownerAvatarUrl ?? store.imageUrl,
                   targetScreen: StoreDetailsScreen(store: store),
                 );
               },
