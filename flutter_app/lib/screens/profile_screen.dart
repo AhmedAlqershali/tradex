@@ -1,6 +1,7 @@
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/edit_profile_screen.dart';
 import 'package:ai_saas/screens/change_password_screen.dart';
+import 'package:ai_saas/screens/about_tradex_screen.dart';
 import 'package:ai_saas/screens/onboarding_screen.dart';
 import 'package:ai_saas/screens/product_details_screen.dart';
 import 'package:ai_saas/screens/notifications_screen.dart';
@@ -304,6 +305,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icons.support_agent_outlined,
           label: l10n.supportContact,
           onTap: _openTechnicalSupport,
+        ),
+        _buildSettingsTile(
+          icon: Icons.info_outline_rounded,
+          label: l10n.aboutTradex,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AboutTradexScreen(),
+            ),
+          ),
         ),
         _buildSettingsTile(
           icon: Icons.language_outlined,

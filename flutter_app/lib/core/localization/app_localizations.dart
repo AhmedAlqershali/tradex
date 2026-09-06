@@ -457,6 +457,30 @@ class AppLocalizations {
   String get rejectionReason => _value('rejectionReason');
   String get supportViaWhatsApp => _value('supportViaWhatsApp');
   String get supportContact => _value('supportContact');
+  String get aboutTradex => _value('aboutTradex');
+  String get aboutHeroDescription => _value('aboutHeroDescription');
+  String get aboutOffers => _value('aboutOffers');
+  String get aboutForShoppers => _value('aboutForShoppers');
+  String get aboutForShoppersDescription => _value('aboutForShoppersDescription');
+  String get aboutForMerchants => _value('aboutForMerchants');
+  String get aboutForMerchantsDescription => _value('aboutForMerchantsDescription');
+  String get aboutAiTools => _value('aboutAiTools');
+  String get aboutAiToolsDescription => _value('aboutAiToolsDescription');
+  String get aboutCompleteExperience => _value('aboutCompleteExperience');
+  String get aboutCompleteExperienceDescription => _value('aboutCompleteExperienceDescription');
+  String get aboutHowItWorks => _value('aboutHowItWorks');
+  String get aboutShopperFlow => _value('aboutShopperFlow');
+  String get aboutMerchantFlow => _value('aboutMerchantFlow');
+  String get aboutDiscover => _value('aboutDiscover');
+  String get aboutChoose => _value('aboutChoose');
+  String get aboutOrder => _value('aboutOrder');
+  String get aboutTrack => _value('aboutTrack');
+  String get aboutCreateStore => _value('aboutCreateStore');
+  String get aboutAddProducts => _value('aboutAddProducts');
+  String get aboutManageOrders => _value('aboutManageOrders');
+  String get aboutReachCustomers => _value('aboutReachCustomers');
+  String get aboutPurpose => _value('aboutPurpose');
+  String get aboutPurposeDescription => _value('aboutPurposeDescription');
   String get noSubscriptions => _value('noSubscriptions');
   String get aiToolsSmart => _value('aiToolsSmart');
   String get aiStoreSpace => _value('aiStoreSpace');
@@ -674,6 +698,30 @@ class AppLocalizations {
       'editProfile': 'تعديل الملف الشخصي',
       'changePassword': 'تغيير كلمة المرور',
       'notifications': 'الإشعارات',
+      'aboutTradex': 'عن Tradex',
+      'aboutHeroDescription': 'سوق ذكي يجمع المتسوقين والتجار في تجربة واحدة لاكتشاف المنتجات وإدارة الأعمال.',
+      'aboutOffers': 'ماذا تقدم Tradex؟',
+      'aboutForShoppers': 'للمتسوقين',
+      'aboutForShoppersDescription': 'اكتشف المتاجر والمنتجات، ابحث بسهولة، أضف إلى السلة، أرسل طلباتك وتابع حالتها.',
+      'aboutForMerchants': 'للتجار',
+      'aboutForMerchantsDescription': 'أدر متجرك ومنتجاتك وطلباتك، وتواصل مع العملاء من خلال أدوات التاجر المتاحة.',
+      'aboutAiTools': 'أدوات مدعومة بالذكاء الاصطناعي',
+      'aboutAiToolsDescription': 'أنشئ أوصاف المنتجات والمحتوى التسويقي والهاشتاقات، وساعدك في صياغة ردود العملاء.',
+      'aboutCompleteExperience': 'تجربة تسوق متكاملة',
+      'aboutCompleteExperienceDescription': 'من اكتشاف المنتجات والمتاجر إلى إتمام الطلب ومتابعة آخر تحديثاته.',
+      'aboutHowItWorks': 'كيف تعمل Tradex؟',
+      'aboutShopperFlow': 'رحلة المتسوق',
+      'aboutMerchantFlow': 'رحلة التاجر',
+      'aboutDiscover': 'اكتشف',
+      'aboutChoose': 'اختر',
+      'aboutOrder': 'اطلب',
+      'aboutTrack': 'تابع',
+      'aboutCreateStore': 'أنشئ متجرك',
+      'aboutAddProducts': 'أضف المنتجات',
+      'aboutManageOrders': 'أدر الطلبات',
+      'aboutReachCustomers': 'تواصل مع العملاء',
+      'aboutPurpose': 'عن Tradex',
+      'aboutPurposeDescription': 'صُممت Tradex لتقريب المتسوقين من المتاجر والمنتجات المحلية، ومنح التجار أدوات واضحة لإدارة حضورهم وطلباتهم في مكان واحد.',
       'language': 'اللغة',
       'languageArabic': 'العربية',
       'languageEnglish': 'الإنجليزية',
@@ -1220,6 +1268,30 @@ class AppLocalizations {
       'editProfile': 'Edit profile',
       'changePassword': 'Change password',
       'notifications': 'Notifications',
+      'aboutTradex': 'About Tradex',
+      'aboutHeroDescription': 'A smart marketplace that brings shoppers and merchants together to discover products and manage business in one place.',
+      'aboutOffers': 'What Tradex offers',
+      'aboutForShoppers': 'For shoppers',
+      'aboutForShoppersDescription': 'Discover stores and products, search with ease, add items to your cart, place orders, and follow their status.',
+      'aboutForMerchants': 'For merchants',
+      'aboutForMerchantsDescription': 'Manage your store, products, and orders, and connect with customers through the available merchant tools.',
+      'aboutAiTools': 'AI-powered tools',
+      'aboutAiToolsDescription': 'Create product descriptions, marketing content, and hashtags, and get help drafting customer replies.',
+      'aboutCompleteExperience': 'A complete shopping experience',
+      'aboutCompleteExperienceDescription': 'From discovering products and stores to placing an order and following its latest updates.',
+      'aboutHowItWorks': 'How Tradex works',
+      'aboutShopperFlow': 'Shopper journey',
+      'aboutMerchantFlow': 'Merchant journey',
+      'aboutDiscover': 'Discover',
+      'aboutChoose': 'Choose',
+      'aboutOrder': 'Order',
+      'aboutTrack': 'Track',
+      'aboutCreateStore': 'Create store',
+      'aboutAddProducts': 'Add products',
+      'aboutManageOrders': 'Manage orders',
+      'aboutReachCustomers': 'Reach customers',
+      'aboutPurpose': 'About Tradex',
+      'aboutPurposeDescription': 'Tradex brings shoppers closer to local stores and products, while giving merchants clear tools to manage their presence and orders in one place.',
       'language': 'Language',
       'languageArabic': 'Arabic',
       'languageEnglish': 'English',
