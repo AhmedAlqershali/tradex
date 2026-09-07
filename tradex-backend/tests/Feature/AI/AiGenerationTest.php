@@ -81,13 +81,13 @@ class AiGenerationTest extends TestCase
             ->withArgs(function (string $systemPrompt, string $userPrompt): bool {
                 return str_contains($systemPrompt, 'Plain text only')
                     && str_contains($userPrompt, 'final product description in Arabic')
-                    && str_contains($userPrompt, 'Return the description text only.')
-                    && str_contains($userPrompt, 'جوال حديث ايفون 17');
+                    && str_contains($userPrompt, 'Return only the finished description text')
+                        && str_contains($userPrompt, 'كرسي مكتب مريح');
             })
             ->andReturn(['result' => 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.', 'tokens_used' => 40]);
 
         $this->postJson('/api/v1/ai/product-description', [
-            'context'  => 'جوال حديث ايفون 17',
+            'context'  => 'كرسي مكتب مريح',
             'language' => 'Arabic',
         ], $this->headers($token))
             ->assertStatus(200)
@@ -106,21 +106,21 @@ class AiGenerationTest extends TestCase
                     && str_contains($systemPrompt, 'complete marketplace-ready description')
                     && str_contains($systemPrompt, 'Do not ask the merchant for more details')
                     && str_contains($systemPrompt, 'Do not stop after the opening sentence')
-                    && str_contains($userPrompt, 'جوال آيفون')
+                        && str_contains($userPrompt, 'حقيبة سفر عملية')
                     && str_contains($userPrompt, 'complete final listing in one response');
             })
             ->andReturn([
-                'result' => "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.",
+                'result' => "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.",
                 'tokens_used' => 180,
             ]);
 
         $this->postJson('/api/v1/ai/product-description', [
-            'context' => 'جوال آيفون',
+            'context' => 'حقيبة سفر عملية',
             'language' => 'Arabic',
         ], $this->headers($token))
             ->assertStatus(200)
             ->assertJsonPath('data.language', 'Arabic')
-            ->assertJsonPath('data.result', "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.");
+            ->assertJsonPath('data.result', "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.");
     }
 
     public function test_another_short_product_idea_is_expanded_in_one_provider_request(): void
@@ -244,12 +244,12 @@ class AiGenerationTest extends TestCase
             ->shouldReceive('complete')
             ->once()
             ->withArgs(fn (string $systemPrompt, string $userPrompt): bool =>
-                str_contains($userPrompt, 'جوال آيفون')
+                str_contains($userPrompt, 'عطر فاخر')
                 && str_contains($systemPrompt, 'substantial marketing copy'))
             ->andReturn(['result' => $marketingCopy, 'tokens_used' => 170]);
 
         $this->postJson('/api/v1/ai/marketing-content', [
-            'context' => 'جوال آيفون',
+            'context' => 'عطر فاخر',
             'language' => 'Arabic',
         ], $this->headers($token))
             ->assertStatus(200)

@@ -24,10 +24,12 @@ results, availability, shipping, policies, or guarantees. Use the requested
 language natively and do not mix languages. Avoid generic filler, hype cliches,
 and excessive emojis; use no emoji unless the facts and tone clearly support it.
 
-Return polished, substantial marketing copy in multiple useful paragraphs.
-Use an attractive opening, clear customer benefits, practical value, and a
-persuasive but natural call to action. Make it suitable for social media or a
-marketplace promotion. Do not compress the response into one short sentence.
+Return polished, substantial marketing copy in multiple useful paragraphs. If
+the supplied context is short, treat it as an initial product or campaign idea,
+not as finished copy. Develop it with an attractive opening, clear customer
+benefits, practical value, relevant audience or use cases, and a persuasive but
+natural call to action. Make it suitable for social media or a marketplace
+promotion. Do not compress any input into one short sentence.
 Use the requested language natively, plain text only, and do not add labels,
 JSON, internal reasoning, or meta commentary. Never invent prices,
 discounts, availability, guarantees, exact specifications, or unsupported facts.
@@ -55,8 +57,10 @@ PROMPT;
 
         $userPrompt = <<<PROMPT
     Generate detailed, complete, useful marketing content in {$language}.
-    Turn even a short product idea into substantial promotional copy in one
-    response. Do not ask for more information before writing.
+    Treat a short input as an initial idea and expand it into complete,
+    substantial promotional copy in one response. Include an opening, product
+    value, customer experience, suitable audience or use cases, and a natural
+    closing call to action. Do not ask for more information before writing.
 
     PRODUCT OR CAMPAIGN FACTS (use only these facts):
     {$context}

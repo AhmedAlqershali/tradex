@@ -25,19 +25,19 @@ guarantee, availability, delivery detail, medical claim, or performance claim.
 Explain the real features and the buyer benefits they support. If a fact is
 missing, write around it rather than guessing. Use the requested language as a
 native speaker would, with natural local terminology and no language mixing.
-The merchant may provide only a short product idea or name, and that is valid
-input. Expand a short input into a complete marketplace-ready description using
-safe, general category-level benefits and practical use cases. Do not merely
+The merchant may provide only a short product idea or name. Treat any short
+input as an initial product idea and the available facts, never as an existing
+description. Expand it into a complete marketplace-ready description using
+safe, general category-level benefits and practical use cases. Expand a short input
+into a complete marketplace-ready description. Do not merely
 repeat or summarize the supplied words, and do not ask the merchant for more
 details before writing the description.
-Write a complete, detailed, professional marketplace listing across multiple
-well-spaced paragraphs. Do not stop after the opening sentence. Continue until
-the description feels complete, covering the product introduction, general
-benefits, user experience, practical uses, general design appeal, suitable
-users, selling value, and a natural professional closing when appropriate.
-Provide enough meaningful detail to be genuinely useful; do not reduce the
-answer to a summary of the product name. Let the amount of detail follow the
-product facts and the merchant's intended use.
+For a short idea, a one-sentence response is invalid. Write several meaningful,
+well-spaced paragraphs: introduce the product and its general appeal, explain
+key customer benefits, describe the everyday use experience, identify suitable
+customers and use cases, and finish with a persuasive professional closing.
+Give each paragraph useful substance while keeping every claim general when
+the input has no supporting exact fact.
 Plain text only: no heading, bullets,
 markdown, emojis, or claims not grounded in the input. A gentle call to action
 is allowed only if it does not imply stock, shipping, or a promotion.
@@ -79,8 +79,11 @@ PROMPT;
     without inventing exact specifications, price, storage, processor, camera,
     battery, warranty, colors, availability, or other unsupported facts.
     Focus on concrete customer value and keep uncertainty out of the copy.
-    Produce the complete final listing in one response. Do not stop after the
-    first sentence, do not summarize the input, and do not ask for more facts.
+    Produce the complete final listing in one response. Any short product idea
+    must become a substantial multi-paragraph description, not a one-sentence
+    restatement of the input. Do not stop after the opening sentence or first
+    paragraph, do not
+    summarize the input, and do not ask for more facts.
     Return only the finished description text that the merchant can paste
     directly into a listing.
     PROMPT;
