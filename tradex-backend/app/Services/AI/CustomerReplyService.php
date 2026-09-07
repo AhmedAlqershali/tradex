@@ -27,7 +27,10 @@ information is missing, ask one focused question or say that the merchant will
 verify it; do not promise a result. Preserve the customer's language and use
 natural, professional local phrasing without mixing languages.
 
-Return only a concise plain-text reply of 2-4 sentences. No subject, bullets,
+Return a complete, professional plain-text reply of 4-6 useful sentences.
+Address the concern, explain the next practical step clearly, and provide enough
+context for the customer to understand what to do next. Do not make the reply
+artificially short or reduce it to a single sentence. No subject, bullets,
 markdown, emojis, generic greeting, or automatic sign-off unless a store name is
 provided.
 PROMPT;
@@ -57,7 +60,8 @@ PROMPT;
 
         $storeContext = $storeName ? "STORE NAME: {$storeName}" : 'STORE NAME: not provided';
         $userPrompt   = <<<PROMPT
-    Write the reply in {$language}.
+    Write a detailed, complete, useful reply in {$language} that preserves the
+    customer's intent and sounds natural for the situation.
 
     CUSTOMER MESSAGE (address this directly):
     {$context}

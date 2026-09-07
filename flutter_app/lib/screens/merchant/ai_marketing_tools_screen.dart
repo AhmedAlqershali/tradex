@@ -89,8 +89,8 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
-              SizedBox(height: 2.h),
+                Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                SizedBox(height: 2.h),
                 Text(
                   l10n.aiSmartWorkspaceSubtitle,
                   maxLines: 2,
@@ -100,7 +100,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
               ],
             ),
           ),
-          const Spacer(),
           Icon(Icons.tune_rounded, color: AppColors.textMid, size: 22.sp),
         ],
       ),
@@ -166,10 +165,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 icon: _workspaceLoading ? SizedBox(width: 17.w, height: 17.h, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.auto_awesome_rounded, size: 18),
                 label: Text(_workspaceLoading ? l10n.aiGenerateButtonLoading : l10n.aiGenerateButton),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primaryDark,
-                  disabledBackgroundColor: AppColors.textGray,
-                  disabledForegroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.white.withValues(alpha: 0.32),
+                  disabledForegroundColor: Colors.white.withValues(alpha: 0.55),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                 ),
@@ -182,16 +181,15 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildToolSelector() {
-    final l10n = AppLocalizations.of(context);
     final tools = [
-      (AiToolType.productDescription, l10n.productDescriptionTool, Icons.description_outlined),
-      (AiToolType.instagramPost, l10n.marketingContentTool, Icons.campaign_outlined),
-      (AiToolType.hashtags, l10n.hashtagsTool, Icons.tag),
-      (AiToolType.customerReply, l10n.customerReplyTool, Icons.reply_rounded),
+      (AiToolType.productDescription, AppLocalizations.of(context).productDescriptionTool, Icons.description_outlined),
+      (AiToolType.instagramPost, AppLocalizations.of(context).marketingContentTool, Icons.campaign_outlined),
+      (AiToolType.hashtags, AppLocalizations.of(context).hashtagsTool, Icons.tag),
+      (AiToolType.customerReply, AppLocalizations.of(context).customerReplyTool, Icons.reply_rounded),
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      reverse: l10n.isArabic,
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Row(
         children: tools.map((item) {
           final selected = _selectedTool == item.$1;
@@ -199,7 +197,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             padding: EdgeInsetsDirectional.only(start: 8.w),
             child: ChoiceChip(
               selected: selected,
-              label: Text(item.$2),
+              label: Text(item.$2, maxLines: 1, overflow: TextOverflow.ellipsis),
               avatar: Icon(item.$3, size: 16.sp, color: selected ? AppColors.primary : Colors.white70),
               labelStyle: TextStyle(color: selected ? AppColors.primaryDark : Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w700),
               selectedColor: Colors.white,
@@ -288,17 +286,17 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
 
   Widget _buildWorkspaceFeedback() {
     if (_workspaceLoading) {
-      return _feedbackCard(const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator())));
+      return _feedbackCard(const Center(child: Padding(padding: EdgeInsets.all(18), child: CircularProgressIndicator(strokeWidth: 2))));
     }
     if (_workspaceError != null) {
       return _feedbackCard(Row(children: [Icon(Icons.error_outline, color: AppColors.red, size: 22.sp), SizedBox(width: 10.w), Expanded(child: Text(_workspaceError!, style: TextStyle(color: AppColors.textDark, fontSize: 13.sp, height: 1.4))), IconButton(tooltip: AppLocalizations.of(context).close, onPressed: () => setState(() => _workspaceError = null), icon: const Icon(Icons.close))]));
     }
     final result = _workspaceResult;
-    if (result == null) return const SizedBox.shrink();
+    if (result == null || result.output.trim().isEmpty) return const SizedBox.shrink();
     return _feedbackCard(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), IconButton(tooltip: AppLocalizations.of(context).copy, onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
+      Row(children: [Icon(Icons.auto_awesome, color: AppColors.primary, size: 18.sp), SizedBox(width: 8.w), Expanded(child: Text(result.tool.label, style: TextStyle(color: AppColors.primaryDark, fontSize: 14.sp, fontWeight: FontWeight.w800))), if (result.output.trim().isNotEmpty) IconButton(tooltip: AppLocalizations.of(context).copy, onPressed: () => _copyWorkspaceResult(result.output), icon: const Icon(Icons.copy_outlined))]),
       const Divider(),
-      ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: AppLocalizations.of(context).textDirection, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
+      ConstrainedBox(constraints: BoxConstraints(maxHeight: 260.h), child: SingleChildScrollView(child: SelectableText(result.output, textDirection: AppLocalizations.of(context).textDirection, textAlign: TextAlign.start, style: TextStyle(color: AppColors.textDark, fontSize: 14.sp, height: 1.65)))),
       SizedBox(height: 8.h),
       Align(alignment: AlignmentDirectional.centerEnd, child: TextButton.icon(onPressed: _generateInWorkspace, icon: const Icon(Icons.refresh_rounded, size: 18), label: Text(AppLocalizations.of(context).regenerateResult))),
     ]));
@@ -353,7 +351,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
           Icon(icon, color: color, size: 21.sp),
           SizedBox(width: 9.w),
           Expanded(child: Text(label, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.textDark))),
-          Icon(Icons.chevron_left_rounded, color: AppColors.textLight, size: 19.sp),
+          Icon(AppLocalizations.of(context).isArabic ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: AppColors.textLight, size: 19.sp),
         ]),
       ),
     );
@@ -963,7 +961,7 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
                 ],
               ),
             ),
-            if (onTap != null) Icon(Icons.chevron_left_rounded, color: AppColors.textLight, size: 20.sp),
+            if (onTap != null) Icon(AppLocalizations.of(context).isArabic ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: AppColors.textLight, size: 20.sp),
           ],
         ),
       ),
@@ -1302,8 +1300,8 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                             onPressed: _canGenerate ? _generate : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _accentColor,
-                                        disabledBackgroundColor: AppColors.textGray,
-                                        disabledForegroundColor: Colors.white,
+                              disabledBackgroundColor: _accentColor.withValues(alpha: 0.18),
+                              disabledForegroundColor: Colors.white.withValues(alpha: 0.55),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14.r),
                               ),
@@ -1313,14 +1311,14 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                                 ? SizedBox(
                                     width: 18.w,
                                     height: 18.h,
-                                    child: const CircularProgressIndicator(
+                                    child: CircularProgressIndicator(
                                       color: Colors.white,
                                       strokeWidth: 2,
                                     ),
                                   )
                                 : Icon(
                                     Icons.auto_awesome,
-                                    color: Colors.white,
+                                    color: _canGenerate ? Colors.white : Colors.white.withValues(alpha: 0.55),
                                     size: 18.sp,
                                   ),
                             label: Text(
@@ -1328,7 +1326,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                                   ? AppLocalizations.of(context).aiGenerateButtonLoading
                                   : AppLocalizations.of(context).generateAiText,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: _canGenerate ? Colors.white : Colors.white.withValues(alpha: 0.55),
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1337,7 +1335,7 @@ class _AiToolSheetState extends State<_AiToolSheet> {
                         ),
 
 // Result
-                        if (_result != null) ...[
+                        if (_result != null && _result!.output.trim().isNotEmpty) ...[
                           SizedBox(height: 24.h),
                           _buildResultCard(),
                         ],
@@ -1535,44 +1533,39 @@ class _AiToolSheetState extends State<_AiToolSheet> {
             color: _accentColor.withValues(alpha: 0.2),
             height: 20.h,
           ),
-          SelectableText(
-            _result!.output,
-            textDirection: AppLocalizations.of(context).textDirection,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: const Color(0xff333333),
-              height: 1.7,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: 320.h),
+            child: SingleChildScrollView(
+              child: SelectableText(
+                _result!.output,
+                textDirection: AppLocalizations.of(context).textDirection,
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xff333333),
+                  height: 1.7,
+                ),
+              ),
             ),
           ),
           SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            height: 44.h,
-            child: OutlinedButton.icon(
-              onPressed: _copyResult,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: _accentColor,
+          if (_result!.output.trim().isNotEmpty)
+            SizedBox(
+              width: double.infinity,
+              height: 44.h,
+              child: OutlinedButton.icon(
+                onPressed: _copyResult,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: _accentColor),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              icon: Icon(
-                Icons.copy_outlined,
-                color: _accentColor,
-                size: 16.sp,
-              ),
-              label: Text(
-                AppLocalizations.of(context).copyText,
-                style: TextStyle(
-                  color: _accentColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.sp,
+                icon: Icon(Icons.copy_outlined, color: _accentColor, size: 16.sp),
+                label: Text(
+                  AppLocalizations.of(context).copyText,
+                  style: TextStyle(color: _accentColor, fontWeight: FontWeight.bold, fontSize: 13.sp),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

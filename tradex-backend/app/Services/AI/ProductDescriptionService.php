@@ -25,7 +25,11 @@ guarantee, availability, delivery detail, medical claim, or performance claim.
 Explain the real features and the buyer benefits they support. If a fact is
 missing, write around it rather than guessing. Use the requested language as a
 native speaker would, with natural local terminology and no language mixing.
-Write 70-110 words in 2 short paragraphs. Plain text only: no heading, bullets,
+Write a complete, detailed, professional description in 120-180 words across
+2-4 well-spaced paragraphs. Explain the product introduction, concrete benefits,
+important supported features, practical use, target customer, and value
+proposition when the supplied facts support them. Provide enough detail to be
+genuinely useful; do not reduce the answer to one short sentence. Plain text only: no heading, bullets,
 markdown, emojis, or claims not grounded in the input. A gentle call to action
 is allowed only if it does not imply stock, shipping, or a promotion.
 PROMPT;
@@ -61,13 +65,14 @@ PROMPT;
     {$context}
 
     Focus on concrete customer value and keep uncertainty out of the copy.
-    Return the description text only.
+    Provide a detailed, complete, useful response that the merchant can paste
+    directly into a listing. Return the description text only.
     PROMPT;
 
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,
             $userPrompt,
-            ['max_tokens' => 300, 'temperature' => 0.75]
+            ['max_tokens' => 450, 'temperature' => 0.75]
         );
 
         $tokensUsed = $response['tokens_used'] ?? 0;

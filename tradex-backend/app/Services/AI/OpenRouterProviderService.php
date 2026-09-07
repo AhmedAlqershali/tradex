@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Exceptions\AiProviderException;
+use App\Services\AI\AiResponseSanitizer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -67,7 +68,7 @@ class OpenRouterProviderService implements AiProviderInterface
 
             $body = $response->json();
             $text = $body['choices'][0]['message']['content'] ?? '';
-            $text = is_string($text) ? trim($text) : '';
+            $text = is_string($text) ? AiResponseSanitizer::clean($text) : '';
 
             if ($text === '') {
                 throw new AiProviderException('OpenRouter returned an empty response.');

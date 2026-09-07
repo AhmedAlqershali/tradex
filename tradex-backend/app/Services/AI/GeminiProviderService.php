@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Exceptions\AiProviderException;
+use App\Services\AI\AiResponseSanitizer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -110,7 +111,7 @@ class GeminiProviderService implements AiProviderInterface
             // Gemini may return an empty candidates array when content is
             // filtered by safety policies — treat that as a provider failure.
             $text = $body['candidates'][0]['content']['parts'][0]['text'] ?? '';
-            $text = is_string($text) ? trim($text) : '';
+            $text = is_string($text) ? AiResponseSanitizer::clean($text) : '';
 
             if ($text === '') {
                 // Check for a prompt-feedback block reason before generic message.

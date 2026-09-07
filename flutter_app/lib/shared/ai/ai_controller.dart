@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ai_saas/core/api/api_client.dart';
@@ -258,7 +260,13 @@ class AiController {
           'خادم الذكاء الاصطناعي أعاد نتيجة فارغة أو غير صالحة. حاول مجدداً.',
         );
       }
-      return result.trim();
+      final cleaned = _cleanResponse(result);
+      if (cleaned.isEmpty) {
+        throw const UnknownException(
+          'خادم الذكاء الاصطناعي أعاد نتيجة فارغة أو غير قابلة للعرض. حاول مجدداً.',
+        );
+      }
+      return cleaned;
     } on AiRuntimeFailure {
       rethrow;
     } catch (error) {
@@ -268,6 +276,30 @@ class AiController {
 
   String _detectLanguage(String text) {
     return RegExp(r'[\u0600-\u06FF]').hasMatch(text) ? 'Arabic' : 'English';
+  }
+
+  String _cleanResponse(String value) {
+    var text = value.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
+    final jsonMatch = RegExp(r'^\s*\{.*\}\s*$', dotAll: true).firstMatch(text);
+    if (jsonMatch != null) {
+      try {
+        final decoded = jsonDecode(text);
+        if (decoded is Map<String, dynamic>) {
+          final nested = decoded['result'] ?? decoded['content'] ?? decoded['text'];
+          if (nested is String) text = nested.trim();
+        }
+      } catch (_) {
+        // Keep the provider text when it is not valid JSON.
+      }
+    }
+    text = text.replaceAll(RegExp(r'^```(?:json|text|markdown)?\s*|\s*```$', caseSensitive: false), '');
+    text = text.replaceAll(RegExp(r'\(\s*in\s+(?:Arabic|English)\s*\)', caseSensitive: false), '');
+    text = text.replaceAll(RegExp(r'^\s*(?:final\s+answer|answer|output|response)\s*:\s*', caseSensitive: false, multiLine: true), '');
+    final lines = text.split('\n').where((line) {
+      return !RegExp(r'^\s*(?:system|developer|internal|user)\s+(?:prompt|instructions?)\s*:', caseSensitive: false).hasMatch(line) &&
+          !RegExp(r'^\s*(?:prompt|instructions?)\s*:\s*', caseSensitive: false).hasMatch(line);
+    });
+    return lines.join('\n').trim();
   }
 
   // ── Marketing-content parsing ─────────────────────────────────────────────────
@@ -280,7 +312,7 @@ class AiController {
   // whole block is returned rather than an empty string.
 
   String _extractCaption(String raw) {
-    final caption = _extractLabelled(raw, 'Caption');
+    final caption = _extractLabelled(raw, 'Caption', nextLabels: const ['Hashtags', 'Tagline']);
     final tagline = _extractLabelled(raw, 'Tagline');
     if (caption == null && tagline == null) return raw;
     return [caption, tagline]
@@ -296,8 +328,15 @@ class AiController {
     return matches.isNotEmpty ? matches.join(' ') : raw;
   }
 
-  String? _extractLabelled(String raw, String label) {
-    final match = RegExp('$label:\\s*(.+)').firstMatch(raw);
+  String? _extractLabelled(String raw, String label, {List<String> nextLabels = const []}) {
+    if (nextLabels.isEmpty) {
+      return RegExp('^\\s*$label:\\s*([\\s\\S]*)', multiLine: true)
+          .firstMatch(raw)
+          ?.group(1)
+          ?.trim();
+    }
+    final boundary = '(?=^\\s*(?:${nextLabels.join('|')}):)';
+    final match = RegExp('^\\s*$label:\\s*(.*?)$boundary', multiLine: true, dotAll: true).firstMatch(raw);
     return match?.group(1)?.trim();
   }
 }

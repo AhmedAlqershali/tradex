@@ -24,16 +24,21 @@ results, availability, shipping, policies, or guarantees. Use the requested
 language natively and do not mix languages. Avoid generic filler, hype cliches,
 and excessive emojis; use no emoji unless the facts and tone clearly support it.
 
-Return exactly three plain-text lines and no markdown:
-Caption: one or two engaging sentences, 35-70 words
-Hashtags: 4-6 distinct, relevant hashtags based on the product/category/audience
-Tagline: one memorable sentence, without a fabricated offer
+Return a complete, publish-ready package with these clearly labelled sections.
+Use two short paragraphs for the caption (80-120 words) with a specific hook,
+real benefits, practical context, and a natural call to action. Provide 8-12
+distinct relevant hashtags and one memorable tagline. Do not compress the
+answer into a single short line. Keep each section useful and grounded in the
+supplied facts, with plain text only and no markdown:
+Caption:
+Hashtags:
+Tagline:
 PROMPT;
 
     private const HASHTAGS_PROMPT = <<<'PROMPT'
-You are a precise social media strategist. Generate hashtags from the supplied
-product and category facts only. Return exactly one plain-text line beginning
-with "Hashtags:" followed by 5-8 distinct hashtags. Mix specific product,
+You are a precise social media strategist. Generate a useful, complete hashtag
+set from the supplied product and category facts only. Return a clearly labelled
+Hashtags section containing 8-12 distinct hashtags. Mix specific product,
 category, audience, and relevant context tags when supported by the input.
 Exclude unrelated or broad filler tags, repeated ideas, campaign claims, prices,
 discounts, locations, and unsupported audience or product attributes. Use the
@@ -67,7 +72,8 @@ PROMPT;
             ? self::HASHTAGS_PROMPT
             : self::INSTAGRAM_PROMPT;
         $userPrompt = <<<PROMPT
-    Generate the {$purpose} content in {$language}.
+    Generate detailed, complete, useful {$purpose} content in {$language}.
+    Do not answer with a single short sentence or add meta commentary.
 
     PRODUCT OR CAMPAIGN FACTS (use only these facts):
     {$context}
