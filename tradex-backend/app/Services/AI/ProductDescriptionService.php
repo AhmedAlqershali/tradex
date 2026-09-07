@@ -69,7 +69,7 @@ PROMPT;
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,
             $userPrompt,
-            ['max_tokens' => 1200, 'temperature' => 0.75]
+            ['max_tokens' => 1200, 'temperature' => 0.75, 'diagnostics' => true]
         );
 
         $tokensUsed = $response['tokens_used'] ?? 0;

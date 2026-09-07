@@ -84,7 +84,11 @@ class AiGenerationTest extends TestCase
                     && str_contains($systemPrompt, 'assume specifications')
                     && str_contains($userPrompt, 'Requested language: Arabic')
                     && str_contains($userPrompt, 'كرسي مكتب مريح')
-                    && $options === ['max_tokens' => 1200, 'temperature' => 0.75];
+                    && $options === [
+                        'max_tokens' => 1200,
+                        'temperature' => 0.75,
+                        'diagnostics' => true,
+                    ];
             })
             ->andReturn(['result' => $description, 'tokens_used' => 80]);
 

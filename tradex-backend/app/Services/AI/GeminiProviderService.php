@@ -61,6 +61,7 @@ class GeminiProviderService implements AiProviderInterface
 
         $maxTokens   = (int)   ($options['max_tokens']  ?? 800);
         $temperature = (float) ($options['temperature'] ?? 0.7);
+        $diagnostics = ($options['diagnostics'] ?? false) === true;
 
         $payload = [
             'systemInstruction' => [
@@ -90,6 +91,21 @@ class GeminiProviderService implements AiProviderInterface
                 $status  = $response->status();
                 $message = $response->json('error.message', 'Unknown error from Gemini.');
 
+                if ($diagnostics) {
+                    Log::warning('Gemini Product Description diagnostic', [
+                        'model'                  => $this->model,
+                        'maxOutputTokens'        => $maxTokens,
+                        'temperature'            => $temperature,
+                        'http_status'            => $status,
+                        'finishReason'           => null,
+                        'promptTokenCount'       => null,
+                        'candidatesTokenCount'   => null,
+                        'totalTokenCount'        => null,
+                        'raw_text_length'        => 0,
+                        'sanitized_text_length'  => 0,
+                    ]);
+                }
+
                 // Surface a clear hint when the key is wrong so operators
                 // can diagnose quickly without reading provider error prose.
                 if (in_array($status, [401, 403], true)) {
@@ -118,7 +134,27 @@ class GeminiProviderService implements AiProviderInterface
                     ->filter(static fn ($part): bool => is_string($part) && trim($part) !== '')
                     ->implode('')
                 : '';
+            $rawTextLength = mb_strlen($text);
+            $finishReason = $body['candidates'][0]['finishReason'] ?? null;
+            $promptTokens = $body['usageMetadata']['promptTokenCount'] ?? null;
+            $candidateTokens = $body['usageMetadata']['candidatesTokenCount'] ?? null;
+            $totalTokens = $body['usageMetadata']['totalTokenCount'] ?? null;
             $text = AiResponseSanitizer::clean($text);
+
+            if ($diagnostics) {
+                Log::info('Gemini Product Description diagnostic', [
+                    'model'                 => $this->model,
+                    'maxOutputTokens'       => $maxTokens,
+                    'temperature'           => $temperature,
+                    'http_status'           => $response->status(),
+                    'finishReason'          => $finishReason,
+                    'promptTokenCount'      => $promptTokens,
+                    'candidatesTokenCount'  => $candidateTokens,
+                    'totalTokenCount'       => $totalTokens,
+                    'raw_text_length'       => $rawTextLength,
+                    'sanitized_text_length' => mb_strlen($text),
+                ]);
+            }
 
             if ($text === '') {
                 // Check for a prompt-feedback block reason before generic message.
@@ -133,9 +169,9 @@ class GeminiProviderService implements AiProviderInterface
             // `totalTokenCount` is the sum of prompt + candidate tokens.
             // Separate prompt/candidate counts are available for finer-grained
             // cost attribution if needed in the future.
-            $promptTokens    = (int) ($body['usageMetadata']['promptTokenCount']     ?? 0);
-            $candidateTokens = (int) ($body['usageMetadata']['candidatesTokenCount'] ?? 0);
-            $tokensUsed      = (int) ($body['usageMetadata']['totalTokenCount']      ?? ($promptTokens + $candidateTokens));
+            $promptTokens    = (int) ($promptTokens ?? 0);
+            $candidateTokens = (int) ($candidateTokens ?? 0);
+            $tokensUsed      = (int) ($totalTokens ?? ($promptTokens + $candidateTokens));
 
             // Gemini 2.0 Flash pricing (per 1M tokens, as of 2026):
             //   Input:  $0.075 / 1M tokens
