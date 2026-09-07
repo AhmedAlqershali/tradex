@@ -60,8 +60,8 @@ PROMPT;
 
         $storeContext = $storeName ? "STORE NAME: {$storeName}" : 'STORE NAME: not provided';
         $userPrompt   = <<<PROMPT
-    Write a detailed, complete, useful reply in {$language} that preserves the
-    customer's intent and sounds natural for the situation.
+    Write a natural, professional customer-service reply in {$language} that
+    directly addresses the customer's message and preserves their intent.
 
     CUSTOMER MESSAGE (address this directly):
     {$context}

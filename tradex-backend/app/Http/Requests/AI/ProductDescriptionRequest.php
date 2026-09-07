@@ -14,7 +14,7 @@ class ProductDescriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'context'  => ['required', 'string', 'min:5', 'max:500'],
+            'context'  => ['required', 'string', 'not_regex:/^\s*$/', 'max:500'],
             'language' => ['nullable', 'string', 'max:50'],
         ];
     }
@@ -23,7 +23,7 @@ class ProductDescriptionRequest extends FormRequest
     {
         return [
             'context.required' => 'Product context is required (e.g. product name, category, key features).',
-            'context.min'      => 'Please provide at least 5 characters of product context.',
+            'context.not_regex' => 'Product context cannot be empty.',
             'context.max'      => 'Product context must not exceed 500 characters.',
         ];
     }

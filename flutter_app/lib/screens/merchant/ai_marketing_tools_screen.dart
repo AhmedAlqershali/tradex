@@ -188,7 +188,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     final tools = [
       (AiToolType.productDescription, l10n.productDescriptionTool, Icons.description_outlined),
       (AiToolType.instagramPost, l10n.marketingContentTool, Icons.campaign_outlined),
-      (AiToolType.hashtags, l10n.hashtagsTool, Icons.tag),
       (AiToolType.customerReply, l10n.customerReplyTool, Icons.reply_rounded),
     ];
     return SingleChildScrollView(
@@ -239,10 +238,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
         case AiToolType.instagramPost:
           if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateInstagramPost');
           result = await ai.generateInstagramPost(productName: prompt);
-          break;
-        case AiToolType.hashtags:
-          if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateHashtags');
-          result = await ai.generateHashtags(topic: prompt);
           break;
         case AiToolType.customerReply:
           if (kDebugMode) debugPrint('[AI_RUNTIME] controller method entered: generateCustomerReply');
@@ -332,7 +327,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
     final tools = [
       (AiToolType.productDescription, Icons.description_outlined, l10n.productDescriptionTool, AppColors.primary),
       (AiToolType.instagramPost, Icons.camera_alt_outlined, l10n.marketingContentTool, AppColors.orange),
-      (AiToolType.hashtags, Icons.tag, l10n.hashtagsTool, AppColors.teal),
       (AiToolType.customerReply, Icons.forum_outlined, l10n.customerReplyTool, AppColors.pink),
     ];
     return Directionality(
@@ -879,8 +873,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       case AiToolType.instagramPost:
         return Icons.camera_alt_outlined;
 
-      case AiToolType.hashtags:
-        return Icons.tag;
 
       case AiToolType.customerReply:
         return Icons.chat_bubble_outline;
@@ -895,8 +887,6 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
       case AiToolType.instagramPost:
         return AppColors.orange;
 
-      case AiToolType.hashtags:
-        return AppColors.teal;
 
       case AiToolType.customerReply:
         return AppColors.pink;
@@ -1047,8 +1037,6 @@ class _AiToolSheetState extends State<_AiToolSheet> {
       case AiToolType.instagramPost:
         return AppColors.orange;
 
-      case AiToolType.hashtags:
-        return AppColors.teal;
 
       case AiToolType.customerReply:
         return AppColors.pink;
@@ -1063,9 +1051,6 @@ class _AiToolSheetState extends State<_AiToolSheet> {
 
       case AiToolType.instagramPost:
         return l10n.aiGenerateSheetTitleInstagram;
-
-      case AiToolType.hashtags:
-        return l10n.aiGenerateSheetTitleHashtags;
 
       case AiToolType.customerReply:
         return l10n.aiGenerateSheetTitleCustomerReply;
@@ -1099,13 +1084,6 @@ class _AiToolSheetState extends State<_AiToolSheet> {
         case AiToolType.instagramPost:
           result = await ai.generateInstagramPost(
             productName: _field1.text.trim(),
-            category: _field2.text.trim(),
-          );
-          break;
-
-        case AiToolType.hashtags:
-          result = await ai.generateHashtags(
-            topic: _field1.text.trim(),
             category: _field2.text.trim(),
           );
           break;
@@ -1397,21 +1375,6 @@ class _AiToolSheetState extends State<_AiToolSheet> {
           _inputField(
             _field2,
             AppLocalizations.of(context).exampleCosmetics,
-          ),
-        ];
-
-      case AiToolType.hashtags:
-        return [
-          _label(AppLocalizations.of(context).productOrTopic),
-          _inputField(
-            _field1,
-            AppLocalizations.of(context).exampleWinterFashion,
-          ),
-          SizedBox(height: 14.h),
-          _label(AppLocalizations.of(context).optionalCategory),
-          _inputField(
-            _field2,
-            AppLocalizations.of(context).categoryExample,
           ),
         ];
 

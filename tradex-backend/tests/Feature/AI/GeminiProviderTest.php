@@ -95,6 +95,33 @@ class GeminiProviderTest extends TestCase
         $this->assertEquals(95, $result['tokens_used']);
     }
 
+    public function test_gemini_provider_preserves_all_text_parts(): void
+    {
+        config(['services.gemini.key' => 'fake-test-key']);
+
+        Http::fake([
+            '*' => Http::response([
+                'candidates' => [[
+                    'content' => [
+                        'parts' => [
+                            ['text' => 'Evaluate Input Facts vs. Constraints: internal reasoning', 'thought' => true],
+                            ['text' => "مقدمة المنتج وفائدته.\n\n"],
+                            ['text' => "تجربة استخدام عملية وقيمة مناسبة للعملاء.\n\n"],
+                            ['text' => 'صياغة ختامية مهنية تشجع على الشراء.'],
+                        ],
+                    ],
+                ]],
+            ], 200),
+        ]);
+
+        $result = (new GeminiProviderService())->complete('You are a copywriter.', 'Write a description.');
+
+        $this->assertSame(
+            "مقدمة المنتج وفائدته.\n\nتجربة استخدام عملية وقيمة مناسبة للعملاء.\n\nصياغة ختامية مهنية تشجع على الشراء.",
+            $result['result'],
+        );
+    }
+
     public function test_gemini_provider_throws_on_401_invalid_key(): void
     {
         config(['services.gemini.key' => 'invalid-key']);
@@ -250,7 +277,7 @@ class GeminiProviderTest extends TestCase
 
     public function test_marketing_content_uses_gemini_result(): void
     {
-        $this->mockProvider("Caption: Grab the deal!\nHashtags: #sale #deals\nTagline: Don't miss out.", 95);
+        $this->mockProvider("Discover the value of practical electronics chosen for modern daily needs.\n\nExplore a polished shopping experience and choose with confidence.", 95);
 
         $this->postJson('/api/v1/ai/marketing-content', [
             'context'  => 'Flash sale, 40% off all electronics',

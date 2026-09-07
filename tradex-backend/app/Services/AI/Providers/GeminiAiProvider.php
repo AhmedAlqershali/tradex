@@ -4,6 +4,7 @@ namespace App\Services\AI\Providers;
 
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Exceptions\AiProviderException;
+use App\Services\AI\AiResponseSanitizer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -66,6 +67,7 @@ class GeminiAiProvider implements AiProviderInterface
 
             $body = $response->json();
             $text = $body['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $text = is_string($text) ? AiResponseSanitizer::clean($text) : '';
 
             if ($text === '' || $text === null) {
                 $blockReason = $body['promptFeedback']['blockReason'] ?? null;

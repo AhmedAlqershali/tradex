@@ -51,7 +51,7 @@
 - ✅ Update order status: pending → confirmed → processing → completed / cancelled
 - ✅ Store settings: name, description, logo upload → PUT /merchant/stores/:id
 - ✅ Complete store profile at first registration
-- ✅ AI Marketing Tools: product description, Instagram post, hashtags, customer reply
+- ✅ AI Marketing Tools: product description, marketing content, customer reply
 - ✅ AI result in-memory history (newest-first, max 20 entries)
 - ✅ AiService implemented with real API calls to /ai/* endpoints
 

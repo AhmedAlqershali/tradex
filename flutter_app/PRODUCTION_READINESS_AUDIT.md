@@ -252,8 +252,7 @@ Only the **merchant** may change status. The customer sees it read-only.
 | Method | Endpoint | Purpose |
 |---|---|---|
 | `POST` | `/ai/product-description` | Generate product description from name + category |
-| `POST` | `/ai/marketing-post` | Generate social media post from product info |
-| `POST` | `/ai/hashtags` | Generate hashtags from product/post content |
+| `POST` | `/ai/marketing-content` | Generate marketing content from product info |
 | `POST` | `/ai/customer-reply` | Suggest reply to a customer message |
 | `GET` | `/ai/history` | Merchant's recent AI operations |
 

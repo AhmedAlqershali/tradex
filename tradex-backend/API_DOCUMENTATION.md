@@ -1013,7 +1013,7 @@ Generate a professional product description.
 
 ### `POST /ai/marketing-content` 🔐 (merchant)
 
-Generate a marketing caption, hashtags, and promotional tagline.
+Generate substantial marketing content for a product or campaign.
 
 **Body:**
 ```json
@@ -1034,7 +1034,7 @@ Generate a marketing caption, hashtags, and promotional tagline.
   "success": true,
   "message": "Marketing content generated successfully.",
   "data": {
-    "result":       "Caption: Summer vibes are here! ☀️\nHashtags: #SummerSale #Fashion #50Off\nTagline: Shop the season — before it's gone.",
+    "result":       "Discover practical value with a polished product experience designed for modern daily needs.\n\nExplore the benefits and choose with confidence.",
     "tokens_used":  180,
     "service_type": "marketing_content",
     "language":     "English"

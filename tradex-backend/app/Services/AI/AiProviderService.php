@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\Contracts\Services\AI\AiProviderInterface;
 use App\Exceptions\AiProviderException;
+use App\Services\AI\AiResponseSanitizer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -72,6 +73,7 @@ class AiProviderService implements AiProviderInterface
 
             $body             = $response->json();
             $result           = $body['choices'][0]['message']['content'] ?? '';
+            $result           = is_string($result) ? AiResponseSanitizer::clean($result) : '';
             $promptTokens     = (int) ($body['usage']['prompt_tokens']     ?? 0);
             $completionTokens = (int) ($body['usage']['completion_tokens'] ?? 0);
             $tokensUsed       = (int) ($body['usage']['total_tokens']      ?? ($promptTokens + $completionTokens));

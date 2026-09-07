@@ -110,8 +110,15 @@ class GeminiProviderService implements AiProviderInterface
 
             // Gemini may return an empty candidates array when content is
             // filtered by safety policies — treat that as a provider failure.
-            $text = $body['candidates'][0]['content']['parts'][0]['text'] ?? '';
-            $text = is_string($text) ? AiResponseSanitizer::clean($text) : '';
+            $parts = $body['candidates'][0]['content']['parts'] ?? [];
+            $text = is_array($parts)
+                ? collect($parts)
+                    ->reject(static fn ($part): bool => is_array($part) && ($part['thought'] ?? false) === true)
+                    ->pluck('text')
+                    ->filter(static fn ($part): bool => is_string($part) && trim($part) !== '')
+                    ->implode('')
+                : '';
+            $text = AiResponseSanitizer::clean($text);
 
             if ($text === '') {
                 // Check for a prompt-feedback block reason before generic message.

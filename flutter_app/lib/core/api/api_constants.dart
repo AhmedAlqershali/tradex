@@ -154,8 +154,7 @@ class ApiConstants {
 
   // ── AI ────────────────────────────────────────────────────────────────────────
   static const String aiProductDescription = '/ai/product-description';
-  // Backend combines caption + hashtags + tagline into one endpoint — there
-  // is no separate /ai/marketing-post or /ai/hashtags route.
+  // Marketing copy is returned as one clean text response.
   static const String aiMarketingContent = '/ai/marketing-content';
   static const String aiCustomerReply = '/ai/customer-reply';
   // No /ai/history endpoint exists; usage/limit info is at /ai/usage.

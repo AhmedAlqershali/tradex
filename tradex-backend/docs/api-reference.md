@@ -776,14 +776,13 @@ Generate a product description.
 
 ### `POST /ai/marketing-content`
 
-Generate a marketing campaign post.
+Generate substantial marketing content.
 
 **Body:**
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `context` | string | ✓ | 5–500 chars — product/campaign details |
 | `language` | string | — | |
-| `purpose` | string | — | `instagram` or `hashtags` (default: `instagram`) |
 
 **Response 200:** Same structure as product-description; `service_type` is `"marketing_content"`.
 

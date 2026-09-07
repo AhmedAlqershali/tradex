@@ -3,7 +3,6 @@
 enum AiToolType {
   productDescription,
   instagramPost,
-  hashtags,
   customerReply,
 }
 
@@ -13,9 +12,7 @@ extension AiToolTypeLabel on AiToolType {
       case AiToolType.productDescription:
         return 'وصف منتج';
       case AiToolType.instagramPost:
-        return 'بوست انستغرام';
-      case AiToolType.hashtags:
-        return 'هاشتاقات';
+        return 'محتوى تسويقي';
       case AiToolType.customerReply:
         return 'رد عميل';
     }
@@ -69,7 +66,6 @@ class AiResult {
     switch (tool) {
       case AiToolType.productDescription: return 'product_description';
       case AiToolType.instagramPost:      return 'instagram_post';
-      case AiToolType.hashtags:           return 'hashtags';
       case AiToolType.customerReply:      return 'customer_reply';
     }
   }
@@ -78,7 +74,6 @@ class AiResult {
     switch (value) {
       case 'product_description': return AiToolType.productDescription;
       case 'instagram_post':      return AiToolType.instagramPost;
-      case 'hashtags':            return AiToolType.hashtags;
       case 'customer_reply':      return AiToolType.customerReply;
       default:                    return AiToolType.productDescription;
     }

@@ -105,8 +105,9 @@ class AiGenerationTest extends TestCase
                 return str_contains($systemPrompt, 'short product idea or name')
                     && str_contains($systemPrompt, 'complete marketplace-ready description')
                     && str_contains($systemPrompt, 'Do not ask the merchant for more details')
+                    && str_contains($systemPrompt, 'Do not stop after the opening sentence')
                     && str_contains($userPrompt, 'جوال آيفون')
-                    && str_contains($userPrompt, 'complete, useful response');
+                    && str_contains($userPrompt, 'complete final listing in one response');
             })
             ->andReturn([
                 'result' => "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.",
@@ -120,6 +121,30 @@ class AiGenerationTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('data.language', 'Arabic')
             ->assertJsonPath('data.result', "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.");
+    }
+
+    public function test_another_short_product_idea_is_expanded_in_one_provider_request(): void
+    {
+        $token = $this->merchantToken();
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->withArgs(fn (string $systemPrompt, string $userPrompt): bool =>
+                str_contains($userPrompt, 'حذاء رياضي')
+                && str_contains($systemPrompt, 'Expand a short input into a complete marketplace-ready description'))
+            ->andReturn([
+                'result' => "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه.",
+                'tokens_used' => 190,
+            ]);
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'حذاء رياضي',
+            'language' => 'Arabic',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.language', 'Arabic')
+            ->assertJsonPath('data.result', "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه.");
     }
 
     public function test_product_description_records_usage(): void
@@ -158,15 +183,17 @@ class AiGenerationTest extends TestCase
             ->assertJsonStructure(['errors' => ['context']]);
     }
 
-    public function test_product_description_context_min_length(): void
+    public function test_short_product_description_context_is_valid(): void
     {
         $token = $this->merchantToken();
 
+        $this->mockProvider('وصف كامل لمنتج جوال مناسب للاستخدام اليومي.', 40);
+
         $this->postJson('/api/v1/ai/product-description', [
-            'context' => 'abc',  // 3 chars, min is 5
+            'context' => 'abc',
         ], $this->headers($token))
-            ->assertStatus(422)
-            ->assertJsonPath('success', false);
+            ->assertStatus(200)
+            ->assertJsonPath('success', true);
     }
 
     public function test_product_description_context_max_length(): void
@@ -187,7 +214,7 @@ class AiGenerationTest extends TestCase
     public function test_merchant_can_generate_marketing_content(): void
     {
         $token = $this->merchantToken();
-        $this->mockProvider("Caption: Summer sale!\nHashtags: #sale #summer\nTagline: Shop now.", 200);
+        $this->mockProvider("Discover practical value and a polished shopping experience with our electronics collection.\n\nChoose a product that fits your daily needs and enjoy a confident, professional purchase experience.", 200);
 
         $this->postJson('/api/v1/ai/marketing-content', [
             'context'  => 'Summer sale on all clothing items, 50% off this weekend',
@@ -206,6 +233,27 @@ class AiGenerationTest extends TestCase
             ->assertStatus(422)
             ->assertJsonPath('success', false)
             ->assertJsonStructure(['errors' => ['context']]);
+    }
+
+    public function test_short_marketing_idea_returns_substantial_copy_in_one_request(): void
+    {
+        $token = $this->merchantToken();
+        $marketingCopy = "هاتف آيفون بحضور أنيق وتجربة مناسبة للحياة اليومية.\n\nيجمع هذا المنتج بين القيمة العملية والانطباع العصري، ويساعد المستخدم على إنجاز تواصله ومهامه اليومية بسهولة. اختيار مناسب لمن يبحث عن منتج موثوق في استخداماته العامة، مع تجربة شراء تستحق الاهتمام.";
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->withArgs(fn (string $systemPrompt, string $userPrompt): bool =>
+                str_contains($userPrompt, 'جوال آيفون')
+                && str_contains($systemPrompt, 'substantial marketing copy'))
+            ->andReturn(['result' => $marketingCopy, 'tokens_used' => 170]);
+
+        $this->postJson('/api/v1/ai/marketing-content', [
+            'context' => 'جوال آيفون',
+            'language' => 'Arabic',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.result', $marketingCopy);
     }
 
     // =========================================================================
@@ -235,6 +283,27 @@ class AiGenerationTest extends TestCase
             ->assertStatus(422)
             ->assertJsonPath('success', false)
             ->assertJsonStructure(['errors' => ['context']]);
+    }
+
+    public function test_short_customer_message_returns_a_natural_reply_in_one_request(): void
+    {
+        $token = $this->merchantToken();
+        $reply = 'أهلاً بك، شكرًا لتواصلك معنا. سأتحقق من حالة توفر الجوال وأعود إليك بالمعلومة المؤكدة. هل تقصد إصدارًا أو لونًا محددًا؟';
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->withArgs(fn (string $systemPrompt, string $userPrompt): bool =>
+                str_contains($userPrompt, 'هل الجوال متوفر؟')
+                && str_contains($systemPrompt, 'customer-care representative'))
+            ->andReturn(['result' => $reply, 'tokens_used' => 95]);
+
+        $this->postJson('/api/v1/ai/customer-reply', [
+            'context' => 'هل الجوال متوفر؟',
+            'language' => 'Arabic',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.result', $reply);
     }
 
     public function test_customer_reply_context_max_1000_chars(): void

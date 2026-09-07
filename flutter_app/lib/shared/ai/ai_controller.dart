@@ -13,18 +13,10 @@ import 'ai_result_model.dart';
 // Singleton controller for all AI generation features. Calls the real
 // backend AI endpoints:
 //   POST /ai/product-description  { context, language }
-//   POST /ai/marketing-content    { context, language, purpose } — covers
-//                                    both the Instagram-post and hashtags tools;
-//                                    the backend returns one formatted block
-//                                    ("Caption: ...\nHashtags: ...\n
-//                                    Tagline: ..."), parsed client-side.
+//   POST /ai/marketing-content    { context, language } — generates marketing
+//                                    content for the selected product.
 //   POST /ai/customer-reply       { context, language, store_name }
 //
-// There is no backend endpoint for the hashtags tool on its own — it shares
-// /ai/marketing-content with the Instagram-post tool. Requesting both
-// consecutively calls the backend twice (each generation is
-// non-deterministic anyway, so the two calls needn't return matching
-// hashtags/caption pairs).
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AiRuntimeFailure implements Exception {
@@ -114,36 +106,12 @@ class AiController {
     return _generate(
       tool: AiToolType.instagramPost,
       prompt: context,
-      request: () async {
+      request: () {
         if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
-        return _extractCaption(await _post(
+        return _post(
           ApiConstants.aiMarketingContent,
           context,
-          purpose: 'instagram',
-        ));
-      },
-    );
-  }
-
-  /// Generates a list of relevant hashtags for the given topic.
-  Future<AiResult> generateHashtags({
-    required String topic,
-    String category = '',
-  }) {
-    final context = [
-      topic,
-      if (category.isNotEmpty) 'الفئة: $category',
-    ].join(' — ');
-    return _generate(
-      tool: AiToolType.hashtags,
-      prompt: context,
-      request: () async {
-        if (kDebugMode) debugPrint('[AI_RUNTIME] calling _post');
-        return _extractHashtags(await _post(
-          ApiConstants.aiMarketingContent,
-          context,
-          purpose: 'hashtags',
-        ));
+        );
       },
     );
   }
@@ -225,7 +193,6 @@ class AiController {
     String path,
     String context, {
     String? storeName,
-    String? purpose,
   }) async {
     if (kDebugMode) debugPrint('[AI_RUNTIME] _post entered path=$path');
     final trimmed = context.trim();
@@ -241,7 +208,6 @@ class AiController {
         data: {
           'context': safeContext,
           'language': _detectLanguage(safeContext),
-          if (purpose != null) 'purpose': purpose,
           if (storeName != null && storeName.isNotEmpty) 'store_name': storeName,
         },
       );
@@ -280,65 +246,27 @@ class AiController {
 
   String _cleanResponse(String value) {
     var text = value.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
-    final jsonMatch = RegExp(r'^\s*\{.*\}\s*$', dotAll: true).firstMatch(text);
+    text = text.replaceAll(RegExp(r'^```(?:json|text|markdown)?\s*|\s*```$', caseSensitive: false), '');
+    final jsonMatch = RegExp(r'\{.*\}', dotAll: true).firstMatch(text);
     if (jsonMatch != null) {
       try {
-        final decoded = jsonDecode(text);
+        final decoded = jsonDecode(jsonMatch.group(0)!);
         if (decoded is Map<String, dynamic>) {
-          final nested = decoded['result'] ?? decoded['content'] ?? decoded['text'];
+          final nested = decoded['result'] ?? decoded['content'] ?? decoded['text'] ?? decoded['output'];
           text = nested is String ? nested.trim() : '';
-        } else {
-          text = '';
         }
       } catch (_) {
         // Keep the provider text when it is not valid JSON.
       }
     }
-    text = text.replaceAll(RegExp(r'^```(?:json|text|markdown)?\s*|\s*```$', caseSensitive: false), '');
     text = text.replaceAll(RegExp(r'\(\s*in\s+(?:Arabic|English)\s*\)', caseSensitive: false), '');
     text = text.replaceAll(RegExp(r'^\s*(?:final\s+answer|answer|output|response)\s*:\s*', caseSensitive: false, multiLine: true), '');
     final lines = text.split('\n').where((line) {
       return !RegExp(r'^\s*(?:system|developer|internal|user)\s+(?:prompt|instructions?)\s*:', caseSensitive: false).hasMatch(line) &&
-          !RegExp(r'^\s*(?:prompt|instructions?)\s*:\s*', caseSensitive: false).hasMatch(line);
+          !RegExp(r'^\s*(?:prompt|instructions?)\s*:\s*', caseSensitive: false).hasMatch(line) &&
+          !RegExp(r'^\s*(?:evaluate input facts(?:\s+vs\.?\s+constraints)?|analyze input|constraints|system prompt|developer instruction|internal reasoning)\s*:?\s*', caseSensitive: false).hasMatch(line);
     });
     return lines.join('\n').trim();
   }
 
-  // ── Marketing-content parsing ─────────────────────────────────────────────────
-  //
-  // The backend returns one block formatted as:
-  //   Caption: <caption text>
-  //   Hashtags: <hashtag1> <hashtag2> ...
-  //   Tagline: <tagline text>
-  // Parsed defensively — if the model doesn't follow the format exactly, the
-  // whole block is returned rather than an empty string.
-
-  String _extractCaption(String raw) {
-    final caption = _extractLabelled(raw, 'Caption', nextLabels: const ['Hashtags', 'Tagline']);
-    final tagline = _extractLabelled(raw, 'Tagline');
-    if (caption == null && tagline == null) return raw;
-    return [caption, tagline]
-        .where((s) => s != null && s.isNotEmpty)
-        .join('\n\n');
-  }
-
-  String _extractHashtags(String raw) {
-    final hashtags = _extractLabelled(raw, 'Hashtags');
-    if (hashtags != null && hashtags.isNotEmpty) return hashtags;
-    // Fallback: pull any #word tokens out of the raw text.
-    final matches = RegExp(r'#\S+').allMatches(raw).map((m) => m.group(0)!);
-    return matches.isNotEmpty ? matches.join(' ') : raw;
-  }
-
-  String? _extractLabelled(String raw, String label, {List<String> nextLabels = const []}) {
-    if (nextLabels.isEmpty) {
-      return RegExp('^\\s*$label:\\s*([\\s\\S]*)', multiLine: true)
-          .firstMatch(raw)
-          ?.group(1)
-          ?.trim();
-    }
-    final boundary = '(?=^\\s*(?:${nextLabels.join('|')}):)';
-    final match = RegExp('^\\s*$label:\\s*(.*?)$boundary', multiLine: true, dotAll: true).firstMatch(raw);
-    return match?.group(1)?.trim();
-  }
 }

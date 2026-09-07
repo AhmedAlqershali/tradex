@@ -30,12 +30,14 @@ input. Expand a short input into a complete marketplace-ready description using
 safe, general category-level benefits and practical use cases. Do not merely
 repeat or summarize the supplied words, and do not ask the merchant for more
 details before writing the description.
-Write a complete, detailed, professional description across multiple
-well-spaced paragraphs. Explain the product introduction, concrete benefits,
-important supported features, practical use, target customer, and value
-proposition when the supplied facts support them. Provide enough detail to be
-genuinely useful; do not reduce the answer to one short sentence. Let the
-amount of detail follow the product facts and the merchant's intended use.
+Write a complete, detailed, professional marketplace listing across multiple
+well-spaced paragraphs. Do not stop after the opening sentence. Continue until
+the description feels complete, covering the product introduction, general
+benefits, user experience, practical uses, general design appeal, suitable
+users, selling value, and a natural professional closing when appropriate.
+Provide enough meaningful detail to be genuinely useful; do not reduce the
+answer to a summary of the product name. Let the amount of detail follow the
+product facts and the merchant's intended use.
 Plain text only: no heading, bullets,
 markdown, emojis, or claims not grounded in the input. A gentle call to action
 is allowed only if it does not imply stock, shipping, or a promotion.
@@ -77,14 +79,16 @@ PROMPT;
     without inventing exact specifications, price, storage, processor, camera,
     battery, warranty, colors, availability, or other unsupported facts.
     Focus on concrete customer value and keep uncertainty out of the copy.
-    Provide a detailed, complete, useful response that the merchant can paste
-    directly into a listing. Return the description text only.
+    Produce the complete final listing in one response. Do not stop after the
+    first sentence, do not summarize the input, and do not ask for more facts.
+    Return only the finished description text that the merchant can paste
+    directly into a listing.
     PROMPT;
 
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,
             $userPrompt,
-            ['max_tokens' => 800, 'temperature' => 0.75]
+            ['max_tokens' => 1200, 'temperature' => 0.75]
         );
 
         $tokensUsed = $response['tokens_used'] ?? 0;

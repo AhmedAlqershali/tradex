@@ -190,8 +190,8 @@ Replaced with a no-op placeholder test. Real BLoC unit tests belong in Task #4 w
 
 ---
 
-### AI Tools (Merchant) — Intentionally mocked 🟡
-`AiController` returns Arabic mock responses via `_mockGenerate()` with a simulated delay. This is intentional pending a real AI backend (Task #2). All AI endpoints are defined in `ApiConstants` (`/ai/product-description`, `/ai/marketing-post`, `/ai/hashtags`, `/ai/customer-reply`), ready to be wired.
+### AI Tools (Merchant)
+`AiController` calls the real AI endpoints in `ApiConstants` for product descriptions, marketing content, and customer replies.
 
 ---
 

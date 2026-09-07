@@ -14,7 +14,7 @@ class CustomerReplyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'context'    => ['required', 'string', 'min:5', 'max:1000'],
+            'context'    => ['required', 'string', 'not_regex:/^\s*$/', 'max:1000'],
             'language'   => ['nullable', 'string', 'max:50'],
             'store_name' => ['nullable', 'string', 'max:255'],
         ];
@@ -24,7 +24,7 @@ class CustomerReplyRequest extends FormRequest
     {
         return [
             'context.required' => 'Customer message context is required.',
-            'context.min'      => 'Please provide at least 5 characters of customer message context.',
+            'context.not_regex' => 'Customer message cannot be empty.',
             'context.max'      => 'Customer message must not exceed 1000 characters.',
         ];
     }

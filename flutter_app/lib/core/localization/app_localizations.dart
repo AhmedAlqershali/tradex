@@ -317,7 +317,6 @@ class AppLocalizations {
   String get exampleWirelessHeadphones => _value('exampleWirelessHeadphones');
   String get examplePerfume => _value('examplePerfume');
   String get exampleCosmetics => _value('exampleCosmetics');
-  String get exampleWinterFashion => _value('exampleWinterFashion');
   String get exampleCustomerMessage => _value('exampleCustomerMessage');
   String get minutesAgo => _value('minutesAgo');
   String get hoursAgo => _value('hoursAgo');
@@ -499,7 +498,6 @@ class AppLocalizations {
   String get now => _value('now');
   String get productDescriptionTool => _value('productDescriptionTool');
   String get marketingContentTool => _value('marketingContentTool');
-  String get hashtagsTool => _value('hashtagsTool');
   String get customerReplyTool => _value('customerReplyTool');
   String get aiPromptPlaceholder => _value('aiPromptPlaceholder');
   String get aiGenerateButton => _value('aiGenerateButton');
@@ -517,7 +515,6 @@ class AppLocalizations {
   String get aiNoHistory => _value('aiNoHistory');
   String get aiGenerateSheetTitleProduct => _value('aiGenerateSheetTitleProduct');
   String get aiGenerateSheetTitleInstagram => _value('aiGenerateSheetTitleInstagram');
-  String get aiGenerateSheetTitleHashtags => _value('aiGenerateSheetTitleHashtags');
   String get aiGenerateSheetTitleCustomerReply => _value('aiGenerateSheetTitleCustomerReply');
   String get aiStageLabel => _value('aiStageLabel');
   String get aiStageUnknown => _value('aiStageUnknown');
@@ -706,7 +703,7 @@ class AppLocalizations {
       'aboutForMerchants': 'للتجار',
       'aboutForMerchantsDescription': 'أدر متجرك ومنتجاتك وطلباتك، وتواصل مع العملاء من خلال أدوات التاجر المتاحة.',
       'aboutAiTools': 'أدوات مدعومة بالذكاء الاصطناعي',
-      'aboutAiToolsDescription': 'أنشئ أوصاف المنتجات والمحتوى التسويقي والهاشتاقات، وساعدك في صياغة ردود العملاء.',
+      'aboutAiToolsDescription': 'أنشئ أوصاف المنتجات والمحتوى التسويقي، وساعدك في صياغة ردود العملاء.',
       'aboutCompleteExperience': 'تجربة تسوق متكاملة',
       'aboutCompleteExperienceDescription': 'من اكتشاف المنتجات والمتاجر إلى إتمام الطلب ومتابعة آخر تحديثاته.',
       'aboutHowItWorks': 'كيف تعمل Tradex؟',
@@ -887,7 +884,6 @@ class AppLocalizations {
       'exampleWirelessHeadphones': 'مثال: سماعات لاسلكية بلوتوث',
       'examplePerfume': 'مثال: عطر ليلة الياسمين',
       'exampleCosmetics': 'مثال: كوزمتكس',
-      'exampleWinterFashion': 'مثال: ملابس نسائية شتوية',
       'exampleCustomerMessage': 'الصق رسالة العميل هنا...',
       'minutesAgo': 'قبل',
       'hoursAgo': 'قبل',
@@ -1052,7 +1048,6 @@ class AppLocalizations {
       'now': 'الآن',
       'productDescriptionTool': 'وصف المنتج',
       'marketingContentTool': 'محتوى تسويقي',
-      'hashtagsTool': 'هاشتاقات',
       'customerReplyTool': 'رد العميل',
       'aiPromptPlaceholder': 'كيف يمكنني مساعدتك؟',
       'aiGenerateButton': 'توليد باستخدام Tradex AI',
@@ -1070,7 +1065,6 @@ class AppLocalizations {
       'aiNoHistory': 'لا توجد عمليات محفوظة بعد.',
       'aiGenerateSheetTitleProduct': 'كتابة وصف منتج',
       'aiGenerateSheetTitleInstagram': 'إنشاء بوست انستغرام',
-      'aiGenerateSheetTitleHashtags': 'توليد هاشتاقات',
       'aiGenerateSheetTitleCustomerReply': 'كتابة رد للعميل',
       'aiStageLabel': 'المرحلة',
       'aiStageUnknown': 'غير محددة',
@@ -1276,7 +1270,7 @@ class AppLocalizations {
       'aboutForMerchants': 'For merchants',
       'aboutForMerchantsDescription': 'Manage your store, products, and orders, and connect with customers through the available merchant tools.',
       'aboutAiTools': 'AI-powered tools',
-      'aboutAiToolsDescription': 'Create product descriptions, marketing content, and hashtags, and get help drafting customer replies.',
+      'aboutAiToolsDescription': 'Create product descriptions, marketing content, and help drafting customer replies.',
       'aboutCompleteExperience': 'A complete shopping experience',
       'aboutCompleteExperienceDescription': 'From discovering products and stores to placing an order and following its latest updates.',
       'aboutHowItWorks': 'How Tradex works',
@@ -1360,7 +1354,6 @@ class AppLocalizations {
       'generateImage': 'Generate',
       'productDescriptionTool': 'Product description',
       'marketingContentTool': 'Marketing content',
-      'hashtagsTool': 'Hashtags',
       'customerReplyTool': 'Customer reply',
       'aiPromptPlaceholder': 'How can I help you?',
       'aiGenerateButton': 'Generate with Tradex AI',
@@ -1378,7 +1371,6 @@ class AppLocalizations {
       'aiNoHistory': 'No saved operations yet.',
       'aiGenerateSheetTitleProduct': 'Write product description',
       'aiGenerateSheetTitleInstagram': 'Create Instagram post',
-      'aiGenerateSheetTitleHashtags': 'Generate hashtags',
       'aiGenerateSheetTitleCustomerReply': 'Write customer reply',
       'aiStageLabel': 'Stage',
       'aiStageUnknown': 'Unknown',
