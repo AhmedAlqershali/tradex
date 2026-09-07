@@ -16,32 +16,24 @@ use App\Models\AiUsage;
 class ProductDescriptionService implements AiServiceInterface
 {
     private const SERVICE_TYPE = AiUsage::TYPE_PRODUCT_DESCRIPTION;
-    private const MIN_SUBSTANTIVE_LENGTH = 120;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-You are a meticulous e-commerce copywriter. Create a useful product description
-from the supplied product facts only. Treat the input as the complete source of
-truth: never invent a price, discount, specification, measurement, certification,
-guarantee, availability, delivery detail, medical claim, or performance claim.
-Explain the real features and the buyer benefits they support. If a fact is
-missing, write around it rather than guessing. Use the requested language as a
-native speaker would, with natural local terminology and no language mixing.
-The merchant may provide only a short product idea or name. Treat any short
-input as an initial product idea and the available facts, never as an existing
-description. Expand it into a complete marketplace-ready description using
-safe, general category-level benefits and practical use cases. Expand a short input
-into a complete marketplace-ready description. Do not merely
-repeat or summarize the supplied words, and do not ask the merchant for more
-details before writing the description.
-For a short idea, a one-sentence response is invalid. Write several meaningful,
-well-spaced paragraphs: introduce the product and its general appeal, explain
-key customer benefits, describe the everyday use experience, identify suitable
-customers and use cases, and finish with a persuasive professional closing.
-Give each paragraph useful substance while keeping every claim general when
-the input has no supporting exact fact.
-Plain text only: no heading, bullets,
-markdown, emojis, or claims not grounded in the input. A gentle call to action
-is allowed only if it does not imply stock, shipping, or a promotion.
+You are a professional e-commerce copywriter. Write one useful, natural, detailed
+product description from the supplied product information.
+
+Use the supplied information as the complete source of truth. Do not invent or
+assume specifications, features, materials, dimensions, prices, certifications,
+guarantees, availability, performance claims, or other facts that were not
+provided. When the information is brief, develop the description naturally by
+explaining only safe, general benefits, everyday use, and suitable use cases that
+can be reasonably inferred from the product information. Do not simply repeat
+the product name and do not stop at a shallow one-sentence introduction.
+
+Write in the requested language as a native speaker. Use clear, connected
+paragraphs with enough substance for a marketplace listing, while keeping every
+claim factual and appropriately general. Return only the finished description in
+plain text, without headings, bullets, markdown, labels, emojis, or commentary
+about the task.
 PROMPT;
 
     public function __construct(
@@ -66,27 +58,12 @@ PROMPT;
         $this->usageService->checkLimit($user, self::SERVICE_TYPE);
 
         $userPrompt = <<<PROMPT
-    Write only the final product description in {$language}, as if it will be
-    pasted directly into a marketplace listing. Do not explain the task or
-    your process. Do not include a heading, labels such as "Goal:" or "Task:",
-    language notes such as "(in Arabic)", markdown, or any meta-commentary.
+    Requested language: {$language}
 
-    PRODUCT FACTS (use only these facts):
+    Product information:
     {$context}
 
-    Treat the supplied facts as the full source of truth. When the input is
-    only a product name, enrich the copy with natural general-purpose marketing
-    language, user experience, suitable users, practical use, and value
-    without inventing exact specifications, price, storage, processor, camera,
-    battery, warranty, colors, availability, or other unsupported facts.
-    Focus on concrete customer value and keep uncertainty out of the copy.
-    Produce the complete final listing in one response. Any short product idea
-    must become a substantial multi-paragraph description, not a one-sentence
-    restatement of the input. Do not stop after the opening sentence or first
-    paragraph, do not
-    summarize the input, and do not ask for more facts.
-    Return only the finished description text that the merchant can paste
-    directly into a listing.
+    Return only the finished product description.
     PROMPT;
 
         $response = $this->provider->complete(
@@ -94,23 +71,6 @@ PROMPT;
             $userPrompt,
             ['max_tokens' => 1200, 'temperature' => 0.75]
         );
-
-        if ($this->isInsufficient($response['result'] ?? '')) {
-            $response = $this->provider->complete(
-                self::SYSTEM_PROMPT,
-                $userPrompt . <<<'PROMPT'
-
-
-    EXPANSION REQUIREMENT: The previous draft was insufficiently short. Rewrite
-    it as a complete, detailed marketplace description with at least three
-    useful paragraphs covering the product's general appeal, customer benefits,
-    everyday use, suitable users or use cases, and a professional closing.
-    Keep every statement general and factual when the supplied facts do not
-    provide exact specifications. Return only the rewritten description.
-    PROMPT,
-                ['max_tokens' => 1200, 'temperature' => 0.75]
-            );
-        }
 
         $tokensUsed = $response['tokens_used'] ?? 0;
         $costUsd    = $response['cost_usd']    ?? 0.0;
@@ -133,13 +93,5 @@ PROMPT;
             'service_type' => self::SERVICE_TYPE,
             'language'     => $language,
         ];
-    }
-
-    private function isInsufficient(string $result): bool
-    {
-        $text = trim($result);
-
-        return mb_strlen($text) < self::MIN_SUBSTANTIVE_LENGTH
-            || substr_count($text, "\n\n") < 2;
     }
 }
