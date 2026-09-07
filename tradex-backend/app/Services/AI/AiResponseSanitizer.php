@@ -13,7 +13,7 @@ final class AiResponseSanitizer
         try {
             $decoded = json_decode($text, true, 16, JSON_THROW_ON_ERROR);
             if (is_array($decoded)) {
-                $text = self::extractText($decoded) ?? $text;
+                $text = self::extractText($decoded) ?? '';
             }
         } catch (JsonException) {
             // The provider normally returns plain text.

@@ -286,7 +286,9 @@ class AiController {
         final decoded = jsonDecode(text);
         if (decoded is Map<String, dynamic>) {
           final nested = decoded['result'] ?? decoded['content'] ?? decoded['text'];
-          if (nested is String) text = nested.trim();
+          text = nested is String ? nested.trim() : '';
+        } else {
+          text = '';
         }
       } catch (_) {
         // Keep the provider text when it is not valid JSON.

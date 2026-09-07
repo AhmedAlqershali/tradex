@@ -89,7 +89,10 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text('Tradex AI', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                ),
                 SizedBox(height: 2.h),
                 Text(
                   l10n.aiSmartWorkspaceSubtitle,
@@ -181,11 +184,12 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
   }
 
   Widget _buildToolSelector() {
+    final l10n = AppLocalizations.of(context);
     final tools = [
-      (AiToolType.productDescription, AppLocalizations.of(context).productDescriptionTool, Icons.description_outlined),
-      (AiToolType.instagramPost, AppLocalizations.of(context).marketingContentTool, Icons.campaign_outlined),
-      (AiToolType.hashtags, AppLocalizations.of(context).hashtagsTool, Icons.tag),
-      (AiToolType.customerReply, AppLocalizations.of(context).customerReplyTool, Icons.reply_rounded),
+      (AiToolType.productDescription, l10n.productDescriptionTool, Icons.description_outlined),
+      (AiToolType.instagramPost, l10n.marketingContentTool, Icons.campaign_outlined),
+      (AiToolType.hashtags, l10n.hashtagsTool, Icons.tag),
+      (AiToolType.customerReply, l10n.customerReplyTool, Icons.reply_rounded),
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -194,15 +198,17 @@ class _DashboardScreenState extends State<AlMarketingToolsScreen> {
         children: tools.map((item) {
           final selected = _selectedTool == item.$1;
           return Padding(
-            padding: EdgeInsetsDirectional.only(start: 8.w),
+            padding: EdgeInsetsDirectional.only(start: 8.w, end: 2.w),
             child: ChoiceChip(
               selected: selected,
               label: Text(item.$2, maxLines: 1, overflow: TextOverflow.ellipsis),
               avatar: Icon(item.$3, size: 16.sp, color: selected ? AppColors.primary : Colors.white70),
               labelStyle: TextStyle(color: selected ? AppColors.primaryDark : Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w700),
               selectedColor: Colors.white,
-              backgroundColor: Colors.white.withValues(alpha: 0.13),
-              side: BorderSide(color: selected ? Colors.white : Colors.white24),
+              backgroundColor: const Color(0x334A43A8),
+              side: BorderSide(color: selected ? Colors.white : Colors.white54),
+              checkmarkColor: AppColors.primary,
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               onSelected: (_) => setState(() => _selectedTool = item.$1),
             ),
           );

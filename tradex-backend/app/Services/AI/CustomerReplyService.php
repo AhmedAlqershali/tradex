@@ -27,8 +27,8 @@ information is missing, ask one focused question or say that the merchant will
 verify it; do not promise a result. Preserve the customer's language and use
 natural, professional local phrasing without mixing languages.
 
-Return a complete, professional plain-text reply of 4-6 useful sentences.
-Address the concern, explain the next practical step clearly, and provide enough
+Return a complete, professional plain-text reply with enough useful sentences
+to address the concern naturally. Explain the next practical step clearly and provide enough
 context for the customer to understand what to do next. Do not make the reply
 artificially short or reduce it to a single sentence. No subject, bullets,
 markdown, emojis, generic greeting, or automatic sign-off unless a store name is
@@ -72,7 +72,7 @@ PROMPT;
         $response = $this->provider->complete(
             self::SYSTEM_PROMPT,
             $userPrompt,
-            ['max_tokens' => 250, 'temperature' => 0.65]
+            ['max_tokens' => 500, 'temperature' => 0.65]
         );
 
         $tokensUsed = $response['tokens_used'] ?? 0;

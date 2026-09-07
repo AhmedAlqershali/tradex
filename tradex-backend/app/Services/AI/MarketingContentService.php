@@ -25,7 +25,7 @@ language natively and do not mix languages. Avoid generic filler, hype cliches,
 and excessive emojis; use no emoji unless the facts and tone clearly support it.
 
 Return a complete, publish-ready package with these clearly labelled sections.
-Use two short paragraphs for the caption (80-120 words) with a specific hook,
+Use multiple useful paragraphs for the caption with a specific hook,
 real benefits, practical context, and a natural call to action. Provide 8-12
 distinct relevant hashtags and one memorable tagline. Do not compress the
 answer into a single short line. Keep each section useful and grounded in the
@@ -82,7 +82,7 @@ PROMPT;
         $response = $this->provider->complete(
             $systemPrompt,
             $userPrompt,
-            ['max_tokens' => 400, 'temperature' => 0.80]
+            ['max_tokens' => 700, 'temperature' => 0.80]
         );
 
         $tokensUsed = $response['tokens_used'] ?? 0;
