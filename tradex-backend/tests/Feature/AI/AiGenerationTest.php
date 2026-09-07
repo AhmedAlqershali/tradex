@@ -57,7 +57,7 @@ class AiGenerationTest extends TestCase
     public function test_merchant_can_generate_product_description(): void
     {
         $token = $this->merchantToken();
-        $this->mockProvider('A high-quality wireless headphone with superior sound.', 120);
+        $this->mockProvider("A high-quality wireless headphone with superior sound and a comfortable listening experience for everyday use.\n\nIts practical design supports convenient use at home, work, or while travelling, helping customers enjoy their audio content with ease.\n\nA suitable choice for listeners looking for a dependable addition to their daily routine.", 120);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context'  => 'Sony WH-1000XM5, noise-cancelling headphones, electronics category',
@@ -77,21 +77,24 @@ class AiGenerationTest extends TestCase
 
         $this->mock(AiProviderInterface::class)
             ->shouldReceive('complete')
-            ->once()
+            ->twice()
             ->withArgs(function (string $systemPrompt, string $userPrompt): bool {
                 return str_contains($systemPrompt, 'Plain text only')
                     && str_contains($userPrompt, 'final product description in Arabic')
                     && str_contains($userPrompt, 'Return only the finished description text')
                         && str_contains($userPrompt, 'كرسي مكتب مريح');
             })
-            ->andReturn(['result' => 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.', 'tokens_used' => 40]);
+            ->andReturn(
+                ['result' => 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.', 'tokens_used' => 40],
+                ['result' => "هاتف ذكي حديث بتصميم أنيق وتجربة استخدام عملية تناسب الاحتياجات اليومية.\n\nيوفر حضوراً عصرياً وقيمة عملية عامة لمن يبحث عن منتج سهل الدمج في روتينه، دون افتراض مواصفات غير مذكورة.\n\nاختيار مناسب للمستخدم الذي يقدّر الراحة والبساطة في استخدامه اليومي.", 'tokens_used' => 80],
+            );
 
         $this->postJson('/api/v1/ai/product-description', [
             'context'  => 'كرسي مكتب مريح',
             'language' => 'Arabic',
         ], $this->headers($token))
             ->assertStatus(200)
-            ->assertJsonPath('data.result', 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.');
+            ->assertJsonPath('data.result', "هاتف ذكي حديث بتصميم أنيق وتجربة استخدام عملية تناسب الاحتياجات اليومية.\n\nيوفر حضوراً عصرياً وقيمة عملية عامة لمن يبحث عن منتج سهل الدمج في روتينه، دون افتراض مواصفات غير مذكورة.\n\nاختيار مناسب للمستخدم الذي يقدّر الراحة والبساطة في استخدامه اليومي.");
     }
 
     public function test_short_product_name_is_valid_and_prompt_requests_full_expansion(): void
@@ -102,16 +105,11 @@ class AiGenerationTest extends TestCase
             ->shouldReceive('complete')
             ->once()
             ->withArgs(function (string $systemPrompt, string $userPrompt): bool {
-                return str_contains($systemPrompt, 'short product idea or name')
-                    && str_contains($systemPrompt, 'complete marketplace-ready description')
-                    && str_contains($systemPrompt, 'Do not ask the merchant for more details')
-                    && str_contains($systemPrompt, 'Do not stop after the opening sentence')
-                        && str_contains($userPrompt, 'حقيبة سفر عملية')
-                    && str_contains($userPrompt, 'complete final listing in one response');
+                return str_contains($userPrompt, 'حقيبة سفر عملية');
             })
-            ->andReturn([
-                'result' => "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.",
-                'tokens_used' => 180,
+                ->andReturn([
+                    'result' => "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.\n\nاختيار مناسب لمن يبحث عن تجربة تنقل عملية وواضحة تساعده على ترتيب احتياجاته والاستعداد لرحلاته بسهولة.",
+                    'tokens_used' => 180,
             ]);
 
         $this->postJson('/api/v1/ai/product-description', [
@@ -120,7 +118,7 @@ class AiGenerationTest extends TestCase
         ], $this->headers($token))
             ->assertStatus(200)
             ->assertJsonPath('data.language', 'Arabic')
-            ->assertJsonPath('data.result', "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.");
+            ->assertJsonPath('data.result', "حقيبة سفر عملية بتصميم أنيق وتجربة استخدام مناسبة للتنقل اليومي.\n\nتوفر حضوراً منظماً ومرونة في حمل الاحتياجات، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.\n\nاختيار مناسب لمن يبحث عن تجربة تنقل عملية وواضحة تساعده على ترتيب احتياجاته والاستعداد لرحلاته بسهولة.");
     }
 
     public function test_another_short_product_idea_is_expanded_in_one_provider_request(): void
@@ -132,9 +130,9 @@ class AiGenerationTest extends TestCase
             ->once()
             ->withArgs(fn (string $systemPrompt, string $userPrompt): bool =>
                 str_contains($userPrompt, 'حذاء رياضي')
-                && str_contains($systemPrompt, 'Expand a short input into a complete marketplace-ready description'))
+                && str_contains($systemPrompt, 'Expand a short input'))
             ->andReturn([
-                'result' => "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه.",
+                'result' => "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه، مع تجربة استخدام واضحة ومريحة تدعم الحركة وتنسجم مع الروتين اليومي.",
                 'tokens_used' => 190,
             ]);
 
@@ -144,7 +142,7 @@ class AiGenerationTest extends TestCase
         ], $this->headers($token))
             ->assertStatus(200)
             ->assertJsonPath('data.language', 'Arabic')
-            ->assertJsonPath('data.result', "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه.");
+            ->assertJsonPath('data.result', "حذاء رياضي بتصميم عملي يناسب الحركة اليومية والأنشطة المتنوعة.\n\nيوفر إحساساً بالراحة ومظهراً عصرياً يساعد المستخدم على اختيار إطلالة عملية للاستخدام اليومي والرياضي، مع قيمة مناسبة لمن يبحث عن منتج متعدد الاستخدامات.\n\nاختيار مناسب لمن يقدّر الراحة والحضور الأنيق في تفاصيل يومه، مع تجربة استخدام واضحة ومريحة تدعم الحركة وتنسجم مع الروتين اليومي.");
     }
 
     public function test_product_description_records_usage(): void
@@ -156,7 +154,7 @@ class AiGenerationTest extends TestCase
         $this->mock(AiProviderInterface::class)
             ->shouldReceive('complete')
             ->once()
-            ->andReturn(['result' => 'Great product.', 'tokens_used' => 80]);
+                ->andReturn(['result' => "Great product with a practical everyday purpose and a comfortable user experience.\n\nIt provides useful general value for customers who want a simple addition to their routine without unsupported claims.\n\nA clear and professional choice for ordinary daily needs.", 'tokens_used' => 80]);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context' => 'Test product description context',
@@ -187,7 +185,7 @@ class AiGenerationTest extends TestCase
     {
         $token = $this->merchantToken();
 
-        $this->mockProvider('وصف كامل لمنتج جوال مناسب للاستخدام اليومي.', 40);
+        $this->mockProvider("وصف كامل لمنتج جوال مناسب للاستخدام اليومي وتجربة عملية مرنة.\n\nيساعد المستخدم على إنجاز احتياجاته العامة بسهولة ضمن روتين يومي منظم، مع قيمة واضحة دون افتراض مواصفات غير مذكورة.\n\nخيار مناسب لمن يبحث عن استخدام مريح وبسيط.", 40);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context' => 'abc',
@@ -418,12 +416,53 @@ class AiGenerationTest extends TestCase
     public function test_response_has_standard_envelope(): void
     {
         $token = $this->merchantToken();
-        $this->mockProvider('Generated text.', 50);
+        $this->mockProvider("Generated text for a practical product experience in everyday use.\n\nIt offers useful general value for customers who want a simple addition to their routine without unsupported claims.\n\nA clear and professional choice for ordinary daily needs.", 50);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context' => 'Product context here',
         ], $this->headers($token))
             ->assertStatus(200)
             ->assertJsonStructure(['success', 'message', 'data']);
+    }
+
+    public function test_short_product_description_retries_once_and_preserves_result_contract(): void
+    {
+        $token = $this->merchantToken();
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->twice()
+            ->withArgs(function (string $systemPrompt, string $userPrompt, array $options): bool {
+                return $options === ['max_tokens' => 1200, 'temperature' => 0.75]
+                    && str_contains($userPrompt, 'ساعة ذكية');
+            })
+            ->andReturn(
+                ['result' => 'ساعة ذكية عملية.', 'tokens_used' => 20],
+                ['result' => "ساعة ذكية بتصميم عملي يساعد على تنظيم جوانب مختلفة من الاستخدام اليومي.\n\nتمنح المستخدم تجربة مريحة لمتابعة احتياجاته العامة بطريقة واضحة، مع فوائد عامة دون افتراض مواصفات تقنية غير مذكورة.\n\nتناسب من يبحث عن إضافة عملية وأنيقة إلى روتينه اليومي.", 'tokens_used' => 90],
+            );
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'ساعة ذكية',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonStructure(['success', 'message', 'data' => ['result']])
+            ->assertJsonPath('data.result', "ساعة ذكية بتصميم عملي يساعد على تنظيم جوانب مختلفة من الاستخدام اليومي.\n\nتمنح المستخدم تجربة مريحة لمتابعة احتياجاته العامة بطريقة واضحة، مع فوائد عامة دون افتراض مواصفات تقنية غير مذكورة.\n\nتناسب من يبحث عن إضافة عملية وأنيقة إلى روتينه اليومي.");
+    }
+
+    public function test_substantive_product_description_does_not_retry(): void
+    {
+        $token = $this->merchantToken();
+        $description = "A practical product with a clear everyday purpose and a comfortable user experience.\n\nIt provides useful general value for customers who want to integrate it into their routine, while avoiding unsupported specifications or promises.\n\nA suitable choice for people looking for a simple and dependable solution for ordinary needs.";
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->andReturn(['result' => $description, 'tokens_used' => 100]);
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'Generic product idea',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.result', $description);
     }
 }

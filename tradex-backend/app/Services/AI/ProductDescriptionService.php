@@ -16,6 +16,7 @@ use App\Models\AiUsage;
 class ProductDescriptionService implements AiServiceInterface
 {
     private const SERVICE_TYPE = AiUsage::TYPE_PRODUCT_DESCRIPTION;
+    private const MIN_SUBSTANTIVE_LENGTH = 120;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
 You are a meticulous e-commerce copywriter. Create a useful product description
@@ -94,6 +95,23 @@ PROMPT;
             ['max_tokens' => 1200, 'temperature' => 0.75]
         );
 
+        if ($this->isInsufficient($response['result'] ?? '')) {
+            $response = $this->provider->complete(
+                self::SYSTEM_PROMPT,
+                $userPrompt . <<<'PROMPT'
+
+
+    EXPANSION REQUIREMENT: The previous draft was insufficiently short. Rewrite
+    it as a complete, detailed marketplace description with at least three
+    useful paragraphs covering the product's general appeal, customer benefits,
+    everyday use, suitable users or use cases, and a professional closing.
+    Keep every statement general and factual when the supplied facts do not
+    provide exact specifications. Return only the rewritten description.
+    PROMPT,
+                ['max_tokens' => 1200, 'temperature' => 0.75]
+            );
+        }
+
         $tokensUsed = $response['tokens_used'] ?? 0;
         $costUsd    = $response['cost_usd']    ?? 0.0;
 
@@ -115,5 +133,13 @@ PROMPT;
             'service_type' => self::SERVICE_TYPE,
             'language'     => $language,
         ];
+    }
+
+    private function isInsufficient(string $result): bool
+    {
+        $text = trim($result);
+
+        return mb_strlen($text) < self::MIN_SUBSTANTIVE_LENGTH
+            || substr_count($text, "\n\n") < 2;
     }
 }

@@ -262,7 +262,8 @@ class GeminiProviderTest extends TestCase
 
     public function test_product_description_uses_gemini_result(): void
     {
-        $this->mockProvider('Wireless headphones with 30-hour battery and deep bass.', 110);
+        $description = "Wireless headphones with a comfortable everyday listening experience and a practical design.\n\nThey offer useful general value for customers who want to enjoy audio content at home, work, or while travelling, without unsupported specifications.\n\nA suitable choice for listeners looking for a dependable addition to their daily routine.";
+        $this->mockProvider($description, 110);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context'  => 'Sony WH-XB910N, Extra-Bass headphones, electronics',
@@ -270,7 +271,7 @@ class GeminiProviderTest extends TestCase
         ], $this->merchantHeaders())
             ->assertStatus(200)
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.result', 'Wireless headphones with 30-hour battery and deep bass.')
+            ->assertJsonPath('data.result', $description)
             ->assertJsonPath('data.tokens_used', 110)
             ->assertJsonPath('data.service_type', AiUsage::TYPE_PRODUCT_DESCRIPTION);
     }
@@ -334,7 +335,7 @@ class GeminiProviderTest extends TestCase
         $this->mock(AiProviderInterface::class)
             ->shouldReceive('complete')
             ->once()
-            ->andReturn(['result' => 'Great description.', 'tokens_used' => 88]);
+            ->andReturn(['result' => "Great description with a practical everyday purpose and a comfortable user experience.\n\nIt provides useful general value for customers who want a simple addition to their routine without unsupported claims.\n\nA clear and professional choice for ordinary daily needs.", 'tokens_used' => 88]);
 
         $this->postJson('/api/v1/ai/product-description', [
             'context' => 'Test product for credit tracking',
