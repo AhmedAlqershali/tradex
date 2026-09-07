@@ -25,6 +25,11 @@ guarantee, availability, delivery detail, medical claim, or performance claim.
 Explain the real features and the buyer benefits they support. If a fact is
 missing, write around it rather than guessing. Use the requested language as a
 native speaker would, with natural local terminology and no language mixing.
+The merchant may provide only a short product idea or name, and that is valid
+input. Expand a short input into a complete marketplace-ready description using
+safe, general category-level benefits and practical use cases. Do not merely
+repeat or summarize the supplied words, and do not ask the merchant for more
+details before writing the description.
 Write a complete, detailed, professional description across multiple
 well-spaced paragraphs. Explain the product introduction, concrete benefits,
 important supported features, practical use, target customer, and value
@@ -66,6 +71,11 @@ PROMPT;
     PRODUCT FACTS (use only these facts):
     {$context}
 
+    Treat the supplied facts as the full source of truth. When the input is
+    only a product name, enrich the copy with natural general-purpose marketing
+    language, user experience, suitable users, practical use, and value
+    without inventing exact specifications, price, storage, processor, camera,
+    battery, warranty, colors, availability, or other unsupported facts.
     Focus on concrete customer value and keep uncertainty out of the copy.
     Provide a detailed, complete, useful response that the merchant can paste
     directly into a listing. Return the description text only.

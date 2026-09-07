@@ -94,6 +94,34 @@ class AiGenerationTest extends TestCase
             ->assertJsonPath('data.result', 'هاتف ذكي حديث بتصميم أنيق وأداء متطور.');
     }
 
+    public function test_short_product_name_is_valid_and_prompt_requests_full_expansion(): void
+    {
+        $token = $this->merchantToken();
+
+        $this->mock(AiProviderInterface::class)
+            ->shouldReceive('complete')
+            ->once()
+            ->withArgs(function (string $systemPrompt, string $userPrompt): bool {
+                return str_contains($systemPrompt, 'short product idea or name')
+                    && str_contains($systemPrompt, 'complete marketplace-ready description')
+                    && str_contains($systemPrompt, 'Do not ask the merchant for more details')
+                    && str_contains($userPrompt, 'جوال آيفون')
+                    && str_contains($userPrompt, 'complete, useful response');
+            })
+            ->andReturn([
+                'result' => "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.",
+                'tokens_used' => 180,
+            ]);
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'جوال آيفون',
+            'language' => 'Arabic',
+        ], $this->headers($token))
+            ->assertStatus(200)
+            ->assertJsonPath('data.language', 'Arabic')
+            ->assertJsonPath('data.result', "هاتف آيفون بتصميم عصري وتجربة استخدام مناسبة للاستخدام اليومي.\n\nيوفر حضوراً أنيقاً ومرونة في التواصل والمهام اليومية، مع صياغة تسويقية واضحة دون ادعاء مواصفات غير معروفة.");
+    }
+
     public function test_product_description_records_usage(): void
     {
         $merchant = User::factory()->merchant()->create();
