@@ -273,6 +273,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard');
                 Route::get('analytics', [AdminDashboardController::class, 'analytics'])->name('analytics');
 
+                // ── Commissions (admin read-only) ─────────────────────────────
+                Route::get('commissions', [Admin\CommissionController::class, 'index'])->name('commissions.index');
+                Route::get('commissions/{id}', [Admin\CommissionController::class, 'show'])->name('commissions.show');
+
                 // ── Reviews moderation ────────────────────────────────────────
                 Route::get('products/{productId}/reviews', [AdminReviewController::class, 'index'])->name('products.reviews.index');
                 Route::delete('reviews/{id}',              [AdminReviewController::class, 'destroy'])->name('reviews.destroy');

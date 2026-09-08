@@ -45,6 +45,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
         Route::get('/products/{product}', [AdminProductController::class, 'show'])->name('products.show');
+        Route::get('/commissions', [\App\Http\Controllers\Admin\CommissionController::class, 'index'])->name('commissions.index');
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
         Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');

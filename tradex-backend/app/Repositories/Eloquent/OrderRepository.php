@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Contracts\Repositories\OrderRepositoryInterface;
+use App\Contracts\Services\CommissionServiceInterface;
 use App\Exceptions\OrderException;
 use App\Models\Order;
 use App\Models\Product;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class OrderRepository implements OrderRepositoryInterface
 {
+    public function __construct(
+        private readonly CommissionServiceInterface $commissionService,
+    ) {}
+
     /**
      * Create an order with its items inside a DB transaction.
      *
@@ -212,6 +217,10 @@ class OrderRepository implements OrderRepositoryInterface
             // performed the transition (affected == 1).
             if ($affected > 0 && $status === Order::STATUS_CANCELLED) {
                 $this->restoreStockForOrder($order);
+            }
+
+            if ($affected > 0 && $status === Order::STATUS_COMPLETED) {
+                $this->commissionService->accrueForCompletedOrder($order);
             }
 
             // Sync the in-memory instance for the caller.

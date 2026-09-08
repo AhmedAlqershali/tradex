@@ -34,6 +34,9 @@
                 <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('admin.orders.*') ? 'bg-indigo-500/15 text-indigo-300' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                     <span aria-hidden="true">▤</span> Orders
                 </a>
+                <a href="{{ route('admin.commissions.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('admin.commissions.*') ? 'bg-indigo-500/15 text-indigo-300' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                    <span aria-hidden="true">◍</span> Commissions
+                </a>
                 <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition {{ request()->routeIs('admin.products.*') ? 'bg-indigo-500/15 text-indigo-300' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                     <span aria-hidden="true">□</span> Products
                 </a>
@@ -90,6 +93,7 @@
                         <a href="{{ route('admin.subscriptions.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request('section') === 'subscriptions' ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Subscriptions</a>
                         <a href="{{ route('admin.stores.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.stores.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Stores</a>
                         <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.orders.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Orders</a>
+                        <a href="{{ route('admin.commissions.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.commissions.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Commissions</a>
                         <a href="{{ route('admin.products.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.products.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Products</a>
                         <a href="{{ route('admin.categories.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.categories.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Categories</a>
                         <a href="{{ route('admin.users.index') }}" class="rounded-lg px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.users.*') ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Users</a>
