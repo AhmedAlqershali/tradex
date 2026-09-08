@@ -26,6 +26,9 @@ class AdminPlan {
   final DateTime? createdAt;
 
   bool get isActive => status == 'active';
+  bool get isPremium => name.toLowerCase() == 'premium';
+  bool get isFree => name.toLowerCase() == 'free';
+  bool get isAi => name.toLowerCase() == 'ai';
 
   factory AdminPlan.fromJson(Map<String, dynamic> json) {
     return AdminPlan(

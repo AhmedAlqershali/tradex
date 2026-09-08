@@ -33,6 +33,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('merchants.subscription-requests.approve');
         Route::post('/merchants/{merchant}/subscription-requests/{subscriptionRequest}/reject', [AdminMerchantController::class, 'rejectSubscription'])
             ->name('merchants.subscription-requests.reject');
+        Route::get('/merchants/{merchant}/subscription-requests/{subscriptionRequest}/proof', [AdminMerchantController::class, 'downloadSubscriptionProof'])
+            ->name('merchants.subscription-requests.proof');
         Route::get('/stores', [AdminStoreController::class, 'index'])->name('stores.index');
         Route::get('/stores/{store}', [AdminStoreController::class, 'show'])->name('stores.show');
         Route::put('/stores/{store}/status', [AdminStoreController::class, 'updateStatus'])->name('stores.status');

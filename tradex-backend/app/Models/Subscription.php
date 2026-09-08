@@ -71,6 +71,11 @@ class Subscription extends Model
         return $this->type === 'trial';
     }
 
+    public function isAiEntitled(): bool
+    {
+        return $this->isTrial() || $this->plan?->isAiPlan() === true;
+    }
+
     public function isEntitled(): bool
     {
         return $this->status === 'active'

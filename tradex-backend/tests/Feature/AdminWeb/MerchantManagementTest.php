@@ -9,6 +9,8 @@ use App\Models\SubscriptionRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MerchantManagementTest extends TestCase
@@ -172,5 +174,29 @@ class MerchantManagementTest extends TestCase
         $this->post("/admin/merchants/{$merchant->id}/subscription-requests/{$reviewedRequest->id}/approve")
             ->assertRedirect()
             ->assertSessionHasErrors('subscription');
+    }
+
+    public function test_admin_can_view_a_merchant_payment_proof_from_private_storage(): void
+    {
+        Storage::fake('local');
+        $admin = User::factory()->admin()->create();
+        $merchant = User::factory()->merchant()->create();
+        $plan = Plan::factory()->create(['display_name' => 'AI']);
+        $proof = UploadedFile::fake()->image('proof.png');
+        $path = $proof->store('subscription-proofs', 'local');
+        $request = SubscriptionRequest::factory()
+            ->forUser($merchant)
+            ->forPlan($plan)
+            ->create(['payment_proof_image' => $path]);
+
+        $this->actingAs($admin, 'web')
+            ->get("/admin/merchants/{$merchant->id}/subscription-requests/{$request->id}/proof")
+            ->assertOk()
+            ->assertHeader('Content-Disposition', 'inline; filename="proof.png"');
+
+        $this->actingAs($admin, 'web')
+            ->get("/admin/merchants/{$merchant->id}")
+            ->assertOk()
+            ->assertSee('View payment proof');
     }
 }

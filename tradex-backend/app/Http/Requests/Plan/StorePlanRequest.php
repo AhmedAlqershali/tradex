@@ -20,10 +20,10 @@ class StorePlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'            => ['required', 'string', 'max:50', 'alpha_dash', 'unique:plans,name', Rule::notIn(['free', 'free_trial'])],
+            'name'            => ['required', 'string', 'max:50', 'alpha_dash', 'unique:plans,name', Rule::notIn(['free', 'free_trial', Plan::PREMIUM_PLAN_NAME])],
             'display_name'    => ['required', 'string', 'max:100'],
-            'monthly_price'   => ['required', 'numeric', 'in:' . Plan::MONTHLY_PRICE],
-            'yearly_price'    => ['required', 'numeric', 'in:' . Plan::YEARLY_PRICE],
+            'monthly_price'   => ['required', 'numeric', 'in:' . Plan::AI_MONTHLY_PRICE],
+            'yearly_price'    => ['required', 'numeric', 'in:' . Plan::AI_YEARLY_PRICE],
             'ai_usage_limit'  => ['sometimes', 'nullable', 'integer', 'min:0'],
             'product_limit'   => ['sometimes', 'nullable', 'integer', 'min:0'],
             'store_limit'     => ['sometimes', 'integer', 'min:1'],

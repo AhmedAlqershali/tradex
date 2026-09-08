@@ -137,9 +137,12 @@ class _MerchantSubscriptionScreenState
     String? error,
   }) {
     final l10n = AppLocalizations.of(context);
+    final commercialPlans = plans
+      .where((plan) => plan.isFree || plan.isAi)
+      .toList();
     final selectedId = _selectedPlan?.id;
     final selectedStillAvailable =
-        selectedId != null && plans.any((plan) => plan.id == selectedId);
+        selectedId != null && commercialPlans.any((plan) => plan.id == selectedId);
     if (!selectedStillAvailable && _selectedPlan != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _selectedPlan = null);
@@ -171,7 +174,7 @@ class _MerchantSubscriptionScreenState
                 .read<MerchantSubscriptionBloc>()
                 .add(const MerchantSubscriptionPlansLoadRequested()),
           )
-        else if (plans.isEmpty)
+        else if (commercialPlans.isEmpty)
           _Message(
             message: l10n.noPlansAvailable,
             icon: Icons.card_membership_outlined,
@@ -180,7 +183,7 @@ class _MerchantSubscriptionScreenState
                 .add(const MerchantSubscriptionPlansLoadRequested()),
           )
         else ...[
-          ...plans.map(_buildPlanCard),
+          ...commercialPlans.map(_buildPlanCard),
           if (_selectedPlan != null) ...[
             SizedBox(height: 8.h),
             SizedBox(
@@ -199,6 +202,7 @@ class _MerchantSubscriptionScreenState
 
   Widget _buildPlanCard(AdminPlan plan) {
     final l10n = AppLocalizations.of(context);
+    final selectable = plan.isAi;
     final selected = _selectedPlan?.id == plan.id;
     return Card(
       margin: EdgeInsets.only(bottom: 10.h),
@@ -213,7 +217,7 @@ class _MerchantSubscriptionScreenState
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14.r),
-        onTap: () => setState(() => _selectedPlan = plan),
+        onTap: selectable ? () => setState(() => _selectedPlan = plan) : null,
         child: Padding(
           padding: EdgeInsets.all(14.r),
           child: Column(
@@ -230,18 +234,18 @@ class _MerchantSubscriptionScreenState
                       ),
                     ),
                   ),
-                  Icon(
-                    selected
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
-                    color: selected ? _primary : const Color(0xffAAAAAA),
-                  ),
+                  if (selectable)
+                    Icon(
+                      selected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
+                      color: selected ? _primary : const Color(0xffAAAAAA),
+                    ),
                 ],
               ),
               SizedBox(height: 6.h),
               Text(
-                '${_priceLabel(plan.monthlyPrice, l10n.monthly)} · '
-                '${_priceLabel(plan.yearlyPrice, l10n.yearly)}',
+                _planPriceLabel(plan, l10n),
                 style: GoogleFonts.ibmPlexSans(
                   color: _primary,
                   fontWeight: FontWeight.bold,
@@ -249,26 +253,7 @@ class _MerchantSubscriptionScreenState
                 ),
               ),
               SizedBox(height: 7.h),
-              Text(
-                '${l10n.productLimitLabel}: ${_limitLabel(plan.productLimit, l10n)} · '
-                '${l10n.storeLimitLabel}: ${_limitLabel(plan.storeLimit, l10n)}',
-                style: GoogleFonts.ibmPlexSans(
-                  color: const Color(0xff707070),
-                  fontSize: 12.sp,
-                ),
-              ),
-              if (plan.features.isNotEmpty) ...[
-                SizedBox(height: 6.h),
-                Text(
-                  plan.features.join(' · '),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.ibmPlexSans(
-                    color: const Color(0xff707070),
-                    fontSize: 12.sp,
-                  ),
-                ),
-              ],
+              _planFeatureList(plan, l10n),
             ],
           ),
         ),
@@ -419,9 +404,47 @@ class _MerchantSubscriptionScreenState
   }
 
   List<AdminPlan> _plansFromState(MerchantSubscriptionState state) {
-    if (state is MerchantSubscriptionLoaded) return state.plans;
-    if (state is MerchantSubscriptionFailure) return state.plans;
-    return const [];
+    final plans = state is MerchantSubscriptionLoaded
+        ? state.plans
+        : state is MerchantSubscriptionFailure
+            ? state.plans
+            : const <AdminPlan>[];
+    return plans.where((plan) => plan.isFree || plan.isAi).toList();
+  }
+
+  String _planPriceLabel(AdminPlan plan, AppLocalizations l10n) {
+    if (plan.isFree) return '0₪';
+    if (plan.isAi) return '15₪ / ${l10n.monthly}';
+    return _priceLabel(plan.monthlyPrice, l10n.monthly);
+  }
+
+  Widget _planFeatureList(AdminPlan plan, AppLocalizations l10n) {
+    final features = plan.isFree
+        ? [l10n.basicFeaturesIncluded, l10n.aiFeaturesUnavailable, l10n.freePlanDescription]
+        : plan.isAi
+            ? [l10n.basicFeaturesIncluded, l10n.aiFeaturesIncluded, l10n.aiPlanDescription]
+            : [
+                '${l10n.productLimitLabel}: ${_limitLabel(plan.productLimit, l10n)}',
+                '${l10n.storeLimitLabel}: ${_limitLabel(plan.storeLimit, l10n)}',
+                ...plan.features,
+              ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: features
+          .map((feature) => Padding(
+                padding: EdgeInsets.only(top: 5.h),
+                child: Text(
+                  feature,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.ibmPlexSans(
+                    color: const Color(0xff707070),
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ))
+          .toList(),
+    );
   }
 
   String _priceLabel(double price, String cycle) =>
@@ -465,6 +488,7 @@ class _MerchantSubscriptionScreenState
 
     final entitled = subscription.isEntitled;
     final isTrial = subscription.isTrial;
+    final hasAiAccess = subscription.hasAiAccess;
     final endsAt = subscription.endsAt;
     final daysRemaining =
         endsAt?.difference(DateTime.now()).inDays.clamp(0, 9999);
@@ -502,9 +526,15 @@ class _MerchantSubscriptionScreenState
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                    subscription.planName.isEmpty
-                      ? l10n.noPlanName
-                      : subscription.planName,
+                  isTrial
+                    ? l10n.trialLabel
+                    : subscription.isAiPlan
+                      ? l10n.planAi
+                      : subscription.isFreePlan
+                        ? l10n.planFree
+                        : (subscription.planName.isEmpty
+                          ? l10n.noPlanName
+                          : subscription.planName),
                   style: GoogleFonts.ibmPlexSans(
                     fontSize: 19.sp,
                     fontWeight: FontWeight.bold,
@@ -529,6 +559,16 @@ class _MerchantSubscriptionScreenState
           if (subscription.billingCycle.isNotEmpty)
             _detailRow(
                 AppLocalizations.of(context).billingCycleLabel, _billingLabel(subscription.billingCycle)),
+            _detailRow(
+              l10n.currentPlanLabel,
+              _currentPlanLabel(subscription, l10n),
+            ),
+          _detailRow(
+            l10n.aiAvailable,
+            hasAiAccess
+                ? (isTrial ? l10n.trialAiAvailable : l10n.aiAvailable)
+                : l10n.aiUnavailable,
+          ),
           if (endsAt != null)
             _detailRow(
               AppLocalizations.of(context).endsAt,
@@ -567,6 +607,18 @@ class _MerchantSubscriptionScreenState
         ],
       ),
     );
+  }
+
+  String _currentPlanLabel(
+    AdminSubscription subscription,
+    AppLocalizations l10n,
+  ) {
+    if (subscription.isTrial) return l10n.trialLabel;
+    if (subscription.isAiPlan) return '15₪ / ${l10n.monthly}';
+    if (subscription.isFreePlan) return l10n.planFree;
+    return subscription.planName.isEmpty
+      ? l10n.noPlanName
+      : subscription.planName;
   }
 
   Future<void> _openWhatsAppSupport() async {

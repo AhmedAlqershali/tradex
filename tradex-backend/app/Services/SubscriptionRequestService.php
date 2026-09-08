@@ -9,6 +9,7 @@ use App\Contracts\Services\SubscriptionServiceInterface;
 use App\Contracts\Services\UserNotificationServiceInterface;
 use App\Exceptions\SubscriptionException;
 use App\Models\SubscriptionRequest;
+use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
@@ -150,7 +151,7 @@ class SubscriptionRequestService implements SubscriptionRequestServiceInterface
         if (
             ! $plan
             || $plan->status !== 'active'
-            || in_array($plan->name, ['free', 'free_trial'], true)
+            || in_array($plan->name, [Plan::FREE_PLAN_NAME, SubscriptionService::TRIAL_PLAN_NAME, Plan::PREMIUM_PLAN_NAME], true)
         ) {
             throw SubscriptionException::planInactive($plan->display_name ?? 'selected');
         }

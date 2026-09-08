@@ -2,6 +2,7 @@ class AdminSubscription {
   const AdminSubscription({
     required this.id,
     required this.planId,
+    required this.planKey,
     required this.planName,
     required this.billingCycle,
     required this.type,
@@ -15,6 +16,7 @@ class AdminSubscription {
 
   final String id;
   final String planId;
+  final String planKey;
   final String planName;
   final String billingCycle;
   final String type;
@@ -25,12 +27,17 @@ class AdminSubscription {
   final DateTime? endsAt;
   final DateTime? cancelledAt;
 
+  bool get isAiPlan => planKey.toLowerCase() == 'ai';
+  bool get isFreePlan => planKey.toLowerCase() == 'free';
+  bool get hasAiAccess => isEntitled && (isTrial || isAiPlan);
+
   factory AdminSubscription.fromJson(Map<String, dynamic> json) {
     final plan = json['plan'];
     final planMap = plan is Map ? Map<String, dynamic>.from(plan) : const {};
     return AdminSubscription(
       id: _text(json['id']),
       planId: _text(planMap['id']),
+      planKey: _text(planMap['name']),
       planName: _text(
         planMap['display_name'] ?? planMap['name'],
       ),

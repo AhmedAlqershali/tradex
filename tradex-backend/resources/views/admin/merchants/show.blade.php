@@ -160,6 +160,13 @@
                             <td class="px-6 py-5 text-sm text-slate-600">
                                 <p class="capitalize">{{ str_replace('_', ' ', $request->payment_method) }}</p>
                                 <p class="mt-1 text-xs text-slate-400">{{ $request->phone }}</p>
+                                @if ($request->payment_proof_image)
+                                    <a href="{{ route('admin.merchants.subscription-requests.proof', [$merchant, $request]) }}"
+                                       target="_blank" rel="noopener"
+                                       class="mt-2 inline-flex text-xs font-semibold text-indigo-600 hover:text-indigo-500">
+                                        View payment proof
+                                    </a>
+                                @endif
                             </td>
                             <td class="px-6 py-5">
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize {{ $requestClasses }}">{{ $request->status }}</span>

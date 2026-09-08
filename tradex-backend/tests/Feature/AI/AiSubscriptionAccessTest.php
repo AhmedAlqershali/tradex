@@ -9,6 +9,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 /**
@@ -35,7 +36,12 @@ class AiSubscriptionAccessTest extends TestCase
     private function merchantToken(string $type = 'paid', bool $expired = false): array
     {
         $merchant = User::factory()->merchant()->create();
-        $plan = Plan::factory()->active()->create(['ai_usage_limit' => null]);
+        $plan = Plan::factory()->active()->create([
+            'name'           => Plan::AI_PLAN_NAME,
+            'monthly_price'  => Plan::AI_MONTHLY_PRICE,
+            'yearly_price'   => Plan::AI_YEARLY_PRICE,
+            'ai_usage_limit' => null,
+        ]);
 
         Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
             'type'    => $type,
@@ -103,7 +109,12 @@ class AiSubscriptionAccessTest extends TestCase
 
     public function test_active_trial_allows_ai_generation(): void
     {
-        ['token' => $token] = $this->merchantToken('trial');
+        ['merchant' => $merchant, 'token' => $token] = $this->merchantToken('trial');
+        $subscription = Subscription::where('user_id', $merchant->id)->firstOrFail();
+
+        $this->assertTrue($subscription->ends_at->equalTo(
+            $subscription->starts_at->copy()->addDays(14),
+        ));
 
         $this->assertGenerationAllowed($token);
     }
@@ -115,10 +126,34 @@ class AiSubscriptionAccessTest extends TestCase
         $this->assertGenerationAllowed($token);
     }
 
+    public function test_active_free_subscription_cannot_supply_ai_access(): void
+    {
+        $merchant = User::factory()->merchant()->create();
+        $plan = Plan::factory()->active()->create([
+            'name'           => Plan::FREE_PLAN_NAME,
+            'monthly_price'  => Plan::FREE_MONTHLY_PRICE,
+            'yearly_price'   => Plan::FREE_YEARLY_PRICE,
+            'ai_usage_limit' => 0,
+        ]);
+        Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
+            'type'   => 'paid',
+            'status' => 'active',
+        ]);
+
+        $this->assertGenerationDenied(
+            $merchant->createToken('test')->plainTextToken,
+        );
+    }
+
     public function test_expired_subscription_cannot_supply_an_ai_plan_limit(): void
     {
         $merchant = User::factory()->merchant()->create();
-        $plan = Plan::factory()->active()->create(['ai_usage_limit' => 1]);
+        $plan = Plan::factory()->active()->create([
+            'name'           => Plan::AI_PLAN_NAME,
+            'monthly_price'  => Plan::AI_MONTHLY_PRICE,
+            'yearly_price'   => Plan::AI_YEARLY_PRICE,
+            'ai_usage_limit' => 1,
+        ]);
         Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
             'type'      => 'paid',
             'status'    => 'active',
@@ -148,6 +183,45 @@ class AiSubscriptionAccessTest extends TestCase
     public function test_expired_paid_subscription_denies_every_merchant_ai_generation_endpoint(): void
     {
         ['token' => $token] = $this->merchantToken('paid', true);
+
+        $this->assertGenerationDenied($token);
+    }
+
+    public function test_ai_subscription_at_exact_end_time_cannot_access_ai(): void
+    {
+        $merchant = User::factory()->merchant()->create();
+        $plan = Plan::factory()->active()->create([
+            'name'           => Plan::AI_PLAN_NAME,
+            'monthly_price'  => Plan::AI_MONTHLY_PRICE,
+            'yearly_price'   => Plan::AI_YEARLY_PRICE,
+            'ai_usage_limit' => null,
+        ]);
+        $endsAt = Carbon::now()->addDay();
+        Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
+            'type'      => 'paid',
+            'status'    => 'active',
+            'starts_at' => $endsAt->copy()->subMonth(),
+            'ends_at'   => $endsAt,
+        ]);
+
+        Carbon::setTestNow($endsAt);
+        try {
+            $this->postJson('/api/v1/ai/product-description', [
+                'context' => 'Exact expiration must deny AI access.',
+            ], $this->headers($merchant->createToken('test')->plainTextToken))
+                ->assertForbidden();
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_cancelled_ai_subscription_cannot_access_ai(): void
+    {
+        ['merchant' => $merchant, 'token' => $token] = $this->merchantToken();
+        Subscription::where('user_id', $merchant->id)->update([
+            'status'       => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
 
         $this->assertGenerationDenied($token);
     }

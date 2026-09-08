@@ -19,11 +19,12 @@ class EnsureMerchantHasSubscription
         private readonly SubscriptionServiceInterface $subscriptionService,
     ) {}
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $entitlement = 'business'): Response
     {
         $user = $request->user();
+        $subscription = $user ? $this->subscriptionService->getActiveForMerchant($user) : null;
 
-        if ($user && $this->subscriptionService->getActiveForMerchant($user)) {
+        if ($subscription && ($entitlement !== 'ai' || $subscription->isAiEntitled())) {
             return $next($request);
         }
 

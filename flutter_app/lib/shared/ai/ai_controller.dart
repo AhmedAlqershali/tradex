@@ -34,7 +34,7 @@ class AiController {
   static final AiController instance = AiController._();
 
   static const String subscriptionRequiredMessage =
-      'يلزم وجود اشتراك نشط لاستخدام أدوات Tradex AI. يرجى الاشتراك للمتابعة.';
+      'أدوات الذكاء الاصطناعي متاحة مع خطة AI فقط.';
 
   static bool isSubscriptionRequiredError(Object error) {
     final cause = error is AiRuntimeFailure ? error.cause : error;

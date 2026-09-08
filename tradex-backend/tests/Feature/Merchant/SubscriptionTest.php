@@ -87,9 +87,10 @@ class SubscriptionTest extends TestCase
     {
         ['token' => $token] = $this->actingAsMerchant();
         Plan::factory()->active()->create([
-            'display_name' => 'Pro Plan',
-            'monthly_price' => 5.00,
-            'yearly_price' => 60.00,
+            'name'          => Plan::AI_PLAN_NAME,
+            'display_name'  => 'AI',
+            'monthly_price' => Plan::AI_MONTHLY_PRICE,
+            'yearly_price'  => Plan::AI_YEARLY_PRICE,
         ]);
         Plan::factory()->create([
             'display_name' => 'Retired Plan',
@@ -101,7 +102,7 @@ class SubscriptionTest extends TestCase
             ->assertJson(['success' => true]);
 
         $this->assertCount(1, $response->json('data'));
-        $this->assertSame('Pro Plan', $response->json('data.0.display_name'));
+        $this->assertSame('AI', $response->json('data.0.display_name'));
     }
 
     public function test_client_cannot_list_merchant_subscription_plans(): void

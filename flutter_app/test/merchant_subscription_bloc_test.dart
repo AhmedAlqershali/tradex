@@ -8,7 +8,7 @@ import 'package:ai_saas/shared/models/admin_subscription_request_model.dart';
 AdminSubscription _subscription() {
   return AdminSubscription.fromJson({
     'id': 7,
-    'plan': {'display_name': 'Pro'},
+    'plan': {'name': 'free_trial', 'display_name': 'Free Trial'},
     'billing_cycle': 'monthly',
     'type': 'trial',
     'is_trial': true,
@@ -21,7 +21,7 @@ AdminSubscription _subscription() {
 AdminSubscriptionRequest _request() {
   return AdminSubscriptionRequest.fromJson({
     'id': 9,
-    'plan': {'id': 2, 'display_name': 'Pro'},
+    'plan': {'id': 2, 'name': 'ai', 'display_name': 'AI'},
     'billing_cycle': 'monthly',
     'full_name': 'Ahmed Ali',
     'phone': '0501234567',
@@ -33,10 +33,10 @@ AdminSubscriptionRequest _request() {
 AdminPlan _plan() {
   return AdminPlan.fromJson({
     'id': 2,
-    'name': 'pro',
-    'display_name': 'Pro Plan',
-    'monthly_price': 19.99,
-    'yearly_price': 199.99,
+    'name': 'ai',
+    'display_name': 'AI',
+    'monthly_price': 15,
+    'yearly_price': 180,
     'product_limit': 100,
     'store_limit': 1,
     'features': ['AI tools'],
@@ -85,6 +85,83 @@ void main() {
     bloc.add(const MerchantSubscriptionLoadRequested());
     await states;
     await bloc.close();
+  });
+
+  test('maps server entitlement for Free, AI, and expired AI explicitly', () {
+    final free = AdminSubscription.fromJson({
+      'id': 1,
+      'plan': {'name': 'free', 'display_name': 'Free'},
+      'type': 'paid',
+      'is_trial': false,
+      'status': 'active',
+      'is_entitled': true,
+    });
+    final ai = AdminSubscription.fromJson({
+      'id': 2,
+      'plan': {'name': 'ai', 'display_name': 'AI'},
+      'type': 'paid',
+      'is_trial': false,
+      'status': 'active',
+      'is_entitled': true,
+    });
+    final expiredAi = AdminSubscription.fromJson({
+      'id': 3,
+      'plan': {'name': 'ai', 'display_name': 'AI'},
+      'type': 'paid',
+      'is_trial': false,
+      'status': 'expired',
+      'is_entitled': false,
+    });
+
+    expect(free.hasAiAccess, isFalse);
+    expect(ai.hasAiAccess, isTrue);
+    expect(expiredAi.hasAiAccess, isFalse);
+  });
+
+  test('allows AI during an entitled trial but never from active status alone', () {
+    final trial = AdminSubscription.fromJson({
+      'id': 4,
+      'plan': {'name': 'free', 'display_name': 'Free'},
+      'type': 'trial',
+      'is_trial': true,
+      'status': 'active',
+      'is_entitled': true,
+    });
+    final activeFree = AdminSubscription.fromJson({
+      'id': 5,
+      'plan': {'name': 'free', 'display_name': 'Free'},
+      'type': 'paid',
+      'is_trial': false,
+      'status': 'active',
+      'is_entitled': true,
+    });
+    final deniedAi = AdminSubscription.fromJson({
+      'id': 6,
+      'plan': {'name': 'ai', 'display_name': 'AI'},
+      'type': 'paid',
+      'is_trial': false,
+      'status': 'active',
+      'is_entitled': false,
+    });
+
+    expect(trial.hasAiAccess, isTrue);
+    expect(activeFree.hasAiAccess, isFalse);
+    expect(deniedAi.hasAiAccess, isFalse);
+  });
+
+  test('recognizes Premium as unavailable for new plan selection', () {
+    final premium = AdminPlan.fromJson({
+      'id': 3,
+      'name': 'premium',
+      'display_name': 'Premium',
+      'monthly_price': 30,
+      'yearly_price': 360,
+      'store_limit': 1,
+      'status': 'active',
+    });
+
+    expect(premium.isPremium, isTrue);
+    expect(premium.isAi, isFalse);
   });
 
   test('refreshes expired state to active after a server-side renewal',
@@ -175,7 +252,7 @@ void main() {
         isA<MerchantSubscriptionLoaded>()
             .having((state) => state.plans.single.id, 'plan id', '2')
             .having((state) => state.plans.single.displayName, 'plan name',
-                'Pro Plan'),
+              'AI'),
       ]),
     );
 

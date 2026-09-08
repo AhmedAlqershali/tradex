@@ -23,10 +23,10 @@ class UpdatePlanRequest extends FormRequest
         $planId = $this->route('id');
 
         return [
-            'name'            => ['sometimes', 'string', 'max:50', 'alpha_dash', Rule::unique('plans', 'name')->ignore($planId), Rule::notIn(['free', 'free_trial'])],
+            'name'            => ['sometimes', 'string', 'max:50', 'alpha_dash', Rule::unique('plans', 'name')->ignore($planId), Rule::notIn(['free', 'free_trial', Plan::PREMIUM_PLAN_NAME])],
             'display_name'    => ['sometimes', 'string', 'max:100'],
-            'monthly_price'   => ['sometimes', 'numeric', 'in:' . Plan::MONTHLY_PRICE],
-            'yearly_price'    => ['sometimes', 'numeric', 'in:' . Plan::YEARLY_PRICE],
+            'monthly_price'   => ['sometimes', 'numeric', 'in:' . Plan::AI_MONTHLY_PRICE],
+            'yearly_price'    => ['sometimes', 'numeric', 'in:' . Plan::AI_YEARLY_PRICE],
             'ai_usage_limit'  => ['sometimes', 'nullable', 'integer', 'min:0'],
             'product_limit'   => ['sometimes', 'nullable', 'integer', 'min:0'],
             'store_limit'     => ['sometimes', 'integer', 'min:1'],

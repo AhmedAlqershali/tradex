@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // slug-like key: free | pro | business
+            $table->string('name')->unique(); // slug-like key: free | ai | legacy plans
             $table->string('display_name');
             $table->decimal('monthly_price', 10, 2)->default(0);
             $table->decimal('yearly_price', 10, 2)->default(0);

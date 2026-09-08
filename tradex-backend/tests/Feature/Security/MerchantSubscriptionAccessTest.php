@@ -63,6 +63,28 @@ class MerchantSubscriptionAccessTest extends TestCase
             ->assertOk();
     }
 
+    public function test_active_free_subscription_allows_merchant_business_access_without_ai(): void
+    {
+        ['merchant' => $merchant, 'token' => $token] = $this->merchantWithToken();
+        $freePlan = Plan::factory()->active()->create([
+            'name'           => Plan::FREE_PLAN_NAME,
+            'monthly_price'  => Plan::FREE_MONTHLY_PRICE,
+            'yearly_price'   => Plan::FREE_YEARLY_PRICE,
+            'ai_usage_limit' => 0,
+        ]);
+        Subscription::factory()->forUser($merchant)->forPlan($freePlan)->active()->create([
+            'type' => 'paid',
+        ]);
+
+        $this->getJson($this->businessUrl(), $this->headers($token))
+            ->assertOk();
+
+        $this->postJson('/api/v1/ai/product-description', [
+            'context' => 'Free merchants can use core business features but not AI.',
+        ], $this->headers($token))
+            ->assertForbidden();
+    }
+
     public function test_future_dated_subscription_does_not_grant_business_access(): void
     {
         ['merchant' => $merchant, 'token' => $token] = $this->merchantWithToken();

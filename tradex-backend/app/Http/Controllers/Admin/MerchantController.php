@@ -12,7 +12,9 @@ use App\Models\SubscriptionRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MerchantController
 {
@@ -89,6 +91,25 @@ class MerchantController
         return redirect()
             ->route('admin.merchants.show', $merchantUser)
             ->with('status', 'Subscription request rejected.');
+    }
+
+    public function downloadSubscriptionProof(int $merchant, int $subscriptionRequest): BinaryFileResponse
+    {
+        $merchantUser = $this->findMerchant($merchant);
+        $request = $this->findMerchantSubscriptionRequest($subscriptionRequest, $merchantUser);
+        $path = $request->payment_proof_image;
+
+        abort_unless($path && Storage::disk('local')->exists($path), 404, 'Payment proof not found.');
+
+        return response()->file(
+            Storage::disk('local')->path($path),
+            [
+                'Content-Type'           => Storage::disk('local')->mimeType($path) ?: 'application/octet-stream',
+                'Content-Disposition'    => 'inline; filename="' . basename($path) . '"',
+                'X-Content-Type-Options' => 'nosniff',
+                'Cache-Control'          => 'no-store, private',
+            ],
+        );
     }
 
     private function findMerchant(int $id): User

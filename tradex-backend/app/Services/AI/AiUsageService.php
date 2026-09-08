@@ -183,6 +183,10 @@ class AiUsageService implements AiUsageServiceInterface
         // subscription periods cannot provide AI plan access.
         $subscription = $this->subscriptionService->getActiveForMerchant($user);
 
+        if ($subscription && ! $subscription->isAiEntitled()) {
+            return 0;
+        }
+
         if ($subscription && $subscription->plan && $subscription->plan->ai_usage_limit !== null) {
             return (int) $subscription->plan->ai_usage_limit;
         }

@@ -183,7 +183,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('usage', [AiController::class, 'usage'])->name('usage');
 
                 // Merchant tools
-                Route::middleware(['role:merchant', 'merchant.subscription'])->group(function () {
+                Route::middleware(['role:merchant', 'merchant.subscription:ai'])->group(function () {
                     Route::post('product-description', [AiController::class, 'productDescription'])->name('product-description');
                     Route::post('marketing-content',   [AiController::class, 'marketingContent'])->name('marketing-content');
                     Route::post('customer-reply',      [AiController::class, 'customerReply'])->name('customer-reply');

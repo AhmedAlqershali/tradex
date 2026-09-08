@@ -453,6 +453,17 @@ class AppLocalizations {
   String get daysRemaining => _value('daysRemaining');
   String get unlimited => _value('unlimited');
   String get noPlanName => _value('noPlanName');
+  String get basicFeaturesIncluded => _value('basicFeaturesIncluded');
+  String get aiFeaturesIncluded => _value('aiFeaturesIncluded');
+  String get aiFeaturesUnavailable => _value('aiFeaturesUnavailable');
+  String get freePlanDescription => _value('freePlanDescription');
+  String get aiPlanDescription => _value('aiPlanDescription');
+  String get currentPlanLabel => _value('currentPlanLabel');
+  String get aiAvailable => _value('aiAvailable');
+  String get aiUnavailable => _value('aiUnavailable');
+  String get trialAiAvailable => _value('trialAiAvailable');
+  String get planFree => _value('planFree');
+  String get planAi => _value('planAi');
   String get rejectionReason => _value('rejectionReason');
   String get supportViaWhatsApp => _value('supportViaWhatsApp');
   String get supportContact => _value('supportContact');
@@ -1025,6 +1036,17 @@ class AppLocalizations {
       'daysRemaining': 'يوم متبقٍ',
       'unlimited': 'غير محدود',
       'noPlanName': 'بدون خطة',
+      'basicFeaturesIncluded': 'وظائف Tradex الأساسية ✓',
+      'aiFeaturesIncluded': 'أدوات الذكاء الاصطناعي ✓',
+      'aiFeaturesUnavailable': 'الذكاء الاصطناعي غير متاح في الخطة المجانية ✕',
+      'freePlanDescription': 'مناسب للاستخدام الأساسي',
+      'aiPlanDescription': 'مناسب للتجار الذين يريدون استخدام الذكاء الاصطناعي',
+      'currentPlanLabel': 'خطتك الحالية',
+      'aiAvailable': 'الذكاء الاصطناعي متاح',
+      'aiUnavailable': 'الذكاء الاصطناعي غير متاح في الخطة المجانية',
+      'trialAiAvailable': 'الذكاء الاصطناعي متاح خلال الفترة التجريبية',
+      'planFree': 'Free',
+      'planAi': 'AI',
       'rejectionReason': 'سبب الرفض',
       'supportViaWhatsApp': 'تعذر فتح واتساب. تواصل مع الدعم على +972597668446.',
       'noPreviousSubscriptionRequests': 'لا توجد طلبات اشتراك سابقة',
@@ -1449,6 +1471,17 @@ class AppLocalizations {
       'daysRemaining': 'days remaining',
       'unlimited': 'Unlimited',
       'noPlanName': 'No plan',
+      'basicFeaturesIncluded': 'Tradex core features ✓',
+      'aiFeaturesIncluded': 'AI tools ✓',
+      'aiFeaturesUnavailable': 'AI is not available on the Free plan ✕',
+      'freePlanDescription': 'Suitable for basic use',
+      'aiPlanDescription': 'For merchants who want to use AI',
+      'currentPlanLabel': 'Your current plan',
+      'aiAvailable': 'AI is available',
+      'aiUnavailable': 'AI is not available on the Free plan',
+      'trialAiAvailable': 'AI is available during the trial',
+      'planFree': 'Free',
+      'planAi': 'AI',
       'rejectionReason': 'Rejection reason',
       'noSubscriptions': 'No active subscription or trial period.',
       'productCategoryDefault': 'General',

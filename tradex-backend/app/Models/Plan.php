@@ -9,8 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
-    public const MONTHLY_PRICE = 5.00;
-    public const YEARLY_PRICE = 60.00;
+    public const FREE_PLAN_NAME = 'free';
+    public const AI_PLAN_NAME = 'ai';
+    public const PREMIUM_PLAN_NAME = 'premium';
+    public const FREE_MONTHLY_PRICE = 0.00;
+    public const FREE_YEARLY_PRICE = 0.00;
+    public const AI_MONTHLY_PRICE = 15.00;
+    public const AI_YEARLY_PRICE = 180.00;
 
     /** @use HasFactory<PlanFactory> */
     use HasFactory;
@@ -61,5 +66,10 @@ class Plan extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    public function isAiPlan(): bool
+    {
+        return $this->name === self::AI_PLAN_NAME;
     }
 }

@@ -136,6 +136,52 @@ class SubscriptionLifecycleTest extends TestCase
         }
     }
 
+    public function test_resubscription_preserves_history_and_only_one_subscription_is_active(): void
+    {
+        Storage::fake('local');
+        $merchant = User::factory()->merchant()->create(['status' => 'active']);
+        $merchantToken = $merchant->createToken('test')->plainTextToken;
+        $plan = Plan::factory()->active()->create([
+            'name'          => Plan::AI_PLAN_NAME,
+            'display_name'  => 'AI',
+            'monthly_price' => Plan::AI_MONTHLY_PRICE,
+            'yearly_price'  => Plan::AI_YEARLY_PRICE,
+        ]);
+        $expired = Subscription::factory()->forUser($merchant)->forPlan($plan)->create([
+            'type'      => 'paid',
+            'status'    => 'expired',
+            'starts_at' => now()->subMonths(2),
+            'ends_at'   => now()->subMonth(),
+        ]);
+
+        $request = $this->postJson('/api/v1/merchant/subscription-requests', [
+            'plan_id'             => $plan->id,
+            'billing_cycle'       => 'monthly',
+            'full_name'           => $merchant->name,
+            'phone'               => $merchant->phone,
+            'payment_method'      => 'bank_transfer',
+            'payment_proof_image' => UploadedFile::fake()->image('proof.png'),
+        ], $this->headers($merchantToken))->assertCreated();
+
+        Auth::forgetGuards();
+        $admin = User::factory()->admin()->create(['status' => 'active']);
+        $this->putJson(
+            '/api/v1/admin/subscription-requests/' . $request->json('data.id') . '/approve',
+            [],
+            $this->headers($admin->createToken('test')->plainTextToken),
+        )->assertOk();
+
+        $this->assertDatabaseHas('subscriptions', [
+            'id'     => $expired->id,
+            'status' => 'expired',
+        ]);
+        $this->assertSame(
+            1,
+            Subscription::where('user_id', $merchant->id)->where('status', 'active')->count(),
+        );
+        $this->assertSame(2, Subscription::where('user_id', $merchant->id)->count());
+    }
+
     private function headers(string $token): array
     {
         return [
