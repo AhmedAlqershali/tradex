@@ -1,6 +1,7 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/merchant/add_product.dart';
+import 'package:ai_saas/shared/models/merchant_dashboard_model.dart';
 import 'package:ai_saas/screens/merchant/merchant_orders_screen.dart';
 import 'package:ai_saas/screens/merchant/merchant_products_screen.dart';
 import 'package:ai_saas/screens/merchant/store_settings_screen.dart';
@@ -334,6 +335,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
 
 class _CommissionCard extends StatelessWidget {
   const _CommissionCard({required this.summary});
+
+  static const Color _primary = Color(0xff4D41DF);
 
   final MerchantCommissionSummary summary;
 
