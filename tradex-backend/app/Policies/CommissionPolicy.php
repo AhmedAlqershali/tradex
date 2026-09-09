@@ -16,4 +16,9 @@ class CommissionPolicy
     {
         return $user->isAdmin();
     }
+
+    public function update(User $user, Commission $commission): bool
+    {
+        return $user->isAdmin();
+    }
 }

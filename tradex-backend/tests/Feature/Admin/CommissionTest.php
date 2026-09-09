@@ -26,6 +26,7 @@ class CommissionTest extends TestCase
             'total_amount' => 100.00,
         ]);
 
+        app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_CONFIRMED);
         app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
 
         $commission = Commission::query()->where('order_id', $order->id)->firstOrFail();
@@ -49,6 +50,7 @@ class CommissionTest extends TestCase
             'total_amount' => 250.00,
         ]);
 
+        app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_CONFIRMED);
         app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
 
         $commission = Commission::query()->where('order_id', $order->id)->firstOrFail();
@@ -71,8 +73,15 @@ class CommissionTest extends TestCase
         ]);
 
         $service = app(OrderServiceInterface::class);
+        $service->updateStatus($merchant, $order->id, Order::STATUS_CONFIRMED);
         $service->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
-        $service->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
+
+        try {
+            $service->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
+            $this->fail('Expected duplicate completion status transition to throw an exception.');
+        } catch (\App\Exceptions\OrderException $exception) {
+            $this->assertStringContainsString("Cannot transition order from 'completed' to 'completed'.", $exception->getMessage());
+        }
 
         $this->assertSame(1, Commission::query()->where('order_id', $order->id)->count());
     }
@@ -105,6 +114,7 @@ class CommissionTest extends TestCase
             'total_amount' => 120.00,
         ]);
 
+        app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_CONFIRMED);
         app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
 
         $this->assertSame('5.00', Commission::query()->where('order_id', $order->id)->value('commission_rate'));
@@ -123,6 +133,7 @@ class CommissionTest extends TestCase
             'total_amount' => 100.00,
         ]);
 
+        app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_CONFIRMED);
         app(OrderServiceInterface::class)->updateStatus($merchant, $order->id, Order::STATUS_COMPLETED);
 
         $this->actingAs($admin, 'web')
@@ -139,6 +150,6 @@ class CommissionTest extends TestCase
 
         $this->actingAs($merchant, 'web')
             ->get('/admin/commissions')
-            ->assertRedirect();
+            ->assertForbidden();
     }
 }

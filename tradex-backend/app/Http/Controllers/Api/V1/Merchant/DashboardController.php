@@ -35,6 +35,7 @@ class DashboardController extends BaseApiController
             'products' => $data['products'],
             'orders'   => $data['orders'],
             'total_sales'   => $data['total_sales'],
+            'commission_summary' => $data['commission_summary'],
             'recent_orders' => OrderResource::collection($data['recent_orders']),
             'top_products'  => ProductResource::collection($data['top_products']),
             'low_inventory' => ProductResource::collection($data['low_inventory']),

@@ -173,6 +173,38 @@ class DashboardTest extends TestCase
     // Analytics
     // =========================================================================
 
+    public function test_merchant_dashboard_exposes_commission_summary(): void
+    {
+        ['merchant' => $merchant, 'store' => $store, 'token' => $token] = $this->actingAsMerchant();
+        $client = User::factory()->client()->create();
+
+        $order = Order::factory()->create([
+            'store_id' => $store->id,
+            'client_id' => $client->id,
+            'status' => 'completed',
+            'total_amount' => 500,
+        ]);
+
+        \App\Models\Commission::create([
+            'order_id' => $order->id,
+            'merchant_id' => $merchant->id,
+            'store_id' => $store->id,
+            'order_amount' => 500.00,
+            'commission_rate' => 5.00,
+            'commission_amount' => 25.00,
+            'merchant_net_amount' => 475.00,
+            'status' => 'accrued',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $response = $this->getJson('/api/v1/merchant/dashboard', $this->headers($token));
+
+        $response->assertOk()
+            ->assertJsonPath('data.commission_summary.due_amount', 25)
+            ->assertJsonPath('data.commission_summary.order_count', 1)
+            ->assertJsonPath('data.commission_summary.payment_status', 'unpaid');
+    }
+
     public function test_merchant_can_access_analytics(): void
     {
         ['token' => $token] = $this->actingAsMerchant();

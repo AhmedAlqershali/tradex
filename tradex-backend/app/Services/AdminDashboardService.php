@@ -69,6 +69,10 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                 ->count('user_id'),
         ];
 
+        $commissionStats = DB::table('commissions')
+            ->selectRaw('COUNT(*) as total, SUM(CASE WHEN payment_status = ? THEN 1 ELSE 0 END) as paid, SUM(CASE WHEN payment_status != ? THEN 1 ELSE 0 END) as unpaid, SUM(CASE WHEN payment_status = ? THEN commission_amount ELSE 0 END) as paid_amount, SUM(CASE WHEN payment_status != ? THEN commission_amount ELSE 0 END) as unpaid_amount, SUM(CASE WHEN payment_status = ? THEN commission_amount ELSE 0 END) as total_paid_output', ['paid', 'paid', 'paid', 'paid', 'paid'])
+            ->first();
+
         // ── Marketplace activity snapshots ─────────────────────────────────────
         $newestUsers = User::orderByDesc('created_at')->limit(5)->get(['id', 'name', 'email', 'role', 'status', 'created_at']);
 
@@ -119,6 +123,13 @@ class AdminDashboardService implements AdminDashboardServiceInterface
                 'subscriptions' => [
                     'active' => (int) $subscriptionStats['active'],
                     'trials' => (int) $subscriptionStats['trials'],
+                ],
+                'commissions' => [
+                    'total' => (int) ($commissionStats->total ?? 0),
+                    'paid' => (int) ($commissionStats->paid ?? 0),
+                    'unpaid' => (int) ($commissionStats->unpaid ?? 0),
+                    'paid_amount' => round((float) ($commissionStats->paid_amount ?? 0), 2),
+                    'unpaid_amount' => round((float) ($commissionStats->unpaid_amount ?? 0), 2),
                 ],
             ],
             'marketplace' => [

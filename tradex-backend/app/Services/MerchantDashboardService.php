@@ -45,6 +45,16 @@ class MerchantDashboardService implements MerchantDashboardServiceInterface
                 SUM(CASE WHEN status = 'completed'  THEN total_amount ELSE 0 END) as total_sales
             ")->first();
 
+        // ── Commission summary ────────────────────────────────────────────────
+        $commissionSummary = DB::table('commissions')
+            ->whereIn('store_id', $storeIds)
+            ->selectRaw('COUNT(*) as order_count, SUM(CASE WHEN payment_status = ? THEN commission_amount ELSE 0 END) as paid_amount, SUM(CASE WHEN payment_status != ? THEN commission_amount ELSE 0 END) as due_amount', ['paid', 'paid'])
+            ->first();
+
+        $commissionPaymentStatus = ((float) ($commissionSummary->due_amount ?? 0) > 0)
+            ? 'unpaid'
+            : ((int) ($commissionSummary->order_count ?? 0) > 0 ? 'paid' : 'unpaid');
+
         // ── Recent orders ──────────────────────────────────────────────────────
         $recentOrders = Order::with(['client', 'items'])
             ->whereIn('store_id', $storeIds)
@@ -84,6 +94,12 @@ class MerchantDashboardService implements MerchantDashboardServiceInterface
                 'cancelled'      => (int) ($orderStats->cancelled      ?? 0),
             ],
             'total_sales'    => round((float) ($orderStats->total_sales ?? 0), 2),
+            'commission_summary' => [
+                'due_amount' => round((float) ($commissionSummary->due_amount ?? 0), 2),
+                'paid_amount' => round((float) ($commissionSummary->paid_amount ?? 0), 2),
+                'order_count' => (int) ($commissionSummary->order_count ?? 0),
+                'payment_status' => $commissionPaymentStatus,
+            ],
             'recent_orders'  => $recentOrders,
             'top_products'   => $topProducts,
             'low_inventory'  => $lowInventory,

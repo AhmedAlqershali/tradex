@@ -200,6 +200,50 @@ class CommissionTest extends TestCase
             ->assertJsonPath('success', true);
     }
 
+    public function test_admin_can_record_commission_payment_once(): void
+    {
+        $merchant = User::factory()->merchant()->create(['status' => 'active']);
+        $this->entitleMerchant($merchant);
+        $store = Store::factory()->forUser($merchant)->active()->create();
+        $order = Order::factory()->forStore($store)->pending()->create([
+            'total_amount' => 500.00,
+        ]);
+
+        $commission = Commission::create([
+            'order_id' => $order->id,
+            'merchant_id' => $merchant->id,
+            'store_id' => $store->id,
+            'order_amount' => 500.00,
+            'commission_rate' => 5.00,
+            'commission_amount' => 25.00,
+            'merchant_net_amount' => 475.00,
+            'status' => 'accrued',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $admin = User::factory()->admin()->create(['status' => 'active']);
+        $token = $admin->createToken('test')->plainTextToken;
+
+        $this->postJson(
+            "/api/v1/admin/commissions/{$commission->id}/mark-paid",
+            [],
+            $this->adminHeaders($token),
+        )
+            ->assertOk()
+            ->assertJsonPath('data.payment_status', 'paid');
+
+        $commission->refresh();
+        $this->assertNotNull($commission->paid_at);
+        $this->assertSame($admin->id, $commission->paid_by);
+        $this->assertSame($admin->id, $commission->recorded_by);
+
+        $this->postJson(
+            "/api/v1/admin/commissions/{$commission->id}/mark-paid",
+            [],
+            $this->adminHeaders($token),
+        )->assertStatus(409);
+    }
+
     public function test_merchant_cannot_access_commission_endpoints(): void
     {
         $merchant = User::factory()->merchant()->create(['status' => 'active']);

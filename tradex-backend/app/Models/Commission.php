@@ -19,6 +19,10 @@ class Commission extends Model
         'commission_amount',
         'merchant_net_amount',
         'status',
+        'payment_status',
+        'paid_at',
+        'paid_by',
+        'recorded_by',
     ];
 
     protected function casts(): array
@@ -28,6 +32,7 @@ class Commission extends Model
             'commission_rate' => 'decimal:2',
             'commission_amount' => 'decimal:2',
             'merchant_net_amount' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 

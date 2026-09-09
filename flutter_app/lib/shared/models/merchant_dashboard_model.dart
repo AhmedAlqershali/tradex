@@ -6,6 +6,7 @@ class MerchantDashboardModel {
     required this.products,
     required this.orders,
     required this.totalSales,
+    required this.commissionSummary,
     required this.recentOrders,
     required this.topProducts,
     required this.lowInventory,
@@ -14,6 +15,7 @@ class MerchantDashboardModel {
   final MerchantProductStats products;
   final MerchantOrderStats orders;
   final double totalSales;
+  final MerchantCommissionSummary commissionSummary;
   final List<MerchantDashboardOrder> recentOrders;
   final List<MerchantDashboardProduct> topProducts;
   final List<MerchantDashboardProduct> lowInventory;
@@ -31,6 +33,9 @@ class MerchantDashboardModel {
       products: MerchantProductStats.fromJson(_map(json['products'])),
       orders: MerchantOrderStats.fromJson(_map(json['orders'])),
       totalSales: _number(json['total_sales']),
+      commissionSummary: MerchantCommissionSummary.fromJson(
+        _map(json['commission_summary']),
+      ),
       recentOrders: _list(json['recent_orders'])
           .map(MerchantDashboardOrder.fromJson)
           .toList(),
@@ -40,6 +45,29 @@ class MerchantDashboardModel {
       lowInventory: _list(json['low_inventory'])
           .map(MerchantDashboardProduct.fromJson)
           .toList(),
+    );
+  }
+}
+
+class MerchantCommissionSummary {
+  const MerchantCommissionSummary({
+    required this.dueAmount,
+    required this.paidAmount,
+    required this.orderCount,
+    required this.paymentStatus,
+  });
+
+  final double dueAmount;
+  final double paidAmount;
+  final int orderCount;
+  final String paymentStatus;
+
+  factory MerchantCommissionSummary.fromJson(Map<String, dynamic> json) {
+    return MerchantCommissionSummary(
+      dueAmount: _number(json['due_amount']),
+      paidAmount: _number(json['paid_amount']),
+      orderCount: _integer(json['order_count']),
+      paymentStatus: _text(json['payment_status'], fallback: 'unpaid'),
     );
   }
 }

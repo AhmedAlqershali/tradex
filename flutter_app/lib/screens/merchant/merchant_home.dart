@@ -217,6 +217,8 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   ),
                 ],
               ),
+              SizedBox(height: 14.h),
+              _CommissionCard(summary: dashboard.commissionSummary),
             ],
           );
         }
@@ -321,6 +323,144 @@ class _MerchantHomePageState extends State<MerchantHomePage> {
                   fontWeight: FontWeight.bold,
                   color: const Color(0xff1A1A1A),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CommissionCard extends StatelessWidget {
+  const _CommissionCard({required this.summary});
+
+  final MerchantCommissionSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final dueAmount = summary.dueAmount;
+    final hasDueCommission = dueAmount > 0;
+    final isPaid = summary.paymentStatus == 'paid';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: _primary.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.r),
+                decoration: BoxDecoration(
+                  color: _primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(Icons.account_balance_wallet_outlined,
+                    color: _primary, size: 20.sp),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'العمولة المستحقة',
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xff1A1A1A),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: isPaid ? const Color(0xffDCFCE7) : const Color(0xffFEE2E2),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  isPaid ? 'تم الدفع' : 'لم يتم الدفع',
+                  style: GoogleFonts.ibmPlexSans(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isPaid ? const Color(0xff166534) : const Color(0xffB91C1C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            hasDueCommission
+                ? '₪${dueAmount.toStringAsFixed(0)}'
+                : 'لا توجد عمولات مستحقة حاليًا',
+            style: GoogleFonts.ibmPlexSans(
+              fontSize: hasDueCommission ? 24.sp : 14.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xff1A1A1A),
+            ),
+          ),
+          if (hasDueCommission) ...[
+            SizedBox(height: 12.h),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: [
+                _InfoPill(label: 'طلبات مكتملة', value: '${summary.orderCount}'),
+                _InfoPill(label: 'مدفوع', value: '₪${summary.paidAmount.toStringAsFixed(0)}'),
+                _InfoPill(label: 'حالة', value: isPaid ? 'مدفوع' : 'مستحق'),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: const Color(0xffF8F9FD),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xffE5E7EB)),
+      ),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: GoogleFonts.ibmPlexSans(
+                fontSize: 10.sp,
+                color: const Color(0xff666666),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: GoogleFonts.ibmPlexSans(
+                fontSize: 10.sp,
+                color: const Color(0xff1A1A1A),
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],

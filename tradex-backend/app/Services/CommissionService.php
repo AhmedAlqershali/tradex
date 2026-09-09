@@ -45,6 +45,7 @@ class CommissionService implements CommissionServiceInterface
                 'commission_amount' => $commissionAmount,
                 'merchant_net_amount' => $merchantNetAmount,
                 'status' => 'accrued',
+                'payment_status' => 'unpaid',
             ]);
         });
     }
