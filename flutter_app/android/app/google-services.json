@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1084579364925",
+    "project_id": "tradex-c1916",
+    "storage_bucket": "tradex-c1916.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084579364925:android:43c622ec5a3913ae986a54",
+        "android_client_info": {
+          "package_name": "ps.tradex.market"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8_2rNyY_2rQ2-NGQ6kdE5t0f24mu-7Rk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
