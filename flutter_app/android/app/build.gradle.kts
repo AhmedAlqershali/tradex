@@ -18,7 +18,7 @@ val uploadKeyAlias = System.getenv("CM_KEY_ALIAS")
 val uploadKeyPassword = System.getenv("CM_KEY_PASSWORD")
 
 android {
-    namespace = "ps.tradex.app"
+    namespace = "ps.tradex.market"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "ps.tradex.app"
+        applicationId = "ps.tradex.market"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

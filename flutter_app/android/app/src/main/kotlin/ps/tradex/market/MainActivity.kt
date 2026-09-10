@@ -1,4 +1,4 @@
-package ps.tradex.app
+package ps.tradex.market
 
 import android.content.Intent
 import android.net.Uri
