@@ -55,7 +55,20 @@ class CategoryService implements CategoryServiceInterface
     public function create(array $data, ?UploadedFile $image = null): Category
     {
         if ($image) {
-            $data['image'] = $image->store('categories', 'public');
+            $disk = Storage::disk('cloudinary');
+            $storedPath = $disk->putFileAs('categories', $image, $image->hashName());
+
+            if ($storedPath === false) {
+                throw new \RuntimeException('Category image could not be persisted.');
+            }
+
+            $url = $disk->url($storedPath);
+
+            if (! is_string($url) || trim($url) === '') {
+                throw new \RuntimeException('Category image URL could not be generated.');
+            }
+
+            $data['image'] = $url;
         }
 
         // Default status to active when not provided
@@ -73,14 +86,31 @@ class CategoryService implements CategoryServiceInterface
     public function update(Category $category, array $data, ?UploadedFile $image = null): Category
     {
         if ($image) {
-            $newPath = $image->store('categories', 'public');
+            $disk = Storage::disk('cloudinary');
+            $storedPath = $disk->putFileAs('categories', $image, $image->hashName());
 
-            // Delete the old image only after the new one is safely stored
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
-                Storage::disk('public')->delete($category->image);
+            if ($storedPath === false) {
+                throw new \RuntimeException('Category image could not be persisted.');
             }
 
-            $data['image'] = $newPath;
+            $newUrl = $disk->url($storedPath);
+
+            if (! is_string($newUrl) || trim($newUrl) === '') {
+                throw new \RuntimeException('Category image URL could not be generated.');
+            }
+
+            // Delete the old image only after the new one is safely stored.
+            // Ignore Cloudinary HTTPS URLs and legacy local /storage/... paths.
+            if ($category->image && preg_match('#^https?://#i', $category->image) !== 1) {
+                $publicPath = preg_replace('#^/?storage/?#i', '', $category->image);
+                $publicPath = preg_replace('#^/+#', '', $publicPath);
+
+                if ($publicPath !== '' && $publicPath !== 'storage' && Storage::disk('public')->exists($publicPath)) {
+                    Storage::disk('public')->delete($publicPath);
+                }
+            }
+
+            $data['image'] = $newUrl;
         }
 
         return $this->categoryRepository->update($category, $data);
@@ -102,9 +132,14 @@ class CategoryService implements CategoryServiceInterface
             throw CategoryException::hasProducts($category->name, $productCount);
         }
 
-        // Remove the category image from storage (best-effort)
-        if ($category->image && Storage::disk('public')->exists($category->image)) {
-            Storage::disk('public')->delete($category->image);
+        // Remove the category image from storage (best-effort), ignoring Cloudinary URLs.
+        if ($category->image && preg_match('#^https?://#i', $category->image) !== 1) {
+            $publicPath = preg_replace('#^/?storage/?#i', '', $category->image);
+            $publicPath = preg_replace('#^/+#', '', $publicPath);
+
+            if ($publicPath !== '' && $publicPath !== 'storage' && Storage::disk('public')->exists($publicPath)) {
+                Storage::disk('public')->delete($publicPath);
+            }
         }
 
         $this->categoryRepository->delete($category);

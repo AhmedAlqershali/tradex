@@ -76,8 +76,13 @@ class ProfileController extends BaseApiController
             AiSetting::where('user_id', $user->id)->delete();
             DB::table('sessions')->where('user_id', $user->id)->delete();
 
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
+            if ($user->avatar && preg_match('#^https?://#i', $user->avatar) !== 1) {
+                $publicPath = preg_replace('#^/?storage/?#i', '', $user->avatar);
+                $publicPath = preg_replace('#^/+#', '', $publicPath);
+
+                if ($publicPath !== '' && $publicPath !== 'storage' && Storage::disk('public')->exists($publicPath)) {
+                    Storage::disk('public')->delete($publicPath);
+                }
             }
 
             // Merchant-owned stores, products, favorites, carts, orders, and the

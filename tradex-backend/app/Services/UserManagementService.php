@@ -187,6 +187,14 @@ class UserManagementService implements UserManagementServiceInterface
         foreach (['public' => 'public', 'local' => 'local'] as $group => $diskName) {
             $disk = Storage::disk($diskName);
             foreach ($paths[$group] as $path) {
+                if (! is_string($path) || trim($path) === '') {
+                    continue;
+                }
+
+                if (preg_match('#^https?://#i', $path) === 1) {
+                    continue;
+                }
+
                 try {
                     if ($disk->exists($path) && ! $disk->delete($path)) {
                         $failures[] = "{$diskName}:{$path}";

@@ -76,30 +76,62 @@ class ProfileService implements ProfileServiceInterface
         $oldPath = $user->avatar;
         AvatarTrace::database('before_upload', $oldPath);
         AvatarTrace::received($file);
-        $path = $file->store('avatars', 'public');
+
+        $cloudinaryDisk = Storage::disk('cloudinary');
+        $storedPath = $cloudinaryDisk->putFileAs('avatars', $file, $file->hashName());
+
+        if ($storedPath === false) {
+            throw new \RuntimeException('User avatar could not be persisted.');
+        }
+
+        $url = $cloudinaryDisk->url($storedPath);
+
+        if (! is_string($url) || trim($url) === '') {
+            throw new \RuntimeException('User avatar URL could not be generated.');
+        }
 
         try {
-            $user->update(['avatar' => $path]);
+            $user->update(['avatar' => $url]);
         } catch (\Throwable $exception) {
-            // Do not leave an orphaned upload when the database write fails.
-            Storage::disk('public')->delete($path);
+            // Do not leave an orphaned Cloudinary upload when the database write fails.
+            $cloudinaryDisk->delete($storedPath);
             throw $exception;
         }
 
-        // Remove the previous file only after the new reference is persisted.
-        // This keeps the existing valid avatar available if storage or the
-        // database rejects the replacement.
-        if ($oldPath && $oldPath !== $path && Storage::disk('public')->exists($oldPath)) {
-            Storage::disk('public')->delete($oldPath);
+        // Remove only legacy local uploaded avatars after persisting the replacement.
+        if ($oldPath && $oldPath !== $url) {
+            $this->deleteLegacyAvatarIfExists($oldPath);
         }
 
-        AvatarTrace::stored($path);
+        AvatarTrace::stored($url);
         $freshUser = $user->fresh(['stores']);
         AvatarTrace::database('after_upload', $freshUser->avatar);
         $payload = $this->userPayload($freshUser);
         AvatarTrace::response($payload['avatar'] ?? null);
 
         return $payload;
+    }
+
+    private function deleteLegacyAvatarIfExists(?string $path): void
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return;
+        }
+
+        if (preg_match('#^https?://#i', $path) === 1) {
+            return;
+        }
+
+        $publicPath = preg_replace('#^/?storage/?#i', '', $path);
+        $publicPath = preg_replace('#^/+#', '', $publicPath);
+
+        if ($publicPath === '' || $publicPath === 'storage') {
+            return;
+        }
+
+        if (Storage::disk('public')->exists($publicPath)) {
+            Storage::disk('public')->delete($publicPath);
+        }
     }
 
     // ── Payload helpers ───────────────────────────────────────────────────────
