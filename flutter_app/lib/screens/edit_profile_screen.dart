@@ -10,6 +10,7 @@ import 'package:ai_saas/core/api/app_config.dart';
 import 'package:ai_saas/core/api/api_exception.dart';
 import 'package:ai_saas/core/localization/app_localizations.dart';
 import 'package:ai_saas/core/services/location_service.dart';
+import 'package:ai_saas/core/utils/phone_country.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -24,6 +25,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
+  String _selectedPhoneCountryCode = PhoneCountry.defaultCountryCode;
   String? _currentSelectedLocation;
   File? _pickedPhoto;
   bool _isSaving = false;
@@ -35,9 +37,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     final user = UserController.instance.currentUser;
+    final existingPhone = user?.phone ?? '';
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
-    _phoneController = TextEditingController(text: user?.phone ?? '');
+    _phoneController = TextEditingController(
+      text: PhoneCountry.stripCountryCode(existingPhone),
+    );
+    _selectedPhoneCountryCode = PhoneCountry.detectFromPhone(existingPhone);
     _currentSelectedLocation = user?.region;
   }
 
@@ -78,7 +84,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await UserController.instance.updateProfile(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: PhoneCountry.applyCountryCode(
+          _phoneController.text.trim(),
+          _selectedPhoneCountryCode,
+        ),
         region: _currentSelectedLocation,
         photoPath: _pickedPhoto?.path,
       );
@@ -249,19 +258,77 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                         // 4. حقل الهاتف
                         _buildFieldLabel(l10n.phoneNumber),
-                        TextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          textDirection: TextDirection.ltr,
-                          style: GoogleFonts.ibmPlexSans(
-                              color: textColor,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500),
-                          decoration: _inputDecoration(
-                            hint: 'أدخل رقم هاتفك',
-                            fillColor: inputFillColor,
-                            prefixIcon: Icons.phone_outlined,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 8.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: inputFillColor,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: Colors.transparent,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: PhoneCountry.supportedCountryCodes
+                                          .contains(_selectedPhoneCountryCode)
+                                      ? _selectedPhoneCountryCode
+                                      : PhoneCountry.defaultCountryCode,
+                                  items: PhoneCountry.supportedCountryCodes
+                                      .map(
+                                        (code) => DropdownMenuItem<String>(
+                                          value: code,
+                                          child: Text(
+                                            code,
+                                            textDirection: TextDirection.ltr,
+                                            style: GoogleFonts.ibmPlexSans(
+                                              color: textColor,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _selectedPhoneCountryCode = value;
+                                      });
+                                    }
+                                  },
+                                  icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                      size: 18.sp, color: Colors.grey),
+                                  dropdownColor: Colors.white,
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                textDirection: TextDirection.ltr,
+                                style: GoogleFonts.ibmPlexSans(
+                                    color: textColor,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: _inputDecoration(
+                                  hint: 'أدخل رقم هاتفك',
+                                  fillColor: inputFillColor,
+                                  prefixIcon: Icons.phone_outlined,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 20.h),
 

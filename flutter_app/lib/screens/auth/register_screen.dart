@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/utils/phone_country.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/auth/complete_profile_client_screen.dart';
@@ -47,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
+  String _selectedPhoneCountryCode = PhoneCountry.defaultCountryCode;
 
   @override
   void dispose() {
@@ -61,10 +63,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final l10n = AppLocalizations.of(context);
     final name = _nameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
-    final phone = _phoneCtrl.text.trim();
+    final phone = PhoneCountry.applyCountryCode(
+      _phoneCtrl.text.trim(),
+      _selectedPhoneCountryCode,
+    );
     final password = _passwordCtrl.text;
 
-    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || _phoneCtrl.text.trim().isEmpty || password.isEmpty) {
       _showError(l10n.enterEmailPassword);
       return;
     }
@@ -362,25 +367,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           const SizedBox(height: 8),
 
-                          TextField(
-                            controller: _phoneCtrl,
-                            keyboardType: TextInputType.phone,
-                            textInputAction: TextInputAction.next,
-                            textDirection: TextDirection.ltr,
-                            textAlign: TextAlign.left,
-                            style: _inputTextStyle(),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(
-                                  r'[0-9+\-\s]',
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: borderColor,
+                                  ),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: PhoneCountry.supportedCountryCodes
+                                            .contains(_selectedPhoneCountryCode)
+                                        ? _selectedPhoneCountryCode
+                                        : PhoneCountry.defaultCountryCode,
+                                    items: PhoneCountry.supportedCountryCodes
+                                        .map(
+                                          (code) => DropdownMenuItem<String>(
+                                            value: code,
+                                            child: Text(
+                                              code,
+                                              textDirection: TextDirection.ltr,
+                                              style: GoogleFonts.ibmPlexSans(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: textDark,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          _selectedPhoneCountryCode = value;
+                                        });
+                                      }
+                                    },
+                                    dropdownColor: Colors.white,
+                                    icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                                        color: Color(0xff707070), size: 18),
+                                    style: _inputTextStyle(),
+                                    alignment: Alignment.center,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: _phoneCtrl,
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.next,
+                                  textDirection: TextDirection.ltr,
+                                  textAlign: TextAlign.left,
+                                  style: _inputTextStyle(),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9]'),
+                                    ),
+                                  ],
+                                  decoration: _inputDecoration(
+                                    hint: l10n.phoneNumberExample,
+                                    hintDirection: TextDirection.ltr,
+                                    icon: Icons.phone_outlined,
+                                  ),
                                 ),
                               ),
                             ],
-                            decoration: _inputDecoration(
-                              hint: l10n.phoneNumberExample,
-                              hintDirection: TextDirection.ltr,
-                              icon: Icons.phone_outlined,
-                            ),
                           ),
 
                           const SizedBox(height: 11),

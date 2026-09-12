@@ -21,6 +21,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool _loading = true;
   String? _error;
   int _quantity = 1;
+  int _selectedImageIndex = 0;
   bool _addingToCart = false;
 
   @override
@@ -157,6 +158,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       );
     }
 
+    final galleryImages = _product.imageUrls
+        .where((url) => url.trim().isNotEmpty)
+        .toList();
+    final visibleGallery = galleryImages.isNotEmpty
+        ? galleryImages
+        : (_product.imageUrl.trim().isEmpty ? <String>[] : [_product.imageUrl]);
+
     return Column(
       children: [
         Expanded(
@@ -165,15 +173,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Product image + floating buttons ──
+                // ── Product gallery + floating buttons ──
                 Stack(
                   children: [
                     Container(
                       height: 380.h,
                       width: double.infinity,
                       decoration: const BoxDecoration(color: Colors.white),
-                      child: ProductImage(
-                          url: _product.imageUrl, fit: BoxFit.cover),
+                      child: visibleGallery.isEmpty
+                          ? ProductImage(url: '', fit: BoxFit.cover)
+                          : PageView.builder(
+                              itemCount: visibleGallery.length,
+                              onPageChanged: (index) =>
+                                  setState(() => _selectedImageIndex = index),
+                              itemBuilder: (context, index) => ProductImage(
+                                url: visibleGallery[index],
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                     ),
                     Positioned(
                       top: 40.h,
@@ -206,6 +223,30 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         },
                       ),
                     ),
+                    if (visibleGallery.length > 1)
+                      Positioned(
+                        bottom: 16.h,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            visibleGallery.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: _selectedImageIndex == index ? 12.w : 8.w,
+                              height: 8.h,
+                              margin: EdgeInsets.symmetric(horizontal: 4.w),
+                              decoration: BoxDecoration(
+                                color: _selectedImageIndex == index
+                                    ? const Color(0xff4D41DF)
+                                    : Colors.white.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
 

@@ -1,4 +1,5 @@
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/utils/phone_country.dart';
 import 'package:ai_saas/presentation/blocs/blocs.dart';
 import 'package:ai_saas/screens/client/order_confirmation_screen.dart';
 import 'package:ai_saas/shared/cart/cart_controller.dart';
@@ -29,6 +30,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _phoneCtrl = TextEditingController(text: '');
   final _cityCtrl  = TextEditingController(text: '');
   final _notesCtrl = TextEditingController();
+  String _selectedPhoneCountryCode = PhoneCountry.defaultCountryCode;
 
   @override
   void dispose() {
@@ -44,7 +46,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     context.read<OrderBloc>().add(OrderCreateRequested(
           customerName: _nameCtrl.text.trim(),
-          customerPhone: _phoneCtrl.text.trim(),
+          customerPhone: PhoneCountry.applyCountryCode(
+            _phoneCtrl.text.trim(),
+            _selectedPhoneCountryCode,
+          ),
           customerCity: _cityCtrl.text.trim(),
           notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
         ));
@@ -109,17 +114,130 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 isRequired: true,
                               ),
                               SizedBox(height: 10.h),
-                              _buildField(
-                                context: context,
-                                label: l10n.phoneNumber,
-                                hint: l10n.phoneNumberExample,
-                                icon: Icons.phone_outlined,
-                                controller: _phoneCtrl,
-                                keyboardType: TextInputType.phone,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        l10n.phoneNumber,
+                                        style: GoogleFonts.ibmPlexSans(
+                                            fontSize: 13.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: _textDark),
+                                      ),
+                                      Text(' *',
+                                          style: GoogleFonts.ibmPlexSans(
+                                              fontSize: 13.sp,
+                                              color: Colors.redAccent)),
+                                    ],
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w,
+                                          vertical: 8.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _fieldFill,
+                                          borderRadius: BorderRadius.circular(12.r),
+                                        ),
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: PhoneCountry.supportedCountryCodes
+                                                    .contains(_selectedPhoneCountryCode)
+                                                ? _selectedPhoneCountryCode
+                                                : PhoneCountry.defaultCountryCode,
+                                            items: PhoneCountry.supportedCountryCodes
+                                                .map(
+                                                  (code) => DropdownMenuItem<String>(
+                                                    value: code,
+                                                    child: Text(code,
+                                                        textDirection:
+                                                            TextDirection.ltr,
+                                                        style:
+                                                            GoogleFonts.ibmPlexSans(
+                                                          fontSize: 13.sp,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: _textDark,
+                                                        )),
+                                                  ),
+                                                )
+                                                .toList(),
+                                            onChanged: (value) {
+                                              if (value != null) {
+                                                setState(() {
+                                                  _selectedPhoneCountryCode = value;
+                                                });
+                                              }
+                                            },
+                                            icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                                size: 18.sp, color: Colors.grey),
+                                            dropdownColor: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _phoneCtrl,
+                                          keyboardType: TextInputType.phone,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.digitsOnly,
+                                          ],
+                                          textDirection: TextDirection.ltr,
+                                          validator: (v) => (v == null || v.trim().isEmpty)
+                                              ? l10n.requiredFieldMessage
+                                              : null,
+                                          style: GoogleFonts.ibmPlexSans(
+                                              fontSize: 13.sp,
+                                              color: _textDark),
+                                          decoration: InputDecoration(
+                                            hintText: l10n.phoneNumberExample,
+                                            hintStyle: GoogleFonts.ibmPlexSans(
+                                                fontSize: 12.sp,
+                                                color: const Color(0xffBBBBBB)),
+                                            prefixIcon: Icon(Icons.phone_outlined,
+                                                size: 18.sp,
+                                                color: const Color(0xffBBBBBB)),
+                                            filled: true,
+                                            fillColor: _fieldFill,
+                                            contentPadding: EdgeInsets.symmetric(
+                                                horizontal: 14.w,
+                                                vertical: 12.h),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderSide: BorderSide(
+                                                  color: _primary.withValues(alpha: 0.5),
+                                                  width: 1.5),
+                                            ),
+                                            errorBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.redAccent, width: 1),
+                                            ),
+                                            focusedErrorBorder: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.redAccent, width: 1.5),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
-                                isRequired: true,
                               ),
                             ],
                           ),

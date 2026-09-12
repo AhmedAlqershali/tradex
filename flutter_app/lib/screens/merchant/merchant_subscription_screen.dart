@@ -761,6 +761,7 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
   late final TextEditingController _planIdController;
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
+  String _selectedPhoneCountryCode = PhoneCountry.defaultCountryCode;
   final _notesController = TextEditingController();
   final _picker = ImagePicker();
   XFile? _proof;
@@ -771,10 +772,14 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
   void initState() {
     super.initState();
     final user = UserController.instance.currentUser;
+    final existingPhone = user?.phone ?? '';
     _planIdController =
         TextEditingController(text: widget.suggestedPlanId?.toString() ?? '');
     _nameController = TextEditingController(text: user?.displayName ?? '');
-    _phoneController = TextEditingController(text: user?.phone ?? '');
+    _phoneController = TextEditingController(
+      text: PhoneCountry.stripCountryCode(existingPhone),
+    );
+    _selectedPhoneCountryCode = PhoneCountry.detectFromPhone(existingPhone);
   }
 
   @override
@@ -870,12 +875,51 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
                             value!.trim().isEmpty ? AppLocalizations.of(context).fullNameRequired : null,
                       ),
                       SizedBox(height: 10.h),
-                      _field(
+                      TextFormField(
                         controller: _phoneController,
-                        label: AppLocalizations.of(context).phoneNumber,
                         keyboardType: TextInputType.phone,
                         validator: (value) =>
                             value!.trim().isEmpty ? AppLocalizations.of(context).phoneRequired : null,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).phoneNumber,
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: PhoneCountry.supportedCountryCodes
+                                        .contains(_selectedPhoneCountryCode)
+                                    ? _selectedPhoneCountryCode
+                                    : PhoneCountry.defaultCountryCode,
+                                items: PhoneCountry.supportedCountryCodes
+                                    .map(
+                                      (code) => DropdownMenuItem<String>(
+                                        value: code,
+                                        child: Text(
+                                          code,
+                                          textDirection: TextDirection.ltr,
+                                          style: GoogleFonts.ibmPlexSans(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedPhoneCountryCode = value;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                                    size: 18, color: Color(0xff888888)),
+                                dropdownColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       SizedBox(height: 10.h),
                       DropdownButtonFormField<String>(
@@ -983,7 +1027,10 @@ class _MerchantRequestFormState extends State<_MerchantRequestForm> {
             planId: int.parse(_planIdController.text.trim()),
             billingCycle: _billingCycle,
             fullName: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
+            phone: PhoneCountry.applyCountryCode(
+              _phoneController.text.trim(),
+              _selectedPhoneCountryCode,
+            ),
             paymentMethod: _paymentMethod,
             paymentProof: proof,
             notes: _notesController.text.trim(),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ai_saas/core/localization/app_localizations.dart';
+import 'package:ai_saas/core/utils/phone_country.dart';
 import 'package:ai_saas/models/app_type.dart';
 import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
@@ -42,6 +43,7 @@ TextEditingController();
 final TextEditingController _workHoursController =
 TextEditingController();
 
+String _selectedPhoneCountryCode = PhoneCountry.defaultCountryCode;
 String? _selectedRegion;
 String? _selectedCategory;
 
@@ -950,20 +952,37 @@ Widget _buildWhatsAppField() {
 return Row(
 children: [
 Container(
-width: 70.w,
-height: 52.h,
-alignment: Alignment.center,
+padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
 decoration: BoxDecoration(
 color: const Color(0xffeff3ff),
 borderRadius: BorderRadius.circular(12.r),
 ),
-child: Text(
-'+970',
-style: GoogleFonts.ibmPlexSans(
-fontWeight: FontWeight.bold,
-fontSize: 14.sp,
+child: DropdownButtonHideUnderline(
+child: DropdownButton<String>(
+value: PhoneCountry.supportedCountryCodes.contains(_selectedPhoneCountryCode)
+    ? _selectedPhoneCountryCode
+    : PhoneCountry.defaultCountryCode,
+items: PhoneCountry.supportedCountryCodes
+    .map((code) => DropdownMenuItem<String>(
+          value: code,
+          child: Text(
+            code,
+            textDirection: TextDirection.ltr,
+            style: GoogleFonts.ibmPlexSans(
+              fontWeight: FontWeight.bold,
+              fontSize: 14.sp,
+            ),
+          ),
+        ))
+    .toList(),
+onChanged: (value) {
+  if (value != null) {
+    setState(() => _selectedPhoneCountryCode = value);
+  }
+},
+dropdownColor: Colors.white,
+icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18.sp, color: primaryColor),
 ),
-textDirection: TextDirection.ltr,
 ),
 ),
 
@@ -974,6 +993,7 @@ child: TextFormField(
 controller: _whatsappController,
 keyboardType: TextInputType.phone,
 textDirection: TextDirection.ltr,
+inputFormatters: [FilteringTextInputFormatter.digitsOnly],
 style: GoogleFonts.ibmPlexSans(
 fontSize: 14.sp,
 color: textColor,

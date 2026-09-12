@@ -152,9 +152,9 @@ class ProductService implements ProductServiceInterface
                         $oldPaths = $this->storedPaths($product);
                         $existing = [];
                     }
-                    if (count($existing) + count($imageFiles) > 10) {
+                    if (count($existing) + count($imageFiles) > 3) {
                         throw ValidationException::withMessages([
-                            'images' => ['You may have a maximum of 10 product images.'],
+                            'images' => ['You may have a maximum of 3 product images.'],
                         ]);
                     }
                     $newPaths = $this->storeImages($product, $imageFiles, $existing);

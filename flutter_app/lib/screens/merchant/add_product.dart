@@ -27,7 +27,7 @@ class _AddProductState extends State<AddProduct> {
   final List<File> _attachedImages = [];
   final List<String> _existingImageUrls = [];
   bool _clearExistingImages = false;
-  final int _maxImages = 10;
+  final int _maxImages = 3;
   final ImagePicker _picker = ImagePicker();
 
   final TextEditingController _nameController       = TextEditingController();
@@ -116,10 +116,16 @@ class _AddProductState extends State<AddProduct> {
     try {
       final XFile? pickedFile =
           await _picker.pickImage(source: source, imageQuality: 70);
-       if (pickedFile != null &&
-           _existingImageUrls.length + _attachedImages.length < _maxImages) {
-        setState(() => _attachedImages.add(File(pickedFile.path)));
+
+      if (pickedFile == null) return;
+
+      final totalImages = _existingImageUrls.length + _attachedImages.length;
+      if (totalImages >= _maxImages) {
+        _showSnackBar(context, 'يمكنك اختيار حتى 3 صور فقط للمنتج.');
+        return;
       }
+
+      setState(() => _attachedImages.add(File(pickedFile.path)));
     } catch (_) {}
   }
 

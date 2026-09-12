@@ -22,7 +22,7 @@ class UpdateProductRequest extends FormRequest
             'price'          => ['sometimes', 'required', 'numeric', 'min:0', 'max:9999999.99'],
             'quantity'       => ['sometimes', 'required', 'integer', 'min:0'],
             'status'         => ['nullable', 'string', Rule::in(['active', 'inactive', 'out_of_stock'])],
-            'images'         => ['nullable', 'array', 'max:10'],
+            'images'         => ['nullable', 'array', 'max:3'],
             'images.*'       => [
                 'file',
                 'image',
@@ -38,7 +38,7 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'price.min'      => 'Price must be a positive number.',
-            'images.max'     => 'You may upload a maximum of 10 images.',
+            'images.max'     => 'You may upload a maximum of 3 images.',
             'images.*.image' => 'Each file must be a valid image.',
             'images.*.max'   => 'Each image must not exceed 2 MB.',
             'images.*.mimes' => 'Accepted image formats: jpeg, jpg, png, webp.',

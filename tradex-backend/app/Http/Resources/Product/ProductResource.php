@@ -26,11 +26,18 @@ class ProductResource extends JsonResource
             'is_available' => $this->isAvailable(),
 
             // Primary image (quick access thumbnail)
-            'image'  => PublicMediaUrl::forPath($this->image),
+            'image' => PublicMediaUrl::forPath(
+                $this->image
+                    ?: ($this->relationLoaded('images')
+                        ? ($this->images->sortBy('sort_order')->first()?->path ?? null)
+                        : $this->images()->orderBy('sort_order')->value('path'))
+            ),
 
             // Full image gallery
             'images' => ProductImageResource::collection(
-                $this->whenLoaded('images', fn () => $this->images->sortBy('sort_order'))
+                $this->relationLoaded('images')
+                    ? $this->images->sortBy('sort_order')
+                    : $this->images()->orderBy('sort_order')->get()
             ),
 
             // Store summary (only included for admin responses)

@@ -17,6 +17,7 @@ class SubscriptionRequestResource extends JsonResource
         // streams the file server-side. Merchants receive null for this field
         // (they uploaded it; they don't need to re-download it via API).
         $proofUrl = null;
+        $whatsappReviewUrl = null;
 
         if ($this->payment_proof_image) {
             $user = $request->user();
@@ -25,6 +26,21 @@ class SubscriptionRequestResource extends JsonResource
                 // Admin sees a secure download URL (served through the API,
                 // not a direct storage URL that could be shared).
                 $proofUrl = route('api.v1.admin.subscription-requests.proof', ['id' => $this->id]);
+
+                $customerName = $this->full_name ?: ($this->user?->name ?? 'Customer');
+                $customerPhone = $this->phone ?: ($this->user?->phone ?? '');
+                $planName = $this->plan?->display_name
+                    ?? $this->plan?->name
+                    ?? ($this->whenLoaded('plan') ? 'Subscription' : 'Subscription');
+
+                $message = implode("\n", [
+                    'Customer: ' . $customerName,
+                    'Phone: ' . $customerPhone,
+                    'Plan: ' . $planName,
+                    'Payment proof URL: ' . $proofUrl,
+                ]);
+
+                $whatsappReviewUrl = 'https://wa.me/972597668446?text=' . rawurlencode($message);
             }
         }
 
@@ -37,6 +53,7 @@ class SubscriptionRequestResource extends JsonResource
             'phone'                 => $this->phone,
             'payment_method'        => $this->payment_method,
             'payment_proof_url'     => $proofUrl,
+            'whatsapp_review_url'   => $whatsappReviewUrl,
             'notes'                 => $this->notes,
             'status'                => $this->status,
             'rejection_reason'      => $this->rejection_reason,
