@@ -7,6 +7,7 @@ import 'package:ai_saas/shared/navigation/nav_shell.dart';
 import 'package:ai_saas/shared/users/user_controller.dart';
 import 'package:ai_saas/core/services/location_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
