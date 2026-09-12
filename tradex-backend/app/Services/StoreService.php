@@ -150,28 +150,61 @@ class StoreService implements StoreServiceInterface
     }
 
     /**
-     * Upload a new logo image, delete the old one from storage,
-     * and persist the new path on the store record.
+     * Upload a new logo image to Cloudinary, delete the old local file when
+     * applicable, and persist the Cloudinary URL on the store record.
      *
-     * Deletion is best-effort: a missing file on disk is not treated
-     * as an error since the record update must still succeed.
+     * Deletion is best-effort: a missing file on disk is not treated as an
+     * error since the record update must still succeed.
      */
     public function updateStoreLogo(Store $store, UploadedFile $file): Store
     {
         $oldPath = $store->logo;
-        $path = $file->store('logos', 'public');
+        $disk = Storage::disk('cloudinary');
+        $storedPath = $disk->putFileAs('logos', $file, $file->hashName());
+
+        if ($storedPath === false) {
+            throw new \RuntimeException('Store logo could not be persisted.');
+        }
+
+        $url = $disk->url($storedPath);
+
+        if (! is_string($url) || trim($url) === '') {
+            throw new \RuntimeException('Store logo URL could not be generated.');
+        }
 
         try {
-            $updated = $this->storeRepository->updateLogo($store, $path);
+            $updated = $this->storeRepository->updateLogo($store, $url);
         } catch (\Throwable $exception) {
-            Storage::disk('public')->delete($path);
+            $disk->delete($storedPath);
             throw $exception;
         }
 
-        if ($oldPath && $oldPath !== $path) {
-            Storage::disk('public')->delete($oldPath);
+        if ($oldPath && $oldPath !== $url) {
+            $this->deleteStoredLogo($oldPath);
         }
 
         return $updated;
+    }
+
+    private function deleteStoredLogo(?string $path): void
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return;
+        }
+
+        if (preg_match('#^https?://#i', $path) === 1) {
+            return;
+        }
+
+        $publicPath = preg_replace('#^/?storage/?#i', '', $path);
+        $publicPath = preg_replace('#^/+#', '', $publicPath);
+
+        if ($publicPath === '' || $publicPath === 'storage') {
+            return;
+        }
+
+        if (Storage::disk('public')->exists($publicPath)) {
+            Storage::disk('public')->delete($publicPath);
+        }
     }
 }
