@@ -8,6 +8,8 @@ tradex-backend/storage/framework/sessions/
 tradex-backend/storage/framework/testing/
 tradex-backend/storage/framework/views/
 tradex-backend/public/storage
+tradex-backend/vendor/
+tradex-backend/bootstrap/cache/
 
 # Flutter generated files
 flutter_app/.dart_tool/

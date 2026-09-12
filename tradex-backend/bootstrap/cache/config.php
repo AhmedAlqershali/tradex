@@ -126,6 +126,7 @@
       22 => 'Illuminate\\View\\ViewServiceProvider',
       23 => 'App\\Providers\\AppServiceProvider',
       24 => 'App\\Providers\\RepositoryServiceProvider',
+      25 => 'CloudinaryLabs\\CloudinaryLaravel\\CloudinaryServiceProvider',
     ),
     'aliases' => 
     array (
@@ -874,6 +875,14 @@
       0 => '/workspaces/tradex/tradex-backend/resources/views',
     ),
     'compiled' => '/workspaces/tradex/tradex-backend/storage/framework/views',
+  ),
+  'cloudinary' => 
+  array (
+    'notification_url' => NULL,
+    'cloud_url' => 'cloudinary://:@',
+    'upload_preset' => NULL,
+    'upload_route' => NULL,
+    'upload_action' => NULL,
   ),
   'tinker' => 
   array (
