@@ -171,14 +171,14 @@ class ProductService implements ProductServiceInterface
             });
         } catch (\Throwable $exception) {
             foreach ($newPaths as $image) {
-                Storage::disk('public')->delete($image['path']);
+                $this->deleteStoredPath($image['path'] ?? null);
             }
             throw $exception;
         }
 
         foreach ($oldPaths as $path) {
             if (! in_array($path, array_column($newPaths, 'path'), true)) {
-                Storage::disk('public')->delete($path);
+                $this->deleteStoredPath($path);
             }
         }
 
@@ -191,7 +191,7 @@ class ProductService implements ProductServiceInterface
         $deleted = DB::transaction(fn () => $this->productRepository->delete($product));
 
         foreach ($paths as $path) {
-            Storage::disk('public')->delete($path);
+            $this->deleteStoredPath($path);
         }
 
         return $deleted;
@@ -232,22 +232,34 @@ class ProductService implements ProductServiceInterface
             ? 0
             : max(array_column($existing, 'sort_order')) + 1;
 
+        $disk = Storage::disk('cloudinary');
+
         try {
             foreach ($files as $index => $file) {
-                $path = $file->store("products/{$product->id}", 'public');
+                $storedPath = $disk->putFileAs(
+                    "products/{$product->id}",
+                    $file,
+                    $file->hashName(),
+                );
 
-                if ($path === false || ! Storage::disk('public')->exists($path)) {
+                if ($storedPath === false) {
                     throw new \RuntimeException('Product image could not be persisted.');
                 }
 
+                $url = $disk->url($storedPath);
+
+                if (! is_string($url) || trim($url) === '') {
+                    throw new \RuntimeException('Product image URL could not be generated.');
+                }
+
                 $images[] = [
-                    'path'       => $path,
+                    'path'       => $url,
                     'sort_order' => $nextSortOrder + $index,
                 ];
             }
         } catch (\Throwable $exception) {
             foreach ($images as $image) {
-                Storage::disk('public')->delete($image['path']);
+                $this->deleteStoredPath($image['path'] ?? null);
             }
             throw $exception;
         }
@@ -267,5 +279,25 @@ class ProductService implements ProductServiceInterface
         }
 
         return array_values(array_unique(array_filter($paths)));
+    }
+
+    private function deleteStoredPath(?string $path): void
+    {
+        if (! is_string($path) || trim($path) === '') {
+            return;
+        }
+
+        if (preg_match('#^https?://#i', $path) === 1) {
+            return;
+        }
+
+        if (Storage::disk('cloudinary')->exists($path)) {
+            Storage::disk('cloudinary')->delete($path);
+            return;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }
